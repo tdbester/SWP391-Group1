@@ -1,6 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,12 +17,12 @@
             if (request.getAttribute("error")!= null){
                 String er=(String)request.getAttribute("error");
         %>
-        <h4 style="color: red"><%= er %></h3>
+        <h5 style="color: red"><%= er %></h5>
                 <%
                         }
                     %>
             <form action="login" method="post">
-                <input type="text" name="username" pattern="[^ @]*@[^ @]*" placeholder="Email" required>
+                <input type="text" name="email" pattern="[^ @]*@[^ @]*" placeholder="Email" required>
                 <input type="password" name="password" placeholder="Mật khẩu" required>
                 <a href="requestPassword.jsp">Quên mật khẩu?</a>
                 <input type="submit" class="button" value="Đăng nhập">
