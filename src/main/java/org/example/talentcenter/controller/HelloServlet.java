@@ -1,4 +1,4 @@
-package org.example.talentcenter;
+package org.example.talentcenter.controller;
 
 import java.io.*;
 
