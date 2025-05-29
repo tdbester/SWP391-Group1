@@ -18,7 +18,6 @@ public class DBConnect {
             + "trustServerCertificate=true";
     private static final String USER = "sa";
     private static final String PASSWORD = "123456789";
-
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }

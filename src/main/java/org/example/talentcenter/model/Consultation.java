@@ -13,11 +13,13 @@ public class Consultation {
 
     public Consultation() {}
 
-    public Consultation(String fullName, String email, String phone, String courseInterest) {
+    public Consultation(int id, String fullName, String email, String phone, String courseInterest, boolean contacted) {
+        this.id = id;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
         this.courseInterest = courseInterest;
+        this.contacted = contacted;
     }
 
     // Getters and Setters
