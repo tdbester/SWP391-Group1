@@ -307,9 +307,9 @@
         <div class="main-content">
             <!-- HEADER BAR -->
             <div class="header">
-                <h1>Hệ thống Quản lý Tuyển dụng</h1>
+
                 <div class="user-info">
-                    <span>Xin chào, <strong>Administrator</strong></span>
+                    <span>Xin chào, <strong>Giao viên</strong></span>
                     <div class="user-avatar">A</div>
                 </div>
             </div>
