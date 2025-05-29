@@ -14,21 +14,19 @@
             margin-top: 20px;
         }
 
-        /* Button Tìm kiếm, Lọc theo khóa học, Lọc theo trạng thái, Thêm: Xanh dương đậm */
         .btn-primary, .btn-success, .btn-warning, .btn-add-custom {
-            background-color: #007bff;
-            border-color: #007bff;
+            background-color: #7a6ad8;
+            border-color:#7a6ad8;
             color: #fff;
             border-radius: 4px;
             padding: 6px 12px;
             font-family: 'Poppins', sans-serif;
         }
         .btn-primary:hover, .btn-success:hover, .btn-warning:hover, .btn-add-custom:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
+            background-color: #7a6ad8;
+            border-color: #7a6ad8;
         }
 
-        /* Button Sửa: Tím nhạt */
         .btn-warning.btn-sm {
             background-color: #7a6ad8;
             border-color: #7a6ad8;
@@ -163,7 +161,7 @@
             <th>Email</th>
             <th>Số điện thoại</th>
             <th>Khóa học</th>
-<%--            <th>Trạng thái</th>--%>
+            <th>Trạng thái</th>
             <th>Đã liên hệ</th>
         </tr>
         </thead>
@@ -175,16 +173,16 @@
                 <td>${c.email}</td>
                 <td>${c.phone}</td>
                 <td>${c.courseInterest}</td>
-<%--                <td>--%>
-<%--                    <form action="Consultation?action=updateConsultationStatus" method="post">--%>
-<%--                        <input type="hidden" name="id" value="${c.id}"/>--%>
-<%--                        <select name="status" class="form-select" onchange="this.form.submit()">--%>
-<%--                            <option value="Đang xử lý" ${c.status eq 'Đang xử lý' ? 'selected' : ''}>Đang xử lý</option>--%>
-<%--                            <option value="Đồng ý" ${c.status eq 'Đồng ý' ? 'selected' : ''}>Đồng ý</option>--%>
-<%--                            <option value="Từ chối" ${c.status eq 'Từ chối' ? 'selected' : ''}>Từ chối</option>--%>
-<%--                        </select>--%>
-<%--                    </form>--%>
-<%--                </td>--%>
+                <td>
+                    <form action="Consultation?action=updateConsultationStatus" method="post">
+                        <input type="hidden" name="id" value="${c.id}"/>
+                        <select name="status" class="form-select" onchange="this.form.submit()">
+                            <option value="Đang xử lý" <c:if test="${c.status eq 'Đang xử lý'}">selected</c:if>>Đang xử lý</option>
+                            <option value="Đồng ý" <c:if test="${c.status eq 'Đồng ý'}">selected</c:if>>Đồng ý</option>
+                            <option value="Từ chối" <c:if test="${c.status eq 'Từ chối'}">selected</c:if>>Từ chối</option>
+                        </select>
+                    </form>
+                </td>
                 <td class="text-center">
                     <form method="post" action="Consultation?action=updateContacted">
                         <input type="hidden" name="id" value="${c.id}"/>

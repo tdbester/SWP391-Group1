@@ -1,7 +1,5 @@
 package org.example.talentcenter.model;
 
-import java.sql.Timestamp;
-
 public class Consultation {
     private int id;
     private String fullName;
@@ -24,7 +22,6 @@ public class Consultation {
         this.status = status;
     }
 
-    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -33,36 +30,12 @@ public class Consultation {
         this.id = id;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getStatus() {
+        return status;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getCourseInterest() {
-        return courseInterest;
-    }
-
-    public void setCourseInterest(String courseInterest) {
-        this.courseInterest = courseInterest;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public boolean isContacted() {
@@ -73,11 +46,35 @@ public class Consultation {
         this.contacted = contacted;
     }
 
-    public String getStatus() {
-        return status;
+    public String getCourseInterest() {
+        return courseInterest;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setCourseInterest(String courseInterest) {
+        this.courseInterest = courseInterest;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }
