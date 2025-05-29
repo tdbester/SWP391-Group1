@@ -10,6 +10,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.ArrayList;
 
@@ -23,14 +24,21 @@ public class ConsultationServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         ArrayList<Subject> subjects = subjectDAO.getAllSubjects();
+        request.setAttribute("subjects", subjects);
         String action = request.getParameter("action");
-
+        String view = request.getParameter("view");
         if (action == null || action.equals("list")) {
-            ArrayList<Consultation> consultations = consultationDAO.getAllConsultations();
-            request.setAttribute("consultations", consultations);
-            request.setAttribute("subjects", subjects);
-            request.getRequestDispatcher("view/consultation-list.jsp").forward(request, response);
+            if (action == null || action.equals("list")) {
+                if ("guest".equals(view)) {
+                    request.getRequestDispatcher("view/home.jsp").forward(request, response);
+                } else {
+                    ArrayList<Consultation> consultations = consultationDAO.getAllConsultations();
+                    request.setAttribute("consultations", consultations);
+                    request.setAttribute("subjects", subjects);
+                    request.getRequestDispatcher("view/consultation-list.jsp").forward(request, response);
 
+                }
+            }
         } else if (action.equals("edit")) {
             String idRaw = request.getParameter("id");
             try {
@@ -71,7 +79,7 @@ public class ConsultationServlet extends HttpServlet {
             request.getRequestDispatcher("view/consultation-list.jsp").forward(request, response);
 
 
-        }else if (action.equals("filterByCourse")) {
+        } else if (action.equals("filterByCourse")) {
             String courseFilter = request.getParameter("course_filter");
             if (courseFilter == null || courseFilter.trim().isEmpty()) {
                 response.sendRedirect("Consultation?action=list");
@@ -82,8 +90,7 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("subjects", subjects);
             request.setAttribute("course_filter", courseFilter);
             request.getRequestDispatcher("view/consultation-list.jsp").forward(request, response);
-        }
-        else {
+        } else {
             response.sendRedirect("Consultation?action=list");
         }
     }
@@ -92,7 +99,24 @@ public class ConsultationServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
         try {
-            if ("add".equals(action)) {
+            if ("addConsultation".equals(action)) { // Dành cho guest submit form tư vấn
+                String name = request.getParameter("name");
+                String email = request.getParameter("email");
+                String phone = request.getParameter("phone");
+                String course = request.getParameter("course_interest");
+
+                Consultation consult = new Consultation();
+                consult.setFullName(name);
+                consult.setEmail(email);
+                consult.setPhone(phone);
+                consult.setCourseInterest(course);
+                consult.setContacted(false);
+                consultationDAO.addConsultation(consult);
+                HttpSession session = request.getSession();
+                session.setAttribute("message0", "Gửi tư vấn thành công!");
+                response.sendRedirect("Consultation?view=guest");
+                return;
+            } else if ("add".equals(action)) {
                 String name = request.getParameter("name");
                 String email = request.getParameter("email");
                 String phone = request.getParameter("phone");
@@ -142,18 +166,33 @@ public class ConsultationServlet extends HttpServlet {
                     int id = Integer.parseInt(idRaw);
                     boolean contacted = contactedParam != null; // checked -> true, unchecked -> false
                     boolean updated = consultationDAO.updateContactedStatus(id, contacted);
-                    if (updated) {
-                        response.sendRedirect("Consultation?action=list");
-                    } else {
-                        request.setAttribute("error", "Cập nhật trạng thái thất bại");
-                        request.getRequestDispatcher("view/edit-consultation.jsp").forward(request, response);
-                    }
+                    response.sendRedirect("Consultation?action=list");
                 } catch (NumberFormatException e) {
                     response.sendRedirect("Consultation?action=list");
                 }
-            }  else {
-                response.sendRedirect("Consultation");
-                return;
+            } else if (action.equals("updateConsultationStatus")) {
+                String idParam = request.getParameter("id");
+                String status = request.getParameter("status");
+
+                try {
+                    int consultationId = Integer.parseInt(idParam);
+                    boolean success = consultationDAO.updateStatus(consultationId, status);
+
+                    if (success) {
+                        System.out.println("Status updated successfully for ID: " + consultationId + " to: " + status);
+                    } else {
+                        System.out.println("Failed to update status for ID: " + consultationId);
+                    }
+
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid ID format: " + idParam);
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    System.out.println("Error updating consultation status: " + e.getMessage());
+                    e.printStackTrace();
+                }
+
+                response.sendRedirect("Consultation?action=list");
             }
         } catch (Exception e) {
             e.printStackTrace();

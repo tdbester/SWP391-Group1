@@ -13,6 +13,67 @@
             text-align: center;
             margin-top: 20px;
         }
+
+        /* Button Tìm kiếm, Lọc theo khóa học, Lọc theo trạng thái, Thêm: Xanh dương đậm */
+        .btn-primary, .btn-success, .btn-warning, .btn-add-custom {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #fff;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-primary:hover, .btn-success:hover, .btn-warning:hover, .btn-add-custom:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        /* Button Sửa: Tím nhạt */
+        .btn-warning.btn-sm {
+            background-color: #7a6ad8;
+            border-color: #7a6ad8;
+            color: #fff;
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-warning.btn-sm:hover {
+            background-color: #6a5acd;
+            border-color: #6a5acd;
+        }
+
+        /* Button Xóa: Đỏ (giữ màu Bootstrap nhưng bo góc theo template) */
+        .btn-danger.btn-sm {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-danger.btn-sm:hover {
+            background-color: #c82333;
+            border-color: #c82333;
+        }
+
+        /* Button Quay lại: Trắng nền, chữ tím */
+        .btn-back-custom {
+            background-color: #fff;
+            color: #7a6ad8;
+            border: 1px solid #7a6ad8;
+            border-radius: 20px;
+            padding: 0px 25px;
+            height: 40px;
+            line-height: 40px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: all .3s;
+        }
+        .btn-back-custom:hover {
+            background-color: #7a6ad8;
+            color: #fff;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -66,53 +127,6 @@
             </div>
         </div>
     </form>
-
-    <c:if test="${not empty message}">
-        <p class="no-results">${message}</p>
-    </c:if>
-
-    <table class="table table-bordered">
-        <thead class="table-warning">
-        <tr>
-            <th>ID</th>
-            <th>Họ tên</th>
-            <th>Email</th>
-            <th>Số điện thoại</th>
-            <th>Khóa học</th>
-            <th>Đã liên hệ</th>
-            <th>Hành động</th>
-        </tr>
-        </thead>
-        <tbody>
-        <c:forEach var="c" items="${consultations}">
-            <tr>
-                <td>${c.id}</td>
-                <td>${c.fullName}</td>
-                <td>${c.email}</td>
-                <td>${c.phone}</td>
-                <td>${c.courseInterest}</td>
-                <td class="text-center">
-                    <form method="post" action="Consultation?action=updateContacted">
-                        <input type="hidden" name="id" value="${c.id}"/>
-                        <input type="checkbox" name="contacted" ${c.contacted ? 'checked' : ''} onchange="this.form.submit()"/>
-                    </form>
-                </td>
-                <td>
-                    <a href="Consultation?action=edit&id=${c.id}" class="btn btn-sm btn-warning">Sửa</a>
-
-                    <form method="post" action="Consultation" style="display:inline;">
-                        <input type="hidden" name="id" value="${c.id}"/>
-                        <button type="submit" name="action" value="delete" class="btn btn-sm btn-danger"
-                                onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa
-                        </button>
-                    </form>
-                </td>
-            </tr>
-        </c:forEach>
-        </tbody>
-
-    </table>
-
     <h2 class="mt-5">Thêm học sinh mới</h2>
     <form method="post" action="Consultation" class="row g-3">
         <div class="col-md-3">
@@ -136,6 +150,64 @@
             <button type="submit" name="action" value="add" class="btn btn-success">Thêm</button>
         </div>
     </form>
+
+    <c:if test="${not empty message}">
+        <p class="no-results">${message}</p>
+    </c:if>
+    <br>
+    <table class="table table-bordered">
+        <thead class="table-warning">
+        <tr>
+            <th>ID</th>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>Số điện thoại</th>
+            <th>Khóa học</th>
+<%--            <th>Trạng thái</th>--%>
+            <th>Đã liên hệ</th>
+        </tr>
+        </thead>
+        <tbody>
+        <c:forEach var="c" items="${consultations}">
+            <tr>
+                <td>${c.id}</td>
+                <td>${c.fullName}</td>
+                <td>${c.email}</td>
+                <td>${c.phone}</td>
+                <td>${c.courseInterest}</td>
+<%--                <td>--%>
+<%--                    <form action="Consultation?action=updateConsultationStatus" method="post">--%>
+<%--                        <input type="hidden" name="id" value="${c.id}"/>--%>
+<%--                        <select name="status" class="form-select" onchange="this.form.submit()">--%>
+<%--                            <option value="Đang xử lý" ${c.status eq 'Đang xử lý' ? 'selected' : ''}>Đang xử lý</option>--%>
+<%--                            <option value="Đồng ý" ${c.status eq 'Đồng ý' ? 'selected' : ''}>Đồng ý</option>--%>
+<%--                            <option value="Từ chối" ${c.status eq 'Từ chối' ? 'selected' : ''}>Từ chối</option>--%>
+<%--                        </select>--%>
+<%--                    </form>--%>
+<%--                </td>--%>
+                <td class="text-center">
+                    <form method="post" action="Consultation?action=updateContacted">
+                        <input type="hidden" name="id" value="${c.id}"/>
+                        <input type="checkbox" name="contacted" ${c.contacted ? 'checked' : ''} onchange="this.form.submit()"/>
+                    </form>
+                </td>
+                <td>
+                    <a href="Consultation?action=edit&id=${c.id}" class="btn btn-sm btn-warning">Sửa</a>
+
+                    <form method="post" action="Consultation" style="display:inline;">
+                        <input type="hidden" name="id" value="${c.id}"/>
+                        <button type="submit" name="action" value="delete" class="btn btn-sm btn-danger"
+                                onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        </c:forEach>
+        </tbody>
+
+    </table>
+
+
 
     <a href="${pageContext.request.contextPath}/Users" class="btn btn-secondary mt-4">Quay lại</a>
 </div>

@@ -10,7 +10,7 @@ public class ConsultationDAO {
 
     // Add consultation to the database
     public static Consultation addConsultation(Consultation consultation) {
-        String sql = "INSERT INTO consultations (full_name, email, phone, course_interest, contacted, created_at) VALUES (?, ?, ?, ?, 0, GETDATE())";
+        String sql = "INSERT INTO consultations (full_name, email, phone, course_interest, contacted, created_at, status) VALUES (?, ?, ?, ?, 0, GETDATE(), 'Đang xử lý')";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement statement = conn.prepareStatement(sql)) {
 
@@ -42,6 +42,7 @@ public class ConsultationDAO {
                 c.setPhone(rs.getString("phone"));
                 c.setCourseInterest(rs.getString("course_interest"));
                 c.setContacted(rs.getBoolean("contacted"));
+                c.setStatus(rs.getString("status"));
                 return c;
             }
         } catch (Exception e) {
@@ -54,7 +55,7 @@ public class ConsultationDAO {
     // Get all consultations from the database
     public ArrayList<Consultation> getAllConsultations() {
         ArrayList<Consultation> consultations = new ArrayList<>();
-        String query = "SELECT * FROM Talent_Center.dbo.consultations;";
+        String query = "SELECT * FROM consultations";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
@@ -67,7 +68,8 @@ public class ConsultationDAO {
                         rs.getString("email"),
                         rs.getString("phone"),
                         rs.getString("course_interest"),
-                        rs.getBoolean("contacted")
+                        rs.getBoolean("contacted"),
+                        rs.getString("status")
                 );
                 consultations.add(consultation);
             }
@@ -80,7 +82,7 @@ public class ConsultationDAO {
 
     // Update consultation
     public boolean updateConsultation(Consultation consultation) {
-        String sql = "UPDATE consultations SET full_name = ?, email = ?, phone = ?, course_interest = ?, contacted = ? WHERE id = ?";
+        String sql = "UPDATE consultations SET full_name = ?, email = ?, phone = ?, course_interest = ?, contacted = ?, status = ? WHERE id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -89,8 +91,8 @@ public class ConsultationDAO {
             ps.setString(3, consultation.getPhone());
             ps.setString(4, consultation.getCourseInterest());
             ps.setBoolean(5, consultation.isContacted());
-            ps.setInt(6, consultation.getId());
-
+            ps.setString(6, consultation.getStatus());
+            ps.setInt(7, consultation.getId());
             int rows = ps.executeUpdate();
             return rows > 0;
         } catch (SQLException e) {
@@ -213,6 +215,20 @@ public class ConsultationDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public boolean updateStatus(int id, String status) {
+        String sql = "UPDATE consultations SET status = ? WHERE id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, id);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 

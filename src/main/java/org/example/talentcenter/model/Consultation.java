@@ -9,17 +9,19 @@ public class Consultation {
     private String phone;
     private String courseInterest;
     private boolean contacted;
-    private Timestamp createdAt;
+    private String status;
 
-    public Consultation() {}
+    public Consultation() {
+    }
 
-    public Consultation(int id, String fullName, String email, String phone, String courseInterest, boolean contacted) {
+    public Consultation(int id, String fullName, String email, String phone, String courseInterest, boolean contacted, String status) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
         this.courseInterest = courseInterest;
         this.contacted = contacted;
+        this.status = status;
     }
 
     // Getters and Setters
@@ -71,11 +73,11 @@ public class Consultation {
         this.contacted = contacted;
     }
 
-    public Timestamp getCreatedAt() {
-        return createdAt;
+    public String getStatus() {
+        return status;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

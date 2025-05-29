@@ -8,10 +8,9 @@ public class Subject {
     public Subject() {
     }
 
-    public Subject(int id, String name, String description) {
+    public Subject(int id, String name) {
         this.id = id;
         this.name = name;
-        this.description = description;
     }
 
     public int getId() {

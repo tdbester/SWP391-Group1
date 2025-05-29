@@ -15,16 +15,15 @@
     <title>Scholar - Online School HTML5 Template</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
 
     <!-- Additional CSS Files -->
-    <link rel="stylesheet" href="assets/css/templatemo-scholar.css">
-    <link rel="stylesheet" href="assets/css/fontawesome.css">
-    <link rel="stylesheet" href="assets/css/owl.css">
-    <link rel="stylesheet" href="assets/css/animate.css">
-    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css"/>
-
+    <link href="${pageContext.request.contextPath}/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/templatemo-scholar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/fontawesome.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/owl.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/animate.css">
 </head>
 
 <body>
@@ -147,7 +146,7 @@
             <div class="col-lg-4 col-md-6">
                 <div class="service-item">
                     <div class="icon">
-                        <img src="assets/images/service-01.png" alt="online degrees">
+                        <img src="${pageContext.request.contextPath}/assets/images/service-01.png" alt="online degrees">
                     </div>
                     <div class="main-content">
                         <h4>Khóa học</h4>
@@ -161,7 +160,7 @@
             <div class="col-lg-4 col-md-6">
                 <div class="service-item">
                     <div class="icon">
-                        <img src="assets/images/service-02.png" alt="short courses">
+                        <img src="${pageContext.request.contextPath}/assets/images/service-02.png" alt="short courses">
                     </div>
                     <div class="main-content">
                         <h4>Sự kiện</h4>
@@ -175,7 +174,7 @@
             <div class="col-lg-4 col-md-6">
                 <div class="service-item">
                     <div class="icon">
-                        <img src="assets/images/service-03.png" alt="web experts">
+                        <img src="${pageContext.request.contextPath}/assets/images/service-03.png" alt="web experts">
                     </div>
                     <div class="main-content">
                         <h4>Blog</h4>
@@ -306,7 +305,7 @@
             <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 design">
                 <div class="events_item">
                     <div class="thumb">
-                        <a href="#"><img src="assets/images/course-01.jpg" alt=""></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/images/course-01.jpg" alt=""></a>
                         <span class="category">Piano</span>
                         <span class="price"><h6><em>$</em>160</h6></span>
                     </div>
@@ -319,7 +318,7 @@
             <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6  development">
                 <div class="events_item">
                     <div class="thumb">
-                        <a href="#"><img src="assets/images/course-02.jpg" alt=""></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/images/course-02.jpg" alt=""></a>
                         <span class="category">Piano</span>
                         <span class="price"><h6><em>$</em>340</h6></span>
                     </div>
@@ -332,7 +331,7 @@
             <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 design wordpress">
                 <div class="events_item">
                     <div class="thumb">
-                        <a href="#"><img src="assets/images/course-03.jpg" alt=""></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/images/course-03.jpg" alt=""></a>
                         <span class="category">Violin</span>
                         <span class="price"><h6><em>$</em>640</h6></span>
                     </div>
@@ -345,7 +344,7 @@
             <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 development">
                 <div class="events_item">
                     <div class="thumb">
-                        <a href="#"><img src="assets/images/course-04.jpg" alt=""></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/images/course-04.jpg" alt=""></a>
                         <span class="category">Violin</span>
                         <span class="price"><h6><em>$</em>450</h6></span>
                     </div>
@@ -358,7 +357,7 @@
             <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 wordpress development">
                 <div class="events_item">
                     <div class="thumb">
-                        <a href="#"><img src="assets/images/course-05.jpg" alt=""></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/images/course-05.jpg" alt=""></a>
                         <span class="category">Guitar</span>
                         <span class="price"><h6><em>$</em>320</h6></span>
                     </div>
@@ -371,7 +370,7 @@
             <div class="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 wordpress design">
                 <div class="events_item">
                     <div class="thumb">
-                        <a href="#"><img src="assets/images/course-06.jpg" alt=""></a>
+                        <a href="#"><img src="${pageContext.request.contextPath}/assets/images/course-06.jpg" alt=""></a>
                         <span class="category">Guitar</span>
                         <span class="price"><h6><em>$</em>240</h6></span>
                     </div>
@@ -432,7 +431,7 @@
                         <p>“Tôi thực sự ấn tượng với cách giảng dạy tại TALENT01 – vừa tận tâm, vừa bài bản. Nhờ chương
                             trình học cá nhân hóa, tôi đã tiến bộ rõ rệt chỉ sau vài tuần luyện tập.”</p>
                         <div class="author">
-                            <img src="assets/images/testimonial-author.jpg" alt="">
+                            <img src="${pageContext.request.contextPath}/assets/images/testimonial-author.jpg" alt="">
                             <span class="category">Piano cơ bản</span>
                             <h4>Claude David</h4>
                         </div>
@@ -442,7 +441,7 @@
                             chuyên sâu. TALENT01 có giảng viên từng du học và thi quốc tế, nên lộ trình học rất bài bản
                             và mình tiến bộ thấy rõ từng tuần.”</p>
                         <div class="author">
-                            <img src="assets/images/testimonial-author.jpg" alt="">
+                            <img src="${pageContext.request.contextPath}/assets/images/testimonial-author.jpg" alt="">
                             <span class="category">Violin nâng cao</span>
                             <h4>Thomas Jefferson</h4>
                         </div>
@@ -452,7 +451,7 @@
                             sửa thế bấm, hướng dẫn luyện ngón chi tiết nên giờ mình có thể chơi fingerstyle phức tạp và
                             biểu diễn tự tin hơn rất nhiều!”</p>
                         <div class="author">
-                            <img src="assets/images/testimonial-author.jpg" alt="">
+                            <img src="${pageContext.request.contextPath}/assets/images/testimonial-author.jpg" alt="">
                             <span class="category">Guitar nâng cao</span>
                             <h4>Stella Blair</h4>
                         </div>
@@ -486,7 +485,7 @@
                     <div class="row">
                         <div class="col-lg-3">
                             <div class="image">
-                                <img src="assets/images/event-01.jpg" alt="">
+                                <img src="${pageContext.request.contextPath}/assets/images/event-01.jpg" alt="">
                             </div>
                         </div>
                         <div class="col-lg-9">
@@ -518,7 +517,7 @@
                     <div class="row">
                         <div class="col-lg-3">
                             <div class="image">
-                                <img src="assets/images/event-02.jpg" alt="">
+                                <img src="${pageContext.request.contextPath}/assets/images/event-02.jpg" alt="">
                             </div>
                         </div>
                         <div class="col-lg-9">
@@ -550,7 +549,7 @@
                     <div class="row">
                         <div class="col-lg-3">
                             <div class="image">
-                                <img src="assets/images/event-03.jpg" alt="">
+                                <img src="${pageContext.request.contextPath}/assets/images/event-03.jpg" alt="">
                             </div>
                         </div>
                         <div class="col-lg-9">
@@ -600,6 +599,9 @@
             </div>
             <div class="col-lg-6">
                 <div class="contact-us-content">
+                    <c:if test="${not empty message0}">
+                        <div class="alert alert-success mt-3">${message0}</div>
+                    </c:if>
                     <form id="contact-form" action="Consultation" method="post">
                         <div class="row">
                             <div class="col-lg-12">
@@ -623,16 +625,16 @@
                             <div class="col-lg-12">
                                 <fieldset>
                                     <select name="course_interest" id="course_interest" required>
-                                        <option value="" disabled selected>Khoá học muốn tư vấn</option>
+                                        <option value="" selected hidden>Khoá học muốn tư vấn</option>
                                         <c:forEach var="subject" items="${subjects}">
-                                            <option value="${subject.id}">${subject.name}</option>
+                                            <option style="color: black" value="${subject.name}">${subject.name}</option>
                                         </c:forEach>
                                     </select>
                                 </fieldset>
                             </div>
                             <div class="col-lg-12">
                                 <fieldset>
-                                    <button type="submit" id="form-submit" class="orange-button">Gửi tư vấn ngay!
+                                    <button type="submit" id="form-submit" name="action" value="addConsultation" class="orange-button">Gửi tư vấn ngay!
                                     </button>
                                 </fieldset>
                             </div>
@@ -659,12 +661,12 @@
 
 <!-- Scripts -->
 <!-- Bootstrap core JavaScript -->
-<script src="vendor/jquery/jquery.min.js"></script>
-<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
-<script src="assets/js/isotope.min.js"></script>
-<script src="assets/js/owl-carousel.js"></script>
-<script src="assets/js/counter.js"></script>
-<script src="assets/js/custom.js"></script>
+<script src="${pageContext.request.contextPath}/vendor/jquery/jquery.min.js"></script>
+<script src="${pageContext.request.contextPath}/vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/isotope.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/owl-carousel.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/counter.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/custom.js"></script>
 
 </body>
 </html>

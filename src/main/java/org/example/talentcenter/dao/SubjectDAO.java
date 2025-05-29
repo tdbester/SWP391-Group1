@@ -13,15 +13,14 @@ public class SubjectDAO {
     public ArrayList<Subject> getAllSubjects() {
         ArrayList<Subject> subjects = new ArrayList<>();
         String query = "SELECT id, name, description FROM Talent_Center.dbo.subjects";
-
+ 
         try (Connection conn = DBConnect.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(query);
                  ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Subject subject = new Subject(
                             rs.getInt("id"),
-                            rs.getString("name"),
-                            rs.getString("description"));
+                            rs.getString("name"));
                     subjects.add(subject);
                 }
             }

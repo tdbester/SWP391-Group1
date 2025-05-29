@@ -1628,6 +1628,15 @@ Contact Style
   position: relative;
   z-index: 3;
 }
+#course_interest {
+  color: black;
+}
+
+#course_interest option.placeholder {
+  color: white;
+  background-color: black; /* nếu muốn dễ nhìn */
+}
+
 
 #contact-form textarea::placeholder {
   color: #fff;
