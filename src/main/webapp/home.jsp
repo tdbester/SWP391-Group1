@@ -1,8 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page session="true" %>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -10,7 +10,7 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <title>Scholar - Online School HTML5 Template</title>
+    <title>Talent Center</title>
 
     <!-- Bootstrap core CSS -->
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -22,17 +22,10 @@
     <link rel="stylesheet" href="assets/css/owl.css">
     <link rel="stylesheet" href="assets/css/animate.css">
     <link rel="stylesheet"href="https://unpkg.com/swiper@7/swiper-bundle.min.css"/>
-    <!--
 
-    TemplateMo 586 Scholar
-
-    https://templatemo.com/tm-586-scholar
-
-    -->
 </head>
 
 <body>
-
 <!-- ***** Preloader Start ***** -->
 <div id="js-preloader" class="js-preloader">
     <div class="preloader-inner">
@@ -71,8 +64,18 @@
                         <li class="scroll-to-section"><a href="#services">Dịch vụ</a></li>
                         <li class="scroll-to-section"><a href="#courses">Khóa học</a></li>
                         <li class="scroll-to-section"><a href="#events">Sự kiện</a></li>
+
+                        <%
+                            Object user = session.getAttribute("user");
+                            if (user == null) { %>
                         <li class="scroll-to-section"><a href="login.jsp">Đăng nhập</a></li>
                         <li class="scroll-to-section"><a href="#contact">Đăng kí</a></li>
+                        <% } else { %>
+                        <li class="scroll-to-section"><a href="profile.jsp">Trang cá nhân</a></li>
+                        <li class="scroll-to-section"><a href="logout">Đăng xuất</a></li>
+                        <% } %>
+
+
                     </ul>
                     <a class='menu-trigger'>
                         <span>Menu</span>

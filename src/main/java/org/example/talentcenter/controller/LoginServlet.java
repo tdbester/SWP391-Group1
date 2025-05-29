@@ -64,6 +64,7 @@ public class LoginServlet extends HttpServlet {
             if (user != null) {
                 HttpSession session = request.getSession();
                 session.setAttribute("user", user);
+                session.setAttribute("userId", user.getId());
                 response.sendRedirect("home.jsp");
             } else {
                 request.setAttribute("error", "Sai email hoặc mật khẩu");
