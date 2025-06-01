@@ -51,7 +51,6 @@ public class ConsultationDAO {
         return null;
     }
 
-
     // Get all consultations from the database
     public ArrayList<Consultation> getAllConsultations() {
         ArrayList<Consultation> consultations = new ArrayList<>();
@@ -230,6 +229,52 @@ public class ConsultationDAO {
             return false;
         }
     }
+    public ArrayList<Consultation> getConsultationsByPage(int offset, int limit) {
+        ArrayList<Consultation> consultations = new ArrayList<>();
+        String query = "SELECT * FROM consultations ORDER BY id LIMIT ? OFFSET ?";
 
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, limit);
+            ps.setInt(2, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Consultation consultation = new Consultation(
+                            rs.getInt("id"),
+                            rs.getString("full_name"),
+                            rs.getString("email"),
+                            rs.getString("phone"),
+                            rs.getString("course_interest"),
+                            rs.getBoolean("contacted"),
+                            rs.getString("status")
+                    );
+                    consultations.add(consultation);
+                }
+            }
+            System.out.println("Số bản ghi phân trang lấy được: " + consultations.size());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return consultations;
+    }
+    public int getTotalConsultations() {
+        String query = "SELECT COUNT(*) FROM consultations";
+        int total = 0;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                total = rs.getInt(1);
+            }
+            System.out.println("Tổng số bản ghi: " + total);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return total;
+    }
 
 }

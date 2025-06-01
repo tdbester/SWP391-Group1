@@ -93,6 +93,21 @@ public class ConsultationServlet extends HttpServlet {
         } else {
             response.sendRedirect("Consultation?action=list");
         }
+        int page = 1;
+        int recordsPerPage = 10;
+
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
+
+        ArrayList<Consultation> list = consultationDAO.getConsultationsByPage((page - 1) * recordsPerPage, recordsPerPage);
+        int totalRecords = consultationDAO.getTotalConsultations();
+        int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+
+        request.setAttribute("consultations", list);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+
     }
 
     @Override
@@ -161,7 +176,7 @@ public class ConsultationServlet extends HttpServlet {
                 return;
             } else if ("updateContacted".equals(action)) {
                 String idRaw = request.getParameter("id");
-                String contactedParam = request.getParameter("contacted"); // checkbox checked gửi "on", unchecked thì null
+                String contactedParam = request.getParameter("contacted");
                 try {
                     int id = Integer.parseInt(idRaw);
                     boolean contacted = contactedParam != null; // checked -> true, unchecked -> false
@@ -177,21 +192,15 @@ public class ConsultationServlet extends HttpServlet {
                 try {
                     int consultationId = Integer.parseInt(idParam);
                     boolean success = consultationDAO.updateStatus(consultationId, status);
-
                     if (success) {
                         System.out.println("Status updated successfully for ID: " + consultationId + " to: " + status);
                     } else {
                         System.out.println("Failed to update status for ID: " + consultationId);
                     }
-
-                } catch (NumberFormatException e) {
-                    System.out.println("Invalid ID format: " + idParam);
-                    e.printStackTrace();
                 } catch (Exception e) {
                     System.out.println("Error updating consultation status: " + e.getMessage());
                     e.printStackTrace();
                 }
-
                 response.sendRedirect("Consultation?action=list");
             }
         } catch (Exception e) {

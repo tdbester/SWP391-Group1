@@ -204,6 +204,17 @@
         </tbody>
 
     </table>
+    <nav aria-label="Page navigation" class="mt-3">
+        <ul class="pagination justify-content-center">
+            <c:forEach var="i" begin="1" end="${totalPages}">
+                <li class="page-item ${i == currentPage ? 'active' : ''}">
+                    <a class="page-link" href="Consultation?page=${i}&action=${param.action}&keyword=${param.keyword}&course_filter=${param.course_filter}&contacted_filter=${param.contacted_filter}">
+                            ${i}
+                    </a>
+                </li>
+            </c:forEach>
+        </ul>
+    </nav>
 
 
 
