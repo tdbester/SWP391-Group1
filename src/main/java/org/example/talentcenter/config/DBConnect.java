@@ -10,7 +10,18 @@ public class DBConnect {
     private static final String USER = "sa";
     private static final String PASSWORD = "12345678";
 
+    static {
+        try {
+            // Load driver thủ công, đảm bảo driver được nạp
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        } catch (ClassNotFoundException e) {
+            System.err.println("Cannot load SQL Server JDBC driver");
+            e.printStackTrace();
+        }
+    }
+
     public static Connection getConnection() throws SQLException {
+        // Tạo kết nối tới SQL Server
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }

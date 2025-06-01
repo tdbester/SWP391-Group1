@@ -6,17 +6,21 @@ public class Blog {
     private Integer id;
     private String title;
     private String content;
+    private String image;
     private Boolean status;
-    private Date createdBy;
+    private Integer createdBy;
     private Date createdAt;
+    private Date updatedAt;
 
-    public Blog(Integer id, String title, String content, Boolean status, Date createdBy, Date createdAt) {
+    public Blog(Integer id, String title, String content, String image, Boolean status, Integer createdBy, Date createdAt, Date updatedAt) {
         this.id = id;
         this.title = title;
         this.content = content;
+        this.image = image;
         this.status = status;
         this.createdBy = createdBy;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Blog() {
@@ -38,7 +42,11 @@ public class Blog {
         return status;
     }
 
-    public Date getCreatedBy() {
+    public String getImage() {
+        return image;
+    }
+
+    public Integer getCreatedBy() {
         return createdBy;
     }
 
@@ -48,6 +56,10 @@ public class Blog {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public void setTitle(String title) {
@@ -62,11 +74,19 @@ public class Blog {
         this.status = status;
     }
 
-    public void setCreatedBy(Date createdBy) {
+    public void setCreatedBy(Integer createdBy) {
         this.createdBy = createdBy;
     }
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
