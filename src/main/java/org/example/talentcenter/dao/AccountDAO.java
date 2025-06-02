@@ -6,9 +6,6 @@ import java.sql.*;
 
 public class AccountDAO {
 
-    /**
-     * Get account by ID
-     */
     public Account getAccountById(int accountId) {
         String sql = "SELECT * FROM Account WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
@@ -34,9 +31,7 @@ public class AccountDAO {
         return null;
     }
 
-    /**
-     * Update account profile
-     */
+
     public boolean updateAccountProfile(int accountId, String fullName, String phoneNumber, String email, String address) {
         String sql = "UPDATE Account SET FullName = ?, PhoneNumber = ?, Email = ?, Address = ? WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
@@ -57,9 +52,7 @@ public class AccountDAO {
         }
     }
 
-    /**
-     * Update password
-     */
+
     public boolean updatePassword(int accountId, String newPassword) {
         String sql = "UPDATE Account SET Password = ? WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
@@ -77,9 +70,7 @@ public class AccountDAO {
         }
     }
 
-    /**
-     * Check if email exists (excluding current account)
-     */
+
     public boolean isEmailExists(String email, int currentAccountId) {
         String sql = "SELECT COUNT(*) FROM Account WHERE Email = ? AND Id != ?";
         try (Connection conn = DBConnect.getConnection();
@@ -98,9 +89,7 @@ public class AccountDAO {
         return false;
     }
 
-    /**
-     * Check if phone exists (excluding current account)
-     */
+
     public boolean isPhoneExists(String phone, int currentAccountId) {
         String sql = "SELECT COUNT(*) FROM Account WHERE PhoneNumber = ? AND Id != ?";
         try (Connection conn = DBConnect.getConnection();
@@ -119,9 +108,7 @@ public class AccountDAO {
         return false;
     }
 
-    /**
-     * Get account by email (for login check)
-     */
+
     public Account getAccountByEmail(String email) {
         String sql = "SELECT * FROM Account WHERE Email = ?";
         try (Connection conn = DBConnect.getConnection();
@@ -147,9 +134,7 @@ public class AccountDAO {
         return null;
     }
 
-    /**
-     * Update password by email (for forgot password feature)
-     */
+
     public boolean updatePasswordByEmail(String email, String password) {
         String sql = "UPDATE Account SET Password = ? WHERE Email = ?";
         try (Connection conn = DBConnect.getConnection();
@@ -165,9 +150,7 @@ public class AccountDAO {
         }
     }
 
-    /**
-     * Insert new account
-     */
+
     public boolean insertAccount(Account account) {
         String sql = "INSERT INTO Account (FullName, Email, Password, PhoneNumber, Address, RoleId) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
@@ -190,9 +173,7 @@ public class AccountDAO {
         }
     }
 
-    /**
-     * Get all accounts
-     */
+
     public java.util.List<Account> getAllAccounts() {
         java.util.List<Account> accounts = new java.util.ArrayList<>();
         String sql = "SELECT * FROM Account";
@@ -218,9 +199,6 @@ public class AccountDAO {
         return accounts;
     }
 
-    /**
-     * Get accounts by role
-     */
     public java.util.List<Account> getAccountsByRole(int roleId) {
         java.util.List<Account> accounts = new java.util.ArrayList<>();
         String sql = "SELECT * FROM Account WHERE RoleId = ?";
@@ -247,9 +225,6 @@ public class AccountDAO {
         return accounts;
     }
 
-    /**
-     * Delete account by ID
-     */
     public boolean deleteAccount(int accountId) {
         String sql = "DELETE FROM Account WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();

@@ -93,13 +93,13 @@
 
       <form method="post" action="changePassword">
         <label for="currentPassword">Mật khẩu hiện tại:</label>
-        <input type="password" id="currentPassword" name="currentPassword" required>
+        <input type="password" name="currentPassword" required>
 
         <label for="newPassword">Mật khẩu mới:</label>
-        <input type="password" id="newPassword" name="newPassword" required>
+        <input type="password" name="newPassword" required>
 
         <label for="confirmPassword">Xác nhận mật khẩu mới:</label>
-        <input type="password" id="confirmPassword" name="confirmPassword" required>
+        <input type="password" name="confirmPassword" required>
 
         <button type="submit" class="btn-save">Đổi mật khẩu</button>
       </form>

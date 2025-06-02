@@ -614,11 +614,9 @@
 <!-------------------------------------------------- ***** footer ***** -------------------------------------------------------------->
 <footer>
     <div class="container">
-        <div class="col-lg-12">
+        <div class = "rol-lg-12">
             <p>
-                © 2025 TALENT01 Music Center. All rights reserved.
-                &nbsp;&nbsp;&nbsp;
-                Website by <a href="#">TALENT01 Team</a>
+                "Copyright © 2025 Talent Center Managemnt. SWP391-Group 01."
             </p>
         </div>
     </div>

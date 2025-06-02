@@ -70,13 +70,13 @@ public class RequestPasswordServlet extends HttpServlet {
 
             ResetService service = new ResetService();
             String token = service.generateToken();
-            String linkReset = "http://localhost:8080/TalentCenter/resetPassword?token=" + token;
+            String linkReset = "http://localhost:9999/TalentCenter_war_exploded/resetPassword?token=" + token;
 
             TokenForgetPassword newTokenForget = new TokenForgetPassword(
-                    account.getId(),
-                    false,
                     token,
-                    service.expireDateTime()
+                    service.expireDateTime(),
+                    false,
+                    account.getId()
             );
 
             // Save token to database
@@ -100,7 +100,7 @@ public class RequestPasswordServlet extends HttpServlet {
                 return;
             }
 
-            request.setAttribute("success", "Liên kết đặt lại mật khẩu đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư!");
+            request.setAttribute("error", "Vui lòng kiểm tra hộp thư!");
             request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
 
         } catch (Exception e) {

@@ -17,7 +17,7 @@
             if (request.getAttribute("error")!= null){
                 String er=(String)request.getAttribute("error");
         %>
-        <h4 style="color: red"><%= er %></h3>
+        <h4 style="color: red"><%= er %></h4>
                 <%
                         }
                     %>
