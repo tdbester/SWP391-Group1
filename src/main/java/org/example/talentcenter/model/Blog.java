@@ -1,26 +1,33 @@
 package org.example.talentcenter.model;
 
-import java.sql.Date;
+import java.util.Date;
 
 public class Blog {
     private Integer id;
     private String title;
+    private String description;
     private String content;
-    private Boolean status;
-    private Date createdBy;
+    private String image;
+    private Integer authorId;
     private Date createdAt;
 
-    public Blog(Integer id, String title, String content, Boolean status, Date createdBy, Date createdAt) {
+
+    public Blog(Integer id, String title, String content, String image, Integer authorId, Date createdAt, String description) {
         this.id = id;
         this.title = title;
         this.content = content;
-        this.status = status;
-        this.createdBy = createdBy;
+        this.image = image;
+        this.authorId = authorId;
         this.createdAt = createdAt;
+        this.description = description;
     }
 
     public Blog() {
     }
+
+    public Blog(int id, String title, String description, String content, String image, int authorId, Date createdAt) {
+    }
+
 
     public Integer getId() {
         return id;
@@ -34,12 +41,13 @@ public class Blog {
         return content;
     }
 
-    public Boolean getStatus() {
-        return status;
+
+    public String getImage() {
+        return image;
     }
 
-    public Date getCreatedBy() {
-        return createdBy;
+    public Integer getAuthorId() {
+        return authorId;
     }
 
     public Date getCreatedAt() {
@@ -50,6 +58,10 @@ public class Blog {
         this.id = id;
     }
 
+    public void setImage(String image) {
+        this.image = image;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -58,15 +70,21 @@ public class Blog {
         this.content = content;
     }
 
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
 
-    public void setCreatedBy(Date createdBy) {
-        this.createdBy = createdBy;
+    public void setAuthorId(Integer authorId) {
+        this.authorId = authorId;
     }
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
