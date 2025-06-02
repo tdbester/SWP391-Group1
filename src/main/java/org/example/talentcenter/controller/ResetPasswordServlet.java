@@ -78,7 +78,6 @@ public class ResetPasswordServlet extends HttpServlet {
                     return;
                 }
 
-                // Store information for reset form
                 request.setAttribute("email", account.getEmail());
                 session.setAttribute("resetToken", token);
                 session.setAttribute("resetAccountId", account.getId());
@@ -174,15 +173,12 @@ public class ResetPasswordServlet extends HttpServlet {
             boolean tokenUpdated = tokenDAO.updateStatus(tokenForgetPassword);
 
             if (!tokenUpdated) {
-                // Password was updated but token status wasn't - log this
                 System.out.println("Warning: Password updated but token status not updated for token: " + tokenStr);
             }
 
-            // Clear session data
             session.removeAttribute("resetToken");
             session.removeAttribute("resetAccountId");
 
-            // Success - redirect to login
             request.setAttribute("success", "Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.");
             request.getRequestDispatcher("login.jsp").forward(request, response);
 
