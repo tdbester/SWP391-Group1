@@ -152,7 +152,7 @@ form button:hover {
   background-color: #0056b3;
 }
 
-/* 
+/*
 ---------------------------------------------
 Global Styles
 --------------------------------------------- 
@@ -1589,7 +1589,7 @@ Contact Style
   z-index: 2;
 }
 
-#contact-form input, #contact-form select {
+#contact-form input {
   width: 100%;
   height: 50px;
   border-radius: 25px;
@@ -1965,8 +1965,11 @@ Contact Style
 /* ... tiếp tục phần dưới */
 
 ---------------------------------------------
+TALENT01 Footer Style
+---------------------------------------------
+*/
 Footer Style
---------------------------------------------- 
+---------------------------------------------
 *
 
 footer {

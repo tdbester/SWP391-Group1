@@ -1,0 +1,179 @@
+* {
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #F6F4FF;
+    color: #333;
+}
+
+header {
+    background: #7A5AF8;
+    color: white;
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.nav {
+    display: flex;
+    gap: 24px;
+}
+
+.nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.container {
+    display: flex;
+    padding: 32px;
+}
+
+.sidebar {
+    width: 200px;
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-right: 32px;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+}
+
+.sidebar a {
+    display: block;
+    margin-bottom: 12px;
+    color: #7A5AF8;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 0;
+    transition: all 0.3s ease;
+}
+
+.sidebar a:hover {
+    color: #9B7BFA;
+    transform: translateX(5px);
+}
+
+.profile-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.avatar {
+    float: right;
+    width: 120px;
+    height: 120px;
+    background: #E0DBFF;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #7A5AF8;
+    font-weight: 500;
+}
+
+.profile-header {
+    margin-bottom: 24px;
+}
+
+.profile-header h2 {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+form {
+    clear: both;
+    margin-top: 20px;
+}
+
+label {
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 4px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.btn-save {
+    background: #7A5AF8;
+    color: white;
+    padding: 10px 24px;
+    border: none;
+    border-radius: 12px;
+    margin-top: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    float: right;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.btn-save:hover {
+    background: #9B7BFA;
+}
+
+/* Alert styles */
+.alert {
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Hiệu ứng scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Active link trong sidebar */
+.sidebar a.active {
+    color: #5E3AC7;
+    font-weight: 600;
+}

@@ -6,7 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import org.example.talentcenter.dao.LoginDAO;
-import org.example.talentcenter.model.User;
+import org.example.talentcenter.model.Account;
 
 @WebServlet(name = "login", value = "/login")
 public class LoginServlet extends HttpServlet {
@@ -15,7 +15,6 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
@@ -28,7 +27,6 @@ public class LoginServlet extends HttpServlet {
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
      *
@@ -39,7 +37,7 @@ public class LoginServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, ServletException {
+            throws ServletException, IOException {
         request.getRequestDispatcher("login.jsp").forward(request, response);
     }
 
@@ -54,25 +52,84 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // Set request encoding to handle Vietnamese characters
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
+        // Basic validation
+        if (email == null || email.trim().isEmpty() ||
+                password == null || password.trim().isEmpty()) {
+            request.setAttribute("error", "Vui lòng nhập đầy đủ email và mật khẩu");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
+        }
+
         try {
             LoginDAO dao = new LoginDAO();
-            User user = dao.checkLogin(email, password);
+            Account account = dao.checkLogin(email.trim(), password);
 
-            if (user != null) {
+            if (account != null) {
+                // Get role name for the account
+                String roleName = dao.getRoleName(account.getRoleId());
+
+                // Create session and store user information
                 HttpSession session = request.getSession();
-                session.setAttribute("user", user);
-                response.sendRedirect("home.jsp");
+                session.setAttribute("account", account);
+                session.setAttribute("accountId", account.getId());
+                session.setAttribute("userEmail", account.getEmail());
+                session.setAttribute("userFullName", account.getFullName());
+                session.setAttribute("userRole", roleName);
+                session.setAttribute("roleId", account.getRoleId());
+
+                // Redirect based on role
+                if (roleName != null) {
+                    switch (roleName.toLowerCase()) {
+                        case "admin":
+                            response.sendRedirect("home.jsp");
+                            break;
+                        case "student":
+                            response.sendRedirect("home.jsp");
+                            break;
+                        case "teacher":
+                            response.sendRedirect("home.jsp");
+                            break;
+                        case "accountant":
+                            response.sendRedirect("home.jsp");
+                            break;
+                        default:
+                            response.sendRedirect("home.jsp");
+                            break;
+
+                    }
+                } else {
+                    response.sendRedirect("home.jsp");
+                }
+
             } else {
-                request.setAttribute("error", "Sai email hoặc mật khẩu");
+                request.setAttribute("error", "Email hoặc mật khẩu không đúng");
+                request.setAttribute("email", email); // Keep email for user convenience
                 request.getRequestDispatcher("login.jsp").forward(request, response);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Lỗi trong quá trình đăng nhập");
+            request.setAttribute("error", "Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại.");
+            request.setAttribute("email", email); // Keep email for user convenience
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Login Servlet for Talent Center Application";
     }
 }
