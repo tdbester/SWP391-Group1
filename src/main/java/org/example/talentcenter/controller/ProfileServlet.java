@@ -1,18 +1,18 @@
 package org.example.talentcenter.controller;
 
-import org.example.talentcenter.dao.UserDAO;
-import org.example.talentcenter.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.example.talentcenter.dao.AccountDAO;
+import org.example.talentcenter.model.Account;
 import java.io.IOException;
 
 @WebServlet("/profile")
 public class ProfileServlet extends HttpServlet {
-    private UserDAO userDAO = new UserDAO();
+    private AccountDAO accountDAO = new AccountDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -26,10 +26,10 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
-        // Lấy thông tin user từ database
-        User user = userDAO.getUserById(userId);
-        if (user != null) {
-            request.setAttribute("user", user);
+        // Lấy thông tin account từ database
+        Account account = accountDAO.getAccountById(userId);
+        if (account != null) {
+            request.setAttribute("account", account);
         }
 
         request.getRequestDispatcher("profile.jsp").forward(request, response);
@@ -55,6 +55,7 @@ public class ProfileServlet extends HttpServlet {
         String fullName = request.getParameter("name");
         String phone = request.getParameter("phone");
         String email = request.getParameter("email");
+        String address = request.getParameter("address");
 
         // Validate dữ liệu
         if (fullName == null || fullName.trim().isEmpty()) {
@@ -76,28 +77,28 @@ public class ProfileServlet extends HttpServlet {
         }
 
         // Kiểm tra email và phone đã tồn tại chưa
-        if (userDAO.isEmailExists(email, userId)) {
+        if (accountDAO.isEmailExists(email, userId)) {
             request.setAttribute("error", "Email này đã được sử dụng bởi tài khoản khác!");
             doGet(request, response);
             return;
         }
 
-        if (userDAO.isPhoneExists(phone, userId)) {
+        if (accountDAO.isPhoneExists(phone, userId)) {
             request.setAttribute("error", "Số điện thoại này đã được sử dụng bởi tài khoản khác!");
             doGet(request, response);
             return;
         }
 
         // Cập nhật thông tin
-        boolean isUpdated = userDAO.updateUserProfile(userId, fullName.trim(), phone, email);
+        boolean isUpdated = accountDAO.updateAccountProfile(userId, fullName.trim(), phone, email, address);
 
         if (isUpdated) {
             request.setAttribute("success", "Cập nhật thông tin thành công!");
 
-            // Cập nhật lại thông tin user trong session
-            User updatedUser = userDAO.getUserById(userId);
-            session.setAttribute("user", updatedUser);
-            request.setAttribute("user", updatedUser);
+            // Cập nhật lại thông tin account trong session
+            Account updatedAccount = accountDAO.getAccountById(userId);
+            session.setAttribute("account", updatedAccount);
+            request.setAttribute("account", updatedAccount);
         } else {
             request.setAttribute("error", "Có lỗi xảy ra khi cập nhật thông tin!");
         }

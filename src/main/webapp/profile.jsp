@@ -47,23 +47,27 @@
       <% } %>
 
       <%
-        org.example.talentcenter.model.User user =
-                (org.example.talentcenter.model.User) session.getAttribute("user");
+        org.example.talentcenter.model.Account account =
+                (org.example.talentcenter.model.Account) session.getAttribute("account");
       %>
 
       <form method="post" action="profile">
         <label for="name">Họ và tên:</label>
         <input type="text" id="name" name="name"
-               value="<%= (user != null && user.getFull_name() != null) ? user.getFull_name() : "" %>" required>
+               value="<%= (account != null && account.getFullName() != null) ? account.getFullName() : "" %>" required>
 
         <label for="phone">Số điện thoại:</label>
         <input type="text" id="phone" name="phone"
-               value="<%= (user != null && user.getPhone() != null) ? user.getPhone() : "" %>"
+               value="<%= (account != null && account.getPhoneNumber() != null) ? account.getPhoneNumber() : "" %>"
                pattern="^0\d{9}$" required>
 
         <label for="email">Email:</label>
         <input type="email" id="email" name="email"
-               value="<%= (user != null && user.getEmail() != null) ? user.getEmail() : "" %>" required>
+               value="<%= (account != null && account.getEmail() != null) ? account.getEmail() : "" %>" required>
+
+        <label for="address">Địa chỉ:</label>
+        <input type="text" id="address" name="address"
+               value="<%= (account != null && account.getAddress() != null) ? account.getAddress() : "" %>" required>
 
         <button type="submit" class="btn-save">Lưu</button>
       </form>

@@ -1,18 +1,20 @@
+// ChangePasswordServlet.java
 package org.example.talentcenter.controller;
 
-import org.example.talentcenter.dao.UserDAO;
-import org.example.talentcenter.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.example.talentcenter.dao.AccountDAO;
+import org.example.talentcenter.model.Account;
+
 import java.io.IOException;
 
 @WebServlet("/changePassword")
 public class ChangePasswordServlet extends HttpServlet {
-    private UserDAO userDAO = new UserDAO();
+    private AccountDAO accountDAO = new AccountDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -25,10 +27,10 @@ public class ChangePasswordServlet extends HttpServlet {
             return;
         }
 
-        // Lấy thông tin user từ database
-        User user = userDAO.getUserById(userId);
-        if (user != null) {
-            request.setAttribute("user", user);
+        // Lấy thông tin account từ database
+        Account account = accountDAO.getAccountById(userId);
+        if (account != null) {
+            request.setAttribute("account", account);
         }
         request.getRequestDispatcher("profile.jsp").forward(request, response);
     }
@@ -82,13 +84,13 @@ public class ChangePasswordServlet extends HttpServlet {
         }
 
         // Kiểm tra mật khẩu hiện tại có đúng không
-        User user = userDAO.getUserById(userId);
-        if (user == null) {
+        Account account = accountDAO.getAccountById(userId);
+        if (account == null) {
             request.setAttribute("passwordError", "Không tìm thấy thông tin người dùng!");
             doGet(request, response);
             return;
         }
-        if (!user.getPassword().equals(oldPassword)) {
+        if (!account.getPassword().equals(oldPassword)) {
             request.setAttribute("passwordError", "Mật khẩu hiện tại không đúng!");
             doGet(request, response);
             return;
@@ -102,13 +104,13 @@ public class ChangePasswordServlet extends HttpServlet {
         }
 
         // Cập nhật mật khẩu
-        boolean isUpdated = userDAO.updatePassword(userId, newPassword);
+        boolean isUpdated = accountDAO.updatePassword(userId, newPassword);
 
         if (isUpdated) {
             request.setAttribute("passwordSuccess", "Đổi mật khẩu thành công!");
-            User updatedUser = userDAO.getUserById(userId);
-            session.setAttribute("user", updatedUser);
-            request.setAttribute("user", updatedUser);
+            Account updatedAccount = accountDAO.getAccountById(userId);
+            session.setAttribute("account", updatedAccount);
+            request.setAttribute("account", updatedAccount);
         } else {
             request.setAttribute("passwordError", "Có lỗi xảy ra khi đổi mật khẩu!");
         }

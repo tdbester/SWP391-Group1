@@ -23,7 +23,7 @@
                     %>
       <form action="resetPassword" method="post">
         <input type="hidden" name="token" value="${sessionScope.token}" />
-        <input type="email" name="email" value="$[email]" placeholder="Email" required>
+        <input type="email" name="email" placeholder="Email" required>
         <input type="password" name="password" placeholder="Mật khẩu mới" required>
         <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu" required>
         <input type="submit" class="button" value="Đổi mật khẩu">

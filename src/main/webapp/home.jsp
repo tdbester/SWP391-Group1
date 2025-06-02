@@ -66,8 +66,8 @@
                         <li class="scroll-to-section"><a href="#events">Sự kiện</a></li>
 
                         <%
-                            Object user = session.getAttribute("user");
-                            if (user == null) { %>
+                            Object account = session.getAttribute("account");
+                            if (account == null) { %>
                         <li class="scroll-to-section"><a href="login.jsp">Đăng nhập</a></li>
                         <li class="scroll-to-section"><a href="#contact">Đăng kí</a></li>
                         <% } else { %>
