@@ -22,7 +22,11 @@
     <title>Chỉnh sửa học sinh tư vấn</title>
 </head>
 <body>
+
 <div class="container mt-5">
+    <c:if test="${not empty message}">
+        <div class="alert alert-success">${message}</div>
+    </c:if>
     <h2 class="mb-4">Chỉnh sửa học sinh tư vấn</h2>
     <form method="post" action="Consultation" class="row g-3">
         <input type="hidden" name="id" value="${consult.id}"/>
@@ -46,25 +50,19 @@
             <label class="form-label">Khóa học quan tâm</label>
             <select name="course_interest" required class="form-select">
                 <c:forEach var="subject" items="${subjects}">
-                    <option value="${subject.name}" ${consult.courseInterest == subject.name ? 'selected' : ''}>
-                            ${subject.name}
+                    <option value="${subject.id}" ${consult.courseId == subject.id ? 'selected' : ''}>
+                            ${subject.title}
                     </option>
                 </c:forEach>
             </select>
         </div>
 
         <div class="col-12">
-            <div class="form-check">
-                <input type="checkbox" name="contacted" class="form-check-input" id="contacted"
-                ${consult.contacted ? 'checked' : ''}/>
-                <label class="form-check-label" for="contacted">Đã liên hệ</label>
-            </div>
-        </div>
-
-        <div class="col-12">
             <button type="submit" name="action" value="update" class="btn btn-primary">Cập nhật</button>
             <a href="Consultation" class="btn btn-secondary">Hủy</a>
+            <a href="Consultation" class="btn btn-outline-dark">Quay lại</a>
         </div>
+
     </form>
 </div>
 </body>

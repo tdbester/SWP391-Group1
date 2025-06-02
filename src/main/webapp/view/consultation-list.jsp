@@ -75,8 +75,11 @@
     </style>
 </head>
 <body>
-
 <div class="container mt-4">
+<c:if test="${not empty sessionScope.message}">
+    <div class="alert alert-success">${sessionScope.message}</div>
+    <c:remove var="message" scope="session" />
+</c:if>
     <h1>Danh sách học sinh đăng ký tư vấn</h1>
     <form method="get" action="Consultation" class="mb-3">
         <input type="hidden" name="action" value="search" />
@@ -85,8 +88,9 @@
                 <input type="text" name="keyword" class="form-control"
                        placeholder="Tìm theo tên, email hoặc sđt" value="${param.keyword}"/>
             </div>
-            <div class="col-md-2 d-grid">
+            <div class="col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                <a href="Consultation" class="btn btn-secondary">Hủy</a>
             </div>
         </div>
     </form>
@@ -94,37 +98,23 @@
     <form method="get" action="Consultation" class="mb-3">
         <input type="hidden" name="action" value="filterByCourse" />
         <div class="row g-2 align-items-end">
-            <div class="col-md-10">
+            <div class="col-md-9">
                 <select name="course_filter" class="form-select">
                     <option value="">--Chọn khóa học--</option>
                     <c:forEach var="subject" items="${subjects}">
-                        <option value="${subject.name}" ${param.course_filter == subject.name ? 'selected' : ''}>
-                                ${subject.name}
+                        <option value="${subject.title}" ${param.course_filter == subject.title ? 'selected' : ''}>
+                                ${subject.title}
                         </option>
                     </c:forEach>
                 </select>
             </div>
-            <div class="col-md-2 d-grid">
+            <div class="col-md-3 d-flex gap-2">
                 <button type="submit" class="btn btn-success">Lọc theo khóa học</button>
+                <a href="Consultation" class="btn btn-secondary">Hủy</a>
             </div>
         </div>
     </form>
 
-    <form method="get" action="Consultation" class="mb-3">
-        <input type="hidden" name="action" value="filterByContacted" />
-        <div class="row g-2 align-items-end">
-            <div class="col-md-10">
-                <select name="contacted_filter" class="form-select">
-                    <option value="">--Trạng thái liên hệ--</option>
-                    <option value="true" ${param.contacted_filter == 'true' ? 'selected' : ''}>Đã liên hệ</option>
-                    <option value="false" ${param.contacted_filter == 'false' ? 'selected' : ''}>Chưa liên hệ</option>
-                </select>
-            </div>
-            <div class="col-md-2 d-grid">
-                <button type="submit" class="btn btn-warning">Lọc theo trạng thái</button>
-            </div>
-        </div>
-    </form>
     <h2 class="mt-5">Thêm học sinh mới</h2>
     <form method="post" action="Consultation" class="row g-3">
         <div class="col-md-3">
@@ -140,7 +130,7 @@
             <select name="course_interest" class="form-select" required>
                 <option value="">--Chọn khóa học--</option>
                 <c:forEach var="subject" items="${subjects}">
-                    <option value="${subject.name}">${subject.name}</option>
+                    <option value="${subject.id}">${subject.title}</option>
                 </c:forEach>
             </select>
         </div>
@@ -148,6 +138,7 @@
             <button type="submit" name="action" value="add" class="btn btn-success">Thêm</button>
         </div>
     </form>
+
 
     <c:if test="${not empty message}">
         <p class="no-results">${message}</p>
@@ -162,7 +153,6 @@
             <th>Số điện thoại</th>
             <th>Khóa học</th>
             <th>Trạng thái</th>
-            <th>Đã liên hệ</th>
         </tr>
         </thead>
         <tbody>
@@ -172,7 +162,7 @@
                 <td>${c.fullName}</td>
                 <td>${c.email}</td>
                 <td>${c.phone}</td>
-                <td>${c.courseInterest}</td>
+                <td>${c.title}</td>
                 <td>
                     <form action="Consultation?action=updateConsultationStatus" method="post">
                         <input type="hidden" name="id" value="${c.id}"/>
@@ -181,12 +171,6 @@
                             <option value="Đồng ý" <c:if test="${c.status eq 'Đồng ý'}">selected</c:if>>Đồng ý</option>
                             <option value="Từ chối" <c:if test="${c.status eq 'Từ chối'}">selected</c:if>>Từ chối</option>
                         </select>
-                    </form>
-                </td>
-                <td class="text-center">
-                    <form method="post" action="Consultation?action=updateContacted">
-                        <input type="hidden" name="id" value="${c.id}"/>
-                        <input type="checkbox" name="contacted" ${c.contacted ? 'checked' : ''} onchange="this.form.submit()"/>
                     </form>
                 </td>
                 <td>
@@ -215,10 +199,7 @@
             </c:forEach>
         </ul>
     </nav>
-
-
-
-    <a href="${pageContext.request.contextPath}/Users" class="btn btn-secondary mt-4">Quay lại</a>
+    <a href="Consultation?action=dashboard" class="btn btn-secondary mt-4">Quay lại</a>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

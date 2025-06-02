@@ -599,8 +599,8 @@
             </div>
             <div class="col-lg-6">
                 <div class="contact-us-content">
-                    <c:if test="${not empty message0}">
-                        <div class="alert alert-success mt-3">${message0}</div>
+                    <c:if test="${param.success == 'true'}">
+                        <div id="success-message">Gửi tư vấn thành công!</div>
                     </c:if>
                     <form id="contact-form" action="Consultation" method="post">
                         <div class="row">
@@ -627,7 +627,7 @@
                                     <select name="course_interest" id="course_interest" required>
                                         <option value="" selected hidden>Khoá học muốn tư vấn</option>
                                         <c:forEach var="subject" items="${subjects}">
-                                            <option style="color: black" value="${subject.name}">${subject.name}</option>
+                                            <option style="color: black" value="${subject.id}">${subject.title}</option>
                                         </c:forEach>
                                     </select>
                                 </fieldset>
@@ -660,6 +660,15 @@
 
 
 <!-- Scripts -->
+<script>
+    window.onload = function() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('success') === 'true') {
+            const form = document.getElementById('contact-form');
+            if (form) form.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+</script>
 <!-- Bootstrap core JavaScript -->
 <script src="${pageContext.request.contextPath}/vendor/jquery/jquery.min.js"></script>
 <script src="${pageContext.request.contextPath}/vendor/bootstrap/js/bootstrap.min.js"></script>
@@ -667,6 +676,5 @@
 <script src="${pageContext.request.contextPath}/assets/js/owl-carousel.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/counter.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/custom.js"></script>
-
 </body>
 </html>

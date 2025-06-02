@@ -10,39 +10,43 @@ public class ConsultationDAO {
 
     // Add consultation to the database
     public static Consultation addConsultation(Consultation consultation) {
-        String sql = "INSERT INTO consultations (full_name, email, phone, course_interest, contacted, created_at, status) VALUES (?, ?, ?, ?, 0, GETDATE(), 'Đang xử lý')";
+        String sql = "INSERT INTO Consultations (FullName, Email, Phone, CourseId, CreatedAt, Status) VALUES (?, ?, ?, ?, GETDATE(), 'Đang xử lý')";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement statement = conn.prepareStatement(sql)) {
 
             statement.setString(1, consultation.getFullName());
             statement.setString(2, consultation.getEmail());
             statement.setString(3, consultation.getPhone());
-            statement.setString(4, consultation.getCourseInterest());
+            statement.setInt(4, consultation.getCourseId());
 
             int rs = statement.executeUpdate();
             if (rs > 0) {
                 return consultation;
             }
+            System.out.println("Inserting consultation: " + consultation.getFullName() + ", courseId: " + consultation.getCourseId());
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public Consultation getById(int id) {
+    public Consultation getById(int Id) {
+        String sql = "SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.Status " +
+                "FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id WHERE c.Id = ?";
         try (Connection con = DBConnect.getConnection();
-             PreparedStatement ps = con.prepareStatement("SELECT * FROM consultations WHERE id = ?")) {
-            ps.setInt(1, id);
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, Id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 Consultation c = new Consultation();
-                c.setId(rs.getInt("id"));
-                c.setFullName(rs.getString("full_name"));
-                c.setEmail(rs.getString("email"));
-                c.setPhone(rs.getString("phone"));
-                c.setCourseInterest(rs.getString("course_interest"));
-                c.setContacted(rs.getBoolean("contacted"));
-                c.setStatus(rs.getString("status"));
+                c.setId(rs.getInt("Id"));
+                c.setFullName(rs.getString("FullName"));
+                c.setEmail(rs.getString("Email"));
+                c.setPhone(rs.getString("Phone"));
+                c.setCourseId(rs.getInt("CourseId"));
+                c.setTitle(rs.getString("Title"));
+                c.setStatus(rs.getString("Status"));
                 return c;
             }
         } catch (Exception e) {
@@ -50,11 +54,11 @@ public class ConsultationDAO {
         }
         return null;
     }
-
-    // Get all consultations from the database
+    // Get all Consultations from the database
     public ArrayList<Consultation> getAllConsultations() {
-        ArrayList<Consultation> consultations = new ArrayList<>();
-        String query = "SELECT * FROM consultations";
+        ArrayList<Consultation> Consultations = new ArrayList<>();
+        String query = "SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.Status " +
+                "FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
@@ -62,38 +66,34 @@ public class ConsultationDAO {
 
             while (rs.next()) {
                 Consultation consultation = new Consultation(
-                        rs.getInt("id"),
-                        rs.getString("full_name"),
-                        rs.getString("email"),
-                        rs.getString("phone"),
-                        rs.getString("course_interest"),
-                        rs.getBoolean("contacted"),
-                        rs.getString("status")
+                        rs.getInt("Id"),
+                        rs.getString("FullName"),
+                        rs.getString("Email"),
+                        rs.getString("Phone"),
+                        rs.getString("Status"),
+                        rs.getString("Title")
                 );
-                consultations.add(consultation);
+                Consultations.add(consultation);
             }
-            System.out.println("Số bản ghi lấy từ DB: " + consultations.size());
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return consultations;
+        return Consultations;
     }
 
     // Update consultation
     public boolean updateConsultation(Consultation consultation) {
-        String sql = "UPDATE consultations SET full_name = ?, email = ?, phone = ?, course_interest = ?, contacted = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE Consultations SET FullName = ?, Email = ?, Phone = ?, CourseId = ?, Status = ? WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, consultation.getFullName());
             ps.setString(2, consultation.getEmail());
             ps.setString(3, consultation.getPhone());
-            ps.setString(4, consultation.getCourseInterest());
-            ps.setBoolean(5, consultation.isContacted());
-            ps.setString(6, consultation.getStatus());
-            ps.setInt(7, consultation.getId());
-            int rows = ps.executeUpdate();
-            return rows > 0;
+            ps.setInt(4, consultation.getCourseId());
+            ps.setString(5, consultation.getStatus());
+            ps.setInt(6, consultation.getId());
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -101,12 +101,12 @@ public class ConsultationDAO {
     }
 
     // Delete consultation by ID
-    public boolean deleteConsultation(int id) {
-        String sql = "DELETE FROM consultations WHERE id = ?";
+    public boolean deleteConsultation(int Id) {
+        String sql = "DELETE FROM Consultations WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, id);
+            ps.setInt(1, Id);
             int rows = ps.executeUpdate();
             return rows > 0;
         } catch (SQLException e) {
@@ -117,10 +117,12 @@ public class ConsultationDAO {
 
     }
 
-    // Search by name, email, or phone number
+    // Search by name, Email, or Phone number
     public ArrayList<Consultation> searchConsultations(String keyword) {
         ArrayList<Consultation> result = new ArrayList<>();
-        String sql = "SELECT * FROM consultations WHERE full_name LIKE ? OR phone LIKE ? OR email LIKE ?";
+        String sql = "SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.Status " +
+                "FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id " +
+                "WHERE c.FullName LIKE ? OR c.Phone LIKE ? OR c.Email LIKE ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -133,12 +135,13 @@ public class ConsultationDAO {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Consultation c = new Consultation();
-                c.setId(rs.getInt("id"));
-                c.setFullName(rs.getString("full_name"));
-                c.setPhone(rs.getString("phone"));
-                c.setEmail(rs.getString("email"));
-                c.setCourseInterest(rs.getString("course_interest"));
-                c.setContacted(rs.getBoolean("contacted"));
+                c.setId(rs.getInt("Id"));
+                c.setFullName(rs.getString("FullName"));
+                c.setPhone(rs.getString("Phone"));
+                c.setEmail(rs.getString("Email"));
+                c.setCourseId(rs.getInt("CourseId"));
+                c.setTitle(rs.getString("Title"));
+                c.setStatus(rs.getString("Status"));
                 result.add(c);
             }
         } catch (SQLException e) {
@@ -147,26 +150,26 @@ public class ConsultationDAO {
         return result;
     }
 
-    // filter by contacted status
-    public ArrayList<Consultation> filterConsultationsByContactedStatus(String contactedStr) {
+    // filter by Course
+    public ArrayList<Consultation> filterConsultationsByCourse(String CourseTitle) {
         ArrayList<Consultation> result = new ArrayList<>();
-        String sql = "SELECT * FROM consultations WHERE contacted = ?";
+        String sql = "SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.Status " +
+                "FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id WHERE cs.Title = ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            boolean contacted = Boolean.parseBoolean(contactedStr);
-            ps.setBoolean(1, contacted);
+            ps.setString(1, CourseTitle);
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Consultation c = new Consultation();
-                c.setId(rs.getInt("id"));
-                c.setFullName(rs.getString("full_name"));
-                c.setPhone(rs.getString("phone"));
-                c.setEmail(rs.getString("email"));
-                c.setCourseInterest(rs.getString("course_interest"));
-                c.setContacted(rs.getBoolean("contacted"));
+                c.setId(rs.getInt("Id"));
+                c.setFullName(rs.getString("FullName"));
+                c.setPhone(rs.getString("Phone"));
+                c.setEmail(rs.getString("Email"));
+                c.setCourseId(rs.getInt("CourseId"));
+                c.setTitle(rs.getString("Title"));
+                c.setStatus(rs.getString("Status"));
                 result.add(c);
             }
         } catch (SQLException e) {
@@ -175,106 +178,18 @@ public class ConsultationDAO {
         return result;
     }
 
-    // filter by course
-    public ArrayList<Consultation> filterConsultationsByCourse(String courseName) {
-        ArrayList<Consultation> result = new ArrayList<>();
-        String sql = "SELECT * FROM consultations WHERE course_interest = ?";
-
+    public boolean updateStatus(int Id, String Status) {
+        String sql = "UPDATE Consultations SET Status = ? WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, courseName);
-
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Consultation c = new Consultation();
-                c.setId(rs.getInt("id"));
-                c.setFullName(rs.getString("full_name"));
-                c.setPhone(rs.getString("phone"));
-                c.setEmail(rs.getString("email"));
-                c.setCourseInterest(rs.getString("course_interest"));
-                c.setContacted(rs.getBoolean("contacted"));
-                result.add(c);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    // update contacted status
-    public boolean updateContactedStatus(int id, boolean contacted) {
-        String sql = "UPDATE consultations SET contacted = ? WHERE id = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setBoolean(1, contacted);
-            ps.setInt(2, id);
-            int rows = ps.executeUpdate();
-            return rows > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean updateStatus(int id, String status) {
-        String sql = "UPDATE consultations SET status = ? WHERE id = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, status);
-            ps.setInt(2, id);
+            ps.setString(1, Status);
+            ps.setInt(2, Id);
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
-    }
-    public ArrayList<Consultation> getConsultationsByPage(int offset, int limit) {
-        ArrayList<Consultation> consultations = new ArrayList<>();
-        String query = "SELECT * FROM consultations ORDER BY id LIMIT ? OFFSET ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-
-            ps.setInt(1, limit);
-            ps.setInt(2, offset);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    Consultation consultation = new Consultation(
-                            rs.getInt("id"),
-                            rs.getString("full_name"),
-                            rs.getString("email"),
-                            rs.getString("phone"),
-                            rs.getString("course_interest"),
-                            rs.getBoolean("contacted"),
-                            rs.getString("status")
-                    );
-                    consultations.add(consultation);
-                }
-            }
-            System.out.println("Số bản ghi phân trang lấy được: " + consultations.size());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return consultations;
-    }
-    public int getTotalConsultations() {
-        String query = "SELECT COUNT(*) FROM consultations";
-        int total = 0;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-
-            if (rs.next()) {
-                total = rs.getInt(1);
-            }
-            System.out.println("Tổng số bản ghi: " + total);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return total;
     }
 
 }

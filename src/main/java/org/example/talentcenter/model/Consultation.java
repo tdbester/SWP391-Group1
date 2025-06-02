@@ -5,21 +5,31 @@ public class Consultation {
     private String fullName;
     private String email;
     private String phone;
-    private String courseInterest;
-    private boolean contacted;
     private String status;
+    private int courseId;
+    private int ProcessedBy;
+    private String title;
 
     public Consultation() {
     }
 
-    public Consultation(int id, String fullName, String email, String phone, String courseInterest, boolean contacted, String status) {
+    public Consultation(int id, int processedBy, int courseId, String status, String phone, String email, String fullName) {
+        this.id = id;
+        ProcessedBy = processedBy;
+        this.courseId = courseId;
+        this.status = status;
+        this.phone = phone;
+        this.email = email;
+        this.fullName = fullName;
+    }
+
+    public Consultation(int id, String fullName, String email, String phone, String status, String title) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
-        this.courseInterest = courseInterest;
-        this.contacted = contacted;
         this.status = status;
+        this.title = title;
     }
 
     public int getId() {
@@ -36,22 +46,6 @@ public class Consultation {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public boolean isContacted() {
-        return contacted;
-    }
-
-    public void setContacted(boolean contacted) {
-        this.contacted = contacted;
-    }
-
-    public String getCourseInterest() {
-        return courseInterest;
-    }
-
-    public void setCourseInterest(String courseInterest) {
-        this.courseInterest = courseInterest;
     }
 
     public String getPhone() {
@@ -76,5 +70,29 @@ public class Consultation {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public int getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(int courseId) {
+        this.courseId = courseId;
+    }
+
+    public int getProcessedBy() {
+        return ProcessedBy;
+    }
+
+    public void setProcessedBy(int processedBy) {
+        ProcessedBy = processedBy;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }
