@@ -12,13 +12,13 @@ public class BlogDAO {
 
     // CREATE blog by using insert command SQL
     public void insert(Blog blog) {
-        String sql = "INSERT INTO blogs (title, content, image, status, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Blog (Title, Description, image, Content, Authorid, CreatedAt) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, blog.getTitle());
-            stmt.setString(2, blog.getContent());
+            stmt.setString(2, blog.getDescription());
             stmt.setString(3, blog.getImage());
-            stmt.setBoolean(4, blog.getStatus());
-            stmt.setInt(5, blog.getCreatedBy());
+            stmt.setString(4, blog.getContent());
+            stmt.setInt(5, blog.getAuthorId());
             stmt.setDate(6, new Date(System.currentTimeMillis()));
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -31,23 +31,25 @@ public class BlogDAO {
     // READ ALL
     public List<BlogDto> getAll() {
         List<BlogDto> list = new ArrayList<>();
-        String sql = "SELECT b.id, b.title, b.image, b.status, u.full_name " +
-                "FROM blogs b " +
-                "JOIN users u ON b.created_by = u.id";
+
+        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt, ac.FullName " +
+                "FROM Blog b join Sale s ON b.AuthorId = s.id join Account ac on s.id = ac.Id";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
-
             while (rs.next()) {
-                BlogDto dto = new BlogDto(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("image"),
-                        rs.getBoolean("status"),
-                        rs.getString("full_name")
+                BlogDto blogDto = new
+                        BlogDto(
+                    rs.getInt("Id"),
+                    rs.getString("Title"),
+                    rs.getString("Description"),
+                    rs.getString("Content"),
+                    rs.getString("image"),
+                    rs.getDate("CreatedAt"),
+                    rs.getString("FullName")
                 );
-                list.add(dto);
+                list.add(blogDto);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -58,20 +60,19 @@ public class BlogDAO {
 
     // READ BY ID
     public Blog getById(int id) {
-        String sql = "SELECT * FROM blogs WHERE id = ?";
+        String sql = "SELECT * FROM Blog WHERE id = ?";
         try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return new Blog(
-                            rs.getInt("id"),
-                            rs.getString("title"),
-                            rs.getString("content"),
+                            rs.getInt("Id"),
+                            rs.getString("Title"),
+                            rs.getString("Content"),
                             rs.getString("image"),
-                            rs.getBoolean("status"),
-                            rs.getInt("created_by"),
-                            rs.getDate("created_at"),
-                            rs.getDate("updated_at")
+                            rs.getInt("AuthorId"),
+                            rs.getDate("CreatedAt"),
+                            rs.getString("Description")
                     );
                 }
             }
@@ -83,13 +84,13 @@ public class BlogDAO {
 
     // UPDATE
     public void update(Blog blog) {
-        String sql = "UPDATE blogs SET title = ?, content = ?, image= ?, status = ?, created_by = ?, updated_at = getutcdate() WHERE id = ?";
+        String sql = "UPDATE Blog SET Title = ?, Description = ?, image= ?, Content = ?, AuthorId = ? WHERE id = ?";
         try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, blog.getTitle());
-            stmt.setString(2, blog.getContent());
+            stmt.setString(2, blog.getDescription());
             stmt.setString(3, blog.getImage());
-            stmt.setBoolean(4, blog.getStatus());
-            stmt.setInt(5, blog.getCreatedBy());
+            stmt.setString(4, blog.getContent());
+            stmt.setInt(5, blog.getAuthorId());
             stmt.setInt(6, blog.getId());
 
             stmt.executeUpdate();
@@ -100,7 +101,7 @@ public class BlogDAO {
 
     // DELETE
     public void delete(int id) {
-        String sql = "DELETE FROM blogs WHERE id = ?";
+        String sql = "DELETE FROM Blog WHERE id = ?";
         try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             stmt.executeUpdate();

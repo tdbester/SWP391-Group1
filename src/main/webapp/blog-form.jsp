@@ -26,25 +26,22 @@
         </div>
 
         <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" name="description" rows="3" class="form-control" required>${blog.description}</textarea>
+        </div>
+        <div class="mb-3">
             <label for="content" class="form-label">Content</label>
             <textarea id="content" name="content" rows="5" class="form-control" required>${blog.content}</textarea>
         </div>
+
         <div class="mb-3">
             <label for="image" class="form-label">Image URL</label>
             <input type="text" id="image" name="image" class="form-control" value="${blog.image}" />
         </div>
-        <div class="form-check mb-3">
-            <div class="form-check mb-3">
-                <input type="checkbox" id="status" name="status" class="form-check-input"
-                       <c:if test="${blog.status}">checked</c:if> />
-                <label for="status" class="form-check-label">Active</label>
-            </div>
-            <label for="status" class="form-check-label">Active</label>
-        </div>
 
         <div class="mb-3">
-            <label for="createdBy" class="form-label">Created By (User ID)</label>
-            <input id="createdBy" name="createdBy" type="number" class="form-control" value="${blog.createdBy}"
+            <label for="authorId" class="form-label">Created By (User ID)</label>
+            <input id="authorId" name="authorId" type="number" class="form-control" value="${blog.authorId}"
                    required/>
         </div>
 

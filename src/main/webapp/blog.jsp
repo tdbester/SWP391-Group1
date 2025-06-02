@@ -25,8 +25,9 @@
         <tr>
             <th>ID</th>
             <th>Title</th>
+            <th>Description</th>
+            <th>Content</th>
             <th>Image</th>
-            <th>Status</th>
             <th>Created By</th>
             <th style="width: 150px;">Actions</th>
         </tr>
@@ -44,13 +45,9 @@
                         <span class="text-muted">No Image</span>
                     </c:if>
                 </td>
-                <td>
-                    <c:choose>
-                        <c:when test="${blog.status}">Active</c:when>
-                        <c:otherwise>Inactive</c:otherwise>
-                    </c:choose>
-                </td>
-                <td>${blog.username}</td>
+                <td>${blog.description}</td>
+                <td>${blog.content}</td>
+                <td>${blog.fullname}</td>
                 <td>
                     <a href="blogs?action=edit&id=${blog.id}" class="btn btn-sm btn-warning">Edit</a>
                     <a href="blogs?action=delete&id=${blog.id}"

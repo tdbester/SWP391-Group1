@@ -1,30 +1,33 @@
 package org.example.talentcenter.model;
 
-import java.sql.Date;
+import java.util.Date;
 
 public class Blog {
     private Integer id;
     private String title;
+    private String description;
     private String content;
     private String image;
-    private Boolean status;
-    private Integer createdBy;
+    private Integer authorId;
     private Date createdAt;
-    private Date updatedAt;
 
-    public Blog(Integer id, String title, String content, String image, Boolean status, Integer createdBy, Date createdAt, Date updatedAt) {
+
+    public Blog(Integer id, String title, String content, String image, Integer authorId, Date createdAt, String description) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.image = image;
-        this.status = status;
-        this.createdBy = createdBy;
+        this.authorId = authorId;
         this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.description = description;
     }
 
     public Blog() {
     }
+
+    public Blog(int id, String title, String description, String content, String image, int authorId, Date createdAt) {
+    }
+
 
     public Integer getId() {
         return id;
@@ -38,16 +41,13 @@ public class Blog {
         return content;
     }
 
-    public Boolean getStatus() {
-        return status;
-    }
 
     public String getImage() {
         return image;
     }
 
-    public Integer getCreatedBy() {
-        return createdBy;
+    public Integer getAuthorId() {
+        return authorId;
     }
 
     public Date getCreatedAt() {
@@ -70,23 +70,21 @@ public class Blog {
         this.content = content;
     }
 
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
 
-    public void setCreatedBy(Integer createdBy) {
-        this.createdBy = createdBy;
+    public void setAuthorId(Integer authorId) {
+        this.authorId = authorId;
     }
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
-        return updatedAt;
+
+    public String getDescription() {
+        return description;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

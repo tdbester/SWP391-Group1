@@ -5,17 +5,15 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.example.talentcenter.dao.BlogDAO;
 import org.example.talentcenter.dto.BlogDto;
 import org.example.talentcenter.model.Blog;
-
 import java.io.IOException;
 import java.util.List;
+import java.util.Date;
 
 @WebServlet("/blogs")
 public class BlogServlet extends HttpServlet {
-
     private BlogDAO blogDAO;
 
     @Override
@@ -24,9 +22,12 @@ public class BlogServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
         String action = request.getParameter("action");
-        if (action == null) action = "list";
+        if (action == null) {
+            action = "list";
+        }
 
         switch (action) {
             case "new":
@@ -38,91 +39,98 @@ public class BlogServlet extends HttpServlet {
             case "delete":
                 deleteBlog(request, response);
                 break;
-            case "list":
             default:
                 listBlogs(request, response);
                 break;
         }
     }
 
-    // Handle form submissions for create and update
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        // For simplicity, action is sent as hidden input in form
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         String action = request.getParameter("action");
-        if ("insert".equals(action)) {
-            insertBlog(request, response);
-        } else if ("update".equals(action)) {
-            updateBlog(request, response);
-        } else {
-            response.sendRedirect("blogs");
+        if (action == null) {
+            action = "list";
+        }
+        System.out.println(action);
+
+        switch (action) {
+            case "insert":
+                insertBlog(request, response);
+                break;
+            case "update":
+                updateBlog(request, response);
+                break;
+            default:
+                response.sendRedirect("blogs");
+                break;
         }
     }
 
-    private void listBlogs(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        List<BlogDto> list = blogDAO.getAll();
-        request.setAttribute("blogList", list);
+    private void listBlogs(HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        List<BlogDto> blogs = blogDAO.getAll();
+        request.setAttribute("blogList", blogs);
         request.getRequestDispatcher("blog.jsp").forward(request, response);
     }
 
-    private void showNewForm(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    private void showNewForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         request.getRequestDispatcher("blog-form.jsp").forward(request, response);
     }
 
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         Blog existingBlog = blogDAO.getById(id);
-        if (existingBlog == null) {
-            response.sendRedirect("blogs");
-            return;
-        }
         request.setAttribute("blog", existingBlog);
         request.getRequestDispatcher("blog-form.jsp").forward(request, response);
     }
 
-    private void insertBlog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void insertBlog(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         String title = request.getParameter("title");
+        String description = request.getParameter("description");
         String content = request.getParameter("content");
-        String statusParam = request.getParameter("status");
-        boolean status = (statusParam != null);
-        int createdBy = Integer.parseInt(request.getParameter("createdBy"));
         String image = request.getParameter("image");
+        Integer authorId = Integer.parseInt(request.getParameter("authorId"));
 
         Blog newBlog = new Blog();
         newBlog.setTitle(title);
+        newBlog.setDescription(description);
         newBlog.setContent(content);
-        newBlog.setStatus(status);
-        newBlog.setCreatedBy(createdBy);
         newBlog.setImage(image);
-        // created_at set in DAO as current date
-
+        newBlog.setAuthorId(authorId);
+        newBlog.setCreatedAt(new Date());
+        System.out.println(newBlog.getTitle() + " " + newBlog.getDescription());
         blogDAO.insert(newBlog);
         response.sendRedirect("blogs");
     }
 
-    private void updateBlog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void updateBlog(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         String title = request.getParameter("title");
+        String description = request.getParameter("description");
         String content = request.getParameter("content");
-        boolean status = "on".equals(request.getParameter("status"));
-        int createdBy = Integer.parseInt(request.getParameter("createdBy"));
         String image = request.getParameter("image");
-
+        Integer authorId = Integer.parseInt(request.getParameter("authorId"));
 
         Blog blog = new Blog();
         blog.setId(id);
         blog.setTitle(title);
+        blog.setDescription(description);
         blog.setContent(content);
-        blog.setStatus(status);
         blog.setImage(image);
-        blog.setCreatedBy(createdBy);
-        // updated_at set in DAO by getutcdate()
+        blog.setAuthorId(authorId);
+        blog.setCreatedAt(new Date());
 
         blogDAO.update(blog);
         response.sendRedirect("blogs");
     }
 
-    private void deleteBlog(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void deleteBlog(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         blogDAO.delete(id);
         response.sendRedirect("blogs");
