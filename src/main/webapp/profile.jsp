@@ -107,6 +107,10 @@
   </div>
 </div>
 
+<footer>
+  <p>Copyright © 2025 Talent Center Management. SWP391-Group 01.</p>
+</footer>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/profile.js"></script>
 </body>

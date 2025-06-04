@@ -177,3 +177,18 @@ html {
     color: #5E3AC7;
     font-weight: 600;
 }
+
+/* Footer styles */
+footer {
+    background: linear-gradient(135deg, #9B7BFA 0%, #7A5AF8 100%);
+    color: white;
+    text-align: center;
+    padding: 32px 0;
+    margin-top: 48px;
+}
+
+footer p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
