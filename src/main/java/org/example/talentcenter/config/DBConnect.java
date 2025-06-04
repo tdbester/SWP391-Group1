@@ -8,7 +8,7 @@ public class DBConnect {
 
     private static final String URL = "jdbc:sqlserver://localhost:1433;databaseName=SchoolManagement1;encrypt=true;trustServerCertificate=true";
     private static final String USER = "sa";
-    private static final String PASSWORD = "12345678";
+    private static final String PASSWORD = "123";
 
     static {
         try {
