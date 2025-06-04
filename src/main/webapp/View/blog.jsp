@@ -37,6 +37,8 @@
             <tr>
                 <td>${blog.id}</td>
                 <td>${blog.title}</td>
+                <td>${blog.description}</td>
+                <td>${blog.content}</td>
                 <td>
                     <c:if test="${not empty blog.image}">
                         <img src="${blog.image}" alt="Image" class="thumb-img" />
@@ -45,8 +47,6 @@
                         <span class="text-muted">No Image</span>
                     </c:if>
                 </td>
-                <td>${blog.description}</td>
-                <td>${blog.content}</td>
                 <td>${blog.fullname}</td>
                 <td>
                     <a href="blogs?action=edit&id=${blog.id}" class="btn btn-sm btn-warning">Edit</a>

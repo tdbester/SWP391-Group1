@@ -71,12 +71,12 @@ public class BlogServlet extends HttpServlet {
             throws IOException, ServletException {
         List<BlogDto> blogs = blogDAO.getAll();
         request.setAttribute("blogList", blogs);
-        request.getRequestDispatcher("blog.jsp").forward(request, response);
+        request.getRequestDispatcher("View/blog.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("blog-form.jsp").forward(request, response);
+        request.getRequestDispatcher("View/blog-form.jsp").forward(request, response);
     }
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
@@ -84,7 +84,7 @@ public class BlogServlet extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         Blog existingBlog = blogDAO.getById(id);
         request.setAttribute("blog", existingBlog);
-        request.getRequestDispatcher("blog-form.jsp").forward(request, response);
+        request.getRequestDispatcher("View/blog-form.jsp").forward(request, response);
     }
 
     private void insertBlog(HttpServletRequest request, HttpServletResponse response)

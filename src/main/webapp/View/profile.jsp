@@ -16,7 +16,7 @@
     <a href="#">Dịch Vụ</a>
     <a href="#">Khóa Học</a>
     <a href="#">Sự Kiện</a>
-    <a href="logout">Đăng Xuất</a>
+    <a href="${pageContext.request.contextPath}/logout">Đăng Xuất</a>
   </div>
 </header>
 
@@ -51,7 +51,7 @@
                 (org.example.talentcenter.model.Account) session.getAttribute("account");
       %>
 
-      <form method="post" action="profile">
+      <form method="post" action="${pageContext.request.contextPath}/profile">
         <label for="name">Họ và tên:</label>
         <input type="text" id="name" name="name"
                value="<%= (account != null && account.getFullName() != null) ? account.getFullName() : "" %>" required>
@@ -91,7 +91,7 @@
       </div>
       <% } %>
 
-      <form method="post" action="changePassword">
+      <form method="post" action="${pageContext.request.contextPath}/changePassword">
         <label for="currentPassword">Mật khẩu hiện tại:</label>
         <input type="password" name="currentPassword" required>
 

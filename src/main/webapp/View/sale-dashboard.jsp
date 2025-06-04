@@ -12,7 +12,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
     <!-- Kế thừa hoặc nhúng lại CSS từ trang chính -->
 
@@ -30,8 +30,11 @@
             <span>Xin chào, <strong>Nhân viên Sale</strong></span>
             <div class="user-avatar">S</div>
         </div>
+        <div class="user-actions">
+            <a href="${pageContext.request.contextPath}/View/profile.jsp" class="btn-link">Trang cá nhân</a>
+            <a href="${pageContext.request.contextPath}/logout" class="btn-link logout">Đăng xuất</a>
+        </div>
     </div>
-
     <div class="content-area">
         <!-- Stats Cards cho Sale -->
         <div class="stats-grid">

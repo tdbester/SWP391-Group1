@@ -28,8 +28,7 @@ public class CourseDAO {
                 );
                 subjects.add(subject);
             }
-
-
+            System.out.println("Số lượng khóa học: " + subjects.size());
         } catch (SQLException e) {
             System.err.println("Lỗi SQL: " + e.getMessage());
             e.printStackTrace();
