@@ -9,16 +9,7 @@
 </head>
 <body>
 
-<header>
-  <div class="logo">TALENT01</div>
-  <div class="nav">
-    <a href="home.jsp">Trang Chủ</a>
-    <a href="#">Dịch Vụ</a>
-    <a href="#">Khóa Học</a>
-    <a href="#">Sự Kiện</a>
-    <a href="logout">Đăng Xuất</a>
-  </div>
-</header>
+<%@ include file="header.jsp" %>
 
 <div class="container">
   <div class="sidebar">
@@ -107,9 +98,7 @@
   </div>
 </div>
 
-<footer>
-  <p>Copyright © 2025 Talent Center Management. SWP391-Group 01.</p>
-</footer>
+<%@ include file="footer.jsp" %>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/profile.js"></script>
