@@ -34,7 +34,7 @@ public class ConsultationServlet extends HttpServlet {
                     ArrayList<Consultation> consultations = consultationDAO.getAllConsultations();
                     request.setAttribute("consultations", consultations);
                     request.setAttribute("subjects", subjects);
-                    request.getRequestDispatcher("view/consultation-list.jsp").forward(request, response);
+                    request.getRequestDispatcher("./View/consultation-list.jsp").forward(request, response);
 
                 }
         } else if (action.equals("edit")) {

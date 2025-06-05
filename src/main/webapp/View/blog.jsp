@@ -14,22 +14,30 @@
             object-fit: cover;
             border-radius: 4px;
         }
+        btn-primary, .btn-success, .btn-warning, .btn-add-custom {
+            background-color: #7a6ad8;
+            border-color:#7a6ad8;
+            color: #fff;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-family: 'Poppins', sans-serif;
+        }
     </style>
 </head>
 <body>
 <div class="container mt-5">
-    <h2 class="mb-4">Blog List</h2>
-    <a href="blogs?action=new" class="btn btn-primary mb-3">Create New Blog</a>
+    <h2 class="mb-4">Danh sách bài viết</h2>
+    <a href="blogs?action=new" class="btn btn-success mb-3">Tạo bài viết mới</a>
     <table class="table table-striped table-bordered align-middle">
         <thead class="table-dark">
         <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Content</th>
-            <th>Image</th>
-            <th>Created By</th>
-            <th style="width: 150px;">Actions</th>
+            <th>STT</th>
+            <th>Tiêu đề</th>
+            <th>Mô tả</th>
+            <th>Nội dung</th>
+            <th>Ảnh</th>
+            <th>Tác giả</th>
+            <th style="width: 150px;">Hành động</th>
         </tr>
         </thead>
         <tbody>
@@ -49,11 +57,11 @@
                 <td>${blog.content}</td>
                 <td>${blog.fullname}</td>
                 <td>
-                    <a href="blogs?action=edit&id=${blog.id}" class="btn btn-sm btn-warning">Edit</a>
+                    <a href="blogs?action=edit&id=${blog.id}" class="btn btn-sm btn-warning">Sửa</a>
                     <a href="blogs?action=delete&id=${blog.id}"
                        class="btn btn-sm btn-danger"
                        onclick="return confirm('Are you sure you want to delete this blog?');">
-                        Delete
+                        Xóa
                     </a>
                 </td>
             </tr>
