@@ -28,15 +28,10 @@ public class ConsultationServlet extends HttpServlet {
         String action = request.getParameter("action");
         String view = request.getParameter("view");
         if (action == null || action.equals("list")) {
-            if ("guest".equals(view)) {
-                request.getRequestDispatcher("View/home.jsp").forward(request, response);
-            } else {
-                ArrayList<Consultation> consultations = consultationDAO.getAllConsultations();
-                request.setAttribute("consultations", consultations);
-                request.setAttribute("subjects", subjects);
-                request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
-
-            }
+            ArrayList<Consultation> consultations = consultationDAO.getAllConsultations();
+            request.setAttribute("consultations", consultations);
+            request.setAttribute("subjects", subjects);
+            request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
         } else if (action.equals("edit")) {
             String idRaw = request.getParameter("id");
             try {
@@ -63,7 +58,6 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("keyword", keyword);
             request.setAttribute("subjects", subjects);
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
-
         } else if (action.equals("filterByCourse")) {
             String courseFilter = request.getParameter("course_filter");
             if (courseFilter == null || courseFilter.trim().isEmpty()) {
@@ -74,9 +68,9 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("consultations", consultations);
             request.setAttribute("subjects", subjects);
             request.setAttribute("course_filter", courseFilter);
-            request.getRequestDispatcher("view/consultation-list.jsp").forward(request, response);
+            request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
         } else if ("dashboard".equals(action)) {
-            request.getRequestDispatcher("view/sale-dashboard.jsp").forward(request, response);
+            request.getRequestDispatcher("View/sale-dashboard.jsp").forward(request, response);
             return;
         } else {
             response.sendRedirect("Consultation?action=list");
@@ -88,27 +82,7 @@ public class ConsultationServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
         try {
-            if ("addConsultation".equals(action)) { // Dành cho guest submit form tư vấn
-                String name = request.getParameter("name");
-                String email = request.getParameter("email");
-                String phone = request.getParameter("phone");
-                String course = request.getParameter("course_interest");
-
-                Consultation consult = new Consultation();
-                consult.setFullName(name);
-                consult.setEmail(email);
-                consult.setPhone(phone);
-                try {
-                    consult.setCourseId(Integer.parseInt(course));
-                } catch (NumberFormatException e) {
-                    consult.setCourseId(0);
-                }
-                consultationDAO.addConsultation(consult);
-                HttpSession session = request.getSession();
-                session.setAttribute("message0", "Gửi tư vấn thành công!");
-                response.sendRedirect("Consultation?view=guest&success=true");
-                return;
-            } else if ("add".equals(action)) {
+            if ("add".equals(action)) {
                 String name = request.getParameter("name");
                 String email = request.getParameter("email");
                 String phone = request.getParameter("phone");

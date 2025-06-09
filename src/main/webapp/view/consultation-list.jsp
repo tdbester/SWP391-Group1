@@ -75,6 +75,7 @@
     </style>
 </head>
 <body>
+<jsp:include page="header.jsp" />
 <div class="container mt-4">
 <c:if test="${not empty sessionScope.message}">
     <div class="alert alert-success">${sessionScope.message}</div>
@@ -200,8 +201,9 @@
         </ul>
     </nav>
     <a href="Consultation?action=dashboard" class="btn btn-secondary mt-4">Quay lại</a>
+    <br>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<jsp:include page="footer.jsp" />
 </body>
 </html>

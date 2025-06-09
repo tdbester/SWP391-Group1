@@ -100,8 +100,8 @@ public class LoginServlet extends HttpServlet {
                         case "accountant":
                             response.sendRedirect("home.jsp");
                             break;
-                        case "sale":
-                            response.sendRedirect("View/sale-dashboard.jsp");
+                        case "training manager":
+                            response.sendRedirect("View/training-manager-dashboard.jsp");
                             break;
                         default:
                             response.sendRedirect("View/home.jsp");
