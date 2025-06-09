@@ -114,7 +114,7 @@ public class LoginServlet extends HttpServlet {
 
             } else {
                 request.setAttribute("error", "Email hoặc mật khẩu không đúng");
-                request.setAttribute("email", email); // Keep email for user convenience
+                request.setAttribute("email", email);
                 request.getRequestDispatcher("View/login.jsp").forward(request, response);
             }
 
