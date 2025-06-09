@@ -15,6 +15,7 @@
   <div class="sidebar">
     <a href="#profile-section" class="active">Trang cá nhân</a>
     <a href="#password-section">Đổi mật khẩu</a>
+    <a href="#theme-section">Đổi giao diện</a>
   </div>
 
   <div class="profile-content">
@@ -94,6 +95,13 @@
 
         <button type="submit" class="btn-save">Đổi mật khẩu</button>
       </form>
+    </div>
+
+    <div id="theme-section" class="profile-card">
+      <div class="profile-header">
+        <h2>Đổi giao diện</h2>
+      </div>
+
     </div>
   </div>
 </div>
