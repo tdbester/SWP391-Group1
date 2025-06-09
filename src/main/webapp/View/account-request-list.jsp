@@ -89,7 +89,7 @@
             if (confirm("Bạn có chắc chắn muốn tạo tài khoản này không?")) {
                 const form = document.createElement("form");
                 form.method = "POST";
-                form.action = "account-request-list";
+                form.action = "CreateAccount";
 
                 const input = document.createElement("input");
                 input.type = "hidden";
@@ -105,7 +105,48 @@
 </head>
 <body>
 <div class="container mt-5">
-    <h2>Danh sách yêu cầu cấp tài khoản</h2>
+    <h1>Danh sách yêu cầu cấp tài khoản</h1>
+    <%
+        String success = request.getParameter("success");
+        String error = request.getParameter("error");
+
+        if ("account_created".equals(success)) {
+    %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Thành công!</strong> Tài khoản đã được tạo và email thông báo đã được gửi đến học sinh.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <%
+    } else if (error != null) {
+        String errorMessage = "";
+        switch (error) {
+            case "request_not_found":
+                errorMessage = "Không tìm thấy yêu cầu này.";
+                break;
+            case "invalid_data":
+                errorMessage = "Dữ liệu yêu cầu không hợp lệ.";
+                break;
+            case "email_failed":
+                errorMessage = "Tài khoản đã được tạo nhưng gửi email thất bại.";
+                break;
+            case "account_creation_failed":
+                errorMessage = "Không thể tạo tài khoản. Có thể email đã tồn tại.";
+                break;
+            case "invalid_id":
+                errorMessage = "ID yêu cầu không hợp lệ.";
+                break;
+            default:
+                errorMessage = "Đã xảy ra lỗi trong quá trình xử lý.";
+        }
+    %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Lỗi!</strong> <%= errorMessage %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <%
+        }
+    %>
+
     <table class="table table-bordered mt-3">
         <thead>
         <tr>
@@ -133,7 +174,7 @@
             <td><%= req.get("sender") %>
             </td>
             <td>
-                <button class="btn btn-success btn-sm" onclick="confirmCreate(<%= req.get("id") %>)">Tạo</button>
+                <button class="btn btn-success btn-sm" onclick="confirmCreate(<%= req.get("id") %>)">Tạo tài khoản</button>
             </td>
         </tr>
         <%

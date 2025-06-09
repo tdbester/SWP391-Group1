@@ -13,6 +13,9 @@ public class Request {
     private Date responseAt;
     private int processedBy;
 
+    public Request() {
+    }
+
     public Request(int id, String type, int senderID, String reason, String status, String response, Date createdAt, Date responseAt, int processedBy) {
         this.id = id;
         this.type = type;
@@ -23,6 +26,12 @@ public class Request {
         this.createdAt = createdAt;
         this.responseAt = responseAt;
         this.processedBy = processedBy;
+    }
+
+    public Request(int id, String reason, int senderID) {
+        this.id = id;
+        this.reason = reason;
+        this.senderID = senderID;
     }
 
     public int getId() {

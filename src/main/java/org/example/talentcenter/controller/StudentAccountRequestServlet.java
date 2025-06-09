@@ -14,6 +14,7 @@ import java.io.IOException;
 @WebServlet("/StudentAccountRequest")
 public class StudentAccountRequestServlet extends HttpServlet {
     private final AccountRequestDAO dao = new AccountRequestDAO();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
@@ -21,7 +22,7 @@ public class StudentAccountRequestServlet extends HttpServlet {
             request.setAttribute("requests", dao.getAllAccountRequests());
             request.getRequestDispatcher("/View/account-request-list.jsp").forward(request, response);
         } else {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu hoặc sai action");
+            request.getRequestDispatcher("/View/student-account-request.jsp").forward(request, response);
         }
     }
 
@@ -34,11 +35,10 @@ public class StudentAccountRequestServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        String studentInfoText = "Tên: " + studentName + ", Email: " + email + ", SĐT: " + phone;
+        String studentInfoText = studentName + "|" + email + "|" + phone;
 
         AccountRequestDAO dao = new AccountRequestDAO();
-        boolean success = dao.sendCreateAccountRequest(senderId, studentInfoText);
-
+        boolean success = dao.sendCreateAccountRequest(senderId, studentName, email, phone);
         if (success) {
             request.setAttribute("message", "Gửi yêu cầu thành công!");
         } else {
