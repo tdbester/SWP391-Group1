@@ -64,7 +64,7 @@ public class LoginServlet extends HttpServlet {
         if (email == null || email.trim().isEmpty() ||
                 password == null || password.trim().isEmpty()) {
             request.setAttribute("error", "Vui lòng nhập đầy đủ email và mật khẩu");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("View/login.jsp").forward(request, response);
             return;
         }
 
@@ -100,26 +100,29 @@ public class LoginServlet extends HttpServlet {
                         case "accountant":
                             response.sendRedirect("home.jsp");
                             break;
+                        case "sale":
+                            response.sendRedirect("View/sale-dashboard.jsp");
+                            break;
                         default:
-                            response.sendRedirect("home.jsp");
+                            response.sendRedirect("View/home.jsp");
                             break;
 
                     }
                 } else {
-                    response.sendRedirect("home.jsp");
+                    response.sendRedirect("View/home.jsp");
                 }
 
             } else {
                 request.setAttribute("error", "Email hoặc mật khẩu không đúng");
                 request.setAttribute("email", email); // Keep email for user convenience
-                request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getRequestDispatcher("View/login.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại.");
             request.setAttribute("email", email); // Keep email for user convenience
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("View/login.jsp").forward(request, response);
         }
     }
 

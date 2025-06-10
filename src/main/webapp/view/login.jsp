@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/login.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/login.css">
 </head>
 <body>
 <div class="container">
@@ -21,10 +21,10 @@
                 <%
                         }
                     %>
-            <form action="login" method="post">
+            <form action="${pageContext.request.contextPath}/login" method="post">
                 <input type="text" name="email" pattern="[^ @]*@[^ @]*" placeholder="Email" required>
                 <input type="password" name="password" placeholder="Mật khẩu" required>
-                <a href="requestPassword.jsp">Quên mật khẩu?</a>
+                <a href="${pageContext.request.contextPath}/View/requestPassword.jsp">Quên mật khẩu?</a>
                 <input type="submit" class="button" value="Đăng nhập">
             </form>
     </div>

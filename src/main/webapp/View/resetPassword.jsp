@@ -21,7 +21,7 @@
         <%
                         }
                     %>
-      <form action="resetPassword" method="post">
+      <form action="${pageContext.request.contextPath}/resetPassword" method="post">
         <input type="hidden" name="token" value="${sessionScope.token}" />
         <input type="email" name="email" placeholder="Email" required>
         <input type="password" name="password" placeholder="Mật khẩu mới" required>

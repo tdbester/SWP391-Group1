@@ -35,7 +35,7 @@ public class RequestPasswordServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/requestPassword.jsp").forward(request, response);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class RequestPasswordServlet extends HttpServlet {
         // Validate email input
         if (email == null || email.trim().isEmpty()) {
             request.setAttribute("error", "Vui lòng nhập email");
-            request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/requestPassword.jsp").forward(request, response);
             return;
         }
 
@@ -64,7 +64,7 @@ public class RequestPasswordServlet extends HttpServlet {
             if (account == null) {
                 request.setAttribute("error", "Email không tồn tại trong hệ thống");
                 request.setAttribute("email", email); // Keep email for user convenience
-                request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/requestPassword.jsp").forward(request, response);
                 return;
             }
 
@@ -86,7 +86,7 @@ public class RequestPasswordServlet extends HttpServlet {
             if (!isInserted) {
                 request.setAttribute("error", "Lỗi hệ thống, không thể tạo token reset");
                 request.setAttribute("email", email);
-                request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/requestPassword.jsp").forward(request, response);
                 return;
             }
 
@@ -96,18 +96,18 @@ public class RequestPasswordServlet extends HttpServlet {
             if (!isSent) {
                 request.setAttribute("error", "Lỗi trong quá trình gửi email. Vui lòng thử lại.");
                 request.setAttribute("email", email);
-                request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/requestPassword.jsp").forward(request, response);
                 return;
             }
 
             request.setAttribute("error", "Vui lòng kiểm tra hộp thư!");
-            request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/requestPassword.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Có lỗi xảy ra trong quá trình xử lý. Vui lòng thử lại.");
             request.setAttribute("email", email);
-            request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/requestPassword.jsp").forward(request, response);
         }
     }
 }

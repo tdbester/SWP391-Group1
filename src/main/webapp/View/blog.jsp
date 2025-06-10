@@ -61,7 +61,7 @@
     <div class="row justify-content-between ms-1">
         <a href="blogs?action=new" class="btn btn-success mb-3 col-3">Tạo bài viết mới</a>
         <form action="blogs" method="get" class="col-4 mb-3">
-            <input type="search" name="search" class="form-control me-2" placeholder="Search">
+            <input type="search" name="search" class="form-control me-2" placeholder="Tìm kiếm">
         </form>
     </div>
     <table class="table table-striped table-bordered align-middle">

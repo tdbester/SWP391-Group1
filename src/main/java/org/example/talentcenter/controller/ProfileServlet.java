@@ -22,7 +22,7 @@ public class ProfileServlet extends HttpServlet {
         Integer accountId = (Integer) session.getAttribute("accountId");
 
         if (accountId == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("/View/login.jsp");
             return;
         }
 
@@ -32,7 +32,7 @@ public class ProfileServlet extends HttpServlet {
             request.setAttribute("account", account);
         }
 
-        request.getRequestDispatcher("profile.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ProfileServlet extends HttpServlet {
         Integer accountId = (Integer) session.getAttribute("accountId");
 
         if (accountId == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("/View/login.jsp");
             return;
         }
 
@@ -59,32 +59,32 @@ public class ProfileServlet extends HttpServlet {
         // Validate dữ liệu
         if (fullName == null || fullName.trim().isEmpty()) {
             request.setAttribute("error", "Họ và tên không được để trống!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
             return;
         }
 
         if (phone == null || !phone.matches("^0\\d{9}$")) {
             request.setAttribute("error", "Số điện thoại không hợp lệ! (10 số, bắt đầu bằng 0)");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
             return;
         }
 
         if (email == null || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
             request.setAttribute("error", "Email không hợp lệ!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
             return;
         }
 
         // Kiểm tra email và phone đã tồn tại chưa
         if (accountDAO.isEmailExists(email, accountId)) {
             request.setAttribute("error", "Email này đã được sử dụng bởi tài khoản khác!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
             return;
         }
 
         if (accountDAO.isPhoneExists(phone, accountId)) {
             request.setAttribute("error", "Số điện thoại này đã được sử dụng bởi tài khoản khác!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
             return;
         }
 
@@ -98,13 +98,13 @@ public class ProfileServlet extends HttpServlet {
             Account updatedAccount = accountDAO.getAccountById(accountId);
             session.setAttribute("account", updatedAccount);
             request.setAttribute("account", updatedAccount);
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Có lỗi xảy ra khi cập nhật thông tin!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
         }
 
         // Forward về trang profile
-        request.getRequestDispatcher("profile.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
     }
 }

@@ -28,15 +28,15 @@ public class ConsultationServlet extends HttpServlet {
         String action = request.getParameter("action");
         String view = request.getParameter("view");
         if (action == null || action.equals("list")) {
-                if ("guest".equals(view)) {
-                    request.getRequestDispatcher("view/home.jsp").forward(request, response);
-                } else {
-                    ArrayList<Consultation> consultations = consultationDAO.getAllConsultations();
-                    request.setAttribute("consultations", consultations);
-                    request.setAttribute("subjects", subjects);
-                    request.getRequestDispatcher("./View/consultation-list.jsp").forward(request, response);
+            if ("guest".equals(view)) {
+                request.getRequestDispatcher("View/home.jsp").forward(request, response);
+            } else {
+                ArrayList<Consultation> consultations = consultationDAO.getAllConsultations();
+                request.setAttribute("consultations", consultations);
+                request.setAttribute("subjects", subjects);
+                request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
 
-                }
+            }
         } else if (action.equals("edit")) {
             String idRaw = request.getParameter("id");
             try {
@@ -48,7 +48,7 @@ public class ConsultationServlet extends HttpServlet {
                 }
                 request.setAttribute("consult", consult);
                 request.setAttribute("subjects", subjects);
-                request.getRequestDispatcher("view/edit-consultation.jsp").forward(request, response);
+                request.getRequestDispatcher("View/edit-consultation.jsp").forward(request, response);
             } catch (NumberFormatException e) {
                 response.sendRedirect("Consultation?action=list");
             }
@@ -62,7 +62,7 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("consultations", consultations);
             request.setAttribute("keyword", keyword);
             request.setAttribute("subjects", subjects);
-            request.getRequestDispatcher("view/consultation-list.jsp").forward(request, response);
+            request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
 
         } else if (action.equals("filterByCourse")) {
             String courseFilter = request.getParameter("course_filter");
@@ -75,11 +75,10 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("subjects", subjects);
             request.setAttribute("course_filter", courseFilter);
             request.getRequestDispatcher("view/consultation-list.jsp").forward(request, response);
-        } else if ("dashboard".equals(action)){
+        } else if ("dashboard".equals(action)) {
             request.getRequestDispatcher("view/sale-dashboard.jsp").forward(request, response);
             return;
-        }
-        else {
+        } else {
             response.sendRedirect("Consultation?action=list");
         }
 
@@ -149,7 +148,7 @@ public class ConsultationServlet extends HttpServlet {
                 request.setAttribute("subjects", subjectDAO.getAllCourses());
                 HttpSession session = request.getSession();
                 session.setAttribute("message", "Cập nhật thành công.");
-                request.getRequestDispatcher("view/edit-consultation.jsp").forward(request, response);
+                request.getRequestDispatcher("View/edit-consultation.jsp").forward(request, response);
                 return;
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
@@ -178,7 +177,7 @@ public class ConsultationServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("message", "Lỗi xử lý dữ liệu!");
-            request.getRequestDispatcher("view/consultation-list.jsp").forward(request, response);
+            request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
             return;
         }
     }

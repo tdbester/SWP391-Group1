@@ -23,7 +23,7 @@ public class ChangePasswordServlet extends HttpServlet {
         Integer accountId = (Integer) session.getAttribute("accountId");
 
         if (accountId == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("View/login.jsp");
             return;
         }
 
@@ -32,7 +32,7 @@ public class ChangePasswordServlet extends HttpServlet {
         if (account != null) {
             request.setAttribute("account", account);
         }
-        request.getRequestDispatcher("profile.jsp").forward(request, response);
+        request.getRequestDispatcher("View/profile.jsp").forward(request, response);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class ChangePasswordServlet extends HttpServlet {
         Integer accountId = (Integer) session.getAttribute("accountId");
 
         if (accountId == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("View/login.jsp");
             return;
         }
 
@@ -55,31 +55,31 @@ public class ChangePasswordServlet extends HttpServlet {
         // Validate dữ liệu đầu vào
         if (oldPassword == null || oldPassword.trim().isEmpty()) {
             request.setAttribute("passwordError", "Vui lòng nhập mật khẩu hiện tại!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("View/profile.jsp").forward(request, response);
             return;
         }
         if (newPassword == null || newPassword.trim().isEmpty()) {
             request.setAttribute("passwordError", "Vui lòng nhập mật khẩu mới!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("View/profile.jsp").forward(request, response);
             return;
         }
         if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
             request.setAttribute("passwordError", "Vui lòng xác nhận mật khẩu mới!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("View/profile.jsp").forward(request, response);
             return;
         }
 
         // Kiểm tra mật khẩu mới và xác nhận có khớp không
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("passwordError", "Mật khẩu mới không khớp!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("View/profile.jsp").forward(request, response);
             return;
         }
 
         // Kiểm tra độ dài mật khẩu mới
         if (newPassword.length() < 6) {
             request.setAttribute("passwordError", "Mật khẩu mới phải có ít nhất 6 ký tự!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("View/profile.jsp").forward(request, response);
             return;
         }
 
@@ -87,19 +87,19 @@ public class ChangePasswordServlet extends HttpServlet {
         Account account = accountDAO.getAccountById(accountId);
         if (account == null) {
             request.setAttribute("passwordError", "Không tìm thấy thông tin người dùng!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("View/profile.jsp").forward(request, response);
             return;
         }
         if (!account.getPassword().equals(oldPassword)) {
             request.setAttribute("passwordError", "Mật khẩu hiện tại không đúng!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("View/profile.jsp").forward(request, response);
             return;
         }
 
         // Kiểm tra mật khẩu mới không trùng với mật khẩu cũ
         if (oldPassword.equals(newPassword)) {
             request.setAttribute("passwordError", "Mật khẩu mới phải khác mật khẩu hiện tại!");
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("View/profile.jsp").forward(request, response);
             return;
         }
 
@@ -111,7 +111,7 @@ public class ChangePasswordServlet extends HttpServlet {
             Account updatedAccount = accountDAO.getAccountById(accountId);
             session.setAttribute("account", updatedAccount);
             request.setAttribute("account", updatedAccount);
-            request.getRequestDispatcher("profile.jsp").forward(request, response);
+            request.getRequestDispatcher("View/profile.jsp").forward(request, response);
         } else {
             request.setAttribute("passwordError", "Có lỗi xảy ra khi đổi mật khẩu!");
         }

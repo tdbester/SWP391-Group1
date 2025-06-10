@@ -30,8 +30,11 @@
             <span>Xin chào, <strong>Nhân viên Sale</strong></span>
             <div class="user-avatar">S</div>
         </div>
+        <div class="user-actions">
+            <a href="${pageContext.request.contextPath}/View/profile.jsp" class="btn-link">Trang cá nhân</a>
+            <a href="${pageContext.request.contextPath}/logout" class="btn-link logout">Đăng xuất</a>
+        </div>
     </div>
-
     <div class="content-area">
         <!-- Stats Cards cho Sale -->
         <div class="stats-grid">
