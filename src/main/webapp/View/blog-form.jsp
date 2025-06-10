@@ -35,8 +35,7 @@
 
         <div class="mb-3">
             <label class="form-label">Tiêu đề</label>
-            <div id="editor-title" style="height: 30px;"></div>
-            <input type="hidden" name="title" id="title"/>
+            <input type="text" class="form-control" name="title" value="${blog.title}" required/>
         </div>
 
         <div class="mb-3">
@@ -83,14 +82,6 @@
         ['clean']
     ];
 
-    const editorTitle = new Quill('#editor-title', {
-        theme: 'snow',
-        modules: {
-            toolbar: toolbarOptions
-        },
-        placeholder: 'Nhập tiêu đề bài viết...'
-    });
-
     const editorDescription = new Quill('#editor-description', {
         theme: 'snow',
         modules: {
@@ -107,16 +98,13 @@
         placeholder: 'Nhập nội dung bài viết...'
     });
 
-    const blogTitle = '${blog.title != null ? blog.title : ""}';
     const blogDescription = '${blog.description != null ? blog.description : ""}';
     const blogContent = '${blog.content != null ? blog.content : ""}';
 
-    editorTitle.root.innerHTML = blogTitle;
     editorDescription.root.innerHTML = blogDescription;
     editorContent.root.innerHTML = blogContent;
 
     function handleSubmit() {
-        document.getElementById('title').value = editorTitle.root.innerHTML;
         document.getElementById('description').value = editorDescription.root.innerHTML;
         document.getElementById('content').value = editorContent.root.innerHTML;
     }

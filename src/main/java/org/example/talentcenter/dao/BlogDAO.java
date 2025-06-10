@@ -26,8 +26,7 @@ public class BlogDAO {
         }
     }
 
-    //ResultSet:[blog1, blog2, blog3] ;
-//while: blog1 -> new Blog(blog1.id, blog1.title,...) -> list.add(blog)
+
     // READ ALL
     public List<BlogDto> getAll() {
         List<BlogDto> list = new ArrayList<>();
@@ -41,13 +40,13 @@ public class BlogDAO {
             while (rs.next()) {
                 BlogDto blogDto = new
                         BlogDto(
-                    rs.getInt("Id"),
-                    rs.getString("Title"),
-                    rs.getString("Description"),
-                    rs.getString("Content"),
-                    rs.getString("image"),
-                    rs.getDate("CreatedAt"),
-                    rs.getString("FullName")
+                        rs.getInt("Id"),
+                        rs.getString("Title"),
+                        rs.getString("Description"),
+                        rs.getString("Content"),
+                        rs.getString("image"),
+                        rs.getDate("CreatedAt"),
+                        rs.getString("FullName")
                 );
                 list.add(blogDto);
             }
@@ -109,4 +108,48 @@ public class BlogDAO {
             e.printStackTrace();
         }
     }
+
+    public int getTotalBlog() {
+        String sql = "SELECT COUNT(*) FROM Blog";
+        try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+        }
+        return 0;
+    }
+
+    public List<BlogDto> pagingBlog(int index) {
+        List<BlogDto> list = new ArrayList<>();
+        String sql = "select * from Blog b join Sale s ON b.AuthorId = s.id join Account ac on s.id = ac.Id\n" +
+                "order by b.Id\n" +
+                "offset ? rows fetch next 5 rows only;";
+        try {
+            Connection conn = DBConnect.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, (index - 1) * 5);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                list.add(new BlogDto(
+                        rs.getInt("Id"),
+                        rs.getString("Title"),
+                        rs.getString("Description"),
+                        rs.getString("Content"),
+                        rs.getString("image"),
+                        new java.util.Date(rs.getDate("CreatedAt").getTime()),
+                        rs.getString("FullName")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        return list;
+    }
+
 }

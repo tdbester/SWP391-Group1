@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Date;
+
 import jakarta.servlet.annotation.MultipartConfig;
 import com.cloudinary.*;
 import com.cloudinary.utils.ObjectUtils;
@@ -93,8 +94,19 @@ public class BlogServlet extends HttpServlet {
 
     private void listBlogs(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        List<BlogDto> blogs = blogDAO.getAll();
-        request.setAttribute("blogList", blogs);
+        String search = request.getParameter("search");
+        Integer index = 1;
+        if (request.getParameter("index") != null) {
+             index = Integer.parseInt(request.getParameter("index"));
+        }
+        List<BlogDto> blogs = blogDAO.pagingBlog(index);
+        List<BlogDto> filtered = blogs.stream().filter(blog ->
+                search == null || blog.getTitle().toLowerCase().contains(search.toLowerCase())).toList();
+        request.setAttribute("blogList", filtered);
+        BlogDAO blogDAO = new BlogDAO();
+        int count = blogDAO.getTotalBlog();
+        int endPage = count % 5 == 0 ? count / 5 : count / 5 + 1;
+        request.setAttribute("endP", endPage);
         request.getRequestDispatcher("./View/blog.jsp").forward(request, response);
     }
 

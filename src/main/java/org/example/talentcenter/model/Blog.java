@@ -87,4 +87,17 @@ public class Blog {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    @Override
+    public String toString() {
+        return "Blog{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", content='" + content + '\'' +
+                ", image='" + image + '\'' +
+                ", authorId=" + authorId +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

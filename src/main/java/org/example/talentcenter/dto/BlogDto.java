@@ -67,5 +67,16 @@ public class BlogDto {
         this.fullname = fullname;
     }
 
-
+    @Override
+    public String toString() {
+        return "BlogDto{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", content='" + content + '\'' +
+                ", image='" + image + '\'' +
+                ", createdAt=" + createdAt +
+                ", fullname='" + fullname + '\'' +
+                '}';
+    }
 }
