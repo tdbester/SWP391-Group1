@@ -46,16 +46,7 @@
 
 </head>
 <body>
-<header>
-    <div class="logo">TALENT01</div>
-    <div class="nav">
-        <a href="home.jsp">Trang Chủ</a>
-        <a href="#">Dịch Vụ</a>
-        <a href="#">Khóa Học</a>
-        <a href="#">Sự Kiện</a>
-        <a href="logout">Đăng Xuất</a>
-    </div>
-</header>
+<jsp:include page="header.jsp"/>
 <div class="container mt-5">
     <h2 class="mb-4">Danh sách bài viết</h2>
     <div class="row justify-content-between ms-1">
@@ -113,6 +104,7 @@
         </ul>
     </nav>
 </div>
+<jsp:include page="footer.jsp"/>
 
 <!-- Bootstrap JS Bundle (includes Popper) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
