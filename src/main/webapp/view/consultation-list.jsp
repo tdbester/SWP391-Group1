@@ -140,10 +140,6 @@
         </div>
     </form>
 
-
-    <c:if test="${not empty message}">
-        <p class="no-results">${message}</p>
-    </c:if>
     <br>
     <table class="table table-bordered">
         <thead class="table-warning">
@@ -189,19 +185,7 @@
         </tbody>
 
     </table>
-    <nav aria-label="Page navigation" class="mt-3">
-        <ul class="pagination justify-content-center">
-            <c:forEach var="i" begin="1" end="${totalPages}">
-                <li class="page-item ${i == currentPage ? 'active' : ''}">
-                    <a class="page-link" href="Consultation?page=${i}&action=${param.action}&keyword=${param.keyword}&course_filter=${param.course_filter}&contacted_filter=${param.contacted_filter}">
-                            ${i}
-                    </a>
-                </li>
-            </c:forEach>
-        </ul>
-    </nav>
-    <a href="Consultation?action=dashboard" class="btn btn-secondary mt-4">Quay lại</a>
-    <br>
+    <a href="Consultation?action=dashboard" class="btn btn-secondary mt-4" style="margin-bottom: 30px;">Quay lại</a>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <jsp:include page="footer.jsp" />

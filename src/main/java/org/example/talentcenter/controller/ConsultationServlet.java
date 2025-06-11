@@ -76,6 +76,7 @@ public class ConsultationServlet extends HttpServlet {
             response.sendRedirect("Consultation?action=list");
         }
 
+
     }
 
     @Override
@@ -127,7 +128,8 @@ public class ConsultationServlet extends HttpServlet {
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
                 consultationDAO.deleteConsultation(id);
-                request.setAttribute("message", "Xóa thành công.");
+                HttpSession session = request.getSession();
+                session.setAttribute("message", "Xóa thành công.");
                 response.sendRedirect("Consultation");
                 return;
             } else if (action.equals("updateConsultationStatus")) {

@@ -57,6 +57,7 @@
     <a href="#">Dịch Vụ</a>
     <a href="#">Khóa Học</a>
     <a href="#">Sự Kiện</a>
-    <a href="logout">Đăng Xuất</a>
+    <a href="${pageContext.request.contextPath}/profile">Trang cá nhân</a>
+    <a href="${pageContext.request.contextPath}/logout">Đăng Xuất</a>
   </div>
 </header>
