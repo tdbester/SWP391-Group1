@@ -6,16 +6,20 @@ public class Course {
     private double price;
     private String information;
     private int createdBy;
+    private String image;
+    private int category;
 
     public Course() {
     }
 
-    public Course(int id, String title, double price, String information, int createdBy) {
+    public Course(int id, String title, double price, String information, int createdBy, String image, int category) {
         this.id = id;
         this.title = title;
         this.price = price;
         this.information = information;
         this.createdBy = createdBy;
+        this.image = image;
+        this.category = category;
     }
 
     public int getId() {
@@ -56,6 +60,18 @@ public class Course {
 
     public void setCreatedBy(int createdBy) {
         this.createdBy = createdBy;
+    }
+    public String getImage() {
+        return image;
+    }
+    public void setImage(String image) {
+        this.image = image;
+    }
+    public int getCategory() {
+        return category;
+    }
+    public void setCategory(int category) {
+        this.category = category;
     }
 
 }

@@ -53,13 +53,16 @@ public class BlogServlet extends HttpServlet {
 
         switch (action) {
             case "new":
-                showNewForm(request, response);
+                showNewBlogForm(request, response);
                 break;
             case "edit":
-                showEditForm(request, response);
+                showEditBlogForm(request, response);
                 break;
             case "delete":
                 deleteBlog(request, response);
+                break;
+            case "view":
+                showBlogDetail(request, response);
                 break;
             default:
                 listBlogs(request, response);
@@ -111,13 +114,26 @@ public class BlogServlet extends HttpServlet {
     }
 
 
-    private void showNewForm(HttpServletRequest request, HttpServletResponse response)
+    private void showNewBlogForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.getRequestDispatcher("./View/blog-form.jsp").forward(request, response);
     }
 
+    private void showBlogDetail(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+//            try{
+                System.out.println(request.getParameter("id"));
+                int id = Integer.parseInt(request.getParameter("id"));
+                Blog blog = blogDAO.getById(id);
+                request.setAttribute("blog", blog);
+                request.getRequestDispatcher("./View/user-blog-detail.jsp").forward(request, response);
+//            } catch (Exception e){
+//                response.sendRedirect("blogs");
+//            }
+        }
 
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
+
+    private void showEditBlogForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         Blog existingBlog = blogDAO.getById(id);
@@ -145,7 +161,7 @@ public class BlogServlet extends HttpServlet {
                 System.err.println("Error uploading image to Cloudinary: " + e.getMessage());
                 request.setAttribute("errorMessage", "Failed to upload image. Please try again.");
                 // Chuyển hướng về form hoặc hiển thị lỗi
-                showNewForm(request, response);
+                showNewBlogForm(request, response);
                 return;
             }
         } else {
@@ -190,7 +206,7 @@ public class BlogServlet extends HttpServlet {
             } catch (Exception e) {
                 System.err.println("Error uploading new image to Cloudinary: " + e.getMessage());
                 request.setAttribute("errorMessage", "Failed to upload new image. Please try again.");
-                showEditForm(request, response); // Quay lại form chỉnh sửa với lỗi
+                showEditBlogForm(request, response); // Quay lại form chỉnh sửa với lỗi
                 return;
             }
         } else {

@@ -61,7 +61,7 @@
             <th>STT</th>
             <th>Tiêu đề</th>
             <th>Mô tả</th>
-            <th>Nội dung</th>
+<%--            <th>Nội dung</th>--%>
             <th>Ảnh</th>
             <th>Tác giả</th>
             <th style="width: 150px;">Hành động</th>
@@ -73,7 +73,7 @@
                 <td>${status.index+1}</td>
                 <td>${blog.title}</td>
                 <td>${blog.description}</td>
-                <td>${blog.content}</td>
+<%--                <td>${blog.content}</td>--%>
                 <td>
                     <c:if test="${not empty blog.image}">
                         <img src="${blog.image}" alt="Image" class="thumb-img"/>

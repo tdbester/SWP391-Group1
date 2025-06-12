@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class CourseDAO {
     public ArrayList<Course> getAllCourses() {
         ArrayList<Course> subjects = new ArrayList<>();
-        String query = "SELECT Id, Title, Price, Information, CreatedBy FROM Course";
+        String query = "SELECT Id, Title, Price, Information, CreatedBy, Image, Category FROM Course";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
@@ -24,7 +24,9 @@ public class CourseDAO {
                         rs.getString("Title"),
                         rs.getDouble("Price"),
                         rs.getString("Information"),
-                        rs.getInt("CreatedBy")
+                        rs.getInt("CreatedBy"),
+                        rs.getString("Image"),
+                        rs.getInt("Category")
                 );
                 subjects.add(subject);
             }
