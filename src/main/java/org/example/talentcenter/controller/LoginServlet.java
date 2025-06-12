@@ -92,7 +92,7 @@ public class LoginServlet extends HttpServlet {
                             response.sendRedirect("home.jsp");
                             break;
                         case "student":
-                            response.sendRedirect("home.jsp");
+                            response.sendRedirect("View/student-dashboard.jsp");
                             break;
                         case "teacher":
                             response.sendRedirect("home.jsp");
