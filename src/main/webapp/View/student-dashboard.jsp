@@ -15,7 +15,133 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
     <!-- Kế thừa hoặc nhúng lại CSS từ trang chính -->
+    <style>
+        /* Override để căn giữa content */
+        .content-area {
+            background-color: white;
+            padding: 40px 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+        }
 
+        .content-area h1 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 2.5rem;
+        }
+
+        .content-area p {
+            color: #666;
+            font-size: 18px;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        /* Đảm bảo container layout đúng */
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        /* Header styles */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 30px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            margin: 0 20px;
+            font-size: 1.8rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .sidebar-toggle-main {
+            background: #8d78e4;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle-main:hover {
+            background: #7a6ad8;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-details-header {
+            text-align: right;
+        }
+
+        .user-name-header {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .user-role-header {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .user-avatar-header {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8d78e4, #7a6ad8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+            }
+
+            .user-details-header {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
 <jsp:include page="header.jsp" />
@@ -23,80 +149,31 @@
 <!-- Tách sidebar thành file riêng để tái sử dụng -->
 
 <!-- dashboard -->
+
 <div class="container">
-    <jsp:include page="sale-sidebar.jsp" />
+    <jsp:include page="student-sidebar.jsp" />
     <div class="main-content">
+        <div class="dashboard-header">
+            <div class="header-left">
+                <button class="sidebar-toggle-main" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>Student Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info-header">
+                    <div class="user-details-header">
+                        <div class="user-name-header">Xin chào, Nguyễn Văn A</div>
+                    </div>
+                    <div class="user-avatar-header">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="content-area">
-            <!-- Stats Cards cho Sale -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fa-solid fa-building-user"></i></div>
-                    <div class="stat-number" style="color: #3498db;">12</div>
-                    <div class="stat-label">Khách hàng mới</div>
-                    <div class="stat-status status-info">Trong tuần này</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fa-solid fa-phone-volume"></i></div>
-                    <div class="stat-number" style="color: #f39c12;">8</div>
-                    <div class="stat-label">Cuộc gọi chưa xử lý</div>
-                    <div class="stat-status status-warning">Cần gọi lại</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
-                    <div class="stat-number" style="color: #2ecc71;">5</div>
-                    <div class="stat-label">Hợp đồng thành công</div>
-                    <div class="stat-status status-good">Trong tháng này</div>
-                </div>
-            </div>
-
-            <!-- Content Grid (tùy chỉnh tùy ý) -->
-            <div class="content-grid">
-                <!-- Lịch gặp khách hôm nay -->
-                <div class="card">
-                    <h2 class="card-title">Lịch hẹn khách hôm nay</h2>
-                    <div class="schedule-item">
-                        <div class="schedule-time">09:00</div>
-                        <div class="schedule-info">
-                            <div class="schedule-title">Gặp khách hàng Công ty A</div>
-                            <div class="schedule-details">Tòa nhà Pearl Plaza, Quận Bình Thạnh</div>
-                        </div>
-                        <div class="schedule-actions">
-                            <button class="btn-success">Xác nhận</button>
-                            <button class="btn-warning">Hủy</button>
-                        </div>
-                    </div>
-                    <div class="schedule-item">
-                        <div class="schedule-time">14:00</div>
-                        <div class="schedule-info">
-                            <div class="schedule-title">Call tư vấn Công ty B</div>
-                            <div class="schedule-details">Qua Zoom, khách hàng Nhật</div>
-                        </div>
-                        <div class="schedule-actions">
-                            <button class="btn-primary">Tham gia</button>
-                            <button class="btn-warning">Trễ</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Yêu cầu báo giá -->
-                <div class="card">
-                    <h2 class="card-title">Yêu cầu báo giá</h2>
-
-                    <div class="request-item">
-                        <div class="request-title">Công ty C - Website giới thiệu</div>
-                        <div class="request-date">Gửi lúc: 30/05/2025</div>
-                        <div class="request-status pending">Đang xử lý</div>
-                    </div>
-
-                    <div class="request-item">
-                        <div class="request-title">Công ty D - Giải pháp CRM</div>
-                        <div class="request-date">Gửi lúc: 29/05/2025</div>
-                        <div class="request-status approved">Đã báo giá</div>
-                    </div>
-                </div>
-            </div>
+            <h1>Chào mừng đến Dashboard học sinh</h1>
+            <p>Xem thông tin lịch học, khoá học,... tại đây</p>
         </div>
     </div>
 </div>

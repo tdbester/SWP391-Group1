@@ -12,6 +12,9 @@ public class Request {
     private Date createdAt;
     private Date responseAt;
     private int processedBy;
+    private String courseName;
+    private String parentPhone;
+    private String phoneNumber;
 
     public Request() {
     }
@@ -28,11 +31,20 @@ public class Request {
         this.processedBy = processedBy;
     }
 
+    public Request(int senderID, String reason, String courseName, String parentPhone, Date createdAt) {
+        this.senderID = senderID;
+        this.courseName = courseName;
+        this.reason = reason;
+        this.parentPhone = parentPhone;
+        this.createdAt = createdAt;
+    }
+
     public Request(int id, String reason, int senderID) {
         this.id = id;
         this.reason = reason;
         this.senderID = senderID;
     }
+
 
     public int getId() {
         return id;
@@ -104,5 +116,29 @@ public class Request {
 
     public void setProcessedBy(int processedBy) {
         this.processedBy = processedBy;
+    }
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+
+    public String getParentPhone() {
+        return parentPhone;
+    }
+
+    public void setParentPhone(String parentPhone) {
+        this.parentPhone = parentPhone;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

@@ -5,7 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.talentcenter.dao.AccountRequestDAO;
+import org.example.talentcenter.dao.RequestDAO;
 import org.example.talentcenter.dao.AccountDAO;
 import org.example.talentcenter.model.Request;
 
@@ -13,7 +13,7 @@ import java.io.IOException;
 
 @WebServlet("/CreateAccount")
 public class CreateAccountServlet extends HttpServlet {
-    private final AccountRequestDAO dao = new AccountRequestDAO();
+    private final RequestDAO dao = new RequestDAO();
     private final AccountDAO accountDAO = new AccountDAO();
     private final SendAccountService service = new SendAccountService();
 

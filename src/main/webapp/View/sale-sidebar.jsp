@@ -13,66 +13,66 @@
 <title>Sidebar and Header Demo</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
- <!-- SIDEBAR -->
+<!-- SIDEBAR -->
 <div class="dashboard">
-  <div class="sidebar">
+    <div class="sidebar">
 
-    <div class="logo">
-      <i class="fas fa-users-cog"></i>
-      <h2>Trung Tâm Năng Khiếu</h2>
+        <div class="logo">
+            <i class="fas fa-users-cog"></i>
+            <h2>Trung Tâm Năng Khiếu</h2>
+        </div>
+        <nav>
+            <div class="nav-section">
+                <a href="${pageContext.request.contextPath}/View/sale-dashboard.jsp" class="nav-item ${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'page' : 'false'}">
+                    <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <a href="${pageContext.request.contextPath}/Consultation?action=list"
+                   class="nav-item ${pageContext.request.requestURI.contains('consultation-list.jsp') ? 'active' : ''}"
+                   role="link"
+                   aria-current="${pageContext.request.requestURI.contains('consultation-list.jsp') ? 'page' : 'false'}">
+                    <i class="fa-solid fa-building" aria-hidden="true"></i>
+                    <span>Danh sách đăng kí tư vấn</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <a href="${pageContext.request.contextPath}/blogs?action=list"
+                   class="nav-item ${pageContext.request.requestURI.contains('blog.jsp') ? 'active' : ''}"
+                   role="link"
+                   aria-current="${pageContext.request.requestURI.contains('blog.jsp') ? 'page' : 'false'}">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <span>Quản lý Blog</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <a href="${pageContext.request.contextPath}/StudentAccountRequest"
+                   class="nav-item ${pageContext.request.requestURI.contains('student-account-request.jsp') ? 'active' : ''}"
+                   role="link"
+                   aria-current="${pageContext.request.requestURI.contains('student-account-request.jsp') ? 'page' : 'false'}">
+                    <i class="fas fa-briefcase" aria-hidden="true"></i>
+                    <span>Yêu cầu cấp tài khoản học viên</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <a href="CandidateDetails.jsp" class="nav-item ${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'page' : 'false'}">
+                    <i class="fas fa-user" aria-hidden="true"></i>
+                    <span>Danh sách lớp</span>
+                </a>
+            </div>
+        </nav>
     </div>
-    <nav>
-      <div class="nav-section">
-        <a href="${pageContext.request.contextPath}/View/sale-dashboard.jsp" class="nav-item ${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'page' : 'false'}">
-          <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
-          <span>Dashboard</span>
-        </a>
-      </div>
-      <div class="nav-section">
-        <a href="${pageContext.request.contextPath}/Consultation?action=list"
-           class="nav-item ${pageContext.request.requestURI.contains('consultation-list.jsp') ? 'active' : ''}"
-           role="link"
-           aria-current="${pageContext.request.requestURI.contains('consultation-list.jsp') ? 'page' : 'false'}">
-          <i class="fa-solid fa-building" aria-hidden="true"></i>
-          <span>Danh sách đăng kí tư vấn</span>
-        </a>
-      </div>
-      <div class="nav-section">
-        <a href="${pageContext.request.contextPath}/blogs?action=list"
-           class="nav-item ${pageContext.request.requestURI.contains('blog.jsp') ? 'active' : ''}"
-           role="link"
-           aria-current="${pageContext.request.requestURI.contains('blog.jsp') ? 'page' : 'false'}">
-          <i class="fas fa-search" aria-hidden="true"></i>
-          <span>Quản lý Blog</span>
-        </a>
-      </div>
-      <div class="nav-section">
-        <a href="${pageContext.request.contextPath}/StudentAccountRequest"
-           class="nav-item ${pageContext.request.requestURI.contains('student-account-request.jsp') ? 'active' : ''}"
-           role="link"
-           aria-current="${pageContext.request.requestURI.contains('student-account-request.jsp') ? 'page' : 'false'}">
-          <i class="fas fa-briefcase" aria-hidden="true"></i>
-          <span>Yêu cầu cấp tài khoản học viên</span>
-        </a>
-      </div>
-      <div class="nav-section">
-        <a href="CandidateDetails.jsp" class="nav-item ${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'page' : 'false'}">
-          <i class="fas fa-user" aria-hidden="true"></i>
-          <span>Danh sách lớp</span>
-        </a>
-      </div>
-    </nav>
-  </div>
 </div>
-  <script>
+<script>
     document.querySelectorAll('.nav-item').forEach(item => {
-      item.addEventListener('click', function() {
-        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-        this.classList.add('active');
-      });
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+        });
     });
 
     function toggleSidebar() {
-      document.querySelector('.sidebar').classList.toggle('active');
+        document.querySelector('.sidebar').classList.toggle('active');
     }
-  </script>
+</script>

@@ -1,10 +1,8 @@
 package org.example.talentcenter.controller;
 
 import jakarta.servlet.http.*;
-import org.example.talentcenter.dao.AccountRequestDAO;
-import org.example.talentcenter.model.Request;
+import org.example.talentcenter.dao.RequestDAO;
 
-import org.example.talentcenter.dao.AccountRequestDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,7 +11,7 @@ import java.io.IOException;
 
 @WebServlet("/StudentAccountRequest")
 public class StudentAccountRequestServlet extends HttpServlet {
-    private final AccountRequestDAO dao = new AccountRequestDAO();
+    private final RequestDAO dao = new RequestDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -37,7 +35,7 @@ public class StudentAccountRequestServlet extends HttpServlet {
 
         String studentInfoText = studentName + "|" + email + "|" + phone;
 
-        AccountRequestDAO dao = new AccountRequestDAO();
+        RequestDAO dao = new RequestDAO();
         boolean success = dao.sendCreateAccountRequest(senderId, studentName, email, phone);
         if (success) {
             request.setAttribute("message", "Gửi yêu cầu thành công!");

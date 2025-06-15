@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AccountRequestDAO {
+public class RequestDAO {
     public boolean sendCreateAccountRequest(int senderId, String name, String email, String phone) {
         String formattedReason = name + "|" + email + "|" + phone;
         String sql = "INSERT INTO Request (Type, SenderId, Reason, Status) VALUES (?, ?, ?, ?)";
@@ -84,4 +84,32 @@ public class AccountRequestDAO {
 
         return null;
     }
+    public boolean insert(Request transferRequest) {
+        String combinedReason = transferRequest.getCourseName() + "|" +
+                transferRequest.getParentPhone() + "|" +
+                transferRequest.getPhoneNumber() + "|" +
+                transferRequest.getReason();
+
+        String sql = "INSERT INTO Request (Type, SenderId, Reason, Status, CreatedAt) " +
+                "VALUES (?, ?, ?, ?, ?)";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, "Đơn xin chuyển lớp");
+            stmt.setInt(2, transferRequest.getSenderID());
+            stmt.setString(3, combinedReason);
+            stmt.setString(4, "Chờ xử lý");
+            Timestamp timestamp = new Timestamp(transferRequest.getCreatedAt().getTime());
+            stmt.setTimestamp(5, timestamp);
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
 }

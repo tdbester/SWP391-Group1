@@ -47,10 +47,10 @@
                 </a>
             </div>
             <div class="nav-section">
-                <a href="${pageContext.request.contextPath}/StudentAccountRequest"
-                   class="nav-item ${pageContext.request.requestURI.contains('student-account-request.jsp') ? 'active' : ''}"
+                <a href="${pageContext.request.contextPath}/StudentApplication?action=application"
+                   class="nav-item ${pageContext.request.requestURI.contains('student-application.jsp') ? 'active' : ''}"
                    role="link"
-                   aria-current="${pageContext.request.requestURI.contains('student-account-request.jsp') ? 'page' : 'false'}">
+                   aria-current="${pageContext.request.requestURI.contains('student-application.jsp') ? 'page' : 'false'}">
                     <i class="fas fa-briefcase" aria-hidden="true"></i>
                     <span>Chuyển lớp</span>
                 </a>

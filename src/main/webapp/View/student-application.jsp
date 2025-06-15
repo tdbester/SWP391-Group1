@@ -470,55 +470,38 @@
                             <h3 class="card-title">Thông tin đơn xin chuyển lớp</h3>
                         </div>
                         <div class="card-body">
-                            <form action="TransferRequest" method="post">
+                            <form action="StudentApplication" method="post">
                                 <input type="hidden" name="action" value="create">
-
+                                <div class="form-row">
+                                    <div class="form-col">
+                                        <label class="form-label">Họ và Tên<span class="required">*</span></label>
+                                        <input type="text" class="form-control" value="${student.name}" placeholder="${student.name}">
+                                        <input type="hidden" name="studentName" value="${student.name}">
+                                    </div>
+                                    <div class="form-col">
+                                        <label class="form-label">Số điện thoại<span class="required">*</span></label>
+                                        <input type="text" class="form-control" name="phoneNumber"
+                                               value="${student.parentPhone}" required placeholder="${student.name}">
+                                    </div>
+                                </div>
                                 <div class="form-row">
                                     <div class="form-col">
                                         <label class="form-label">Lớp hiện tại <span class="required">*</span></label>
-                                        <input type="text" class="form-control" value="12A1" disabled>
-                                        <input type="hidden" name="currentClass" value="12A1">
+                                        <input type="text" class="form-control" value="${student.className}">
+                                        <input type="hidden" name="currentClass" value="${student.className}">
                                     </div>
                                     <div class="form-col">
                                         <label class="form-label">Ngày nộp đơn <span class="required">*</span></label>
                                         <input type="date" class="form-control" name="requestDate" required>
                                     </div>
                                 </div>
-
                                 <div class="form-row">
-                                    <div class="form-col">
-                                        <label class="form-label">Lớp muốn chuyển đến <span
-                                                class="required">*</span></label>
-                                        <select class="form-select" name="targetClass" required>
-                                            <option value="">--Chọn lớp--</option>
-                                            <option value="12A2">12A2 - Chuyên Toán</option>
-                                            <option value="12A3">12A3 - Chuyên Lý</option>
-                                            <option value="12A4">12A4 - Chuyên Hóa</option>
-                                            <option value="12B1">12B1 - Chuyên Văn</option>
-                                            <option value="12B2">12B2 - Chuyên Anh</option>
-                                            <option value="12C1">12C1 - Chuyên Sử</option>
-                                            <option value="12C2">12C2 - Chuyên Địa</option>
-                                        </select>
-                                    </div>
                                     <div class="form-col">
                                         <label class="form-label">Số điện thoại phụ huynh <span
                                                 class="required">*</span></label>
                                         <input type="tel" class="form-control" name="parentPhone"
                                                placeholder="Nhập số điện thoại" required>
                                     </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="form-label">Lý do chuyển lớp <span class="required">*</span></label>
-                                    <select class="form-select" name="reason" required>
-                                        <option value="">--Chọn lý do--</option>
-                                        <option value="academic">Lý do học tập (chuyển chuyên ngành)</option>
-                                        <option value="health">Lý do sức khỏe</option>
-                                        <option value="family">Lý do gia đình (chuyển nhà, công tác)</option>
-                                        <option value="schedule">Lý do thời gian biểu</option>
-                                        <option value="social">Lý do xã hội (bạn bè, môi trường)</option>
-                                        <option value="other">Lý do khác</option>
-                                    </select>
                                 </div>
 
                                 <div class="form-group">
@@ -540,6 +523,7 @@
                                     </button>
                                 </div>
                             </form>
+
                         </div>
                     </div>
                 </div>
@@ -632,7 +616,7 @@
 
         // Add form validation to submit button
         document.addEventListener('DOMContentLoaded', function () {
-            var form = document.querySelector('form[action="TransferRequest"]');
+            var form = document.querySelector('form[action="StudentApplication"]');
             if (form) {
                 form.addEventListener('submit', function (e) {
                     if (!validateForm()) {
