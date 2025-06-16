@@ -69,14 +69,25 @@
 
                         <%
                             Object account = session.getAttribute("account");
-                            if (account == null) { %>
+                            String role = (String) session.getAttribute("userRole");
+
+                            if (account == null) {
+                        %>
                         <li class="scroll-to-section"><a href="View/login.jsp">Đăng nhập</a></li>
                         <li class="scroll-to-section"><a href="#contact">Đăng kí</a></li>
-                        <% } else { %>
+                        <%
+                        } else {
+                            String dashboardURL = "View/home.jsp";
+                            if ("teacher".equalsIgnoreCase(role)) {
+                                dashboardURL = "View/teacher-dashboard.jsp";
+                            } else if ("sale".equalsIgnoreCase(role)) {
+                                dashboardURL = "View/sale-dashboard.jsp";
+                            }
+                        %>
+                        <li class="scroll-to-section"><a href="<%=dashboardURL%>">Dashboard</a></li>
                         <li class="scroll-to-section"><a href="View/profile.jsp">Trang cá nhân</a></li>
                         <li class="scroll-to-section"><a href="logout">Đăng xuất</a></li>
                         <% } %>
-
 
                     </ul>
                     <a class='menu-trigger'>

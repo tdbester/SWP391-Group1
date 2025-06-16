@@ -1,4 +1,69 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.util.*" %>
+<%@ page import="java.time.*" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
+<%@ page import="org.example.talentcenter.model.Schedule" %>
+<%
+    // Lấy danh sách schedule từ request
+    @SuppressWarnings("unchecked")
+    List<Schedule> schedules = (List<Schedule>) request.getAttribute("schedules");
+    if (schedules == null) {
+        schedules = new ArrayList<>();
+    }
+
+    // Tạo map để nhóm các schedule theo ngày trong tuần và slot
+    Map<String, Map<String, List<Schedule>>> weekSchedule = new HashMap<>();
+
+    // Khởi tạo structure cho 7 ngày trong tuần
+    String[] days = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
+    String[] slots = {"Sáng", "Chiều", "Tối"};
+
+    for (String day : days) {
+        weekSchedule.put(day, new HashMap<>());
+        for (String slot : slots) {
+            weekSchedule.get(day).put(slot, new ArrayList<>());
+        }
+    }
+
+    // Phân loại schedule theo ngày và slot
+    for (Schedule schedule : schedules) {
+        LocalDate date = schedule.getDate();
+        LocalTime startTime = schedule.getStartTime();
+
+        // Xác định ngày trong tuần
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+        String dayKey = dayOfWeek.toString();
+
+        // Xác định slot dựa trên thời gian
+        String slot;
+        int hour = startTime.getHour();
+        if (hour >= 6 && hour < 12) {
+            slot = "Sáng";
+        } else if (hour >= 12 && hour < 18) {
+            slot = "Chiều";
+        } else {
+            slot = "Tối";
+        }
+
+        // Thêm vào map
+        if (weekSchedule.containsKey(dayKey)) {
+            weekSchedule.get(dayKey).get(slot).add(schedule);
+        }
+    }
+
+    // Sắp xếp các lớp trong cùng slot theo thời gian bắt đầu
+    for (String day : days) {
+        for (String slot : slots) {
+            List<Schedule> slotSchedules = weekSchedule.get(day).get(slot);
+            slotSchedules.sort((s1, s2) -> s1.getStartTime().compareTo(s2.getStartTime()));
+        }
+    }
+
+    // Tính toán ngày trong tuần hiện tại
+    LocalDate today = LocalDate.now();
+    LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM");
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -14,7 +79,7 @@
 <div class="header">
     <div class="logo">TALENT01</div>
     <div class="nav">
-        <a href="${pageContext.request.contextPath}/View/home.jsp"">Trang Chủ</a>
+        <a href="${pageContext.request.contextPath}/View/home.jsp">Trang Chủ</a>
         <a href="#">Dịch Vụ</a>
         <a href="#">Khóa Học</a>
         <a href="#">Sự Kiện</a>
@@ -30,153 +95,66 @@
 <div class="main-content">
     <div class="container">
         <h1>Thời Khóa Biểu</h1>
-
-        <!-- Controls -->
-        <div class="controls">
-            <div class="control-group">
-                <label for="year">Năm:</label>
-                <select name="year" id="year">
-                    <option value="2024">2024</option>
-                    <option value="2025" selected>2025</option>
-                    <option value="2026">2026</option>
-                </select>
-            </div>
-
-            <div class="control-group">
-                <label for="week">Tuần:</label>
-                <select name="week" id="week">
-                    <option value="1">Week 1 (Jan 1-7)</option>
-                    <option value="2">Week 2 (Jan 8-14)</option>
-                    <option value="3" selected>Week 3 (Jan 15-21)</option>
-                    <option value="4">Week 4 (Jan 22-28)</option>
-                </select>
-            </div>
-        </div>
-
         <!-- Schedule Table -->
         <div class="schedule-table">
             <table>
                 <thead>
                 <tr>
                     <th class="slot-header">SLOT</th>
-                    <th class="day-header">Thứ 2<br><span class="date">15/01</span></th>
-                    <th class="day-header">Thứ 3<br><span class="date">16/01</span></th>
-                    <th class="day-header">Thứ 4<br><span class="date">17/01</span></th>
-                    <th class="day-header">Thứ 5<br><span class="date">18/01</span></th>
-                    <th class="day-header">Thứ 6<br><span class="date">19/01</span></th>
-                    <th class="day-header">Thứ 7<br><span class="date">20/01</span></th>
-                    <th class="day-header">Chủ nhật<br><span class="date">21/01</span></th>
+                    <th class="day-header">Thứ 2<br><span class="date"><%=startOfWeek.format(dateFormatter)%></span></th>
+                    <th class="day-header">Thứ 3<br><span class="date"><%=startOfWeek.plusDays(1).format(dateFormatter)%></span></th>
+                    <th class="day-header">Thứ 4<br><span class="date"><%=startOfWeek.plusDays(2).format(dateFormatter)%></span></th>
+                    <th class="day-header">Thứ 5<br><span class="date"><%=startOfWeek.plusDays(3).format(dateFormatter)%></span></th>
+                    <th class="day-header">Thứ 6<br><span class="date"><%=startOfWeek.plusDays(4).format(dateFormatter)%></span></th>
+                    <th class="day-header">Thứ 7<br><span class="date"><%=startOfWeek.plusDays(5).format(dateFormatter)%></span></th>
+                    <th class="day-header">Chủ nhật<br><span class="date"><%=startOfWeek.plusDays(6).format(dateFormatter)%></span></th>
                 </tr>
                 </thead>
                 <tbody>
+                <%
+                    String[] slotNames = {"Sáng", "Chiều", "Tối"};
+                    String[] dayKeys = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
+
+                    for (String slotName : slotNames) {
+                %>
                 <tr>
-                    <td class="slot-cell">Slot 1</td>
+                    <td class="slot-cell"><%=slotName%></td>
+                    <%
+                        for (String dayKey : dayKeys) {
+                            List<Schedule> daySlotSchedules = weekSchedule.get(dayKey).get(slotName);
+                    %>
                     <td class="schedule-cell">
+                        <%
+                            if (daySlotSchedules.isEmpty()) {
+                        %>
+                        -
+                        <%
+                        } else {
+                            for (Schedule schedule : daySlotSchedules) {
+                                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+                                String startTimeStr = schedule.getStartTime().format(timeFormatter);
+                                String endTimeStr = schedule.getEndTime().format(timeFormatter);
+                        %>
                         <div class="class-item">
-                            <div class="class-code">SWP391</div>
+                            <div class="class-code"><%=schedule.getCourseTitle()%></div>
                             <div class="class-info">
-                                <a href="#" class="btn view-materials">View Materials</a><br>
-                                at Room 101 -
-                                <a href="#" class="btn meet-url">Meet URL</a>
-                                <a href="#" class="btn edu-next">EduNext</a><br>
-                                <span class="attendance-status">(attended)</span><br>
-                                <span class="time-slot">(07:30-09:00)</span>
+                                Lớp: <%=schedule.getClassName()%><br>
+                                Phòng: <%=schedule.getRoomCode()%><br>
+                                <span class="time-slot">(<%=startTimeStr%>-<%=endTimeStr%>)</span>
                             </div>
                         </div>
+                        <%
+                                }
+                            }
+                        %>
                     </td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">
-                        <div class="class-item">
-                            <div class="class-code">PRN231</div>
-                            <div class="class-info">
-                                <a href="#" class="btn view-materials">View Materials</a><br>
-                                at Room 203 -
-                                <a href="#" class="btn meet-url">Meet URL</a>
-                                <a href="#" class="btn edu-next">EduNext</a><br>
-                                <span class="attendance-status">(attended)</span><br>
-                                <span class="time-slot">(07:30-09:00)</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">
-                        <div class="class-item">
-                            <div class="class-code">SWE201c</div>
-                            <div class="class-info">
-                                <a href="#" class="btn view-materials">View Materials</a><br>
-                                at Room 105 -
-                                <a href="#" class="btn meet-url">Meet URL</a>
-                                <a href="#" class="btn edu-next">EduNext</a><br>
-                                <span class="attendance-status">(attended)</span><br>
-                                <span class="time-slot">(07:30-09:00)</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
+                    <%
+                        }
+                    %>
                 </tr>
-                <tr>
-                    <td class="slot-cell">Slot 2</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">
-                        <div class="class-item">
-                            <div class="class-code">SWP391</div>
-                            <div class="class-info">
-                                <a href="#" class="btn view-materials">View Materials</a><br>
-                                at Room 101 -
-                                <a href="#" class="btn meet-url">Meet URL</a>
-                                <a href="#" class="btn edu-next">EduNext</a><br>
-                                <span class="attendance-status">(attended)</span><br>
-                                <span class="time-slot">(09:10-10:40)</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                </tr>
-                <tr>
-                    <td class="slot-cell">Slot 3</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                </tr>
-                <tr>
-                    <td class="slot-cell">Slot 4</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                </tr>
-                <tr>
-                    <td class="slot-cell">Slot 5</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                </tr>
-                <tr>
-                    <td class="slot-cell">Slot 6</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                    <td class="schedule-cell">-</td>
-                </tr>
+                <%
+                    }
+                %>
                 </tbody>
             </table>
         </div>
@@ -188,39 +166,5 @@
     <p>Copyright © 2025 Talent Center Management. SWP391-Group 01.</p>
 </div>
 
-<script>
-    // Form submission handling
-    document.getElementById('year').addEventListener('change', function() {
-        // Simulate form submission
-        console.log('Year changed to:', this.value);
-    });
-
-    document.getElementById('week').addEventListener('change', function() {
-        // Simulate form submission
-        console.log('Week changed to:', this.value);
-    });
-
-    // Button interactions
-    document.querySelectorAll('.view-materials').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Xem tài liệu học tập');
-        });
-    });
-
-    document.querySelectorAll('.meet-url').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Tham gia lớp học online');
-        });
-    });
-
-    document.querySelectorAll('.edu-next').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Mở EduNext');
-        });
-    });
-</script>
 </body>
 </html>

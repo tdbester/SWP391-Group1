@@ -57,7 +57,6 @@ body {
 .main-content {
     margin-left: 280px;
     margin-top: 72px;
-
     min-height: calc(100vh - 72px);
 }
 
@@ -192,9 +191,12 @@ th {
 
 td {
     border: 1px solid #e2e8f0;
-    padding: 16px 12px;
+    padding: 12px 8px;
     vertical-align: top;
-    height: 140px;
+    /* Tăng chiều cao để chứa nhiều lớp hơn */
+    min-height: 160px;
+    max-height: 220px;
+    overflow-y: auto;
     transition: all 0.3s ease;
     position: relative;
 }
@@ -203,10 +205,12 @@ td {
     background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     font-weight: 700;
     text-align: center;
-    color: #4a5568;
-    width: 120px;
-    font-size: 16px;
-    border-right: 3px solid #cbd5e0;
+    color: #334155;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-height: 160px;
+    vertical-align: middle;
 }
 
 .schedule-cell {
@@ -214,24 +218,49 @@ td {
     position: relative;
     width: 180px;
     transition: all 0.3s ease;
+    /* Thêm scrollbar cho cell có nhiều lớp */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.schedule-cell::-webkit-scrollbar {
+    width: 6px;
+}
+
+.schedule-cell::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-radius: 3px;
+}
+
+.schedule-cell::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.schedule-cell::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 .schedule-cell:hover {
     background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    transform: scale(1.02);
+    transform: scale(1.01);
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
 .class-item {
     background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
     border-radius: 12px;
-    padding: 14px;
-    margin: 6px 0;
-    border-left: 5px solid #0ea5e9;
-    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.2);
+    padding: 12px;
+    /* Giảm margin để fit nhiều lớp hơn */
+    margin: 4px 0;
+    border-left: 4px solid #0ea5e9;
+    box-shadow: 0 3px 12px rgba(14, 165, 233, 0.2);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    /* Đảm bảo không quá cao */
+    max-height: 120px;
 }
 
 .class-item::before {
@@ -250,36 +279,48 @@ td {
 }
 
 .class-item:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.3);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
     background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
 }
 
 .class-code {
     font-weight: 700;
     color: #0c4a6e;
-    font-size: 16px;
-    margin-bottom: 8px;
+    font-size: 13px;
+    margin-bottom: 6px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    /* Giới hạn số dòng để tiết kiệm không gian */
+    line-height: 1.3;
+    max-height: 2.6em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .class-info {
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 11px;
+    line-height: 1.4;
     color: #475569;
 }
 
+.class-info br {
+    margin-bottom: 2px;
+}
+
 .btn {
-    padding: 6px 12px;
-    border-radius: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
     text-decoration: none;
-    font-size: 11px;
+    font-size: 10px;
     cursor: pointer;
     display: inline-block;
     font-weight: 600;
     transition: all 0.3s ease;
-    margin: 2px;
+    margin: 1px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -303,30 +344,39 @@ td {
 }
 
 .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .attendance-status {
     color: #059669;
     font-weight: 600;
-    font-size: 11px;
+    font-size: 10px;
     background: #d1fae5;
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 3px 6px;
+    border-radius: 4px;
     display: inline-block;
-    margin-top: 4px;
+    margin-top: 3px;
 }
 
 .time-slot {
     color: #6b7280;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 500;
     background: #f3f4f6;
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 3px 6px;
+    border-radius: 4px;
     display: inline-block;
-    margin-top: 4px;
+    margin-top: 3px;
+}
+
+/* Empty cell styling */
+.schedule-cell:has-text("-") {
+    color: #9ca3af;
+    font-weight: 500;
+    text-align: center;
+    font-size: 18px;
+    opacity: 0.6;
 }
 
 /* Footer */
@@ -364,6 +414,12 @@ td {
     animation: fadeInUp 0.6s ease-out;
 }
 
+/* Animation cho multiple classes */
+.class-item:nth-child(1) { animation-delay: 0.1s; }
+.class-item:nth-child(2) { animation-delay: 0.2s; }
+.class-item:nth-child(3) { animation-delay: 0.3s; }
+.class-item:nth-child(4) { animation-delay: 0.4s; }
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .main-content {
@@ -374,6 +430,11 @@ td {
 
     .footer {
         margin-left: 0;
+    }
+
+    td {
+        min-height: 140px;
+        max-height: 180px;
     }
 }
 
@@ -414,7 +475,28 @@ td {
     }
 
     td {
-        height: 100px;
-        padding: 8px 6px;
+        min-height: 120px;
+        max-height: 160px;
+        padding: 6px 4px;
+    }
+
+    .class-item {
+        padding: 8px;
+        margin: 3px 0;
+        max-height: 100px;
+    }
+
+    .class-code {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .class-info {
+        font-size: 10px;
+    }
+
+    .time-slot {
+        font-size: 9px;
+        padding: 2px 4px;
     }
 }
