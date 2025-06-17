@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #ffffff;
     min-height: 100vh;
     color: #333;
 }
@@ -62,23 +62,23 @@ body {
 }
 
 .welcome-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #ffffff; /* hoặc giữ background như cũ nếu bạn dùng hiệu ứng mờ */
+    backdrop-filter: blur(20px); /* giữ hoặc bỏ tuỳ bạn */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* đổi màu viền sáng */
     border-radius: 20px;
     padding: 32px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: white;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    color: #222222; /* đổi màu chữ */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); /* làm shadow nhẹ hơn cho nền sáng */
 }
 
 .welcome-text h1 {
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, #ffffff, #e0e0e0);
+    background: linear-gradient(135deg, #333, #666); /* chuyển sang gradient đậm */
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -100,7 +100,8 @@ body {
 
 .welcome-avatar {
     font-size: 4rem;
-    opacity: 0.3;
+    opacity: 0.6; /* tăng độ rõ */
+    color: #888888; /* hoặc đổi sang màu xám */
 }
 
 /* Stats Grid */

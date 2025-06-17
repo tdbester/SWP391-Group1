@@ -47,7 +47,9 @@
                     </div>
                 </div>
                 <div class="welcome-avatar">
-                    <i class="fas fa-user-circle"></i>
+                    <a href="View/profile.jsp">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
                 </div>
             </div>
         </div>
