@@ -30,9 +30,9 @@
             </div>
             <div class="nav-section">
                 <a href="${pageContext.request.contextPath}/Consultation?action=list"
-                   class="nav-item ${pageContext.request.requestURI.contains('consultation-list.jsp') ? 'active' : ''}"
+                   class="nav-item ${pageContext.request.requestURI.contains('student-schedule.jsp') ? 'active' : ''}"
                    role="link"
-                   aria-current="${pageContext.request.requestURI.contains('consultation-list.jsp') ? 'page' : 'false'}">
+                   aria-current="${pageContext.request.requestURI.contains('student-schedule.jsp') ? 'page' : 'false'}">
                     <i class="fa-solid fa-building" aria-hidden="true"></i>
                     <span>Thời khoá biểu</span>
                 </a>

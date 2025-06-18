@@ -29,7 +29,7 @@ public class StudentApplicationServlet extends HttpServlet {
         StudentDAO studentDAO = new StudentDAO();
         CourseDAO courseDAO = new CourseDAO();
 
-        Student student = studentDAO.getStudentByAccountId(studentId);
+        Student student = studentDAO.getStudentById(studentId);
         ArrayList<Course> courseList = courseDAO.getAllCourses();
 
         request.setAttribute("student", student);
@@ -38,6 +38,7 @@ public class StudentApplicationServlet extends HttpServlet {
         request.getRequestDispatcher("/View/student-application.jsp").forward(request, response);
     }
 
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         String action = request.getParameter("action");

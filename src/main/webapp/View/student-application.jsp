@@ -535,11 +535,10 @@
                         </div>
                         <div class="card-body">
                             <div class="info-box">
-                                <p><strong>Họ và tên:</strong><br>Nguyễn Văn A</p>
-                                <p><strong>Mã học sinh:</strong><br>HS2024001</p>
-                                <p><strong>Lớp hiện tại:</strong><br><span class="badge badge-primary">12A1</span></p>
-                                <p><strong>GVCN:</strong><br>Cô Nguyễn Thị Hương</p>
-                                <p><strong>Năm học:</strong><br>2024-2025</p>
+                                <p><strong>Họ và tên:</strong><br>${student.name}</p>
+                                <p><strong>Mã học sinh:</strong><br>${student.id}</p>
+                                <p><strong>Lớp hiện tại:</strong><br>${student.className}</p>
+                                <p><strong>Số điện thoại:</strong><br>${student.phoneNumber}</p>
                             </div>
                         </div>
                     </div>
