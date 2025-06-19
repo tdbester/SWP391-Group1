@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.List;
 
-@WebServlet("/teacher/schedule")
+@WebServlet(name = "StudentScheduleServlet", value = "/StudentSchedule")
 public class StudentScheduleServlet extends HttpServlet {
     public static StudentDAO studentDAO = new StudentDAO();
     public static StudentScheduleDAO studentScheduleDAO = new StudentScheduleDAO();
@@ -23,10 +23,10 @@ public class StudentScheduleServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
-        Account account = (Account) session.getAttribute("user");
+        Account account = (Account) session.getAttribute("account");
 
         if (account == null) {
-            response.sendRedirect("/login.jsp");
+            response.sendRedirect("View/login.jsp");
             return;
         }
 

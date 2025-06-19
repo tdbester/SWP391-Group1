@@ -5,10 +5,10 @@
   Time: 10:08 PM
   To change this template use File | Settings | File Templates.
 --%>
-<!DOCTYPE html>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<meta charset="UTF-8">
+<!DOCTYPE html>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sidebar and Header Demo</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
@@ -29,7 +29,7 @@
                 </a>
             </div>
             <div class="nav-section">
-                <a href="${pageContext.request.contextPath}/Consultation?action=list"
+                <a href="${pageContext.request.contextPath}/StudentSchedule"
                    class="nav-item ${pageContext.request.requestURI.contains('student-schedule.jsp') ? 'active' : ''}"
                    role="link"
                    aria-current="${pageContext.request.requestURI.contains('student-schedule.jsp') ? 'page' : 'false'}">

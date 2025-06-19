@@ -78,6 +78,7 @@ public class LoginServlet extends HttpServlet {
 
                 // Create session and store user information
                 HttpSession session = request.getSession();
+                session.setMaxInactiveInterval(30 * 60);
                 session.setAttribute("account", account);
                 session.setAttribute("accountId", account.getId());
                 session.setAttribute("userEmail", account.getEmail());

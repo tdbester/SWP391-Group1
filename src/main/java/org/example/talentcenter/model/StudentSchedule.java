@@ -10,15 +10,12 @@ public class StudentSchedule {
     private LocalTime endTime;
     private int roomId;
     private int classRoomId;
-
-    //dữ liệu đã tham gia
     private String className;
     private String courseTitle;
     private String roomCode;
     private int teacherId;
     private String teacherName;
 
-    // Constructors
     public StudentSchedule() {}
 
     public StudentSchedule(int id, LocalDate date, LocalTime startTime, LocalTime endTime,

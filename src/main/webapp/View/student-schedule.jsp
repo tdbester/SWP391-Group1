@@ -5,7 +5,7 @@
   Time: 10:59 PM
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
 <%@ page import="java.util.*" %>
 <%@ page import="java.time.*" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
@@ -71,33 +71,16 @@
     LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM");
 %>
-<!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
+    <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thời Khóa Biểu Tuần - TALENT01</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/schedule.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/student-sidebar.css">
 </head>
 <body>
-<!-- Header -->
-<div class="header">
-    <div class="logo">TALENT01</div>
-    <div class="nav">
-        <a href="${pageContext.request.contextPath}/View/home.jsp">Trang Chủ</a>
-        <a href="#">Dịch Vụ</a>
-        <a href="#">Khóa Học</a>
-        <a href="#">Sự Kiện</a>
-        <a href="${pageContext.request.contextPath}/View/profile.jsp">Trang cá nhân</a>
-        <a href="/logout">Đăng Xuất</a>
-    </div>
-</div>
-
-<!-- Sidebar -->
-<%@ include file="student-sidebar.jsp" %>
-
+<jsp:include page="header.jsp" />
 <!-- Main Content -->
 <div class="main-content">
     <div class="container">
@@ -108,24 +91,31 @@
                 <thead>
                 <tr>
                     <th class="slot-header">SLOT</th>
-                    <th class="day-header">Thứ 2<br><span class="date"><%=startOfWeek.format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 3<br><span class="date"><%=startOfWeek.plusDays(1).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 4<br><span class="date"><%=startOfWeek.plusDays(2).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 5<br><span class="date"><%=startOfWeek.plusDays(3).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 6<br><span class="date"><%=startOfWeek.plusDays(4).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 7<br><span class="date"><%=startOfWeek.plusDays(5).format(dateFormatter)%></span></th>
-                    <th class="day-header">Chủ nhật<br><span class="date"><%=startOfWeek.plusDays(6).format(dateFormatter)%></span></th>
+                    <th class="day-header">Thứ 2<br><span class="date"><%=startOfWeek.format(dateFormatter)%></span>
+                    </th>
+                    <th class="day-header">Thứ 3<br><span
+                            class="date"><%=startOfWeek.plusDays(1).format(dateFormatter)%></span></th>
+                    <th class="day-header">Thứ 4<br><span
+                            class="date"><%=startOfWeek.plusDays(2).format(dateFormatter)%></span></th>
+                    <th class="day-header">Thứ 5<br><span
+                            class="date"><%=startOfWeek.plusDays(3).format(dateFormatter)%></span></th>
+                    <th class="day-header">Thứ 6<br><span
+                            class="date"><%=startOfWeek.plusDays(4).format(dateFormatter)%></span></th>
+                    <th class="day-header">Thứ 7<br><span
+                            class="date"><%=startOfWeek.plusDays(5).format(dateFormatter)%></span></th>
+                    <th class="day-header">Chủ nhật<br><span
+                            class="date"><%=startOfWeek.plusDays(6).format(dateFormatter)%></span></th>
                 </tr>
                 </thead>
                 <tbody>
                 <%
                     String[] slotNames = {"Sáng", "Chiều", "Tối"};
                     String[] dayKeys = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
-
                     for (String slotName : slotNames) {
                 %>
                 <tr>
-                    <td class="slot-cell"><%=slotName%></td>
+                    <td class="slot-cell"><%=slotName%>
+                    </td>
                     <%
                         for (String dayKey : dayKeys) {
                             List<StudentSchedule> daySlotSchedules = weekSchedule.get(dayKey).get(slotName);
@@ -143,10 +133,12 @@
                                 String endTimeStr = schedule.getEndTime().format(timeFormatter);
                         %>
                         <div class="class-item">
-                            <div class="class-code"><%=schedule.getCourseTitle()%></div>
+                            <div class="class-code"><%=schedule.getCourseTitle()%>
+                            </div>
                             <div class="class-info">
                                 Lớp: <%=schedule.getClassName()%><br>
                                 Phòng: <%=schedule.getRoomCode()%><br>
+                                Giảng viên: <%=schedule.getTeacherName()%><br>
                                 <span class="time-slot">(<%=startTimeStr%>-<%=endTimeStr%>)</span>
                             </div>
                         </div>
@@ -168,10 +160,8 @@
     </div>
 </div>
 
-<!-- Footer -->
-<div class="footer">
-    <p>Copyright © 2025 Talent Center Management. SWP391-Group 01.</p>
-</div>
+<jsp:include page="footer.jsp" />
+
 
 </body>
 </html>
