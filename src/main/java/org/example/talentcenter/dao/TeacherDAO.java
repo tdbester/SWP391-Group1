@@ -1,9 +1,18 @@
 package org.example.talentcenter.dao;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class TeacherDAO {
-    public static int getTeacherIdByAccountId(Connection conn, int accountId) throws SQLException {
+    private Connection conn;
+
+    public TeacherDAO(Connection conn) {
+        this.conn = conn;
+    }
+
+    public int getTeacherIdByAccountId(int accountId) throws SQLException {
         String sql = "SELECT Id FROM Teacher WHERE AccountId = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);

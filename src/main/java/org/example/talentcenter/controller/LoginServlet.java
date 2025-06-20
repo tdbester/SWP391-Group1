@@ -64,7 +64,7 @@ public class LoginServlet extends HttpServlet {
         if (email == null || email.trim().isEmpty() ||
                 password == null || password.trim().isEmpty()) {
             request.setAttribute("error", "Vui lòng nhập đầy đủ email và mật khẩu");
-            request.getRequestDispatcher("View/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/login.jsp").forward(request, response);
             return;
         }
 
@@ -89,22 +89,19 @@ public class LoginServlet extends HttpServlet {
                 if (roleName != null) {
                     switch (roleName.toLowerCase()) {
                         case "admin":
-                            response.sendRedirect("View/home.jsp");
+                            response.sendRedirect(request.getContextPath() + "/View/home.jsp");
                             break;
                         case "student":
-                            response.sendRedirect("View/home.jsp");
+                            response.sendRedirect(request.getContextPath() + "/View/home.jsp");
                             break;
                         case "teacher":
-                            response.sendRedirect("View/teacher-dashboard.jsp");
-                            break;
-                        case "accountant":
-                            response.sendRedirect("View/home.jsp");
+                            response.sendRedirect(request.getContextPath() + "/View/teacher-dashboard.jsp");
                             break;
                         case "sale":
-                            response.sendRedirect("View/sale-dashboard.jsp");
+                            response.sendRedirect(request.getContextPath() + "/View/sale-dashboard.jsp");
                             break;
                         default:
-                            response.sendRedirect("View/home.jsp");
+                            response.sendRedirect(request.getContextPath() + "/View/home.jsp");
                             break;
 
                     }
@@ -115,14 +112,14 @@ public class LoginServlet extends HttpServlet {
             } else {
                 request.setAttribute("error", "Email hoặc mật khẩu không đúng");
                 request.setAttribute("email", email);
-                request.getRequestDispatcher("View/login.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/login.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại.");
             request.setAttribute("email", email); // Keep email for user convenience
-            request.getRequestDispatcher("View/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/login.jsp").forward(request, response);
         }
     }
 

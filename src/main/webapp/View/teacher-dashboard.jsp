@@ -47,7 +47,7 @@
                     </div>
                 </div>
                 <div class="welcome-avatar">
-                    <a href="View/profile.jsp">
+                    <a href="<%=request.getContextPath()%>/profile">
                         <i class="fas fa-user-circle"></i>
                     </a>
                 </div>

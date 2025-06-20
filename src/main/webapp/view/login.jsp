@@ -28,10 +28,10 @@
         <%
             }
         %>
-        <form action="login" method="post">
+        <form action="<%= request.getContextPath() %>/login" method="post">
             <input type="text" name="email" pattern="[^ @]*@[^ @]*" placeholder="Email" required>
             <input type="password" name="password" placeholder="Mật khẩu" required>
-            <a href="requestPassword.jsp">Quên mật khẩu?</a>
+            <a href="<%= request.getContextPath() %>/requestPassword">Quên mật khẩu?</a>
             <input type="submit" class="button" value="Đăng nhập">
         </form>
     </div>
