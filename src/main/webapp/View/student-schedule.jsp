@@ -78,10 +78,11 @@
     <title>Thời Khóa Biểu Tuần - TALENT01</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/schedule.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
 </head>
 <body>
 <jsp:include page="header.jsp" />
-<!-- Main Content -->
+<jsp:include page="student-sidebar.jsp" />
 <div class="main-content">
     <div class="container">
         <h1>Thời Khóa Biểu</h1>

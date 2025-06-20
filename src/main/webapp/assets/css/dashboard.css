@@ -1,13 +1,75 @@
 /*Dashboard CSS*/
-.main-content {
-    flex: 1;
-    padding: 30px;
-    overflow-y: auto;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.container {
-    display: flex;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #ffffff;
     min-height: 100vh;
+    color: #333;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: calc(100vh - 144px); /* Adjust for header and footer */
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    min-height: calc(100vh - 144px);
+}
+.welcome-section {
+    margin-bottom: 32px;
+}
+
+.welcome-card {
+    background: #ffffff; /* hoặc giữ background như cũ nếu bạn dùng hiệu ứng mờ */
+    backdrop-filter: blur(20px); /* giữ hoặc bỏ tuỳ bạn */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* đổi màu viền sáng */
+    border-radius: 20px;
+    padding: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #222222; /* đổi màu chữ */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); /* làm shadow nhẹ hơn cho nền sáng */
+}
+
+.welcome-text h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #333, #666); /* chuyển sang gradient đậm */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.welcome-text p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 16px;
+}
+
+.current-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.welcome-avatar {
+    font-size: 4rem;
+    opacity: 0.6; /* tăng độ rõ */
+    color: #888888; /* hoặc đổi sang màu xám */
 }
 
 .user-info {
@@ -28,28 +90,18 @@
     font-weight: bold;
 }
 
-/* Dashboard Header */
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding: 20px 0;
-    border-bottom: 2px solid #f0f0f0;
-}
+/*.header-left {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    gap: 15px;*/
+/*}*/
 
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.header-left h1 {
-    margin: 0;
-    color: #333;
-    font-size: 2rem;
-    font-weight: 600;
-}
+/*.header-left h1 {*/
+/*    margin: 0;*/
+/*    color: #333;*/
+/*    font-size: 2rem;*/
+/*    font-weight: 600;*/
+/*}*/
 
 .sidebar-toggle-main {
     background: #8d78e4;
@@ -66,10 +118,10 @@
     background: #7a6ad8;
 }
 
-.header-right {
-    display: flex;
-    align-items: center;
-}
+/*.header-right {*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*}*/
 
 .user-info-header {
     display: flex;
@@ -78,7 +130,7 @@
     background: white;
     padding: 10px 20px;
     border-radius: 25px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .user-name-header {
@@ -205,7 +257,7 @@
     background: white;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 .sale-course-table thead {
@@ -262,19 +314,33 @@
     flex-wrap: wrap;
 }
 
+
 .stat-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    flex: 1;
-    min-width: 220px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .stat-icon {
-    font-size: 2rem;
-    margin-bottom: 10px;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
 }
 
 .stat-number {
@@ -317,7 +383,7 @@
     background: #ffffff;
     padding: 25px;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .card-title {
@@ -327,7 +393,6 @@
     color: #8d78e4;
 }
 
-/* Schedule Items */
 .schedule-item {
     display: flex;
     align-items: center;
@@ -390,7 +455,7 @@
     padding: 15px;
     border-radius: 8px;
     background: #f8f9fa;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
 .request-title {

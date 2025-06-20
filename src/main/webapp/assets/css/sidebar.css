@@ -1,121 +1,116 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #7a6ad8;
-    min-height: 100vh;
-    color: #333;
-}
-
-.dashboard {
-    display: flex;
-    min-height: 100vh;
-}
-
-/* SIDEBAR STYLES */
+/* Sidebar Styles */
 .sidebar {
     width: 280px;
-    background: #7a6ad8;
-    backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, #7a6ad8 0%, #9b7bfa 100%);
+    backdrop-filter: blur(20px);
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     padding: 20px;
     color: white;
     position: fixed;
-    top: 70px; /* Đặt sidebar bắt đầu từ dưới header (giả sử header cao 70px) */
-    left: 0;
-    height: calc(100vh - 70px); /* Chiều cao = 100vh - chiều cao header */
+    top: 58px;
+    height: calc(100vh - 58px);
     overflow-y: auto;
-    z-index: 100;
-}
-
-/* Main content cần margin-left để không bị che bởi sidebar */
-.main-content {
-    margin-left: 280px;
-    flex: 1;
-    padding: 20px;
-    padding-top: 70px; /* ✅ THÊM DÒNG NÀY */
-}
-
-.logo {
-    display: flex;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.logo i {
-    font-size: 2rem;
-    margin-right: 10px;
-    color: #4CAF50;
-}
-
-.logo h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
+    z-index: 999;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.1);
 }
 
 .nav-section {
-    margin-bottom: 25px;
-}
-
-.nav-section-title {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
-    font-weight: 600;
+    margin-bottom: 20px;
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    padding: 12px 15px;
-    margin-bottom: 5px;
-    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 8px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+    text-decoration: none;
+    color: white;
     position: relative;
     overflow: hidden;
-    text-decoration: none;
-    color: inherit;
+}
+
+.nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.nav-item:hover::before {
+    left: 100%;
 }
 
 .nav-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateX(5px);
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(8px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .nav-item.active {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    transform: translateX(8px);
 }
 
 .nav-item i {
-    margin-right: 12px;
-    font-size: 1rem;
-    width: 18px;
+    margin-right: 16px;
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
 }
 
 .nav-item span {
-    font-size: 0.9rem;
+    font-size: 16px;
+    font-weight: 500;
 }
 
-/* Responsive cho mobile */
-@media (max-width: 768px) {
+/* Animations */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.nav-item {
+    animation: slideInRight 0.6s ease-out;
+}
+.dashboard {
+    display: flex;
+    flex-direction: row;
+    min-height: 100vh;
+}
+
+.student-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+
+/* Responsive Design for Sidebar */
+@media (max-width: 1024px) {
     .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        top: 0;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
     }
 
-    .main-content {
-        margin-left: 0;
+    .sidebar.active {
+        transform: translateX(0);
     }
 }

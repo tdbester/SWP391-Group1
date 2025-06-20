@@ -15,7 +15,7 @@ public class StudentDAO {
                               JOIN Account a ON s.AccountId = a.id
                               JOIN Student_Class sc ON s.id = sc.StudentId
                               JOIN ClassRooms c ON sc.ClassRoomId = c.id
-                              WHERE s.Id = ?
+                              WHERE s.AccountId = ?
                 """;
 
         try (Connection conn = DBConnect.getConnection();

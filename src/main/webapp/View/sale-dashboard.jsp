@@ -12,8 +12,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sale Dashboard - TALENT01</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
 <jsp:include page="header.jsp"/>
@@ -21,21 +23,20 @@
 <div class="container">
     <jsp:include page="sale-sidebar.jsp" />
     <div class="main-content">
-        <div class="dashboard-header">
-            <div class="header-left">
-                <button class="sidebar-toggle-main" onclick="toggleSidebar()">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h1>Sale Dashboard</h1>
-            </div>
-            <div class="header-right">
-                <div class="user-info-header">
-                    <div class="user-details-header">
-                        <div class="user-name-header">Xin chào, Nguyễn Văn A</div>
+        <div class="welcome-section">
+            <div class="welcome-card">
+                <div class="welcome-text">
+                    <h1>Xin chào nhân viên Sale Nguyen Van A!</h1>
+                    <p>Hôm nay là ngày tuyệt vời để làm việc</p>
+                    <div class="current-time">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="currentDate"></span>
                     </div>
-                    <div class="user-avatar-header">
-                        <i class="fas fa-user"></i>
-                    </div>
+                </div>
+                <div class="welcome-avatar">
+                    <a href="<%=request.getContextPath()%>/profile">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
                 </div>
             </div>
         </div>

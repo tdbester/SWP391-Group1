@@ -47,8 +47,6 @@ public class RequestDAO {
         return requests;
     }
 
-
-
     public boolean markAsCreated(int requestId) {
         String sql = "UPDATE Request SET Status = 'Đã xử lý' WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
