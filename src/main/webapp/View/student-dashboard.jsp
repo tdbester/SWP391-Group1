@@ -145,10 +145,6 @@
 </head>
 <body>
 <jsp:include page="header.jsp" />
-<!-- SIDEBAR -->
-<!-- Tách sidebar thành file riêng để tái sử dụng -->
-
-<!-- dashboard -->
 
 <div class="container">
     <jsp:include page="student-sidebar.jsp" />

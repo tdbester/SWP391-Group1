@@ -1,4 +1,3 @@
-
 * {
     margin: 0;
     padding: 0;
@@ -7,31 +6,38 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #7a6ad8;
     min-height: 100vh;
     color: #333;
 }
 
 .dashboard {
+    display: flex;
     min-height: 100vh;
 }
 
 /* SIDEBAR STYLES */
 .sidebar {
     width: 280px;
-    background: #8d78e4;
-    color: white;
+    background: #7a6ad8;
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
     padding: 20px;
-    overflow-y: auto;
-    position: sticky;
-    top: 0;
+    color: white;
+    position: fixed;
+    top: 70px; /* Đặt sidebar bắt đầu từ dưới header (giả sử header cao 70px) */
     left: 0;
-    height: 100vh;
-    z-index: 1000;
+    height: calc(100vh - 70px); /* Chiều cao = 100vh - chiều cao header */
+    overflow-y: auto;
+    z-index: 100;
 }
 
+/* Main content cần margin-left để không bị che bởi sidebar */
 .main-content {
-    padding: 30px;
-    min-height: 100vh;
+    margin-left: 280px;
+    flex: 1;
+    padding: 20px;
+    padding-top: 70px; /* ✅ THÊM DÒNG NÀY */
 }
 
 .logo {
@@ -100,3 +106,16 @@ body {
     font-size: 0.9rem;
 }
 
+/* Responsive cho mobile */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        top: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+}

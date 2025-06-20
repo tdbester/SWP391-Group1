@@ -5,16 +5,11 @@
   Time: 11:33 PM
   To change this template use File | Settings | File Templates.
 --%>
-<!DOCTYPE html>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sidebar and Header Demo</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <!-- SIDEBAR -->
-<div class="dashboard">
     <div class="sidebar">
 
         <div class="logo">
@@ -63,7 +58,6 @@
             </div>
         </nav>
     </div>
-</div>
 <script>
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {

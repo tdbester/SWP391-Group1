@@ -28,7 +28,7 @@
         <%
             }
         %>
-        <form action="login" method="post">
+        <form action="${pageContext.request.contextPath}/login" method="post">
             <input type="text" name="email" pattern="[^ @]*@[^ @]*" placeholder="Email" required>
             <input type="password" name="password" placeholder="Mật khẩu" required>
             <a href="requestPassword.jsp">Quên mật khẩu?</a>

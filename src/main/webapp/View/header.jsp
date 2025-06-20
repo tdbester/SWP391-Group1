@@ -56,10 +56,19 @@
 <header>
   <div class="logo">TALENT01</div>
   <div class="nav">
-    <a href="home.jsp">Trang Chủ</a>
+    <a href="<%=request.getContextPath()%>/View/home.jsp">Trang Chủ</a>
     <a href="#">Dịch Vụ</a>
     <a href="#">Khóa Học</a>
-    <a href="#">Sự Kiện</a>
-    <a href="logout">Đăng Xuất</a>
+    <%
+      String role = (String) session.getAttribute("userRole");
+      String dashboardURL = "View/home.jsp";
+      if ("teacher".equalsIgnoreCase(role)) {
+        dashboardURL = request.getContextPath() + "/View/teacher-dashboard.jsp";
+      } else if ("sale".equalsIgnoreCase(role)) {
+        dashboardURL ="/View/sale-dashboard.jsp";
+      }
+    %>
+    <a href="<%=dashboardURL%>">Dashboard</a>
+    <a href="<%=request.getContextPath()%>/logout">Đăng Xuất</a>
   </div>
 </header>
