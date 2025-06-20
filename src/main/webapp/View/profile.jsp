@@ -9,21 +9,13 @@
 </head>
 <body>
 
-<header>
-  <div class="logo">TALENT01</div>
-  <div class="nav">
-    <a href="home.jsp">Trang Chủ</a>
-    <a href="#">Dịch Vụ</a>
-    <a href="#">Khóa Học</a>
-    <a href="#">Sự Kiện</a>
-    <a href="${pageContext.request.contextPath}/logout">Đăng Xuất</a>
-  </div>
-</header>
+<%@ include file="header.jsp" %>
 
 <div class="container">
   <div class="sidebar">
     <a href="#profile-section" class="active">Trang cá nhân</a>
     <a href="#password-section">Đổi mật khẩu</a>
+    <a href="#theme-section">Đổi giao diện</a>
   </div>
 
   <div class="profile-content">
@@ -51,7 +43,7 @@
                 (org.example.talentcenter.model.Account) session.getAttribute("account");
       %>
 
-      <form method="post" action="${pageContext.request.contextPath}/profile">
+      <form method="post" action="profile">
         <label for="name">Họ và tên:</label>
         <input type="text" id="name" name="name"
                value="<%= (account != null && account.getFullName() != null) ? account.getFullName() : "" %>" required>
@@ -91,7 +83,7 @@
       </div>
       <% } %>
 
-      <form method="post" action="${pageContext.request.contextPath}/changePassword">
+      <form method="post" action="changePassword">
         <label for="currentPassword">Mật khẩu hiện tại:</label>
         <input type="password" name="currentPassword" required>
 
@@ -104,8 +96,17 @@
         <button type="submit" class="btn-save">Đổi mật khẩu</button>
       </form>
     </div>
+
+    <div id="theme-section" class="profile-card">
+      <div class="profile-header">
+        <h2>Đổi giao diện</h2>
+      </div>
+
+    </div>
   </div>
 </div>
+
+<%@ include file="footer.jsp" %>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/profile.js"></script>
