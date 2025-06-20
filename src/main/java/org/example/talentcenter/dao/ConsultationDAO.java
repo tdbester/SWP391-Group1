@@ -54,11 +54,12 @@ public class ConsultationDAO {
         }
         return null;
     }
+
     // Get all Consultations from the database
     public ArrayList<Consultation> getAllConsultations() {
         ArrayList<Consultation> Consultations = new ArrayList<>();
         String query = "SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.Status " +
-                "FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id";
+                "FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id order by CreatedAt desc";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
@@ -191,5 +192,4 @@ public class ConsultationDAO {
             return false;
         }
     }
-
 }

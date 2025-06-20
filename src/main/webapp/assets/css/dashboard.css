@@ -1,4 +1,4 @@
-/*Dash board css*/
+/*Dashboard CSS*/
 .main-content {
     flex: 1;
     padding: 30px;
@@ -28,30 +28,232 @@
     font-weight: bold;
 }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-    }
-
-    .main-content {
-        margin-left: 0;
-    }
+/* Dashboard Header */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 2px solid #f0f0f0;
 }
 
-/* Sample content area */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-left h1 {
+    margin: 0;
+    color: #333;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.sidebar-toggle-main {
+    background: #8d78e4;
+    color: white;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-toggle-main:hover {
+    background: #7a6ad8;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.user-info-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.user-name-header {
+    font-weight: 600;
+    color: #333;
+}
+
+.user-avatar-header {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8d78e4, #7a6ad8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+}
+
+/* Content Area */
 .content-area {
     background: rgba(255, 255, 255, 0.95);
     padding: 40px;
     border-radius: 15px;
     backdrop-filter: blur(10px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    text-align: center;
 }
 
+/* Sale Quick Navigation */
+.sale-quick-nav {
+    margin-bottom: 40px;
+}
 
+.sale-quick-nav h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.sale-nav-buttons {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.sale-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 25px;
+    background: linear-gradient(135deg, #8d78e4, #7a6ad8);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(141, 120, 228, 0.3);
+}
+
+.sale-nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(141, 120, 228, 0.4);
+    background: linear-gradient(135deg, #7a6ad8, #6b5acf);
+}
+
+.sale-nav-btn i {
+    font-size: 1.1rem;
+}
+
+/* Sale Notifications */
+.sale-notifications {
+    margin-bottom: 40px;
+    background: #f8f9ff;
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 5px solid #8d78e4;
+}
+
+.sale-notifications h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.sale-notification-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sale-notification-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e0e0;
+    color: #555;
+    line-height: 1.5;
+}
+
+.sale-notification-list li:last-child {
+    border-bottom: none;
+}
+
+.sale-notification-list li strong {
+    color: #8d78e4;
+    font-weight: 600;
+}
+
+/* Sale New Courses */
+.sale-new-courses {
+    margin-bottom: 30px;
+}
+
+.sale-new-courses h2 {
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.sale-course-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.sale-course-table thead {
+    background: linear-gradient(135deg, #8d78e4, #7a6ad8);
+    color: white;
+}
+
+.sale-course-table th,
+.sale-course-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.sale-course-table th {
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sale-course-table tbody tr:hover {
+    background: #f8f9ff;
+    transition: background-color 0.3s ease;
+}
+
+.sale-course-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.sale-btn-view {
+    background: #2ecc71;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.sale-btn-view:hover {
+    background: #27ae60;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3);
+}
+
+/* Stats Grid (existing styles) */
 .stats-grid {
     display: flex;
     gap: 20px;
@@ -257,4 +459,80 @@
     border-radius: 5px;
     font-size: 0.9rem;
     cursor: pointer;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .sale-nav-buttons {
+        flex-direction: column;
+    }
+
+    .sale-nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .header-left h1 {
+        font-size: 1.5rem;
+    }
+
+    .content-area {
+        padding: 25px;
+    }
+
+    .sale-course-table {
+        font-size: 0.9rem;
+    }
+
+    .sale-course-table th,
+    .sale-course-table td {
+        padding: 10px 12px;
+    }
+
+    .stats-grid {
+        flex-direction: column;
+    }
+
+    .stat-card {
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .sale-course-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .user-info-header {
+        padding: 8px 15px;
+    }
+
+    .user-name-header {
+        font-size: 0.9rem;
+    }
 }
