@@ -1,4 +1,4 @@
-/*
+/* 
 
 TemplateMo 586 Scholar
 
@@ -20,16 +20,16 @@ Table of contents
 09. footer
 
 --------------------------------------------- */
-/*
+/* 
 ---------------------------------------------
 font & reset css
----------------------------------------------
+--------------------------------------------- 
 */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900");
-/*
+/* 
 ---------------------------------------------
 reset
----------------------------------------------
+--------------------------------------------- 
 */
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, div
 pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q,
@@ -112,7 +112,7 @@ img {
 /*
 ---------------------------------------------
 Global Styles
----------------------------------------------
+--------------------------------------------- 
 */
 html,
 body {
@@ -176,10 +176,10 @@ body {
   color: #fff;
 }
 
-/*
+/* 
 ---------------------------------------------
 Pre-loader Style
----------------------------------------------
+--------------------------------------------- 
 */
 
 .js-preloader {
@@ -210,29 +210,29 @@ Pre-loader Style
 
 @-webkit-keyframes dot {
   50% {
-    -webkit-transform: translateX(96px);
-    transform: translateX(96px);
+      -webkit-transform: translateX(96px);
+      transform: translateX(96px);
   }
 }
 
 @keyframes dot {
   50% {
-    -webkit-transform: translateX(96px);
-    transform: translateX(96px);
+      -webkit-transform: translateX(96px);
+      transform: translateX(96px);
   }
 }
 
 @-webkit-keyframes dots {
   50% {
-    -webkit-transform: translateX(-31px);
-    transform: translateX(-31px);
+      -webkit-transform: translateX(-31px);
+      transform: translateX(-31px);
   }
 }
 
 @keyframes dots {
   50% {
-    -webkit-transform: translateX(-31px);
-    transform: translateX(-31px);
+      -webkit-transform: translateX(-31px);
+      transform: translateX(-31px);
   }
 }
 
@@ -278,10 +278,10 @@ Pre-loader Style
 
 
 
-/*
+/* 
 ---------------------------------------------
 Header Style
----------------------------------------------
+--------------------------------------------- 
 */
 
 .background-header {
@@ -571,7 +571,7 @@ Header Style
     font-weight: 400;
     color: #1e1e1e;
     background-color: #f1f0fe;
-    border-radius: 0px 0px 25px 25px;
+     border-radius: 0px 0px 25px 25px;
   }
   .background-header .main-nav .nav li,
   .header-area .main-nav .nav li {
@@ -657,13 +657,13 @@ Header Style
     padding-left: 0px !important;
     padding-right: 0px !important;
   }
-
+  
 }
 
-/*
+/* 
 ---------------------------------------------
 Banner Style
----------------------------------------------
+--------------------------------------------- 
 */
 
 .main-banner {
@@ -794,10 +794,10 @@ Banner Style
 }
 
 
-/*
+/* 
 ---------------------------------------------
 Services Style
----------------------------------------------
+--------------------------------------------- 
 */
 
 .services .service-item:hover .icon img {
@@ -849,10 +849,10 @@ Services Style
   margin-bottom: 25px;
 }
 
-/*
+/* 
 ---------------------------------------------
 About Style
----------------------------------------------
+--------------------------------------------- 
 */
 
 .about-us {
@@ -946,10 +946,10 @@ h2.accordion-header button {
 }
 
 
-/*
+/* 
 ---------------------------------------------
 Courses Style
----------------------------------------------
+--------------------------------------------- 
 */
 
 .courses {
@@ -1047,7 +1047,7 @@ Courses Style
   position: relative;
   justify-content: center;
   align-items: center;
-}
+} 
 
 .events_item .down-content {
   padding: 20px 30px 25px 30px;
@@ -1075,10 +1075,10 @@ Courses Style
 }
 
 
-/*
+/* 
 ---------------------------------------------
 Facts Style
----------------------------------------------
+--------------------------------------------- 
 */
 
 .fun-facts {
@@ -1137,15 +1137,15 @@ Facts Style
 }
 
 
-/*
+/* 
 ---------------------------------------------
 Team Style
----------------------------------------------
+--------------------------------------------- 
 */
 
 .team {
   margin-top: 100px;
-  padding-top: 140px;
+    padding-top: 140px;
 }
 
 .team-member {
@@ -1209,10 +1209,10 @@ Team Style
 }
 
 
-/*
+/* 
 ---------------------------------------------
 Testimonials Style
----------------------------------------------
+--------------------------------------------- 
 */
 
 .testimonials {
@@ -1316,10 +1316,10 @@ Testimonials Style
 }
 
 
-/*
+/* 
 ---------------------------------------------
 Events Style
----------------------------------------------
+--------------------------------------------- 
 */
 
 .events .section-heading {
@@ -1407,10 +1407,10 @@ Events Style
 }
 
 
-/*
+/* 
 ---------------------------------------------
 Contact Style
----------------------------------------------
+--------------------------------------------- 
 */
 
 .contact-us {
@@ -1461,7 +1461,7 @@ Contact Style
   padding: 30px 8px;
   line-height: 25px;
   height: 120px;
-  border-radius: 15px 60px 60px 15px;
+  border-radius: 15px 60px 60px 15px; 
   display: inline-block;
   text-align: center;
   color: #fff;
