@@ -1,5 +1,7 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java"  pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,28 +53,33 @@
 </head>
 <body>
 <jsp:include page="header.jsp"/>
-<%-- Đảm bảo bạn có file header.jsp --%>
-
 <div class="container mt-5">
     <h2 class="mb-4">Danh sách khóa học</h2>
-    <div class="row justify-content-between ms-1">
-        <a href="courses?action=new" class="btn btn-success mb-3 col-3">Tạo khóa học mới</a>
-        <form action="courses" method="get" class="col-6 mb-3 d-flex justify-content-end">
-            <input type="search"
-                   name="search"
-                   class="form-control me-2"
-                   placeholder="Tìm kiếm theo tiêu đề"
-                   value="${param.search}">
-            <select name="category" class="form-select me-2" style="width: 200px;">
+    <form action="courses" method="get" class="row g-2 mb-3">
+        <div class="col-auto">
+            <input type="search" name="search" class="form-control"
+                   placeholder="Tìm kiếm tiêu đề" value="${param.search}"/>
+        </div>
+        <div class="col-auto">
+            <select name="category" class="form-select">
                 <option value="">Tất cả danh mục</option>
                 <c:forEach var="cat" items="${categories}">
-                    <option value="${cat}" ${param.category == cat ? 'selected' : ''}> ${cat} </option>
-                </c:forEach> </select>
-            <button type="submit" class="btn btn-primary">Lọc</button>
-        </form>
+                    <option value="${cat.id}"
+                        ${param.category == cat.id.toString() ? 'selected' : ''}>
+                            ${cat.name}
+                    </option>
+                </c:forEach>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary">Lọc</button>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="courses?action=new" class="btn btn-success">Tạo mới</a>
+        </div>
+    </form>
 
-    </div>
-    <table class="table table-striped table-bordered align-middle">
+    <table class="table table-striped">
         <thead class="table-dark">
         <tr>
             <th>STT</th>
@@ -80,53 +87,45 @@
             <th>Giá</th>
             <th>Danh mục</th>
             <th>Ảnh</th>
-            <th>Người tạo</th>
             <th style="width: 150px;">Hành động</th>
         </tr>
         </thead>
+
         <tbody>
-        <c:forEach var="course" items="${courseList}" varStatus="status">
+        <c:forEach var="course" items="${courseList}" varStatus="st">
             <tr>
-                <td>${(currentIndex - 1) * 5 + status.index + 1}</td>
-                    <%-- Cập nhật STT cho phân trang --%>
+                <td>${(currentIndex-1)*5 + st.index + 1}</td>
                 <td>${course.title}</td>
-                <td>${course.price}</td>
-                <td>${course.category}</td>
+                <td><fmt:formatNumber value="${course.price}" type="number" groupingUsed="true"/> VNĐ</td>                <td>${course.category.name}</td>
                 <td>
                     <c:if test="${not empty course.image}">
-                        <img src="${course.image}" alt="Course Image" class="thumb-img"/>
-                    </c:if>
-                    <c:if test="${empty course.image}">
-                        <span class="text-muted">No Image</span>
+                        <img src="${course.image}" class="thumb-img"/>
                     </c:if>
                 </td>
-                <td>${course.fullname}</td>
                 <td>
-                    <a href="courses?action=edit&id=${course.id}" class="btn btn-sm btn-warning">Sửa</a>
+                    <a href="courses?action=edit&id=${course.id}" class="btn btn-warning btn-sm">Sửa</a>
                     <a href="courses?action=delete&id=${course.id}"
-                       class="btn btn-sm btn-danger"
-                       onclick="return confirm('Bạn có chắc chắn muốn xóa khóa học này không?');">
-                        Xóa
-                    </a>
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Xác nhận xóa?')">Xóa</a>
                 </td>
             </tr>
         </c:forEach>
         </tbody>
     </table>
-    <nav aria-label="Page navigation example">
+
+    <nav>
         <ul class="pagination">
             <c:forEach begin="1" end="${endP}" var="i">
-                <li class="page-item ${i == currentIndex ? 'active' : ''}"> <%-- Thêm class 'active' cho trang hiện tại --%>
-                    <a class="page-link" href="courses?index=${i}">${i}</a>
+                <li class="page-item ${i==currentIndex?'active':''}">
+                    <a class="page-link" href="courses?index=${i}&category=${param.category}&search=${param.search}">
+                            ${i}
+                    </a>
                 </li>
             </c:forEach>
         </ul>
     </nav>
 </div>
-
 <jsp:include page="footer.jsp"/>
-<%-- Đảm bảo bạn có file footer.jsp --%>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

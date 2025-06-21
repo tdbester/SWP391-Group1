@@ -1,15 +1,18 @@
 package org.example.talentcenter.controller;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
-import org.example.talentcenter.dao.CourseDAO; // Import CourseDAO
-import org.example.talentcenter.dto.CourseDto; // Import CourseDto
-import org.example.talentcenter.model.Course; // Import Course model
-import org.example.talentcenter.utilities.CourseCategory; // Import your CourseCategory enum
+import jakarta.servlet.http.*;
+import org.example.talentcenter.dao.CategoryDAO;
+import org.example.talentcenter.dao.CourseDAO;
+import org.example.talentcenter.dto.CourseDto;
+import org.example.talentcenter.model.Course;
+import org.example.talentcenter.model.Category;
+
+import com.cloudinary.Cloudinary;
+import com.cloudinary.Singleton;
+import com.cloudinary.utils.ObjectUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,367 +20,255 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Map; // For Cloudinary upload result
 
-import jakarta.servlet.annotation.MultipartConfig;
-import com.cloudinary.*;
-import com.cloudinary.utils.ObjectUtils;
+import static org.example.talentcenter.utilities.Const.TYPE_COURSE;
 
-
-@WebServlet("/courses") // Map this servlet to the /courses URL
-@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
-        maxFileSize = 1024 * 1024 * 10,       // 10MB
-        maxRequestSize = 1024 * 1024 * 50)    // 50MB
+@WebServlet("/courses")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2,    // 2MB
+        maxFileSize        = 1024 * 1024 * 10,  // 10MB
+        maxRequestSize     = 1024 * 1024 * 50   // 50MB
+)
 public class CourseServlet extends HttpServlet {
     private CourseDAO courseDAO;
+    private CategoryDAO categoryDAO;
 
     @Override
     public void init() {
-        courseDAO = new CourseDAO();
+        courseDAO    = new CourseDAO();
+        categoryDAO  = new CategoryDAO();
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "list";
-        }
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+//        HttpSession session = req.getSession(false);
+//        if (session == null || session.getAttribute("user") == null) {
+//            resp.sendRedirect("View/login.jsp");
+//            return;
+//        }
+        String action = req.getParameter("action");
+        if (action == null) action = "list";
 
         switch (action) {
-            case "new":
-                showNewCourseForm(request, response);
-                break;
-            case "edit":
-                showEditCourseForm(request, response);
-                break;
-            case "delete":
-                deleteCourse(request, response);
-                break;
-            case "view":
-                showCourseDetail(request, response);
-                break;
-            default:
-                listCourses(request, response);
-                break;
+            case "new":   showNewCourseForm(req, resp);      break;
+            case "edit":  showEditCourseForm(req, resp);     break;
+            case "delete":deleteCourse(req, resp);           break;
+            case "view":  showCourseDetail(req, resp);       break;
+            default:      listCourses(req, resp);            break;
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "list";
-        }
-        System.out.println("Course Action: " + action); // Log action for debugging
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        String action = req.getParameter("action");
+        if (action == null) action = "list";
 
         switch (action) {
-            case "insert":
-                insertCourse(request, response);
-                break;
-            case "update":
-                updateCourse(request, response);
-                break;
-            default:
-                response.sendRedirect("courses");
-                break;
+            case "insert": insertCourse(req, resp); break;
+            case "update": updateCourse(req, resp); break;
+            default:        resp.sendRedirect("courses"); break;
         }
     }
 
-    private void listCourses(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        String search = request.getParameter("search");
-        String category = request.getParameter("category");
-        final CourseCategory finalSelectedCategory;
+    private void listCourses(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        String search    = req.getParameter("search");
+        String catParam  = req.getParameter("category");
+        Category filterCat;
 
-        if(category != null && !category.isEmpty()){
-            try {
-                finalSelectedCategory = CourseCategory.valueOf(category.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                System.err.println("Invalid CourseCategory received: " + category);
-                request.setAttribute("errorMessage", "Invalid course category selected.");
-                showNewCourseForm(request, response);
-                return;
-            }
+        if (catParam != null && !catParam.isBlank()) {
+            filterCat = categoryDAO.getById(Integer.parseInt(catParam));
         } else {
-            finalSelectedCategory = null;
+            filterCat= null;
         }
 
+        int index = 1;
+        try { index = Integer.parseInt(req.getParameter("index")); }
+        catch (Exception ignored) { }
 
-        Integer index = 1;
-        if (request.getParameter("index") != null) {
-            try {
-                index = Integer.parseInt(request.getParameter("index"));
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid index parameter: " + request.getParameter("index"));
-                index = 1; // Default to first page
-            }
-        }
-
-        List<CourseDto> courses = courseDAO.pagingCourse(index);
-        List<CourseDto> filteredCourses = courses.stream()
-                .filter(course -> search == null || course.getTitle().toLowerCase().contains(search.toLowerCase()))
+        List<CourseDto> all = courseDAO.pagingCourse(index);
+        var filtered = all.stream()
+                .filter(c -> search == null
+                        || c.getTitle().toLowerCase().contains(search.toLowerCase()))
                 .toList();
 
-        if(finalSelectedCategory != null){
-            filteredCourses = filteredCourses.stream()
-                    .filter(x -> x.getCategory().equals(finalSelectedCategory))
-                    .toList();
-        }
+        var categoryFiltered = filterCat != null
+                ? filtered.stream()
+                        .filter(c -> c.getCategory().getId() == filterCat.getId())
+                        .toList()
+                : filtered;
 
+        int total   = courseDAO.getTotalCourse();
+        int endPage = (int)Math.ceil((double) total / 5);
 
-        for (CourseDto course : filteredCourses) {
-            System.out.println(course.getCategory());
-        }
+        req.setAttribute("courseList", filtered);
+        req.setAttribute("endP",        endPage);
+        req.setAttribute("currentIndex", index);
+        req.setAttribute("categories",  categoryDAO.getByType(TYPE_COURSE));
+        req.setAttribute("selectedCategory", filterCat != null ? filterCat.getId() : null);
 
-        request.setAttribute("courseList", filteredCourses);
-        int totalCourses = courseDAO.getTotalCourse();
-        int endPage = (int) Math.ceil((double) totalCourses / 5); // 5 courses per page
-        request.setAttribute("endP", endPage);
-        request.setAttribute("categories", CourseCategory.values());
-        request.setAttribute("currentIndex", index); // To highlight current page in pagination
-
-        request.getRequestDispatcher("./View/course.jsp").forward(request, response);
+        req.getRequestDispatcher("/View/course.jsp").forward(req, resp);
     }
 
-    private void showNewCourseForm(HttpServletRequest request, HttpServletResponse response)
+    private void showNewCourseForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // Pass all enum values to the JSP for dropdown
-        request.setAttribute("categories", CourseCategory.values());
-        request.getRequestDispatcher("./View/course-form.jsp").forward(request, response);
+        req.setAttribute("categories", categoryDAO.getByType (TYPE_COURSE));
+        req.getRequestDispatcher("/View/course-form.jsp").forward(req, resp);
     }
 
-    private void showCourseDetail(HttpServletRequest request, HttpServletResponse response)
+    private void showEditCourseForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
-            int id = Integer.parseInt(request.getParameter("id"));
-            Course course = courseDAO.getById(id);
-            if (course != null) {
-                request.setAttribute("course", course);
-                request.getRequestDispatcher("./View/user-course-detail.jsp").forward(request, response);
+            int id = Integer.parseInt(req.getParameter("id"));
+            Course c = courseDAO.getById(id);
+            if (c != null) {
+                req.setAttribute("course",      c);
+                req.setAttribute("categories",  categoryDAO.getByType (TYPE_COURSE));
+                req.getRequestDispatcher("/View/course-form.jsp").forward(req, resp);
             } else {
-                response.sendRedirect("courses?error=CourseNotFound");
+                resp.sendRedirect("courses?error=CourseNotFound");
             }
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid ID parameter for course detail: " + e.getMessage());
-            response.sendRedirect("courses?error=InvalidID");
+        } catch (NumberFormatException ex) {
+            resp.sendRedirect("courses?error=InvalidID");
         }
     }
 
-
-    private void showEditCourseForm(HttpServletRequest request, HttpServletResponse response)
+    private void showCourseDetail(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         try {
-            int id = Integer.parseInt(request.getParameter("id"));
-            Course existingCourse = courseDAO.getById(id);
-            if (existingCourse != null) {
-                request.setAttribute("course", existingCourse);
-                // Pass all enum values to the JSP for dropdown
-                request.setAttribute("categories", CourseCategory.values());
-                request.getRequestDispatcher("./View/course-form.jsp").forward(request, response);
+            int id = Integer.parseInt(req.getParameter("id"));
+            Course c = courseDAO.getById(id);
+            if (c != null) {
+                req.setAttribute("course", c);
+                req.getRequestDispatcher("/View/user-course-detail.jsp")
+                        .forward(req, resp);
             } else {
-                response.sendRedirect("courses?error=CourseNotFound");
+                resp.sendRedirect("courses?error=CourseNotFound");
             }
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid ID parameter for course edit: " + e.getMessage());
-            response.sendRedirect("courses?error=InvalidID");
+        } catch (NumberFormatException ex) {
+            resp.sendRedirect("courses?error=InvalidID");
         }
     }
 
-    private void insertCourse(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        String title = request.getParameter("title");
-        double price = 0.0;
-        try {
-            price = Double.parseDouble(request.getParameter("price"));
-        } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "Invalid price format.");
-            showNewCourseForm(request, response);
-            return;
-        }
-        String information = request.getParameter("information");
-        Part imagePart = request.getPart("imageFile"); // Name of the file input in the form
-        String categoryString = request.getParameter("category");
+    private void insertCourse(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        String title       = req.getParameter("title");
+        String info        = req.getParameter("information");
+        String catParam    = req.getParameter("category");
+        Part   imagePart   = req.getPart("imageFile");
+        int    createdBy;
 
-        // Ensure that createdBy is obtained from the authenticated user's session in a real app
-        // For simplicity, I'm parsing it from request parameter here, but it should be from session.
-        Integer createdBy = 0;
         try {
-            createdBy = Integer.parseInt(request.getParameter("createdBy"));
+            createdBy = Integer.parseInt(req.getParameter("createdBy"));
         } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "Invalid createdBy ID format.");
-            showNewCourseForm(request, response);
+            req.setAttribute("errorMessage", "Invalid creator ID.");
+            showNewCourseForm(req, resp);
             return;
         }
 
-        String imageUrl = null;
+        double price;
+        try {
+            price = Double.parseDouble(req.getParameter("price"));
+        } catch (NumberFormatException e) {
+            req.setAttribute("errorMessage", "Invalid price format.");
+            showNewCourseForm(req, resp);
+            return;
+        }
 
+        String imageUrl = uploadToCloudinary(imagePart);
+        Category category;
+        try {
+            category = categoryDAO.getById(Integer.parseInt(catParam));
+        } catch (Exception e) {
+            req.setAttribute("errorMessage", "Invalid category.");
+            showNewCourseForm(req, resp);
+            return;
+        }
+
+        Course c = new Course();
+        c.setTitle(title);
+        c.setInformation(info);
+        c.setPrice(price);
+        c.setCreatedBy(createdBy);
+        c.setImage(imageUrl);
+        c.setCategory(category);
+
+        courseDAO.insert(c);
+        resp.sendRedirect("courses");
+    }
+
+    private void updateCourse(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        int id = Integer.parseInt(req.getParameter("id"));
+        String title    = req.getParameter("title");
+        String info     = req.getParameter("information");
+        String catParam = req.getParameter("category");
+        Part   imagePart= req.getPart("imageFile");
+        int    createdBy;
+
+        try {
+            createdBy = Integer.parseInt(req.getParameter("createdBy"));
+        } catch (NumberFormatException e) {
+            req.setAttribute("errorMessage", "Invalid creator ID.");
+            showEditCourseForm(req, resp);
+            return;
+        }
+
+        double price;
+        try {
+            price = Double.parseDouble(req.getParameter("price"));
+        } catch (NumberFormatException e) {
+            req.setAttribute("errorMessage", "Invalid price format.");
+            showEditCourseForm(req, resp);
+            return;
+        }
+
+        String imageUrl = req.getParameter("currentImageUrl");
         if (imagePart != null && imagePart.getSize() > 0) {
-            try {
-                imageUrl = uploadToCloudinary(imagePart);
-            } catch (Exception e) {
-                System.err.println("Error uploading image to Cloudinary: " + e.getMessage());
-                request.setAttribute("errorMessage", "Failed to upload image. Please try again.");
-                showNewCourseForm(request, response);
-                return;
-            }
-        } else {
-            System.out.println("No image file provided for course insertion.");
-            // Set a default image URL if no image is uploaded
-            imageUrl = "https://res.cloudinary.com/your-cloud-name/image/upload/v1/default_course_image.png"; // Replace with your actual default image URL
+            imageUrl = uploadToCloudinary(imagePart);
         }
 
-        CourseCategory category = null;
-        if (categoryString != null && !categoryString.isEmpty()) {
-            try {
-                category = CourseCategory.valueOf(categoryString.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                System.err.println("Invalid CourseCategory received: " + categoryString);
-                request.setAttribute("errorMessage", "Invalid course category selected.");
-                showNewCourseForm(request, response);
-                return;
-            }
-        } else {
-            request.setAttribute("errorMessage", "Course category cannot be empty.");
-            showNewCourseForm(request, response);
+        Category category;
+        try {
+            category = categoryDAO.getById(Integer.parseInt(catParam));
+        } catch (Exception e) {
+            req.setAttribute("errorMessage", "Invalid category.");
+            showEditCourseForm(req, resp);
             return;
         }
 
-        Course newCourse = new Course();
-        newCourse.setTitle(title);
-        newCourse.setPrice(price);
-        newCourse.setInformation(information);
-        newCourse.setCreatedBy(createdBy);
-        newCourse.setImage(imageUrl);
-        newCourse.setCategory(category); // Set the enum value
+        Course c = new Course();
+        c.setId(id);
+        c.setTitle(title);
+        c.setInformation(info);
+        c.setPrice(price);
+        c.setCreatedBy(createdBy);
+        c.setImage(imageUrl);
+        c.setCategory(category);
 
-        System.out.println("Inserting Course: " + newCourse.getTitle() + ", Category: " + newCourse.getCategory() + ", Image URL: " + newCourse.getImage());
-        courseDAO.insert(newCourse);
-        response.sendRedirect("courses");
+        courseDAO.update(c);
+        resp.sendRedirect("courses");
     }
 
-    private void updateCourse(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        String title = request.getParameter("title");
-        double price = 0.0;
+    private void deleteCourse(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
-            price = Double.parseDouble(request.getParameter("price"));
-        } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "Invalid price format.");
-            showEditCourseForm(request, response); // Go back to edit form
-            return;
-        }
-        String information = request.getParameter("information");
-        Part imagePart = request.getPart("imageFile");
-        String categoryString = request.getParameter("category");
-
-        Integer createdBy = 0; // Again, should be from session in a real app
-        try {
-            createdBy = Integer.parseInt(request.getParameter("createdBy"));
-        } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "Invalid createdBy ID format.");
-            showEditCourseForm(request, response);
-            return;
-        }
-
-        String imageUrl = request.getParameter("currentImageUrl"); // Get current image URL from a hidden input
-
-        // Check if a new image is uploaded
-        if (imagePart != null && imagePart.getSize() > 0) {
-            try {
-                imageUrl = uploadToCloudinary(imagePart);
-            } catch (Exception e) {
-                System.err.println("Error uploading new image to Cloudinary: " + e.getMessage());
-                request.setAttribute("errorMessage", "Failed to upload new image. Please try again.");
-                showEditCourseForm(request, response); // Go back to edit form with error
-                return;
-            }
-        } else {
-            System.out.println("No new image file provided for update. Keeping existing image.");
-        }
-
-        CourseCategory category = null;
-        if (categoryString != null && !categoryString.isEmpty()) {
-            try {
-                category = CourseCategory.valueOf(categoryString.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                System.err.println("Invalid CourseCategory received: " + categoryString);
-                request.setAttribute("errorMessage", "Invalid course category selected.");
-                showEditCourseForm(request, response);
-                return;
-            }
-        } else {
-            request.setAttribute("errorMessage", "Course category cannot be empty.");
-            showEditCourseForm(request, response);
-            return;
-        }
-
-        Course course = new Course();
-        course.setId(id);
-        course.setTitle(title);
-        course.setPrice(price);
-        course.setInformation(information);
-        course.setCreatedBy(createdBy);
-        course.setImage(imageUrl);
-        course.setCategory(category); // Set the enum value
-
-        System.out.println("Updating Course: " + course.getTitle() + ", Category: " + course.getCategory() + ", Image URL: " + course.getImage());
-        courseDAO.update(course);
-        response.sendRedirect("courses");
-    }
-
-    private void deleteCourse(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
-        try {
-            int id = Integer.parseInt(request.getParameter("id"));
+            int id = Integer.parseInt(req.getParameter("id"));
             courseDAO.delete(id);
-            response.sendRedirect("courses");
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid ID parameter for course delete: " + e.getMessage());
-            response.sendRedirect("courses?error=InvalidIDForDelete");
-        }
+        } catch (NumberFormatException ignored) { }
+        resp.sendRedirect("courses");
     }
 
-    private String uploadToCloudinary(Part filePart) throws IOException, ServletException {
-        // Step 1: Initialize Cloudinary object
+    private String uploadToCloudinary(Part filePart) throws IOException {
         Cloudinary cloudinary = Singleton.getCloudinary();
-        if (cloudinary == null) {
-            throw new ServletException("Cloudinary configuration error: Singleton not initialized.");
-        }
-
-        // Step 2: Read the uploaded file into a temporary file
-        File tempFile = null;
-        try (InputStream input = filePart.getInputStream()) {
-            String fileName = filePart.getSubmittedFileName();
-            String extension = "";
-            int i = fileName.lastIndexOf('.');
-            if (i > 0) {
-                extension = fileName.substring(i);
-            }
-            tempFile = File.createTempFile("upload", extension);
-            Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw e; // Re-throw the exception for handling upstream
-        }
-
-        // Step 3: Upload the image to Cloudinary
-        Map uploadResult = null;
-        try {
-            uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.emptyMap());
-        } catch (IOException e) {
-            System.err.println("Error uploading to Cloudinary: " + e.getMessage());
-            throw e; // Re-throw the exception for handling upstream
+        File temp = File.createTempFile("upload", ".tmp");
+        try (InputStream in = filePart.getInputStream()) {
+            Files.copy(in, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            var result = cloudinary.uploader().upload(temp, ObjectUtils.emptyMap());
+            return (String) result.get("secure_url");
         } finally {
-            // Ensure the temporary file is deleted
-            if (tempFile != null && tempFile.exists()) {
-                tempFile.delete();
-            }
+            temp.delete();
         }
-
-        // Step 4: Get the secure URL of the uploaded image
-        return (String) uploadResult.get("secure_url");
     }
 }
-

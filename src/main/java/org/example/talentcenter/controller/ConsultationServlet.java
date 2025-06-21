@@ -25,7 +25,7 @@ public class ConsultationServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<CourseDto> subjects = subjectDAO.getAll();
+        List<Course> subjects = subjectDAO.getAll();
         request.setAttribute("subjects", subjects);
         String action = request.getParameter("action");
         String view = request.getParameter("view");

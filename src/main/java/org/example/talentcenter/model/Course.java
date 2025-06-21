@@ -1,7 +1,5 @@
 package org.example.talentcenter.model;
 
-import org.example.talentcenter.utilities.CourseCategory;
-
 public class Course {
     private int id;
     private String title;
@@ -9,12 +7,12 @@ public class Course {
     private String information;
     private int createdBy;
     private String image;
-    private CourseCategory category;
+    private Category category;
 
     public Course() {
     }
 
-    public Course(int id, String title, double price, String information, int createdBy, String image, CourseCategory category) {
+    public Course(int id, String title, double price, String information, int createdBy, String image, Category category) {
         this.id = id;
         this.title = title;
         this.price = price;
@@ -69,10 +67,10 @@ public class Course {
     public void setImage(String image) {
         this.image = image;
     }
-    public CourseCategory getCategory() {
+    public Category getCategory() {
         return category;
     }
-    public void setCategory(CourseCategory category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 

@@ -1,6 +1,6 @@
 package org.example.talentcenter.dto;
 
-import org.example.talentcenter.utilities.CourseCategory;
+import org.example.talentcenter.model.Category;
 
 public class CourseDto {
     private int id;
@@ -10,12 +10,13 @@ public class CourseDto {
     private int createdBy;
     private String fullname;
     private String image;
-    private CourseCategory category;
+    private Category category;
 
     public CourseDto() {
     }
 
-    public CourseDto(int id, String title, double price, String information, int createdBy,String fullname, String image, CourseCategory category) {
+    public CourseDto(int id, String title, double price, String information,
+                     int createdBy,String fullname, String image, Category category) {
         this.id = id;
         this.title = title;
         this.price = price;
@@ -71,10 +72,10 @@ public class CourseDto {
     public void setImage(String image) {
         this.image = image;
     }
-    public CourseCategory getCategory() {
+    public Category getCategory() {
         return category;
     }
-    public void setCategory(CourseCategory category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
     public String getFullname() {
