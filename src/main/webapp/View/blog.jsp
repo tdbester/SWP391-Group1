@@ -49,10 +49,10 @@
 <jsp:include page="header.jsp"/>
 <div class="container mt-5">
     <h2 class="mb-4">Danh sách bài viết</h2>
-    <div class="row justify-content-between ms-1">
-        <a href="blogs?action=new" class="btn btn-success mb-3 col-3">Tạo bài viết mới</a>
-        <form action="blogs" method="get" class="col-4 mb-3">
-            <input type="search" name="search" class="form-control me-2" placeholder="Tìm kiếm">
+    <div class="row justify-content-end ms-1" >
+
+        <form action="blogs" method="get" class="col-4 mb-3 mr-auto">
+            <input type="search" name="search" class="form-control " placeholder="Tìm kiếm">
         </form>
     </div>
     <table class="table table-striped table-bordered align-middle">
@@ -96,13 +96,29 @@
 
         </tbody>
     </table>
+
+
+
+
     <nav aria-label="Page navigation example">
-        <ul class="pagination">
-            <c:forEach begin="1" end="${endP}" var="i">
-                <li class="page-item"><a class="page-link" href="blogs?index=${i}">${i}</a></li>
-            </c:forEach>
-        </ul>
+        <div class="row align-items-center ms-1">
+            <div class="col-auto">
+                <ul class="pagination mb-0">
+                    <c:forEach begin="1" end="${endP}" var="i">
+                        <li class="page-item">
+                            <a class="page-link" href="blogs?index=${i}">${i}</a>
+                        </li>
+                    </c:forEach>
+                </ul>
+            </div>
+            <div class="col-auto ms-auto">
+                <a href="blogs?action=new" class="btn btn-success">Tạo bài viết mới</a>
+            </div>
+        </div>
     </nav>
+
+
+
 </div>
 <jsp:include page="footer.jsp"/>
 

@@ -126,11 +126,11 @@ public class BlogDAO {
         List<BlogDto> list = new ArrayList<>();
         String sql = "select * from Blog b join Sale s ON b.AuthorId = s.id join Account ac on s.id = ac.Id\n" +
                 "order by b.Id\n" +
-                "offset ? rows fetch next 5 rows only;";
+                "offset ? rows fetch next 10 rows only;";
         try {
             Connection conn = DBConnect.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, (index - 1) * 5);
+            stmt.setInt(1, (index - 1) * 10);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {

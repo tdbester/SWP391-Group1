@@ -2,6 +2,7 @@ package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.CourseDAO;
 import org.example.talentcenter.dao.ConsultationDAO;
+import org.example.talentcenter.dto.CourseDto;
 import org.example.talentcenter.model.Consultation;
 import org.example.talentcenter.model.Course;
 
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet(name="home", value="/home")
 public class HomeServlet extends HttpServlet {
@@ -24,7 +26,7 @@ public class HomeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        ArrayList<Course> subjects = courseDAO.getAllCourses();
+        List<CourseDto> subjects = courseDAO.getAll();
         request.setAttribute("subjects", subjects);
         if ("true".equals(request.getParameter("success"))) {
             request.setAttribute("message0", "Gửi tư vấn thành công!");

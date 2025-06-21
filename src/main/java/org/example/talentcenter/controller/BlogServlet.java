@@ -108,7 +108,7 @@ public class BlogServlet extends HttpServlet {
         request.setAttribute("blogList", filtered);
         BlogDAO blogDAO = new BlogDAO();
         int count = blogDAO.getTotalBlog();
-        int endPage = count % 5 == 0 ? count / 5 : count / 5 + 1;
+        int endPage = count % 10 == 0 ? count / 10 : count / 10 + 1;
         request.setAttribute("endP", endPage);
         request.getRequestDispatcher("./View/blog.jsp").forward(request, response);
     }

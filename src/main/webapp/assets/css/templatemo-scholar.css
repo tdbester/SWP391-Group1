@@ -1,4 +1,4 @@
-/* 
+/*
 
 TemplateMo 586 Scholar
 
@@ -20,16 +20,16 @@ Table of contents
 09. footer
 
 --------------------------------------------- */
-/* 
+/*
 ---------------------------------------------
 font & reset css
---------------------------------------------- 
+---------------------------------------------
 */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900");
-/* 
+/*
 ---------------------------------------------
 reset
---------------------------------------------- 
+---------------------------------------------
 */
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, div
 pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q,
@@ -109,53 +109,10 @@ img {
   overflow: hidden;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-th, td {
-  border: 1px solid #333;
-  padding: 8px 12px;
-  text-align: left;
-}
-
-th {
-  background-color: #007bff;
-  color: white;
-}
-
-tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-
-form input[type="text"],
-form input[type="email"],
-form select {
-  padding: 6px 10px;
-  margin-right: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-form button {
-  padding: 6px 12px;
-  background-color: #007bff;
-  border: none;
-  color: white;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-form button:hover {
-  background-color: #0056b3;
-}
-
 /*
 ---------------------------------------------
 Global Styles
---------------------------------------------- 
+---------------------------------------------
 */
 html,
 body {
@@ -219,10 +176,10 @@ body {
   color: #fff;
 }
 
-/* 
+/*
 ---------------------------------------------
 Pre-loader Style
---------------------------------------------- 
+---------------------------------------------
 */
 
 .js-preloader {
@@ -253,29 +210,29 @@ Pre-loader Style
 
 @-webkit-keyframes dot {
   50% {
-      -webkit-transform: translateX(96px);
-      transform: translateX(96px);
+    -webkit-transform: translateX(96px);
+    transform: translateX(96px);
   }
 }
 
 @keyframes dot {
   50% {
-      -webkit-transform: translateX(96px);
-      transform: translateX(96px);
+    -webkit-transform: translateX(96px);
+    transform: translateX(96px);
   }
 }
 
 @-webkit-keyframes dots {
   50% {
-      -webkit-transform: translateX(-31px);
-      transform: translateX(-31px);
+    -webkit-transform: translateX(-31px);
+    transform: translateX(-31px);
   }
 }
 
 @keyframes dots {
   50% {
-      -webkit-transform: translateX(-31px);
-      transform: translateX(-31px);
+    -webkit-transform: translateX(-31px);
+    transform: translateX(-31px);
   }
 }
 
@@ -321,10 +278,10 @@ Pre-loader Style
 
 
 
-/* 
+/*
 ---------------------------------------------
 Header Style
---------------------------------------------- 
+---------------------------------------------
 */
 
 .background-header {
@@ -614,7 +571,7 @@ Header Style
     font-weight: 400;
     color: #1e1e1e;
     background-color: #f1f0fe;
-     border-radius: 0px 0px 25px 25px;
+    border-radius: 0px 0px 25px 25px;
   }
   .background-header .main-nav .nav li,
   .header-area .main-nav .nav li {
@@ -700,13 +657,13 @@ Header Style
     padding-left: 0px !important;
     padding-right: 0px !important;
   }
-  
+
 }
 
-/* 
+/*
 ---------------------------------------------
 Banner Style
---------------------------------------------- 
+---------------------------------------------
 */
 
 .main-banner {
@@ -837,10 +794,10 @@ Banner Style
 }
 
 
-/* 
+/*
 ---------------------------------------------
 Services Style
---------------------------------------------- 
+---------------------------------------------
 */
 
 .services .service-item:hover .icon img {
@@ -892,10 +849,10 @@ Services Style
   margin-bottom: 25px;
 }
 
-/* 
+/*
 ---------------------------------------------
 About Style
---------------------------------------------- 
+---------------------------------------------
 */
 
 .about-us {
@@ -989,10 +946,10 @@ h2.accordion-header button {
 }
 
 
-/* 
+/*
 ---------------------------------------------
 Courses Style
---------------------------------------------- 
+---------------------------------------------
 */
 
 .courses {
@@ -1090,7 +1047,7 @@ Courses Style
   position: relative;
   justify-content: center;
   align-items: center;
-} 
+}
 
 .events_item .down-content {
   padding: 20px 30px 25px 30px;
@@ -1118,10 +1075,10 @@ Courses Style
 }
 
 
-/* 
+/*
 ---------------------------------------------
 Facts Style
---------------------------------------------- 
+---------------------------------------------
 */
 
 .fun-facts {
@@ -1180,15 +1137,15 @@ Facts Style
 }
 
 
-/* 
+/*
 ---------------------------------------------
 Team Style
---------------------------------------------- 
+---------------------------------------------
 */
 
 .team {
   margin-top: 100px;
-    padding-top: 140px;
+  padding-top: 140px;
 }
 
 .team-member {
@@ -1252,10 +1209,10 @@ Team Style
 }
 
 
-/* 
+/*
 ---------------------------------------------
 Testimonials Style
---------------------------------------------- 
+---------------------------------------------
 */
 
 .testimonials {
@@ -1359,10 +1316,10 @@ Testimonials Style
 }
 
 
-/* 
+/*
 ---------------------------------------------
 Events Style
---------------------------------------------- 
+---------------------------------------------
 */
 
 .events .section-heading {
@@ -1450,10 +1407,10 @@ Events Style
 }
 
 
-/* 
+/*
 ---------------------------------------------
 Contact Style
---------------------------------------------- 
+---------------------------------------------
 */
 
 .contact-us {
@@ -1504,7 +1461,7 @@ Contact Style
   padding: 30px 8px;
   line-height: 25px;
   height: 120px;
-  border-radius: 15px 60px 60px 15px; 
+  border-radius: 15px 60px 60px 15px;
   display: inline-block;
   text-align: center;
   color: #fff;
@@ -1609,10 +1566,6 @@ Contact Style
   color: #fff;
 }
 
-#contact-form select::placeholder {
-  color: #fff;
-}
-
 #contact-form textarea {
   width: 100%;
   height: 120px;
@@ -1628,15 +1581,6 @@ Contact Style
   position: relative;
   z-index: 3;
 }
-#course_interest {
-  color: black;
-}
-
-#course_interest option.placeholder {
-  color: white;
-  background-color: black; /* nếu muốn dễ nhìn */
-}
-
 
 #contact-form textarea::placeholder {
   color: #fff;
@@ -1685,292 +1629,11 @@ Contact Style
   font-weight: 400;
 }
 
-/*---Sale dashboard---*/
-
-   /* HEADER STYLES */
- .main-content {
-   flex: 1;
-   margin-left: 280px;
-   padding: 30px;
-   overflow-y: auto;
- }
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 20px 30px;
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.header h1 {
-  color: #333;
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.user-avatar {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-}
-
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-  }
-
-  .main-content {
-    margin-left: 0;
-  }
-}
-
-/* Sample content area */
-.content-area {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 40px;
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-
-.stats-grid {
-  display: flex;
-  gap: 20px;
-  justify-content: space-between;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
-}
-
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  flex: 1;
-  min-width: 220px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-.stat-icon {
-  font-size: 2rem;
-  margin-bottom: 10px;
-}
-
-.stat-number {
-  font-size: 2rem;
-  font-weight: bold;
-}
-
-.stat-label {
-  font-weight: 500;
-  color: #555;
-  margin-top: 8px;
-}
-
-.stat-status {
-  margin-top: 5px;
-  font-size: 0.9rem;
-}
-
-.status-info {
-  color: #3498db;
-}
-
-.status-warning {
-  color: #f39c12;
-}
-
-.status-good {
-  color: #2ecc71;
-}
-
-/* Content Grid */
-.content-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-top: 30px;
-}
-
-.card {
-  background: #ffffff;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
-
-.card-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #2c3e50;
-}
-
-/* Schedule Items */
-.schedule-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px 0;
-  border-bottom: 1px solid #eaeaea;
-}
-
-.schedule-time {
-  font-weight: bold;
-  font-size: 1.2rem;
-  color: #2c3e50;
-  min-width: 60px;
-}
-
-.schedule-info {
-  flex: 1;
-  margin-left: 20px;
-}
-
-.schedule-title {
-  font-weight: bold;
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.schedule-details {
-  font-size: 0.9rem;
-  color: #666;
-  margin-top: 4px;
-}
-
-.schedule-actions button {
-  margin-left: 10px;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 5px;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.btn-success {
-  background-color: #2ecc71;
-  color: white;
-}
-
-.btn-primary {
-  background-color: #3498db;
-  color: white;
-}
-
-.btn-warning {
-  background-color: #f39c12;
-  color: white;
-}
-
-/* Request Items */
-.request-item {
-  margin-top: 15px;
-  padding: 15px;
-  border-radius: 8px;
-  background: #f8f9fa;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-.request-title {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.request-date {
-  color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 5px;
-}
-
-.request-status {
-  font-weight: bold;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-}
-
-.request-status.pending {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.request-status.approved {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-/* Class Items */
-.class-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.class-info {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.class-icon {
-  font-size: 2rem;
-}
-
-.class-details h4 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: bold;
-}
-
-.class-details p {
-  margin: 4px 0 0;
-  color: #777;
-  font-size: 0.9rem;
-}
-
-.class-actions button {
-  margin-left: 10px;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 5px;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-/* ... tiếp tục phần dưới */
-
+/*
 ---------------------------------------------
 TALENT01 Footer Style
 ---------------------------------------------
-*
-Footer Style
----------------------------------------------
-*
+*/
 
 footer {
   margin-top: 150px;
