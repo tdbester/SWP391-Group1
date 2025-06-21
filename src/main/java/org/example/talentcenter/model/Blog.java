@@ -9,10 +9,11 @@ public class Blog {
     private String content;
     private String image;
     private Integer authorId;
+    private Integer category;
     private Date createdAt;
 
 
-    public Blog(Integer id, String title, String content, String image, Integer authorId, Date createdAt, String description) {
+    public Blog(Integer id, String title, String content, String image, Integer authorId, Date createdAt, String description, Integer category) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -20,6 +21,7 @@ public class Blog {
         this.authorId = authorId;
         this.createdAt = createdAt;
         this.description = description;
+        this.category = category;
     }
 
     public Blog() {
@@ -86,6 +88,13 @@ public class Blog {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+    public void setCategory(Integer category) {
+        this.category = category;
     }
 
     @Override

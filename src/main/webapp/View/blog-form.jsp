@@ -11,18 +11,17 @@
         </c:choose>
     </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     <style>
-        /* CSS cho ảnh preview */
         .image-preview {
             margin-top: 15px;
-            max-width: 300px; /* Giới hạn chiều rộng tối đa của ảnh */
-            max-height: 200px; /* Giới hạn chiều cao tối đa */
+            max-width: 300px;
+            max-height: 200px;
             border: 1px solid #ddd;
             border-radius: 4px;
             padding: 5px;
-            object-fit: cover; /* Đảm bảo ảnh không bị méo */
+            object-fit: cover;
         }
     </style>
 </head>
@@ -37,19 +36,19 @@
         </c:choose>
     </h2>
 
-    <form action="blogs" method="post" onsubmit="handleSubmit()" enctype="multipart/form-data">
-        <%-- Chỉ cần một trường action duy nhất --%>
+    <form action="blogs" method="post" enctype="multipart/form-data" onsubmit="prepareSubmit()">
         <input type="hidden" name="action" value="${not empty blog ? 'update' : 'insert'}"/>
-        <div class="row">
-            <div class="col-12 col-md-8">
-                <c:if test="${not empty blog}">
-                    <input type="hidden" name="id" value="${blog.id}"/>
-                    <input type="hidden" name="currentImageUrl" value="${blog.image}"/>
-                </c:if>
+        <c:if test="${not empty blog}">
+            <input type="hidden" name="id" value="${blog.id}"/>
+            <input type="hidden" name="currentImageUrl" value="${blog.image}"/>
+        </c:if>
 
+        <div class="row">
+            <div class="col-md-8">
                 <div class="mb-3">
                     <label class="form-label">Tiêu đề</label>
-                    <input type="text" class="form-control" name="title" value="${blog.title}" required/>
+                    <input type="text" name="title" class="form-control"
+                           value="${blog.title}" required/>
                 </div>
 
                 <div class="mb-3">
@@ -63,91 +62,77 @@
                     <div id="editor-content" style="height: 150px;"></div>
                     <input type="hidden" name="content" id="content"/>
                 </div>
+
                 <div class="mb-3">
-                    <label for="authorId" class="form-label">Tạo bởi</label>
-                    <input id="authorId" name="authorId" type="number" class="form-control" value="${blog.authorId}" required/>
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-select" required>
+                        <option value="">-- Chọn loại --</option>
+                        <c:forEach var="cat" items="${categories}">
+                            <option value="${cat.id}"
+                                    <c:if test="${blog.category == cat.id}">selected</c:if>>
+                                    ${cat.name}
+                            </option>
+                        </c:forEach>
+                    </select>
                 </div>
             </div>
-            <div class="col-12 col-md-4">
+
+            <div class="col-md-4">
                 <div class="mb-3">
                     <img id="imagePreview"
-                         src="${not empty blog.image ? blog.image : 'https://placehold.co/600x400?text=select-image'}"
-                         alt="Image Preview" class="image-preview img-fluid max-w-40"/>
+                         src="${not empty blog.image ? blog.image : 'https://placehold.co/600x400?text=Chọn+ảnh'}"
+                         alt="Preview" class="image-preview"/>
                 </div>
                 <div class="mb-3">
-                    <label for="imageFile" class="form-label">Chọn ảnh bìa:</label>
-                    <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/*" onchange="previewImage(event)"/>
+                    <label class="form-label">Chọn ảnh bìa</label>
+                    <input type="file" name="imageFile" class="form-control" accept="image/*"
+                           onchange="previewImage(event)"/>
                 </div>
             </div>
         </div>
 
-
-        <button type="submit" class="btn btn-success">${not empty blog ? 'Sửa' : 'Tạo'}</button>
+        <button type="submit" class="btn btn-success">
+            <c:choose>
+                <c:when test="${not empty blog}">Cập nhật</c:when>
+                <c:otherwise>Tạo mới</c:otherwise>
+            </c:choose>
+        </button>
         <a href="blogs" class="btn btn-secondary ms-2">Hủy</a>
     </form>
 
     <c:if test="${not empty errorMessage}">
-        <div class="alert alert-danger mt-3" role="alert">
-                ${errorMessage}
-        </div>
+        <div class="alert alert-danger mt-3">${errorMessage}</div>
     </c:if>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const toolbarOptions = [
-        [{'header': [1, 2, false]}],
-        ['bold', 'italic', 'underline'],
+        [{ header: [1, 2, false] }],
+        ['bold','italic','underline'],
         ['link'],
-        [{'list': 'ordered'}, {'list': 'bullet'}],
+        [{ list: 'ordered'}, { list: 'bullet' }],
         ['clean']
     ];
+    const editorDesc = new Quill('#editor-description', { theme: 'snow', modules: { toolbar: toolbarOptions } });
+    const editorCont = new Quill('#editor-content', { theme: 'snow', modules: { toolbar: toolbarOptions } });
 
-    const editorDescription = new Quill('#editor-description', {
-        theme: 'snow',
-        modules: {
-            toolbar: toolbarOptions
-        },
-        placeholder: 'Nhập mô tả...'
-    });
+    // Load existing content
+    editorDesc.root.innerHTML = `<c:out value='${blog.description}' default=''/>`;
+    editorCont.root.innerHTML = `<c:out value='${blog.content}' default=''/>`;
 
-    const editorContent = new Quill('#editor-content', {
-        theme: 'snow',
-        modules: {
-            toolbar: toolbarOptions
-        },
-        placeholder: 'Nhập nội dung bài viết...'
-    });
-
-    const blogDescription = `<c:out value='${blog.description}' default=''/>`;
-    const blogContent = `<c:out value='${blog.content}' default=''/>`;
-
-    editorDescription.root.innerHTML = blogDescription;
-    editorContent.root.innerHTML = blogContent;
-
-    function handleSubmit() {
-        // Lấy nội dung từ Quill editor và gán vào các trường input ẩn trước khi submit
-        document.getElementById('description').value = editorDescription.root.innerHTML;
-        document.getElementById('content').value = editorContent.root.innerHTML;
+    function prepareSubmit() {
+        document.getElementById('description').value = editorDesc.root.innerHTML;
+        document.getElementById('content').value     = editorCont.root.innerHTML;
     }
 
-    function previewImage(event) {
-        // Kiểm tra xem người dùng có chọn file không
-        if (event.target.files && event.target.files[0]) {
+    function previewImage(evt) {
+        if (evt.target.files && evt.target.files[0]) {
             const reader = new FileReader();
-
-            reader.onload = function(e) {
-                // Lấy thẻ img và cập nhật thuộc tính src của nó
-                const preview = document.getElementById('imagePreview');
-                preview.src = e.target.result;
-            };
-
-            // Đọc file ảnh dưới dạng Data URL
-            reader.readAsDataURL(event.target.files[0]);
+            reader.onload = e => document.getElementById('imagePreview').src = e.target.result;
+            reader.readAsDataURL(evt.target.files[0]);
         }
     }
 </script>
-<jsp:include page="footer.jsp"/>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

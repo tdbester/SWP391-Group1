@@ -12,14 +12,17 @@ public class BlogDAO {
 
     // CREATE blog by using insert command SQL
     public void insert(Blog blog) {
-        String sql = "INSERT INTO Blog (Title, Description, image, Content, Authorid, CreatedAt) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String sql = "INSERT INTO Blog (Title, Description, image, Content, AuthorId, Category, CreatedAt) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, blog.getTitle());
             stmt.setString(2, blog.getDescription());
             stmt.setString(3, blog.getImage());
             stmt.setString(4, blog.getContent());
             stmt.setInt(5, blog.getAuthorId());
-            stmt.setDate(6, new Date(System.currentTimeMillis()));
+            stmt.setInt(6, blog.getCategory());
+            stmt.setDate(7, new Date(System.currentTimeMillis()));
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -31,9 +34,10 @@ public class BlogDAO {
     public List<BlogDto> getAll() {
         List<BlogDto> list = new ArrayList<>();
 
-        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt, ac.FullName " +
-                "FROM Blog b join Sale s ON b.AuthorId = s.id join Account ac on s.id = ac.Id";
-
+        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt, ac.FullName, b.Category " +
+                "FROM Blog b " +
+                "JOIN Sale s ON b.AuthorId = s.id " +
+                "JOIN Account ac ON s.id = ac.Id";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -46,7 +50,8 @@ public class BlogDAO {
                         rs.getString("Content"),
                         rs.getString("image"),
                         rs.getDate("CreatedAt"),
-                        rs.getString("FullName")
+                        rs.getString("FullName"),
+                        rs.getInt("Category")
                 );
                 list.add(blogDto);
             }
@@ -71,7 +76,8 @@ public class BlogDAO {
                             rs.getString("image"),
                             rs.getInt("AuthorId"),
                             rs.getDate("CreatedAt"),
-                            rs.getString("Description")
+                            rs.getString("Description"),
+                            rs.getInt("Category")
                     );
                 }
             }
@@ -83,15 +89,17 @@ public class BlogDAO {
 
     // UPDATE
     public void update(Blog blog) {
-        String sql = "UPDATE Blog SET Title = ?, Description = ?, image= ?, Content = ?, AuthorId = ? WHERE id = ?";
-        try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String sql = "UPDATE Blog SET Title = ?, Description = ?, image = ?, Content = ?, " +
+                "AuthorId = ?, Category = ? WHERE Id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, blog.getTitle());
             stmt.setString(2, blog.getDescription());
             stmt.setString(3, blog.getImage());
             stmt.setString(4, blog.getContent());
             stmt.setInt(5, blog.getAuthorId());
-            stmt.setInt(6, blog.getId());
-
+            stmt.setInt(6, blog.getCategory());
+            stmt.setInt(7, blog.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -124,7 +132,9 @@ public class BlogDAO {
 
     public List<BlogDto> pagingBlog(int index) {
         List<BlogDto> list = new ArrayList<>();
-        String sql = "select * from Blog b join Sale s ON b.AuthorId = s.id join Account ac on s.id = ac.Id\n" +
+        String sql = "select * from Blog b " +
+                "join Sale s ON b.AuthorId = s.id " +
+                "join Account ac on s.id = ac.Id\n" +
                 "order by b.Id\n" +
                 "offset ? rows fetch next 10 rows only;";
         try {
@@ -141,7 +151,8 @@ public class BlogDAO {
                         rs.getString("Content"),
                         rs.getString("image"),
                         new java.util.Date(rs.getDate("CreatedAt").getTime()),
-                        rs.getString("FullName")
+                        rs.getString("FullName"),
+                        rs.getInt("CategoryId")
                 ));
             }
         } catch (SQLException e) {
