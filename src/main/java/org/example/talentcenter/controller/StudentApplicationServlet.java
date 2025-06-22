@@ -25,18 +25,26 @@ public class StudentApplicationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         Integer studentId = (Integer) session.getAttribute("accountId");
+        String action = request.getParameter("action");
+        if ("list".equals(action)) {
+            // Hiển thị danh sách đơn
+            RequestDAO requestDAO = new RequestDAO();
+            ArrayList<Request> requestList = requestDAO.getRequestBySenderId(studentId);
 
-        StudentDAO studentDAO = new StudentDAO();
-        CourseDAO courseDAO = new CourseDAO();
+            request.setAttribute("requestList", requestList);
+            request.getRequestDispatcher("/View/student-application-list.jsp").forward(request, response);
+        } else {
+            StudentDAO studentDAO = new StudentDAO();
+            CourseDAO courseDAO = new CourseDAO();
 
-        Student student = studentDAO.getStudentById(studentId);
-        ArrayList<Course> courseList = courseDAO.getAllCourses();
+            Student student = studentDAO.getStudentById(studentId);
+            ArrayList<Course> courseList = courseDAO.getAllCourses();
 
-        request.setAttribute("student", student);
-        request.setAttribute("courseList", courseList);
+            request.setAttribute("student", student);
+            request.setAttribute("courseList", courseList);
 
-        request.getRequestDispatcher("/View/student-application.jsp").forward(request, response);
-    }
+            request.getRequestDispatcher("/View/student-application.jsp").forward(request, response);
+        }  }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

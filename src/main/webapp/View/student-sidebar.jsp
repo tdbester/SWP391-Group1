@@ -51,10 +51,10 @@
             </a>
         </div>
         <div class="nav-section">
-            <a href="CandidateDetails.jsp"
-               class="nav-item ${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'active' : ''}"
+            <a href="${pageContext.request.contextPath}/StudentApplication?action=list"
+               class="nav-item ${pageContext.request.requestURI.contains('student-application-list.jsp') ? 'active' : ''}"
                role="link"
-               aria-current="${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'page' : 'false'}">
+               aria-current="${pageContext.request.requestURI.contains('Student-application-list.jsp') ? 'page' : 'false'}">
                 <i class="fas fa-user" aria-hidden="true"></i>
                 <span>Xem đơn</span>
             </a>
