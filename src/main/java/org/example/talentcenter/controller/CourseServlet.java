@@ -158,15 +158,8 @@ public class CourseServlet extends HttpServlet {
         String info        = req.getParameter("information");
         String catParam    = req.getParameter("category");
         Part   imagePart   = req.getPart("imageFile");
-        int    createdBy;
-
-        try {
-            createdBy = Integer.parseInt(req.getParameter("createdBy"));
-        } catch (NumberFormatException e) {
-            req.setAttribute("errorMessage", "Invalid creator ID.");
-            showNewCourseForm(req, resp);
-            return;
-        }
+        HttpSession session = req.getSession(false);
+        int createdBy= (int) session.getAttribute("accountId");
 
         double price;
         try {

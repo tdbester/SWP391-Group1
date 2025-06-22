@@ -163,7 +163,7 @@ public class CourseDAO {
             FROM Course c
             JOIN Account a    ON c.CreatedBy  = a.Id
             JOIN Category cat ON c.CategoryID = cat.Id
-            ORDER BY c.Id
+            ORDER BY c.Id DESC 
             OFFSET ? ROWS FETCH NEXT 5 ROWS ONLY
             """;
 

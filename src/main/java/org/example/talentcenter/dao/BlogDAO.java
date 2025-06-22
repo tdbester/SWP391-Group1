@@ -133,7 +133,7 @@ public class BlogDAO {
         List<BlogDto> list = new ArrayList<>();
         String sql = "select * from Blog b " +
                 "join Account ac on b.authorId = ac.Id\n" +
-                "order by b.Id\n" +
+                "order by b.Id DESC\n" +
                 "offset ? rows fetch next 10 rows only;";
         try {
             Connection conn = DBConnect.getConnection();
