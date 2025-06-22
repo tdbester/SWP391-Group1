@@ -2,7 +2,30 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="en">
-<head>… Bootstrap + Quill + styles …</head>
+<head>
+    <meta charset="UTF-8"/>
+    <title>
+        <c:choose>
+            <c:when test="${not empty course}">Chỉnh sửa khóa học</c:when>
+            <c:otherwise>Khóa học mới</c:otherwise>
+        </c:choose>
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <style>
+        /* CSS cho ảnh preview */
+        .image-preview {
+            margin-top: 15px;
+            max-width: 300px; /* Giới hạn chiều rộng tối đa của ảnh */
+            max-height: 200px; /* Giới hạn chiều cao tối đa */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            object-fit: cover; /* Đảm bảo ảnh không bị méo */
+        }
+    </style>
+</head>
 <body>
 <jsp:include page="header.jsp"/>
 <div class="container mt-5">

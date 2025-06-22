@@ -12,7 +12,7 @@ public class BlogDAO {
 
     // CREATE blog by using insert command SQL
     public void insert(Blog blog) {
-        String sql = "INSERT INTO Blog (Title, Description, image, Content, AuthorId, Category, CreatedAt) " +
+        String sql = "INSERT INTO Blog (Title, Description, image, Content, AuthorId, CategoryId, CreatedAt) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -34,10 +34,9 @@ public class BlogDAO {
     public List<BlogDto> getAll() {
         List<BlogDto> list = new ArrayList<>();
 
-        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt, ac.FullName, b.Category " +
+        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt, ac.FullName, b.CategoryId " +
                 "FROM Blog b " +
-                "JOIN Sale s ON b.AuthorId = s.id " +
-                "JOIN Account ac ON s.id = ac.Id";
+                "JOIN Account ac ON b.authorId = ac.Id";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -51,7 +50,7 @@ public class BlogDAO {
                         rs.getString("image"),
                         rs.getDate("CreatedAt"),
                         rs.getString("FullName"),
-                        rs.getInt("Category")
+                        rs.getInt("CategoryId")
                 );
                 list.add(blogDto);
             }
@@ -90,7 +89,7 @@ public class BlogDAO {
     // UPDATE
     public void update(Blog blog) {
         String sql = "UPDATE Blog SET Title = ?, Description = ?, image = ?, Content = ?, " +
-                "AuthorId = ?, Category = ? WHERE Id = ?";
+                "AuthorId = ?, CategoryId = ? WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, blog.getTitle());
@@ -133,8 +132,7 @@ public class BlogDAO {
     public List<BlogDto> pagingBlog(int index) {
         List<BlogDto> list = new ArrayList<>();
         String sql = "select * from Blog b " +
-                "join Sale s ON b.AuthorId = s.id " +
-                "join Account ac on s.id = ac.Id\n" +
+                "join Account ac on b.authorId = ac.Id\n" +
                 "order by b.Id\n" +
                 "offset ? rows fetch next 10 rows only;";
         try {

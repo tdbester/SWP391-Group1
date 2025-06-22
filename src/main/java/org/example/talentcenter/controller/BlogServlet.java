@@ -44,11 +44,11 @@ public class BlogServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-//        HttpSession session = request.getSession(false);
-//        if (session == null || session.getAttribute("user") == null) {
-//            response.sendRedirect("View/login.jsp");
-//            return;
-//        }
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("accountId") == null) {
+            response.sendRedirect("login");
+            return;
+        }
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
