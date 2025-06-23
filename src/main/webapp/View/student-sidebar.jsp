@@ -15,10 +15,10 @@
     </div>
     <nav>
         <div class="nav-section">
-            <a href="${pageContext.request.contextPath}/View/sale-dashboard.jsp"
-               class="nav-item ${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'active' : ''}"
+            <a href="${pageContext.request.contextPath}/View/student-dashboard.jsp"
+               class="nav-item ${pageContext.request.requestURI.contains('student-dashboard.jsp') ? 'active' : ''}"
                role="link"
-               aria-current="${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'page' : 'false'}">
+               aria-current="${pageContext.request.requestURI.contains('student-dashboard.jsp') ? 'page' : 'false'}">
                 <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
                 <span>Dashboard</span>
             </a>

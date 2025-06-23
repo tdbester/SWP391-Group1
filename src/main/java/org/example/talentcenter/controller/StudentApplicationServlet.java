@@ -30,7 +30,6 @@ public class StudentApplicationServlet extends HttpServlet {
             // Hiển thị danh sách đơn
             RequestDAO requestDAO = new RequestDAO();
             ArrayList<Request> requestList = requestDAO.getRequestBySenderId(studentId);
-
             request.setAttribute("requestList", requestList);
             request.getRequestDispatcher("/View/student-application-list.jsp").forward(request, response);
         } else {

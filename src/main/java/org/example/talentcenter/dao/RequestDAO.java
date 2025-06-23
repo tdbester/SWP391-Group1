@@ -112,7 +112,7 @@ public class RequestDAO {
     }
     public ArrayList<Request> getRequestBySenderId(int senderId) {
         ArrayList<Request> requests = new ArrayList<>();
-        String sql = "SELECT Id, Type, SenderId, Reason, Status, CreatedAt FROM Request WHERE SenderId = ? order by CreatedAt DESC";
+        String sql = "SELECT Id, Type, SenderId, Reason, Status, CreatedAt, Response, ResponseAt FROM Request WHERE SenderId = ? order by CreatedAt DESC";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -128,9 +128,9 @@ public class RequestDAO {
                     String fullReason = rs.getString("Reason");
                     String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
                     String extractedReason = parts.length > 0 ? parts[parts.length - 1] : "";
-
                     request.setReason(extractedReason);
-
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
                     request.setStatus(rs.getString("Status"));
                     Timestamp createdAt = rs.getTimestamp("CreatedAt");
                     if (createdAt != null) {

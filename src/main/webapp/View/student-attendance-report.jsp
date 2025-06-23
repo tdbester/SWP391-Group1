@@ -11,7 +11,6 @@
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="org.example.talentcenter.model.StudentAttendanceReport" %>
 <%
-    // Lấy danh sách attendance reports từ request
     @SuppressWarnings("unchecked")
     List<StudentAttendanceReport> attendanceReports = (List<StudentAttendanceReport>) request.getAttribute("attendanceReports");
     if (attendanceReports == null) {
@@ -65,24 +64,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Báo cáo điểm danh - TALENT01</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/attendance-report.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <style>
         .main-content {
             margin-left: 320px;
-            padding: 20px;
             background-color: #f5f5f5;
             min-height: 100vh;
         }
 
         .container {
             max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: auto;
         }
+
 
         .header-section {
             display: flex;
