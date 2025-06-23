@@ -2,6 +2,7 @@ package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.CourseDAO;
 import org.example.talentcenter.dao.ConsultationDAO;
+import org.example.talentcenter.dto.CourseDto;
 import org.example.talentcenter.model.Consultation;
 import org.example.talentcenter.model.Course;
 
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet(name = "ConsultationServlet", value = "/Consultation")
 public class ConsultationServlet extends HttpServlet {
@@ -23,7 +25,7 @@ public class ConsultationServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        ArrayList<Course> subjects = subjectDAO.getAllCourses();
+        List<Course> subjects = subjectDAO.getAll();
         request.setAttribute("subjects", subjects);
         String action = request.getParameter("action");
         String view = request.getParameter("view");
@@ -120,7 +122,7 @@ public class ConsultationServlet extends HttpServlet {
                 consultationDAO.updateConsultation(consult);
                 Consultation updatedConsult = consultationDAO.getById(id);
                 request.setAttribute("consult", updatedConsult);
-                request.setAttribute("subjects", subjectDAO.getAllCourses());
+                request.setAttribute("subjects", subjectDAO.getAll());
                 HttpSession session = request.getSession();
                 session.setAttribute("message", "Cập nhật thành công.");
                 request.getRequestDispatcher("View/edit-consultation.jsp").forward(request, response);

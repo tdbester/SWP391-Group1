@@ -12,42 +12,45 @@ public class BlogDAO {
 
     // CREATE blog by using insert command SQL
     public void insert(Blog blog) {
-        String sql = "INSERT INTO Blog (Title, Description, image, Content, Authorid, CreatedAt) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String sql = "INSERT INTO Blog (Title, Description, image, Content, AuthorId, CategoryId, CreatedAt) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, blog.getTitle());
             stmt.setString(2, blog.getDescription());
             stmt.setString(3, blog.getImage());
             stmt.setString(4, blog.getContent());
             stmt.setInt(5, blog.getAuthorId());
-            stmt.setDate(6, new Date(System.currentTimeMillis()));
+            stmt.setInt(6, blog.getCategory());
+            stmt.setDate(7, new Date(System.currentTimeMillis()));
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    //ResultSet:[blog1, blog2, blog3] ;
-//while: blog1 -> new Blog(blog1.id, blog1.title,...) -> list.add(blog)
+
     // READ ALL
     public List<BlogDto> getAll() {
         List<BlogDto> list = new ArrayList<>();
 
-        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt, ac.FullName " +
-                "FROM Blog b join Sale s ON b.AuthorId = s.id join Account ac on s.id = ac.Id";
-
+        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt, ac.FullName, b.CategoryId " +
+                "FROM Blog b " +
+                "JOIN Account ac ON b.authorId = ac.Id";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 BlogDto blogDto = new
                         BlogDto(
-                    rs.getInt("Id"),
-                    rs.getString("Title"),
-                    rs.getString("Description"),
-                    rs.getString("Content"),
-                    rs.getString("image"),
-                    rs.getDate("CreatedAt"),
-                    rs.getString("FullName")
+                        rs.getInt("Id"),
+                        rs.getString("Title"),
+                        rs.getString("Description"),
+                        rs.getString("Content"),
+                        rs.getString("image"),
+                        rs.getDate("CreatedAt"),
+                        rs.getString("FullName"),
+                        rs.getInt("CategoryId")
                 );
                 list.add(blogDto);
             }
@@ -72,7 +75,8 @@ public class BlogDAO {
                             rs.getString("image"),
                             rs.getInt("AuthorId"),
                             rs.getDate("CreatedAt"),
-                            rs.getString("Description")
+                            rs.getString("Description"),
+                            rs.getInt("Category")
                     );
                 }
             }
@@ -84,15 +88,17 @@ public class BlogDAO {
 
     // UPDATE
     public void update(Blog blog) {
-        String sql = "UPDATE Blog SET Title = ?, Description = ?, image= ?, Content = ?, AuthorId = ? WHERE id = ?";
-        try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        String sql = "UPDATE Blog SET Title = ?, Description = ?, image = ?, Content = ?, " +
+                "AuthorId = ?, CategoryId = ? WHERE Id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, blog.getTitle());
             stmt.setString(2, blog.getDescription());
             stmt.setString(3, blog.getImage());
             stmt.setString(4, blog.getContent());
             stmt.setInt(5, blog.getAuthorId());
-            stmt.setInt(6, blog.getId());
-
+            stmt.setInt(6, blog.getCategory());
+            stmt.setInt(7, blog.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -109,4 +115,55 @@ public class BlogDAO {
             e.printStackTrace();
         }
     }
+
+    public int getTotalBlog() {
+        String sql = "SELECT COUNT(*) FROM Blog";
+        try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+        }
+        return 0;
+    }
+
+    public List<BlogDto> pagingBlog(int index) {
+        List<BlogDto> list = new ArrayList<>();
+
+        //tạo câu lệnh sql đ truy vấn
+        String sql = "select * from Blog b " +
+                "join Account ac on b.authorId = ac.Id\n" +
+                "order by b.Id DESC\n" +
+                "offset ? rows fetch next 10 rows only;";
+        try {
+            //tạo kết nối tới SQL
+            Connection conn = DBConnect.getConnection();
+            //tạo câu lệnh dựa vào sql
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            // truyền tham số vào câu lệnh query
+            stmt.setInt(1, (index - 1) * 10);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                list.add(new BlogDto(
+                        rs.getInt("Id"),
+                        rs.getString("Title"),
+                        rs.getString("Description"),
+                        rs.getString("Content"),
+                        rs.getString("image"),
+                        new java.util.Date(rs.getDate("CreatedAt").getTime()),
+                        rs.getString("FullName"),
+                        rs.getInt("CategoryId")
+                ));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        return list;
+    }
+
 }

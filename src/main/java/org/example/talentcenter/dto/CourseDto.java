@@ -1,24 +1,29 @@
-package org.example.talentcenter.model;
+package org.example.talentcenter.dto;
 
-public class Course {
+import org.example.talentcenter.model.Category;
+
+public class CourseDto {
     private int id;
     private String title;
     private double price;
     private String information;
     private int createdBy;
+    private String fullname;
     private String image;
     private Category category;
 
-    public Course() {
+    public CourseDto() {
     }
 
-    public Course(int id, String title, double price, String information, int createdBy, String image, Category category) {
+    public CourseDto(int id, String title, double price, String information,
+                     int createdBy,String fullname, String image, Category category) {
         this.id = id;
         this.title = title;
         this.price = price;
         this.information = information;
         this.createdBy = createdBy;
         this.image = image;
+        this.fullname = fullname;
         this.category = category;
     }
 
@@ -73,5 +78,10 @@ public class Course {
     public void setCategory(Category category) {
         this.category = category;
     }
-
+    public String getFullname() {
+        return fullname;
+    }
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
+    }
 }

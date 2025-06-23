@@ -1,10 +1,12 @@
 package org.example.talentcenter.config;
 
 import org.example.talentcenter.dao.BlogDAO;
+import org.example.talentcenter.dto.BlogDto;
 import org.example.talentcenter.model.Blog;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 public class DBTest {
     public static void main(String[] args) {
@@ -19,7 +21,9 @@ public class DBTest {
 //            e.printStackTrace();
 //        }
         BlogDAO blogDAO = new BlogDAO();
-        Blog blog = blogDAO.getById(2);
-        System.out.println(blog.getTitle());
+        List<BlogDto> blog = blogDAO.getAll();
+        for (BlogDto blogDto : blog) {
+            System.out.println(blogDto.getTitle());
+        }
     }
 }

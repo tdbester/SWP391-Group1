@@ -38,7 +38,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("login.jsp").forward(request, response);
+        request.getRequestDispatcher("View/login.jsp").forward(request, response);
     }
 
     /**
@@ -89,16 +89,16 @@ public class LoginServlet extends HttpServlet {
                 if (roleName != null) {
                     switch (roleName.toLowerCase()) {
                         case "admin":
-                            response.sendRedirect("home.jsp");
+                            response.sendRedirect("View/home.jsp");
                             break;
                         case "student":
-                            response.sendRedirect("home.jsp");
+                            response.sendRedirect("View/home.jsp");
                             break;
                         case "teacher":
-                            response.sendRedirect("home.jsp");
+                            response.sendRedirect("View/home.jsp");
                             break;
                         case "accountant":
-                            response.sendRedirect("home.jsp");
+                            response.sendRedirect("View/home.jsp");
                             break;
                         case "training manager":
                             response.sendRedirect("View/training-manager-dashboard.jsp");
@@ -117,7 +117,7 @@ public class LoginServlet extends HttpServlet {
 
             } else {
                 request.setAttribute("error", "Email hoặc mật khẩu không đúng");
-                request.setAttribute("email", email); // Keep email for user convenience
+                request.setAttribute("email", email);
                 request.getRequestDispatcher("View/login.jsp").forward(request, response);
             }
 

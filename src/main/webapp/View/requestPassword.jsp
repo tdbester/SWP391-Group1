@@ -10,6 +10,13 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/login.css">
 </head>
 <body>
+<header class="top-header">
+    <div class="header-content">
+        <div class="logo">TALENT01</div>
+        <a href="View/login.jsp" class="back-home-btn">← Đăng nhập</a>
+    </div>
+</header>
+
 <div class="container">
     <div class="login form">
         <header>Email của bạn</header>
@@ -27,5 +34,8 @@
             </form>
     </div>
 </div>
+<footer class="bottom-footer">
+    <p>Copyright © 2025 Talent Center Management. SWP391-Group 01.</p>
+</footer>
 </body>
 </html>
