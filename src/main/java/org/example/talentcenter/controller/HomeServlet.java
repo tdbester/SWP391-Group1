@@ -31,7 +31,7 @@ public class HomeServlet extends HttpServlet {
         if ("true".equals(request.getParameter("success"))) {
             request.setAttribute("message0", "Gửi tư vấn thành công!");
         }
-        request.getRequestDispatcher("View/home.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/home.jsp").forward(request, response);
     }
 
     @Override
@@ -57,7 +57,6 @@ public class HomeServlet extends HttpServlet {
             response.sendRedirect("home?success=true");
             return;
         }
-        // Nếu có thêm action khác, xử lý ở đây…
         doGet(request, response);
     }
 }
