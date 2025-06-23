@@ -103,7 +103,7 @@ public class CourseServlet extends HttpServlet {
         int total   = courseDAO.getTotalCourse();
         int endPage = (int)Math.ceil((double) total / 5);
 
-        req.setAttribute("courseList", filtered);
+        req.setAttribute("courseList", categoryFiltered);
         req.setAttribute("endP",        endPage);
         req.setAttribute("currentIndex", index);
         req.setAttribute("categories",  categoryDAO.getByType(TYPE_COURSE));

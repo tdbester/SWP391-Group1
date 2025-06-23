@@ -131,13 +131,18 @@ public class BlogDAO {
 
     public List<BlogDto> pagingBlog(int index) {
         List<BlogDto> list = new ArrayList<>();
+
+        //tạo câu lệnh sql đ truy vấn
         String sql = "select * from Blog b " +
                 "join Account ac on b.authorId = ac.Id\n" +
                 "order by b.Id DESC\n" +
                 "offset ? rows fetch next 10 rows only;";
         try {
+            //tạo kết nối tới SQL
             Connection conn = DBConnect.getConnection();
+            //tạo câu lệnh dựa vào sql
             PreparedStatement stmt = conn.prepareStatement(sql);
+            // truyền tham số vào câu lệnh query
             stmt.setInt(1, (index - 1) * 10);
             ResultSet rs = stmt.executeQuery();
 

@@ -46,12 +46,26 @@
 <div class="container mt-5">
     <h2 class="mb-4">Danh sách bài viết</h2>
 
-    <form action="blogs" method="get" class="d-flex justify-content-between mb-4">
+    <form action="blogs" method="get" class="row g-2 mb-3">
         <div class="col-auto">
             <input type="search" name="search" class="form-control" placeholder="Tìm kiếm">
         </div>
         <div class="col-auto">
-        <a href="blogs?action=new" class="btn btn-success">Tạo bài viết mới</a>
+            <select name="category" class="form-select">
+                <option value="">Tất cả danh mục</option>
+                <c:forEach var="cat" items="${categories}">
+                    <option value="${cat.id}"
+                        ${param.category == cat.id.toString() ? 'selected' : ''}>
+                            ${cat.name}
+                    </option>
+                </c:forEach>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary">Lọc</button>
+        </div>
+        <div class="col-auto ms-auto">
+          <a href="blogs?action=new" class="btn btn-success">Tạo bài viết mới</a>
         </div>
     </form>
 

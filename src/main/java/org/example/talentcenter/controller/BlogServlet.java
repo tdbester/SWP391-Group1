@@ -24,6 +24,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
 import static org.example.talentcenter.utilities.Const.TYPE_BLOG;
+import static org.example.talentcenter.utilities.Const.TYPE_COURSE;
 
 @WebServlet("/blogs")
 @MultipartConfig(
@@ -44,6 +45,7 @@ public class BlogServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        // check user login. If user don't login -> redirect to login page
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("accountId") == null) {
             response.sendRedirect("login");
@@ -92,26 +94,45 @@ public class BlogServlet extends HttpServlet {
 
     private void listBlogs(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        // search value
         String search = request.getParameter("search");
+        String catParam  = request.getParameter("category");
+
+        // number of page
         int index = 1;
         if (request.getParameter("index") != null) {
             index = Integer.parseInt(request.getParameter("index"));
         }
+        Category filterCat;
 
+        if (catParam != null && !catParam.isBlank()) {
+            filterCat = categoryDAO.getById(Integer.parseInt(catParam));
+        } else {
+            filterCat= null;
+        }
+
+        // lấy danh sách blog từ database lên theo phân trang
         List<BlogDto> blogs = blogDAO.pagingBlog(index);
         List<BlogDto> filtered = blogs.stream()
                 .filter(blog -> search == null ||
                         blog.getTitle().toLowerCase().contains(search.toLowerCase()))
                 .toList();
+        var categoryFiltered = filterCat != null
+                ? filtered.stream()
+                .filter(c -> c.getCategory() == filterCat.getId())
+                .toList()
+                : filtered;
 
         // Lấy danh sách category để hiển thị tên
         List<Category> categories = categoryDAO.getByType(TYPE_BLOG);
         request.setAttribute("categories", categories);
 
-        request.setAttribute("blogList", filtered);
+        request.setAttribute("blogList", categoryFiltered);
         int count = blogDAO.getTotalBlog();
         int endPage = count % 10 == 0 ? count / 10 : count / 10 + 1;
         request.setAttribute("endP", endPage);
+        request.setAttribute("categories",  categoryDAO.getByType(TYPE_BLOG));
+        request.setAttribute("selectedCategory", filterCat != null ? filterCat.getId() : null);
         request.getRequestDispatcher("/View/blog.jsp").forward(request, response);
     }
 
@@ -147,9 +168,11 @@ public class BlogServlet extends HttpServlet {
 
     private void insertBlog(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        //1. lấy thông tin user đang đăng nhaapj để lưu vào AuthorId
         HttpSession session = request.getSession(false);
         int userId= (int) session.getAttribute("accountId");
 
+        //2. lấy thông tin từ form JSP
         String title       = request.getParameter("title");
         String description = request.getParameter("description");
         String content     = request.getParameter("content");
@@ -157,11 +180,14 @@ public class BlogServlet extends HttpServlet {
         Part imagePart     = request.getPart("imageFile");
         String imageUrl;
 
+        //3. lấy ảnh và upload ln cloudinary, lấy về URL ảnh để lưu vào database
         if (imagePart != null && imagePart.getSize() > 0) {
             imageUrl = uploadToCloudinary(imagePart);
         } else {
-            imageUrl = "https://res.cloudinary.com/your-cloud-name/image/upload/v1/default_image.png";
+            imageUrl = "https://placehold.co/600x400?text=img";
         }
+
+        //4. khởi tạo đối tượng blog theo các giá trị đã get ra ở treen
         Blog newBlog = new Blog();
         newBlog.setTitle(title);
         newBlog.setDescription(description);
@@ -171,14 +197,18 @@ public class BlogServlet extends HttpServlet {
         newBlog.setCategory(categoryId);
         newBlog.setCreatedAt(new Date());
 
+        //5. Dùng DAO để insert blog vào database
         blogDAO.insert(newBlog);
         response.sendRedirect("blogs");
     }
 
     private void updateBlog(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        //1. lấy thông tin người đang đăng nhập
         HttpSession session = request.getSession(false);
         int userId= (int) session.getAttribute("accountId");
+
+        //2. lấy thông tin người dung nhập từ form
         int id          = Integer.parseInt(request.getParameter("id"));
         String title    = request.getParameter("title");
         String description = request.getParameter("description");
@@ -187,10 +217,12 @@ public class BlogServlet extends HttpServlet {
         Part imagePart  = request.getPart("imageFile");
         String imageUrl = request.getParameter("currentImageUrl");
 
+        //3. upload ảnh lên cloudinary
         if (imagePart != null && imagePart.getSize() > 0) {
             imageUrl = uploadToCloudinary(imagePart);
         }
 
+        //4. Khởi tạo đối tượng blog từ casc giá trị lấy được ở trên
         Blog blog = new Blog();
         blog.setId(id);
         blog.setTitle(title);
@@ -201,23 +233,34 @@ public class BlogServlet extends HttpServlet {
         blog.setCategory(categoryId);
         blog.setCreatedAt(new Date());
 
+        //5. Gọi đến DAO để update blog
         blogDAO.update(blog);
+
+        //6. Redirect sang trang list.
         response.sendRedirect("blogs");
     }
 
     private void deleteBlog(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        // lấy Id blog cần delete
         int id = Integer.parseInt(request.getParameter("id"));
+
+        // gọi đến DAO để delete
         blogDAO.delete(id);
+
+        // chuển đến trang list
         response.sendRedirect("blogs");
     }
 
     private String uploadToCloudinary(Part filePart) throws IOException, ServletException {
+        //1. Tạo kết nối web của mình đến cloudinary
         Cloudinary cloudinary = Singleton.getCloudinary();
         if (cloudinary == null) {
             throw new ServletException("Cloudinary not configured");
         }
 
+        //2. Khởi tạo đối tượng file- là file người dùng upload lên
+        // ( đối tượng file được lưu trong bộ nhớ hệ thống)
         File tempFile;
         try (InputStream input = filePart.getInputStream()) {
             String fileName  = filePart.getSubmittedFileName();
@@ -226,8 +269,13 @@ public class BlogServlet extends HttpServlet {
             Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
+        //3. Gửi ảnh lên cloudinary
         Map<?,?> uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.emptyMap());
+
+        //4. xóa đối tượng file tạm trong bộ nhớ hệ thống
         tempFile.delete();
+
+        //5. trả về URL ảnh đã upload
         return (String) uploadResult.get("secure_url");
     }
 }
