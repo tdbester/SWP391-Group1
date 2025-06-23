@@ -70,7 +70,6 @@ public class ResetPasswordServlet extends HttpServlet {
                     return;
                 }
 
-                // Get user information
                 Account account = accountDAO.getAccountById(tokenForgetPassword.getAccountId());
                 if (account == null) {
                     request.setAttribute("error", "Không tìm thấy tài khoản liên kết với token này");
@@ -106,7 +105,7 @@ public class ResetPasswordServlet extends HttpServlet {
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
 
-        // Basic validation
+        //validation
         if (password == null || password.trim().isEmpty()) {
             request.setAttribute("error", "Vui lòng nhập mật khẩu mới");
             request.setAttribute("email", email);

@@ -7,9 +7,16 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/css/login.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/login.css">
 </head>
 <body>
+<header class="top-header">
+  <div class="header-content">
+    <div class="logo">TALENT01</div>
+    <a href="login.jsp" class="back-home-btn">← Đăng nhập</a>
+  </div>
+</header>
+
 <div class="container">
   <div class="login form">
     <header>Đổi mật khẩu</header>

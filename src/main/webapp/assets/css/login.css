@@ -14,9 +14,6 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css
 body {
     background: url('../images/piano.png') no-repeat center center fixed;
     background-size: cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
     position: relative;
 }
@@ -32,10 +29,55 @@ body::before {
     z-index: -1;
 }
 
+/* Header styles */
+.top-header {
+    background: rgba(122, 90, 248, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 16px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-weight: 600;
+    font-size: 20px;
+    color: white;
+}
+
+.back-home-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.back-home-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
 .container {
     width: 100%;
     max-width: 400px;
     padding: 20px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 120px); /* Trừ đi chiều cao header và footer */
 }
 
 .login.form {
@@ -72,14 +114,14 @@ body::before {
 }
 
 .login.form input:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 8px rgba(102, 126, 234, 0.4);
+    border-color: #7A5AF8;
+    box-shadow: 0 0 8px rgba(122, 90, 248, 0.4);
 }
 
 .login.form .button {
     width: 100%;
     height: 50px;
-    background: linear-gradient(to right, #667eea, #764ba2);
+    background: linear-gradient(to right, #7A5AF8, #9B7BFA);
     color: #fff;
     font-size: 16px;
     font-weight: 500;
@@ -91,13 +133,13 @@ body::before {
 }
 
 .login.form .button:hover {
-    background: linear-gradient(to right, #5a6fd1, #6a4299);
+    background: linear-gradient(to right, #6B4CE8, #8B6BEA);
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .login.form a {
-    color: #667eea;
+    color: #7A5AF8;
     text-decoration: none;
     font-size: 14px;
     display: block;
@@ -107,7 +149,7 @@ body::before {
 }
 
 .login.form a:hover {
-    color: #764ba2;
+    color: #9B7BFA;
     text-decoration: underline;
 }
 
@@ -121,7 +163,7 @@ body::before {
 }
 
 .signup a {
-    color: #667eea;
+    color: #7A5AF8;
     text-decoration: none;
     font-weight: 500;
 }
@@ -148,13 +190,42 @@ body::before {
     40%, 80% { transform: translateX(5px); }
 }
 
+/* Footer styles */
+.bottom-footer {
+    background: linear-gradient(135deg, #9B7BFA 0%, #7A5AF8 100%);
+    color: white;
+    text-align: center;
+    padding: 16px 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.bottom-footer p {
+    font-size: 14px;
+    opacity: 0.9;
+}
 
 @media (max-width: 768px) {
     body {
         background-attachment: scroll;
     }
-    
+
     .login.form {
         padding: 20px;
+    }
+
+    .header-content {
+        padding: 0 20px;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .back-home-btn {
+        font-size: 12px;
+        padding: 6px 12px;
     }
 }

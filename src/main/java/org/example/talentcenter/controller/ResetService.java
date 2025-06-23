@@ -9,7 +9,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 public class ResetService {
-    private final int LIMIT_MINUTES = 15; // Increased to 15 minutes for better UX
+    private final int LIMIT_MINUTES = 15;
     private final String from = "talentcenter0001@gmail.com";
     private final String password = "ehmf tner ayhv flzm"; // App password for Gmail
 

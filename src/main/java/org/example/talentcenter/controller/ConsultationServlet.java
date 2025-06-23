@@ -28,10 +28,25 @@ public class ConsultationServlet extends HttpServlet {
         String action = request.getParameter("action");
         String view = request.getParameter("view");
         if (action == null || action.equals("list")) {
-            ArrayList<Consultation> consultations = consultationDAO.getAllConsultations();
+            int page = 1;
+            int recordsPerPage = 10;
+            try {
+                String pageParam = request.getParameter("page");
+                if (pageParam != null) page = Integer.parseInt(pageParam);
+            } catch (NumberFormatException ignored) {
+            }
+
+            int offset = (page - 1) * recordsPerPage;
+            ArrayList<Consultation> consultations = consultationDAO.getConsultationsWithPaging(offset, recordsPerPage);
+            int totalRecords = consultationDAO.getTotalConsultationCount();
+            int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+
             request.setAttribute("consultations", consultations);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
             request.setAttribute("subjects", subjects);
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
+            return;
         } else if (action.equals("edit")) {
             String idRaw = request.getParameter("id");
             try {
@@ -68,6 +83,17 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("consultations", consultations);
             request.setAttribute("subjects", subjects);
             request.setAttribute("course_filter", courseFilter);
+            request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
+        } else if (action.equals("filterByStatus")) {
+            String statusFilter = request.getParameter("status_filter");
+            if (statusFilter == null || statusFilter.trim().isEmpty()) {
+                response.sendRedirect("Consultation?action=list");
+                return;
+            }
+            ArrayList<Consultation> consultations = consultationDAO.filterConsultationsByStatus(statusFilter.trim());
+            request.setAttribute("consultations", consultations);
+            request.setAttribute("subjects", subjects);
+            request.setAttribute("course_filter", statusFilter);
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
         } else if ("dashboard".equals(action)) {
             request.getRequestDispatcher("View/sale-dashboard.jsp").forward(request, response);

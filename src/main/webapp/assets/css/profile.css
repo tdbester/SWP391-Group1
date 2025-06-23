@@ -10,34 +10,6 @@ body {
     color: #333;
 }
 
-header {
-    background: #7A5AF8;
-    color: white;
-    padding: 16px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.logo {
-    font-weight: 600;
-    font-size: 20px;
-}
-
-.nav {
-    display: flex;
-    gap: 24px;
-}
-
-.nav a {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-}
-
 .container {
     display: flex;
     padding: 32px;
@@ -69,6 +41,12 @@ header {
 .sidebar a:hover {
     color: #9B7BFA;
     transform: translateX(5px);
+}
+
+/* Active link trong sidebar */
+.sidebar a.active {
+    color: #5E3AC7;
+    font-weight: 600;
 }
 
 .profile-content {
@@ -170,10 +148,4 @@ input {
 /* Hiệu ứng scroll */
 html {
     scroll-behavior: smooth;
-}
-
-/* Active link trong sidebar */
-.sidebar a.active {
-    color: #5E3AC7;
-    font-weight: 600;
 }

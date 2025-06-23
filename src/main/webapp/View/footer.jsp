@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+
 <style>
   /* Footer styles */
   footer {
@@ -6,6 +7,7 @@
     color: white;
     text-align: center;
     padding: 32px 0;
+    margin-top: 48px;
   }
 
   footer p {
