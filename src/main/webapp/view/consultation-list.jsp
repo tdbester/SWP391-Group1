@@ -5,6 +5,22 @@
   Time: 3:20 PM
   To change this template use File | Settings | File Templates.
 --%>
+/*
+*  Copyright (C) 2025 <Group 1>
+    *  All rights reserved.
+    *
+    *  This file is part of the <Talent Center Management> project.
+    *  Unauthorized copying of this file, via any medium is strictly prohibited.
+    *  Proprietary and confidential.
+    *
+    *  Created on:        2025-05-29
+    *  Author:            Cù Thị Huyền Trang
+    *
+    *  ========================== Change History ==========================
+    *  Date        | Author               | Description
+    *  ------------|----------------------|--------------------------------
+    *  2025-05-29  | Cù Thị Huyền Trang   | Initial creation
+    */
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -240,8 +256,8 @@
                             <input type="text"
                                    id="searchInput"
                                    class="form-control"
-                                   placeholder="Tìm theo tên, email hoặc số điện thoại..."
-                                   value="${param.keyword}"/>
+                                   placeholder="Nhập từ khoá để tìm kiếm"
+                                   value="${keyword}"/>
                         </div>
                     </div>
 
@@ -253,7 +269,7 @@
                         <select id="courseFilter" class="form-select">
                             <option value="">Tất cả khóa học</option>
                             <c:forEach var="subject" items="${subjects}">
-                                <option value="${subject.title}" ${param.course_filter == subject.title ? 'selected' : ''}>
+                                <option value="${subject.title}" ${course_filter == subject.title ? 'selected' : ''}>
                                         ${subject.title}
                                 </option>
                             </c:forEach>
@@ -267,13 +283,13 @@
                         </label>
                         <select id="statusFilter" class="form-select">
                             <option value="">Tất cả trạng thái</option>
-                            <option value="Đồng ý" ${param.status_filter == 'Đồng ý' ? 'selected' : ''}>
+                            <option value="Đồng ý" ${status_filter == 'Đồng ý' ? 'selected' : ''}>
                                 <i class="fas fa-check-circle"></i> Đồng ý
                             </option>
-                            <option value="Đang xử lý" ${param.status_filter == 'Đang xử lý' ? 'selected' : ''}>
+                            <option value="Đang xử lý" ${status_filter == 'Đang xử lý' ? 'selected' : ''}>
                                 <i class="fas fa-clock"></i> Đang xử lý
                             </option>
-                            <option value="Từ chối" ${param.status_filter == 'Từ chối' ? 'selected' : ''}>
+                            <option value="Từ chối" ${status_filter == 'Từ chối' ? 'selected' : ''}>
                                 <i class="fas fa-times-circle"></i> Từ chối
                             </option>
                         </select>
@@ -288,7 +304,6 @@
                 </div>
             </div>
 
-            <!-- Add Student Section -->
             <div class="add-student-section">
                 <h2>
                     <i class="fas fa-user-plus me-2"></i>
@@ -413,10 +428,9 @@
                 } else {
                     window.location.href = 'Consultation';
                 }
-            }, 800); // Chờ 800ms sau khi người dùng ngừng gõ
+            }, 800);
         }
 
-        // Lọc theo khóa học
         function filterByCourse() {
             const courseValue = courseFilter.value;
             if (courseValue) {
@@ -426,7 +440,6 @@
             }
         }
 
-        // Lọc theo trạng thái
         function filterByStatus() {
             const statusValue = statusFilter.value;
             if (statusValue) {
@@ -436,18 +449,15 @@
             }
         }
 
-        // Xóa tất cả bộ lọc
         function clearAllFilters() {
             window.location.href = 'Consultation';
         }
 
-        // Gắn sự kiện
         searchInput.addEventListener('input', searchWithDelay);
         courseFilter.addEventListener('change', filterByCourse);
         statusFilter.addEventListener('change', filterByStatus);
         clearFiltersBtn.addEventListener('click', clearAllFilters);
 
-        // Hiệu ứng visual khi tìm kiếm
         searchInput.addEventListener('input', function () {
             if (this.value.length > 0) {
                 this.style.borderColor = '#7a6ad8';

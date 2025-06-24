@@ -5,6 +5,24 @@
   Time: 12:02 AM
   To change this template use File | Settings | File Templates.
 --%>
+
+/*
+*  Copyright (C) 2025 <Group 1>
+    *  All rights reserved.
+    *
+    *  This file is part of the <Talent Center Management> project.
+    *  Unauthorized copying of this file, via any medium is strictly prohibited.
+    *  Proprietary and confidential.
+    *
+    *  Created on:        2025-06-13
+    *  Author:            Cù Thị Huyền Trang
+    *
+    *  ========================== Change History ==========================
+    *  Date        | Author               | Description
+    *  ------------|----------------------|--------------------------------
+    *  2025-06-13  | Cù Thị Huyền Trang   | Initial creation
+    */
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html lang="vi">
@@ -245,7 +263,6 @@
             </div>
         </div>
 
-        <!-- Success Message -->
         <c:if test="${not empty sessionScope.message}">
             <div class="alert alert-success">
                 <i class="fas fa-check-circle"></i> ${sessionScope.message}
@@ -253,7 +270,6 @@
             <c:remove var="message" scope="session"/>
         </c:if>
 
-        <!-- Form Section -->
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-edit"></i> Thông tin đơn xin chuyển lớp
@@ -314,7 +330,6 @@
             </div>
         </div>
 
-        <!-- Important Notes Section -->
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-exclamation-triangle"></i> Lưu ý quan trọng
@@ -337,7 +352,7 @@
 <jsp:include page="footer.jsp" />
 
 <script>
-    // Set current date as default
+    // mặc định là ngyaf hiện tại
     document.addEventListener('DOMContentLoaded', function () {
         var dateInput = document.querySelector('input[name="requestDate"]');
         if (dateInput) {
@@ -346,7 +361,7 @@
         }
     });
 
-    // Form validation
+    // validate form
     function validateForm() {
         var detailedReason = document.querySelector('textarea[name="detailedReason"]').value;
         var parentPhone = document.querySelector('input[name="parentPhone"]').value;

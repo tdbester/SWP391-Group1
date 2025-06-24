@@ -5,6 +5,22 @@
   Time: 3:37 AM
   To change this template use File | Settings | File Templates.
 --%>
+/*
+*  Copyright (C) 2025 <Group 1>
+    *  All rights reserved.
+    *
+    *  This file is part of the <Talent Center Management> project.
+    *  Unauthorized copying of this file, via any medium is strictly prohibited.
+    *  Proprietary and confidential.
+    *
+    *  Created on:        2025-06-21
+    *  Author:            Cù Thị Huyền Trang
+    *
+    *  ========================== Change History ==========================
+    *  Date        | Author               | Description
+    *  ------------|----------------------|--------------------------------
+    *  2025-06-21  | Cù Thị Huyền Trang   | Initial creation
+    */
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.*, java.text.SimpleDateFormat" %>
@@ -93,7 +109,6 @@
                 <td><%= r.getResponse() != null ? r.getResponse() : "" %></td>
                 <td><%= r.getStatus() != null ? r.getStatus() : "" %></td>
                 <td><%= r.getResponseAt() != null ? dateFormat.format(r.getResponseAt()) : "" %></td>
-
             </tr>
             <%
                     }

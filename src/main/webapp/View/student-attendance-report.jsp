@@ -6,6 +6,23 @@
   To change this template use File | Settings | File Templates.
 --%>
 
+/*
+*  Copyright (C) 2025 <Group1>
+    *  All rights reserved.
+    *
+    *  This file is part of the <TalentCenterManagement> project.
+    *  Unauthorized copying of this file, via any medium is strictly prohibited.
+    *  Proprietary and confidential.
+    *
+    *  Created on:        2025-06-21
+    *  Author:            Cù Thị Huyền Trang
+    *
+    *  ========================== Change History ==========================
+    *  Date        | Author               | Description
+    *  ------------|----------------------|--------------------------------
+    *  2025-06-21  | Cù Thị Huyền Trang   | Initial creation
+    */
+
 <%@ page import="java.util.*" %>
 <%@ page import="java.time.*" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
@@ -17,13 +34,8 @@
         attendanceReports = new ArrayList<>();
     }
 
-    // Lấy thông tin môn học từ record đầu tiên (nếu có)
+    // Lấy thông tin môn học từ record đầu tiên
     String courseTitle = "Báo cáo điểm danh";
-    String courseCode = "";
-    if (!attendanceReports.isEmpty()) {
-        courseTitle = attendanceReports.get(0).getCourseTitle();
-        // Có thể lấy course code từ database nếu cần
-    }
 
     // Sắp xếp records theo ngày
     attendanceReports.sort((r1, r2) -> r1.getDate().compareTo(r2.getDate()));
@@ -65,6 +77,7 @@
     <title>Báo cáo điểm danh - TALENT01</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
     <style>
         .main-content {
             margin-left: 320px;
@@ -348,9 +361,6 @@
                 <div class="course-info"><%=courseTitle%></div>
             </div>
             <div class="filter-section">
-                <button class="filter-btn">
-                    <i class="fas fa-filter"></i> Tất cả lớp học
-                </button>
                 <div class="view-options">
                     <button class="view-option active">
                         <i class="fas fa-th"></i>
@@ -362,7 +372,7 @@
             </div>
         </div>
 
-        <!-- Attendance Records Grid -->
+
         <div class="attendance-grid">
             <%
                 if (attendanceReports.isEmpty()) {
@@ -380,10 +390,10 @@
                     String statusText = "";
                     if (report.getStatus() != null) {
                         switch(report.getStatus().toLowerCase()) {
-                            case "present": statusText = "Present"; break;
-                            case "absent": statusText = "Absent"; break;
-                            case "late": statusText = "Late"; break;
-                            default: statusText = "Unknown"; break;
+                            case "present": statusText = "Có mặt"; break;
+                            case "absent": statusText = "Vắng mặt"; break;
+                            case "late": statusText = "Đi muộn"; break;
+                            default: statusText = "Chưa xác định"; break;
                         }
                     } else {
                         statusText = "Chưa điểm danh";
@@ -418,7 +428,6 @@
             %>
         </div>
 
-        <!-- Statistics Section -->
         <div class="statistics-section">
             <h2 class="statistics-title"><i class="fas fa-chart-pie"></i> Thống kê điểm danh</h2>
             <div class="stats-grid">

@@ -5,6 +5,22 @@
   Time: 11:46 PM
   To change this template use File | Settings | File Templates.
 --%>
+/*
+*  Copyright (C) 2025 <Group 1>
+    *  All rights reserved.
+    *
+    *  This file is part of the <Talent Center Management> project.
+    *  Unauthorized copying of this file, via any medium is strictly prohibited.
+    *  Proprietary and confidential.
+    *
+    *  Created on:        2025-05-31
+    *  Author:            Cù Thị Huyền Trang
+    *
+    *  ========================== Change History ==========================
+    *  Date        | Author               | Description
+    *  ------------|----------------------|--------------------------------
+    *  2025-05-31  | Cù Thị Huyền Trang   | Initial creation
+    */
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <!DOCTYPE html>

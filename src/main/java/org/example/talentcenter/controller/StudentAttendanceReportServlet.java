@@ -1,3 +1,19 @@
+/*
+ *  Copyright (C) 2025 <Group 1>
+ *  All rights reserved.
+ *
+ *  This file is part of the <Talent Center Management> project.
+ *  Unauthorized copying of this file, via any medium is strictly prohibited.
+ *  Proprietary and confidential.
+ *
+ *  Created on:        2025-06-21
+ *  Author:            Cù Thị Huyền Trang
+ *
+ *  ========================== Change History ==========================
+ *  Date        | Author               | Description
+ *  ------------|----------------------|--------------------------------
+ *  2025-06-21  | Cù Thị Huyền Trang   | Initial creation
+ */
 package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.StudentAttendanceReportDAO;
@@ -30,14 +46,13 @@ public class StudentAttendanceReportServlet extends HttpServlet {
             return;
         }
 
-        try (Connection conn = DBConnect.getConnection()) {
+        try {
             int studentId = studentDAO.getStudentById(account.getId()).getId();
             List<StudentAttendanceReport> attendanceReports = studentAttendanceReportDAO.getAttendanceByStudentId(studentId);
             request.setAttribute("attendanceReports", attendanceReports);
             request.getRequestDispatcher("View/student-attendance-report.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendError(500);
         }
 
     }

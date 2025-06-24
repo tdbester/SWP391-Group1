@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2025 <Group 1>
+ *  All rights reserved.
+ *
+ *  This file is part of the <Talent Center Management> project.
+ *  Unauthorized copying of this file, via any medium is strictly prohibited.
+ *  Proprietary and confidential.
+ *
+ *  Created on:        2025-06-13
+ *  Author:            Cù Thị Huyền Trang
+ *
+ *  ========================== Change History ==========================
+ *  Date        | Author               | Description
+ *  ------------|----------------------|--------------------------------
+ *  2025-06-13  | Cù Thị Huyền Trang   | Initial creation
+ */
+
 package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.StudentDAO;
@@ -27,7 +44,6 @@ public class StudentApplicationServlet extends HttpServlet {
         Integer studentId = (Integer) session.getAttribute("accountId");
         String action = request.getParameter("action");
         if ("list".equals(action)) {
-            // Hiển thị danh sách đơn
             RequestDAO requestDAO = new RequestDAO();
             ArrayList<Request> requestList = requestDAO.getRequestBySenderId(studentId);
             request.setAttribute("requestList", requestList);
@@ -57,14 +73,12 @@ public class StudentApplicationServlet extends HttpServlet {
                 response.sendRedirect("login.jsp");
                 return;
             }
-
             String phoneNumber = request.getParameter("phoneNumber");
             String currentClass = request.getParameter("currentClass");
             String parentPhone = request.getParameter("parentPhone");
             String detailedReason = request.getParameter("detailedReason");
-            String requestDateStr = request.getParameter("requestDate");  // yyyy-MM-dd format expected
+            String requestDateStr = request.getParameter("requestDate");
 
-            // Chuyển từ String sang java.util.Date rồi sang Timestamp
             java.util.Date utilDate;
             try {
                 utilDate = new SimpleDateFormat("yyyy-MM-dd").parse(requestDateStr);
@@ -81,7 +95,7 @@ public class StudentApplicationServlet extends HttpServlet {
             transferRequest.setCourseName(currentClass);
             transferRequest.setParentPhone(parentPhone);
             transferRequest.setReason(detailedReason);
-            transferRequest.setCreatedAt(utilDate);  // kiểu java.util.Date
+            transferRequest.setCreatedAt(utilDate);
 
             RequestDAO dao = new RequestDAO();
             dao.insert(transferRequest);

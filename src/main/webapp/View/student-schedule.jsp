@@ -1,24 +1,40 @@
 <%--
   Created by IntelliJ IDEA.
   User: admin
-  Date: 6/18/2025
+  Date: 6/15/2025
   Time: 10:59 PM
   To change this template use File | Settings | File Templates.
 --%>
+/*
+*  Copyright (C) 2025 <Group 1>
+*  All rights reserved.
+*
+*  This file is part of the <Talent Center Management> project.
+    *  Unauthorized copying of this file, via any medium is strictly prohibited.
+    *  Proprietary and confidential.
+    *
+    *  Created on:        2025-06-15
+    *  Author:            Nguyễn Minh Cao
+    *
+    *  ========================== Change History ==========================
+    *  Date        | Author               | Description
+    *  ------------|----------------------|--------------------------------
+    *  2025-06-15  | Nguyễn Minh Cao      | Schedule for teacher
+    *  2025-06-18  | Cù Thị Huyền Trang   | Schedule for student
+    */
 
 <%@ page import="java.util.*" %>
 <%@ page import="java.time.*" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="org.example.talentcenter.model.StudentSchedule" %>
 <%
-    // Lấy danh sách schedule từ request
     @SuppressWarnings("unchecked")
     List<StudentSchedule> schedules = (List<StudentSchedule>) request.getAttribute("schedules");
     if (schedules == null) {
         schedules = new ArrayList<>();
     }
 
-    // Tạo map để nhóm các schedule theo ngày trong tuần và slot
+    // map để nhóm các schedule theo ngày trong tuần và slot
     Map<String, Map<String, List<StudentSchedule>>> weekSchedule = new HashMap<>();
 
     // Khởi tạo structure cho 7 ngày trong tuần

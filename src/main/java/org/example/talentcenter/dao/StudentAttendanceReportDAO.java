@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2025 <Group 1>
+ *  All rights reserved.
+ *
+ *  This file is part of the <Talent Center Management> project.
+ *  Unauthorized copying of this file, via any medium is strictly prohibited.
+ *  Proprietary and confidential.
+ *
+ *  Created on:        2025-06-18
+ *  Author:            Cù Thị Huyền Trang
+ *
+ *  ========================== Change History ==========================
+ *  Date        | Author               | Description
+ *  ------------|----------------------|--------------------------------
+ *  2025-06-15  | Cù Thị Huyền Trang   | Initial creation
+ */
+
 package org.example.talentcenter.dao;
 
 import org.example.talentcenter.config.DBConnect;
@@ -26,7 +43,7 @@ public class StudentAttendanceReportDAO {
                                 JOIN Student st ON sc.StudentId = st.Id
                                 JOIN Attendance att ON att.ScheduleId = s.Id AND att.StudentId = st.Id
                                 WHERE st.Id = ?
-                                ORDER BY s.Date, s.StartTime          
+                                    ORDER BY s.Date, s.StartTime          
                 """;
 
         try (Connection conn = DBConnect.getConnection();

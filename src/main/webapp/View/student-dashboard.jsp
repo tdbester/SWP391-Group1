@@ -5,6 +5,22 @@
   Time: 10:08 PM
   To change this template use File | Settings | File Templates.
 --%>
+/*
+*  Copyright (C) 2025 <Group 1>
+    *  All rights reserved.
+    *
+    *  This file is part of the <Talent Center Management> project.
+    *  Unauthorized copying of this file, via any medium is strictly prohibited.
+    *  Proprietary and confidential.
+    *
+    *  Created on:        2025-06-12
+    *  Author:            Cù Thị Huyền Trang
+    *
+    *  ========================== Change History ==========================
+    *  Date        | Author               | Description
+    *  ------------|----------------------|--------------------------------
+    *  2025-06-12  | Cù Thị Huyền Trang   | Initial creation
+    */
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
@@ -66,40 +82,17 @@
                     <h3 class="card-title"><i class="fas fa-clock"></i> Lịch học hôm nay</h3>
 
                     <div class="schedule-item">
-                        <div class="schedule-time">08:00</div>
-                        <div class="schedule-info">
-                            <div class="schedule-title">Toán cao cấp</div>
-                            <div class="schedule-details">Phòng A101 - GV: Nguyễn Văn B</div>
-                        </div>
-                        <div class="schedule-actions">
-                            <button class="btn-success">Đang diễn ra</button>
-                        </div>
-                    </div>
-
-                    <div class="schedule-item">
                         <div class="schedule-time">10:00</div>
                         <div class="schedule-info">
-                            <div class="schedule-title">Lập trình Java</div>
+                            <div class="schedule-title">Piano cơ bản</div>
                             <div class="schedule-details">Phòng B203 - GV: Trần Thị C</div>
                         </div>
                         <div class="schedule-actions">
                             <button class="btn-primary">Sắp tới</button>
                         </div>
                     </div>
-
-                    <div class="schedule-item">
-                        <div class="schedule-time">13:30</div>
-                        <div class="schedule-info">
-                            <div class="schedule-title">Cơ sở dữ liệu</div>
-                            <div class="schedule-details">Phòng C305 - GV: Lê Văn D</div>
-                        </div>
-                        <div class="schedule-actions">
-                            <button class="btn-warning">Sắp tới</button>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Recent Notifications -->
                 <div class="card">
                     <h3 class="card-title"><i class="fas fa-bell"></i> Thông báo mới</h3>
 
@@ -110,15 +103,6 @@
                         <div class="request-date">2 giờ trước</div>
                         <div class="request-status approved">Mới</div>
                     </div>
-
-                    <div class="request-item">
-                        <div class="request-title">
-                            <i class="fas fa-exclamation-triangle"></i> Deadline bài tập Toán
-                        </div>
-                        <div class="request-date">1 ngày trước</div>
-                        <div class="request-status pending">Quan trọng</div>
-                    </div>
-
                     <div class="request-item">
                         <div class="request-title">
                             <i class="fas fa-check-circle"></i> Điểm kiểm tra đã cập nhật
