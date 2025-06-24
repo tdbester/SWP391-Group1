@@ -113,7 +113,7 @@
                     <p>Điểm danh học sinh hôm nay</p>
                 </a>
 
-                <a href="${pageContext.request.contextPath}/View/schedule.jsp" class="action-card">
+                <a href="${pageContext.request.contextPath}/View/teacher-schedule.jsp" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-calendar-alt"></i>
                     </div>
@@ -145,7 +145,7 @@
             <div class="content-card">
                 <div class="card-header">
                     <h3><i class="fas fa-calendar-day"></i> Lịch hôm nay</h3>
-                    <a href="${pageContext.request.contextPath}/View/schedule.jsp" class="view-all">Xem tất cả</a>
+                    <a href="${pageContext.request.contextPath}/View/teacher-schedule.jsp" class="view-all">Xem tất cả</a>
                 </div>
                 <div class="card-content">
                     <div class="schedule-item">

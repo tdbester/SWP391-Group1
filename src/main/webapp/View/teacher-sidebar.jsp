@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/teacher-sidebar.css">
 <!-- Teacher Sidebar -->
 <div class="sidebar">
   <nav>
@@ -10,7 +10,7 @@
       </a>
     </div>
     <div class="nav-section">
-      <a href="${pageContext.request.contextPath}/View/schedule.jsp" class="nav-item">
+      <a href="${pageContext.request.contextPath}/TeacherSchedule" class="nav-item">
         <i class="fas fa-calendar-alt"></i>
         <span>Thời khóa biểu</span>
       </a>
@@ -22,7 +22,7 @@
       </a>
     </div>
     <div class="nav-section">
-      <a href="${pageContext.request.contextPath}/View/submit-request.jsp" class="nav-item">
+      <a href="${pageContext.request.contextPath}/View/teacher-application.jsp" class="nav-item">
         <i class="fas fa-paper-plane"></i>
         <span>Gửi đơn</span>
       </a>
