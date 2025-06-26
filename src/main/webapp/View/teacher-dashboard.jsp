@@ -54,53 +54,6 @@
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon students">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>120</h3>
-                    <p>Học sinh</p>
-                    <span class="stat-change positive">+5% so với tháng trước</span>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon classes">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>8</h3>
-                    <p>Lớp học</p>
-                    <span class="stat-change positive">+2 lớp mới</span>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon attendance">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>95%</h3>
-                    <p>Tỷ lệ điểm danh</p>
-                    <span class="stat-change positive">+3% tuần này</span>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon requests">
-                    <i class="fas fa-paper-plane"></i>
-                </div>
-                <div class="stat-content">
-                    <h3>12</h3>
-                    <p>Đơn chờ xử lý</p>
-                    <span class="stat-change neutral">2 mới hôm nay</span>
-                </div>
-            </div>
-        </div>
-
         <!-- Quick Actions -->
         <div class="quick-actions">
             <h2>Thao tác nhanh</h2>
@@ -172,46 +125,6 @@
                 </div>
             </div>
 
-            <!-- Recent Notifications -->
-            <div class="content-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-bell"></i> Thông báo gần đây</h3>
-                    <a href="${pageContext.request.contextPath}/View/notifications.jsp" class="view-all">Xem tất cả</a>
-                </div>
-                <div class="card-content">
-                    <div class="notification-item">
-                        <div class="notification-icon new">
-                            <i class="fas fa-info-circle"></i>
-                        </div>
-                        <div class="notification-content">
-                            <h4>Thông báo họp khoa</h4>
-                            <p>Họp khoa vào 15:00 ngày mai tại phòng 501</p>
-                            <span class="notification-time">2 giờ trước</span>
-                        </div>
-                    </div>
-                    <div class="notification-item">
-                        <div class="notification-icon">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <div class="notification-content">
-                            <h4>Học sinh mới</h4>
-                            <p>3 học sinh mới được thêm vào lớp A1</p>
-                            <span class="notification-time">1 ngày trước</span>
-                        </div>
-                    </div>
-                    <div class="notification-item">
-                        <div class="notification-icon">
-                            <i class="fas fa-calendar"></i>
-                        </div>
-                        <div class="notification-content">
-                            <h4>Thay đổi lịch học</h4>
-                            <p>Lịch học lớp B2 thay đổi từ thứ 3 tới</p>
-                            <span class="notification-time">2 ngày trước</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Attendance Chart -->
             <div class="content-card chart-card">
                 <div class="card-header">
@@ -247,6 +160,46 @@
                             <h4>Đơn xin đổi lịch</h4>
                             <p>Xin đổi lịch dạy từ thứ 2 sang thứ 3</p>
                             <span class="request-date">Duyệt: 12/06/2025</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Notifications -->
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-bell"></i> Thông báo gần đây</h3>
+                    <a href="${pageContext.request.contextPath}/View/notifications.jsp" class="view-all">Xem tất cả</a>
+                </div>
+                <div class="card-content">
+                    <div class="notification-item">
+                        <div class="notification-icon new">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="notification-content">
+                            <h4>Thông báo họp khoa</h4>
+                            <p>Họp khoa vào 15:00 ngày mai tại phòng 501</p>
+                            <span class="notification-time">2 giờ trước</span>
+                        </div>
+                    </div>
+                    <div class="notification-item">
+                        <div class="notification-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="notification-content">
+                            <h4>Học sinh mới</h4>
+                            <p>3 học sinh mới được thêm vào lớp A1</p>
+                            <span class="notification-time">1 ngày trước</span>
+                        </div>
+                    </div>
+                    <div class="notification-item">
+                        <div class="notification-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="notification-content">
+                            <h4>Thay đổi lịch học</h4>
+                            <p>Lịch học lớp B2 thay đổi từ thứ 3 tới</p>
+                            <span class="notification-time">2 ngày trước</span>
                         </div>
                     </div>
                 </div>

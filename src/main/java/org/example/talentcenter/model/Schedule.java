@@ -6,29 +6,31 @@ import java.time.LocalTime;
 public class Schedule {
     private int id;
     private LocalDate date;
-    private LocalTime startTime;
-    private LocalTime endTime;
     private int roomId;
     private int classRoomId;
+    private int slotId;
 
-    //dữ liệu đã tham gia
+    // Derived from Slot table
+    private LocalTime slotStartTime;
+    private LocalTime slotEndTime;
+
+    // From ClassRooms join
     private String className;
     private String courseTitle;
-    private String roomCode;
     private int teacherId;
     private String teacherName;
+
+    private String roomCode; // optional if Room table has info
 
     // Constructors
     public Schedule() {}
 
-    public Schedule(int id, LocalDate date, LocalTime startTime, LocalTime endTime,
-                    int roomId, int classRoomId) {
+    public Schedule(int id, LocalDate date, int roomId, int classRoomId, int slotId) {
         this.id = id;
         this.date = date;
-        this.startTime = startTime;
-        this.endTime = endTime;
         this.roomId = roomId;
         this.classRoomId = classRoomId;
+        this.slotId = slotId;
     }
 
     // Getters and Setters
@@ -48,22 +50,6 @@ public class Schedule {
         this.date = date;
     }
 
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
     public int getRoomId() {
         return roomId;
     }
@@ -78,6 +64,30 @@ public class Schedule {
 
     public void setClassRoomId(int classRoomId) {
         this.classRoomId = classRoomId;
+    }
+
+    public int getSlotId() {
+        return slotId;
+    }
+
+    public void setSlotId(int slotId) {
+        this.slotId = slotId;
+    }
+
+    public LocalTime getSlotStartTime() {
+        return slotStartTime;
+    }
+
+    public void setSlotStartTime(LocalTime slotStartTime) {
+        this.slotStartTime = slotStartTime;
+    }
+
+    public LocalTime getSlotEndTime() {
+        return slotEndTime;
+    }
+
+    public void setSlotEndTime(LocalTime slotEndTime) {
+        this.slotEndTime = slotEndTime;
     }
 
     public String getClassName() {
@@ -96,14 +106,6 @@ public class Schedule {
         this.courseTitle = courseTitle;
     }
 
-    public String getRoomCode() {
-        return roomCode;
-    }
-
-    public void setRoomCode(String roomCode) {
-        this.roomCode = roomCode;
-    }
-
     public int getTeacherId() {
         return teacherId;
     }
@@ -120,20 +122,29 @@ public class Schedule {
         this.teacherName = teacherName;
     }
 
+    public String getRoomCode() {
+        return roomCode;
+    }
+
+    public void setRoomCode(String roomCode) {
+        this.roomCode = roomCode;
+    }
+
     @Override
     public String toString() {
         return "Schedule{" +
                 "id=" + id +
                 ", date=" + date +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
+                ", slotId=" + slotId +
+                ", slotStartTime=" + slotStartTime +
+                ", slotEndTime=" + slotEndTime +
                 ", roomId=" + roomId +
                 ", classRoomId=" + classRoomId +
                 ", className='" + className + '\'' +
                 ", courseTitle='" + courseTitle + '\'' +
-                ", roomCode='" + roomCode + '\'' +
                 ", teacherId=" + teacherId +
                 ", teacherName='" + teacherName + '\'' +
+                ", roomCode='" + roomCode + '\'' +
                 '}';
     }
 }

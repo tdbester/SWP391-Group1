@@ -3,65 +3,48 @@
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="org.example.talentcenter.model.Schedule" %>
 <%
-    // Lấy danh sách schedule từ request
-    @SuppressWarnings("unchecked")
     List<Schedule> schedules = (List<Schedule>) request.getAttribute("schedulesTeacher");
     if (schedules == null) {
         schedules = new ArrayList<>();
     }
 
-    // Tạo map để nhóm các schedule theo ngày trong tuần và slot
-    Map<String, Map<String, List<Schedule>>> weekSchedule = new HashMap<>();
-
-    // Khởi tạo structure cho 7 ngày trong tuần
+    // Các ngày trong tuần (theo DayOfWeek)
     String[] days = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
-    String[] slots = {"Sáng", "Chiều", "Tối"};
+    int totalSlots = 10;
 
+    // Map ngày -> slotId -> danh sách lớp
+    Map<String, Map<Integer, List<Schedule>>> weekSchedule = new HashMap<>();
     for (String day : days) {
         weekSchedule.put(day, new HashMap<>());
-        for (String slot : slots) {
+        for (int slot = 1; slot <= totalSlots; slot++) {
             weekSchedule.get(day).put(slot, new ArrayList<>());
         }
     }
 
-    // Phân loại schedule theo ngày và slot
+    // Đưa lịch vào map theo ngày và slotId
     for (Schedule schedule : schedules) {
         LocalDate date = schedule.getDate();
-        LocalTime startTime = schedule.getStartTime();
-
-        // Xác định ngày trong tuần
         DayOfWeek dayOfWeek = date.getDayOfWeek();
         String dayKey = dayOfWeek.toString();
+        int slotId = schedule.getSlotId();
 
-        // Xác định slot dựa trên thời gian
-        String slot;
-        int hour = startTime.getHour();
-        if (hour >= 6 && hour < 12) {
-            slot = "Sáng";
-        } else if (hour >= 12 && hour < 18) {
-            slot = "Chiều";
-        } else {
-            slot = "Tối";
-        }
-
-        // Thêm vào map
-        if (weekSchedule.containsKey(dayKey)) {
-            weekSchedule.get(dayKey).get(slot).add(schedule);
+        if (weekSchedule.containsKey(dayKey) && weekSchedule.get(dayKey).containsKey(slotId)) {
+            weekSchedule.get(dayKey).get(slotId).add(schedule);
         }
     }
 
-    // Sắp xếp các lớp trong cùng slot theo thời gian bắt đầu
-    for (String day : days) {
-        for (String slot : slots) {
-            List<Schedule> slotSchedules = weekSchedule.get(day).get(slot);
-            slotSchedules.sort((s1, s2) -> s1.getStartTime().compareTo(s2.getStartTime()));
-        }
-    }
-
-    // Tính toán ngày trong tuần hiện tại
+    // Tính ngày bắt đầu tuần
     LocalDate today = LocalDate.now();
     LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);
+
+    // Kiểm tra xem có tuần được chọn không
+    LocalDate selectedWeek = (LocalDate) request.getAttribute("selectedWeek");
+    if (selectedWeek != null) {
+        startOfWeek = selectedWeek;
+    }
+
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM");
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 %>
 <html lang="vi">
 <head>
@@ -70,6 +53,7 @@
     <title>Thời Khóa Biểu Tuần - TALENT01</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/schedule.css">
+
 </head>
 <body>
 <jsp:include page="header.jsp" />
@@ -79,40 +63,84 @@
 <div class="main-content">
     <div class="container">
         <h1>Thời Khóa Biểu</h1>
-        <!-- StudentSchedule Table -->
-        <div class="schedule-table">
+
+        <!-- Filter Container -->
+        <div class="filter-container">
+            <form class="filter-form" method="GET" action="${pageContext.request.contextPath}/TeacherSchedule">
+                <div class="filter-group">
+                    <label for="week">Chọn tuần:</label>
+                    <input type="date" name="week" id="week"
+                           value="<%= request.getAttribute("selectedWeek") != null ? request.getAttribute("selectedWeek").toString() : request.getAttribute("defaultWeek") %>">
+                </div>
+
+                <div class="filter-buttons">
+                    <button type="submit" class="btn-filter">
+                        <i class="fas fa-search"></i> Lọc
+                    </button>
+                    <button type="button" class="btn-reset" onclick="resetFilter()">
+                        <i class="fas fa-undo"></i> Đặt lại
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Current Filter Display -->
+        <div class="current-filter">
+            <strong>Đang hiển thị: </strong>
+            Tuần từ <%= startOfWeek.format(dateTimeFormatter) %> đến <%= startOfWeek.plusDays(6).format(dateTimeFormatter) %>
+
+            <span style="margin-left: 20px;">
+                <strong>Tổng số lịch: </strong><%= schedules.size() %> buổi học
+            </span>
+        </div>
+
+        <!-- View Toggle Buttons -->
+        <div style="margin-bottom: 20px;">
+            <button type="button" class="btn-filter" id="weekViewBtn" onclick="showWeekView()">
+                <i class="fas fa-calendar-week"></i> Xem dạng tuần
+            </button>
+            <button type="button" class="btn-filter" onclick="showListView()">
+                <i class="fas fa-list"></i> Xem dạng danh sách
+            </button>
+        </div>
+
+        <!-- Week View (Table Format) -->
+        <div class="schedule-table" id="weekView">
             <table>
                 <thead>
                 <tr>
                     <th class="slot-header">SLOT</th>
-                    <th class="day-header">Thứ 2<br><span class="date"><%=startOfWeek.format(dateFormatter)%></span>
+                    <% for (int i = 0; i < 7; i++) { %>
+                    <th class="day-header">
+                        Thứ <%= (i + 2 <= 7 ? i + 2 : "CN") %><br>
+                        <span class="date"><%=startOfWeek.plusDays(i).format(dateFormatter)%></span>
                     </th>
-                    <th class="day-header">Thứ 3<br><span
-                            class="date"><%=startOfWeek.plusDays(1).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 4<br><span
-                            class="date"><%=startOfWeek.plusDays(2).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 5<br><span
-                            class="date"><%=startOfWeek.plusDays(3).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 6<br><span
-                            class="date"><%=startOfWeek.plusDays(4).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 7<br><span
-                            class="date"><%=startOfWeek.plusDays(5).format(dateFormatter)%></span></th>
-                    <th class="day-header">Chủ nhật<br><span
-                            class="date"><%=startOfWeek.plusDays(6).format(dateFormatter)%></span></th>
+                    <% } %>
                 </tr>
                 </thead>
                 <tbody>
                 <%
-                    String[] slotNames = {"Sáng", "Chiều", "Tối"};
-                    String[] dayKeys = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
-                    for (String slotName : slotNames) {
+                    for (int slotId = 1; slotId <= totalSlots; slotId++) {
+                        final int currentSlotId = slotId;
                 %>
                 <tr>
-                    <td class="slot-cell"><%=slotName%>
+                    <td class="slot-cell">
+                        Slot <%=slotId%><br>
+                        <%
+                            Optional<Schedule> sample = schedules.stream()
+                                    .filter(s -> s.getSlotId() == currentSlotId)
+                                    .findFirst();
+                            if (sample.isPresent()) {
+                                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+                                out.print("(" + sample.get().getSlotStartTime().format(timeFormatter)
+                                        + "-" + sample.get().getSlotEndTime().format(timeFormatter) + ")");
+                            }
+                        %>
                     </td>
+
                     <%
-                        for (String dayKey : dayKeys) {
-                            List<Schedule> daySlotSchedules = weekSchedule.get(dayKey).get(slotName);
+                        for (String dayKey : days) {
+                            List<Schedule> daySlotSchedules = weekSchedule.get(dayKey).get(slotId);
                     %>
                     <td class="schedule-cell">
                         <%
@@ -122,17 +150,13 @@
                         <%
                         } else {
                             for (Schedule schedule : daySlotSchedules) {
-                                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-                                String startTimeStr = schedule.getStartTime().format(timeFormatter);
-                                String endTimeStr = schedule.getEndTime().format(timeFormatter);
                         %>
                         <div class="class-item">
-                            <div class="class-code"><%=schedule.getCourseTitle()%>
-                            </div>
+                            <div class="class-code"><%=schedule.getCourseTitle()%></div>
                             <div class="class-info">
                                 Lớp: <%=schedule.getClassName()%><br>
                                 Phòng: <%=schedule.getRoomCode()%><br>
-                                <span class="time-slot">(<%=startTimeStr%>-<%=endTimeStr%>)</span>
+                                <span class="time-slot">Slot <%=schedule.getSlotId()%></span>
                             </div>
                         </div>
                         <%
@@ -150,11 +174,113 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- List View -->
+        <div class="list-view" id="listView" style="display:none;">
+            <ul class="schedule-list">
+                <%
+                    Map<LocalDate, List<Schedule>> schedulesByDate = new TreeMap<>();
+                    for (Schedule schedule : schedules) {
+                        schedulesByDate.computeIfAbsent(schedule.getDate(), k -> new ArrayList<>()).add(schedule);
+                    }
+
+                    for (Map.Entry<LocalDate, List<Schedule>> entry : schedulesByDate.entrySet()) {
+                        LocalDate date = entry.getKey();
+                        List<Schedule> daySchedules = entry.getValue();
+
+                        // Sắp xếp lịch trong ngày theo slot
+                        daySchedules.sort((s1, s2) -> Integer.compare(s1.getSlotId(), s2.getSlotId()));
+                %>
+                <li class="schedule-item">
+                    <div class="schedule-date">
+                        <i class="fas fa-calendar-day"></i>
+                        <%= date.format(dateTimeFormatter) %>
+                        (<%= date.getDayOfWeek().toString().equals("MONDAY") ? "Thứ 2" :
+                            date.getDayOfWeek().toString().equals("TUESDAY") ? "Thứ 3" :
+                                    date.getDayOfWeek().toString().equals("WEDNESDAY") ? "Thứ 4" :
+                                            date.getDayOfWeek().toString().equals("THURSDAY") ? "Thứ 5" :
+                                                    date.getDayOfWeek().toString().equals("FRIDAY") ? "Thứ 6" :
+                                                            date.getDayOfWeek().toString().equals("SATURDAY") ? "Thứ 7" : "Chủ nhật" %>)
+                    </div>
+                    <div class="schedule-details">
+                        <% for (Schedule schedule : daySchedules) {
+                            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+                        %>
+                        <div class="class-item">
+                            <div class="class-code">
+                                <i class="fas fa-book"></i>
+                                <%= schedule.getCourseTitle() %>
+                            </div>
+                            <div class="class-info">
+                                <div><i class="fas fa-users"></i> Lớp: <%= schedule.getClassName() %></div>
+                                <div><i class="fas fa-door-open"></i> Phòng: <%= schedule.getRoomCode() %></div>
+                                <div><i class="fas fa-clock"></i>
+                                    Slot <%= schedule.getSlotId() %>
+                                    (<%= schedule.getSlotStartTime().format(timeFormatter) %>-<%= schedule.getSlotEndTime().format(timeFormatter) %>)
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </li>
+                <% } %>
+
+                <% if (schedules.isEmpty()) { %>
+                <li class="schedule-item" style="text-align: center; color: #666;">
+                    <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 10px; display: block;"></i>
+                    <p>Không có lịch học trong khoảng thời gian đã chọn</p>
+                </li>
+                <% } %>
+            </ul>
+        </div>
     </div>
 </div>
 
+<script>
+    function resetFilter() {
+        // Set về tuần hiện tại
+        const today = new Date();
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - today.getDay() + 1);
+
+        const year = monday.getFullYear();
+        const month = String(monday.getMonth() + 1).padStart(2, '0');
+        const day = String(monday.getDate()).padStart(2, '0');
+
+        document.getElementById('week').value = `${year}-${month}-${day}`;
+
+        // Submit form
+        document.querySelector('.filter-form').submit();
+    }
+
+    function showWeekView() {
+        document.getElementById('weekView').style.display = 'block';
+        document.getElementById('listView').style.display = 'none';
+    }
+
+    function showListView() {
+        document.getElementById('weekView').style.display = 'none';
+        document.getElementById('listView').style.display = 'block';
+    }
+
+    // Khởi tạo khi trang load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default week if not set
+        const weekInput = document.getElementById('week');
+        if (weekInput && !weekInput.value) {
+            const today = new Date();
+            const monday = new Date(today);
+            monday.setDate(today.getDate() - today.getDay() + 1);
+
+            const year = monday.getFullYear();
+            const month = String(monday.getMonth() + 1).padStart(2, '0');
+            const day = String(monday.getDate()).padStart(2, '0');
+
+            weekInput.value = `${year}-${month}-${day}`;
+        }
+    });
+</script>
+
 <jsp:include page="footer.jsp" />
-
-
 </body>
 </html>
