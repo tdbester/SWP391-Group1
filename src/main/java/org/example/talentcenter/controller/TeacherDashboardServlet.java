@@ -4,6 +4,7 @@ import org.example.talentcenter.dao.TeacherScheduleDAO;
 import org.example.talentcenter.dao.TeacherDAO;
 import org.example.talentcenter.model.Account;
 import org.example.talentcenter.model.Schedule;
+import org.example.talentcenter.dao.AttendanceDAO;
 import org.example.talentcenter.config.DBConnect;
 
 import jakarta.servlet.ServletException;
@@ -14,7 +15,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet(name = "TeacherDashboardServlet", value = "/TeacherDashboard")
 public class TeacherDashboardServlet extends HttpServlet {
@@ -43,6 +46,11 @@ public class TeacherDashboardServlet extends HttpServlet {
             // Set attributes để JSP sử dụng
             request.setAttribute("todaySchedules", todaySchedules);
             request.setAttribute("currentDate", today);
+
+            //Biểu đồ
+            Map<String, Double> chartData = AttendanceDAO.getAttendanceRateByDay(teacherId);
+            request.setAttribute("chartLabels", new ArrayList<>(chartData.keySet()));
+            request.setAttribute("chartValues", new ArrayList<>(chartData.values()));
 
             // Forward đến teacher-dashboard.jsp
             request.getRequestDispatcher("View/teacher-dashboard.jsp").forward(request, response);

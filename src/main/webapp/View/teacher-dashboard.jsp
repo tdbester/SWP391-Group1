@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -63,7 +64,7 @@
         <div class="quick-actions">
             <h2 style="color: black;">Thao tác nhanh</h2>
             <div class="actions-grid">
-                <a href="${pageContext.request.contextPath}/View/attendance.jsp" class="action-card">
+                <a href="${pageContext.request.contextPath}/attendance" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-user-check"></i>
                     </div>
@@ -79,7 +80,7 @@
                     <p>Xem lịch giảng dạy</p>
                 </a>
 
-                <a href="${pageContext.request.contextPath}/View/submit-request.jsp" class="action-card">
+                <a href="${pageContext.request.contextPath}/requestForm" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-paper-plane"></i>
                     </div>
@@ -236,13 +237,28 @@
     // Initialize attendance chart
     function initAttendanceChart() {
         const ctx = document.getElementById('attendanceChart').getContext('2d');
+
+        const labels = [
+            <c:forEach var="label" items="${chartLabels}" varStatus="loop">
+            "<fmt:formatDate value="${label}" pattern="dd/MM" />"
+            <c:if test="${!loop.last}">,</c:if>
+            </c:forEach>
+        ];
+
+        const data = [
+            <c:forEach var="value" items="${chartValues}" varStatus="loop">
+            ${value}
+            <c:if test="${!loop.last}">,</c:if>
+            </c:forEach>
+        ];
+
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                labels: labels,
                 datasets: [{
                     label: 'Tỷ lệ điểm danh (%)',
-                    data: [92, 89, 95, 88, 96, 93],
+                    data: data,
                     borderColor: '#4CAF50',
                     backgroundColor: 'rgba(76, 175, 80, 0.1)',
                     borderWidth: 3,
@@ -261,15 +277,7 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100,
-                        grid: {
-                            color: 'rgba(0,0,0,0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            color: 'rgba(0,0,0,0.1)'
-                        }
+                        max: 100
                     }
                 }
             }

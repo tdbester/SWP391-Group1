@@ -4,7 +4,7 @@
 <div class="sidebar">
   <nav>
     <div class="nav-section">
-      <a href="${pageContext.request.contextPath}/View/teacher-dashboard.jsp" class="nav-item">
+      <a href="${pageContext.request.contextPath}/TeacherDashboard" class="nav-item">
         <i class="fas fa-tachometer-alt"></i>
         <span>Dashboard</span>
       </a>
@@ -16,13 +16,13 @@
       </a>
     </div>
     <div class="nav-section">
-      <a href="${pageContext.request.contextPath}/View/attendance.jsp" class="nav-item">
+      <a href="${pageContext.request.contextPath}/attendance" class="nav-item">
         <i class="fas fa-user-check"></i>
         <span>Điểm danh</span>
       </a>
     </div>
     <div class="nav-section">
-      <a href="${pageContext.request.contextPath}/View/teacher-application.jsp" class="nav-item">
+      <a href="${pageContext.request.contextPath}/requestForm" class="nav-item">
         <i class="fas fa-paper-plane"></i>
         <span>Gửi đơn</span>
       </a>
