@@ -95,7 +95,7 @@ public class LoginServlet extends HttpServlet {
                             response.sendRedirect(request.getContextPath() + "/View/home.jsp");
                             break;
                         case "teacher":
-                            response.sendRedirect(request.getContextPath() + "/View/teacher-dashboard.jsp");
+                            response.sendRedirect(request.getContextPath() + "/TeacherDashboard");
                             break;
                         case "sale":
                             response.sendRedirect(request.getContextPath() + "/View/sale-dashboard.jsp");
@@ -117,9 +117,12 @@ public class LoginServlet extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại.");
+            /*request.setAttribute("error", "Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại.");
             request.setAttribute("email", email); // Keep email for user convenience
-            request.getRequestDispatcher("/View/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/login.jsp").forward(request, response);*/
+            PrintWriter out = response.getWriter();
+            out.println("Lỗi server:");
+            e.printStackTrace(out);
         }
     }
 

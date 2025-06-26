@@ -95,7 +95,7 @@
         </div>
 
         <!-- View Toggle Buttons -->
-        <div style="margin-bottom: 20px;">
+        <div class="week-list">
             <button type="button" class="btn-filter" id="weekViewBtn" onclick="showWeekView()">
                 <i class="fas fa-calendar-week"></i> Xem dạng tuần
             </button>
@@ -104,7 +104,7 @@
             </button>
         </div>
 
-        <!-- Week View (Table Format) -->
+        <!-- Week View (Table) -->
         <div class="schedule-table" id="weekView">
             <table>
                 <thead>
@@ -152,11 +152,15 @@
                             for (Schedule schedule : daySlotSchedules) {
                         %>
                         <div class="class-item">
+                            <%
+                                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+                            %>
                             <div class="class-code"><%=schedule.getCourseTitle()%></div>
                             <div class="class-info">
                                 Lớp: <%=schedule.getClassName()%><br>
                                 Phòng: <%=schedule.getRoomCode()%><br>
-                                <span class="time-slot">Slot <%=schedule.getSlotId()%></span>
+                                <span class="time-slot">Slot <%= schedule.getSlotId() %>
+                                    (<%= schedule.getSlotStartTime().format(timeFormatter) %>-<%= schedule.getSlotEndTime().format(timeFormatter) %>)</span>
                             </div>
                         </div>
                         <%

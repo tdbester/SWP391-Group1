@@ -56,7 +56,7 @@ body {
 /* Main Content */
 .main-content {
     margin-left: 280px;
-    margin-top: 72px;
+    margin-top: 0;
     min-height: calc(100vh - 72px);
 }
 
@@ -155,6 +155,12 @@ h1 {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.week-list {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
 }
 
 .btn-filter {

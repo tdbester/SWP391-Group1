@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -39,7 +40,11 @@
         <div class="welcome-section">
             <div class="welcome-card">
                 <div class="welcome-text">
-                    <h1>Xin chào thầy/cô!</h1>
+                    <%
+                        org.example.talentcenter.model.Account account =
+                                (org.example.talentcenter.model.Account) session.getAttribute("account");
+                    %>
+                    <h1>Xin chào thầy/cô <%= (account != null && account.getFullName() != null) ? account.getFullName() : "" %> !</h1>
                     <p>Hôm nay là ngày tuyệt vời để dạy học</p>
                     <div class="current-time">
                         <i class="fas fa-calendar-alt"></i>
@@ -56,7 +61,7 @@
 
         <!-- Quick Actions -->
         <div class="quick-actions">
-            <h2>Thao tác nhanh</h2>
+            <h2 style="color: black;">Thao tác nhanh</h2>
             <div class="actions-grid">
                 <a href="${pageContext.request.contextPath}/View/attendance.jsp" class="action-card">
                     <div class="action-icon">
@@ -66,7 +71,7 @@
                     <p>Điểm danh học sinh hôm nay</p>
                 </a>
 
-                <a href="${pageContext.request.contextPath}/View/teacher-schedule.jsp" class="action-card">
+                <a href="${pageContext.request.contextPath}/TeacherSchedule" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-calendar-alt"></i>
                     </div>
@@ -98,30 +103,34 @@
             <div class="content-card">
                 <div class="card-header">
                     <h3><i class="fas fa-calendar-day"></i> Lịch hôm nay</h3>
-                    <a href="${pageContext.request.contextPath}/View/teacher-schedule.jsp" class="view-all">Xem tất cả</a>
+                    <a href="${pageContext.request.contextPath}/TeacherSchedule" class="view-all">Xem tất cả</a>
                 </div>
                 <div class="card-content">
-                    <div class="schedule-item">
-                        <div class="schedule-time">8:00 - 9:30</div>
-                        <div class="schedule-info">
-                            <h4>Toán cao cấp</h4>
-                            <p>Lớp: A1 • Phòng: 201</p>
-                        </div>
-                    </div>
-                    <div class="schedule-item">
-                        <div class="schedule-time">10:00 - 11:30</div>
-                        <div class="schedule-info">
-                            <h4>Lập trình Java</h4>
-                            <p>Lớp: B2 • Phòng: Lab1</p>
-                        </div>
-                    </div>
-                    <div class="schedule-item">
-                        <div class="schedule-time">14:00 - 15:30</div>
-                        <div class="schedule-info">
-                            <h4>Cơ sở dữ liệu</h4>
-                            <p>Lớp: C3 • Phòng: 301</p>
-                        </div>
-                    </div>
+                    <c:choose>
+                        <c:when test="${empty todaySchedules}">
+                            <div class="schedule-item">
+                                <div class="schedule-info">
+                                    <p style="color: #666; font-style: italic; text-align: center; padding: 20px;">
+                                        <i class="fas fa-info-circle"></i>
+                                        Không có lịch dạy nào hôm nay
+                                    </p>
+                                </div>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach var="schedule" items="${todaySchedules}">
+                                <div class="schedule-item">
+                                    <div class="schedule-time">
+                                            ${schedule.slotStartTime} - ${schedule.slotEndTime}
+                                    </div>
+                                    <div class="schedule-info">
+                                        <h4>${schedule.courseTitle}</h4>
+                                        <p>Lớp: ${schedule.className} • Phòng: ${schedule.roomCode}</p>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
 
