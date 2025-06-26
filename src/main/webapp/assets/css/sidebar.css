@@ -7,27 +7,31 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #7a6ad8;
     min-height: 100vh;
     color: #333;
 }
 
 .dashboard {
-    display: flex;
     min-height: 100vh;
 }
 
 /* SIDEBAR STYLES */
 .sidebar {
     width: 280px;
-    background: #7a6ad8;
-    backdrop-filter: blur(10px);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 20px;
+    background: #8d78e4;
     color: white;
-    position: fixed;
-    height: 100vh;
+    padding: 20px;
     overflow-y: auto;
+    position: sticky;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+}
+
+.main-content {
+    padding: 30px;
+    min-height: 100vh;
 }
 
 .logo {

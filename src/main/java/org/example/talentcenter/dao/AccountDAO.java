@@ -239,4 +239,46 @@ public class AccountDAO {
             return false;
         }
     }
+
+    public boolean createStudentAccount(String password, String fullName, String email, String phone) {
+
+        String sql = "INSERT INTO Account (Password, FullName, Email, PhoneNumber, Address, RoleId) VALUES (?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, password);
+            stmt.setString(2, fullName);
+            stmt.setString(3, email);
+            stmt.setString(4, phone);
+            stmt.setString(5, ""); // Address để trống hoặc null
+            stmt.setInt(6, 2); // RoleId = 2 cho Student (dựa vào bảng của bạn)
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Error creating student account: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean isUsernameExists(String email) {
+        String sql = "SELECT COUNT(*) FROM Account WHERE Email = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }
