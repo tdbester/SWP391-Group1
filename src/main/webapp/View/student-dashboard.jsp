@@ -5,22 +5,22 @@
   Time: 10:08 PM
   To change this template use File | Settings | File Templates.
 --%>
-/*
-*  Copyright (C) 2025 <Group 1>
-    *  All rights reserved.
-    *
-    *  This file is part of the <Talent Center Management> project.
-    *  Unauthorized copying of this file, via any medium is strictly prohibited.
-    *  Proprietary and confidential.
-    *
-    *  Created on:        2025-06-12
-    *  Author:            Cù Thị Huyền Trang
-    *
-    *  ========================== Change History ==========================
-    *  Date        | Author               | Description
-    *  ------------|----------------------|--------------------------------
-    *  2025-06-12  | Cù Thị Huyền Trang   | Initial creation
-    */
+<%--/*--%>
+<%--*  Copyright (C) 2025 <Group 1>--%>
+<%--    *  All rights reserved.--%>
+<%--    *--%>
+<%--    *  This file is part of the <Talent Center Management> project.--%>
+<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
+<%--    *  Proprietary and confidential.--%>
+<%--    *--%>
+<%--    *  Created on:        2025-06-12--%>
+<%--    *  Author:            Cù Thị Huyền Trang--%>
+<%--    *--%>
+<%--    *  ========================== Change History ==========================--%>
+<%--    *  Date        | Author               | Description--%>
+<%--    *  ------------|----------------------|----------------------------------%>
+<%--    *  2025-06-12  | Cù Thị Huyền Trang   | Initial creation--%>
+<%--    */--%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
@@ -60,17 +60,21 @@
             <div class="sale-quick-nav">
                 <h2><i class="fas fa-bolt"></i> Thao tác nhanh</h2>
                 <div class="sale-nav-buttons">
-                    <a href="${pageContext.request.contextPath}/student/schedule" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/View/student-schedule.jsp" class="sale-nav-btn">
                         <i class="fas fa-calendar-alt"></i>
                         Xem lịch học
                     </a>
-                    <a href="${pageContext.request.contextPath}/student/attendance" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/View/student-attendance-report.jsp" class="sale-nav-btn">
                         <i class="fas fa-user-check"></i>
                         Báo cáo điểm danh
                     </a>
-                    <a href="${pageContext.request.contextPath}/student/request" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/View/student-application.jsp" class="sale-nav-btn">
                         <i class="fas fa-paper-plane"></i>
                         Gửi đơn từ
+                    </a>
+                    <a href="${pageContext.request.contextPath}/View/student-application-list.jsp" class="sale-nav-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        Xem đơn
                     </a>
                 </div>
             </div>

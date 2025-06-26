@@ -41,4 +41,32 @@ public class StudentDAO {
 
         return student;
     }
+    public Student getStudentByStudentId(int studentId) {
+        Student student = new Student();
+        String query = """
+                    SELECT * FROM Student s WHERE s.Id = ?
+                """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, studentId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                student = new Student();
+                student.setId(rs.getInt("Id"));
+                student.setName(rs.getString("FullName"));
+                student.setParentPhone(rs.getString("parentPhone"));
+                student.setAccountId(rs.getString("AccountId"));
+                student.setEnrollmentDate(rs.getDate("EnrollmentDate"));
+                student.setClassName(rs.getString("class_name"));
+                student.setPhoneNumber(rs.getString("PhoneNumber"));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return student;
+    }
 }

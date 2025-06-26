@@ -6,25 +6,26 @@
   To change this template use File | Settings | File Templates.
 --%>
 
-/*
-*  Copyright (C) 2025 <Group 1>
-    *  All rights reserved.
-    *
-    *  This file is part of the <Talent Center Management> project.
-    *  Unauthorized copying of this file, via any medium is strictly prohibited.
-    *  Proprietary and confidential.
-    *
-    *  Created on:        2025-06-13
-    *  Author:            Cù Thị Huyền Trang
-    *
-    *  ========================== Change History ==========================
-    *  Date        | Author               | Description
-    *  ------------|----------------------|--------------------------------
-    *  2025-06-13  | Cù Thị Huyền Trang   | Initial creation
-    */
+<%--/*--%>
+<%--*  Copyright (C) 2025 <Group 1>--%>
+<%--    *  All rights reserved.--%>
+<%--    *--%>
+<%--    *  This file is part of the <Talent Center Management> project.--%>
+<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
+<%--    *  Proprietary and confidential.--%>
+<%--    *--%>
+<%--    *  Created on:        2025-06-13--%>
+<%--    *  Author:            Cù Thị Huyền Trang--%>
+<%--    *--%>
+<%--    *  ========================== Change History ==========================--%>
+<%--    *  Date        | Author               | Description--%>
+<%--    *  ------------|----------------------|----------------------------------%>
+<%--    *  2025-06-13  | Cù Thị Huyền Trang   | Initial creation--%>
+<%--    */--%>
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <html lang="vi">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -58,7 +59,7 @@
             background: white;
             border-radius: 8px;
             padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .header-section {
@@ -82,7 +83,6 @@
             font-size: 14px;
             margin-top: 5px;
         }
-
 
 
         .card {
@@ -251,15 +251,15 @@
     </style>
 </head>
 <body>
-<jsp:include page="header.jsp" />
-<jsp:include page="student-sidebar.jsp" />
+<jsp:include page="header.jsp"/>
+<jsp:include page="student-sidebar.jsp"/>
 
 <div class="main-content">
     <div class="container">
         <div class="header-section">
             <div>
-                <h1 class="header-title"><i class="fas fa-file-alt"></i> Đơn Xin Chuyển Lớp</h1>
-                <div class="course-info">Hệ thống quản lý đơn xin chuyển lớp - Trung Tâm Năng Khiếu</div>
+                <h1 class="header-title"><i class="fas fa-file-alt"></i>Gửi đơn</h1>
+                <div class="course-info">Hệ thống quản lý đơn - Trung Tâm Năng Khiếu</div>
             </div>
         </div>
 
@@ -272,7 +272,7 @@
 
         <div class="card">
             <div class="card-header">
-                <i class="fas fa-edit"></i> Thông tin đơn xin chuyển lớp
+                <i class="fas fa-edit"></i> Nhập thông tin đơn
             </div>
             <div class="card-body">
                 <form action="StudentApplication" method="post">
@@ -281,18 +281,26 @@
                     <div class="form-row">
                         <div class="form-col">
                             <label class="form-label">Họ và Tên<span class="required">*</span></label>
-                            <input type="text" class="form-control" name="studentName" placeholder="Nhập họ và tên" required>
+                            <input type="text" class="form-control" name="studentName" value="${studentName}" readonly>
                         </div>
                         <div class="form-col">
                             <label class="form-label">Số điện thoại<span class="required">*</span></label>
-                            <input type="text" class="form-control" name="phoneNumber" placeholder="Nhập số điện thoại" required>
+                            <input type="text" class="form-control" name="phoneNumber" value="${phoneNumber}"
+                                   required>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-col">
                             <label class="form-label">Lớp hiện tại <span class="required">*</span></label>
-                            <input type="text" class="form-control" name="currentClass" placeholder="Nhập lớp hiện tại" required>
+                            <select class="form-control" name="currentClass" required>
+                                <option value="">-- Chọn lớp hiện tại --</option>
+                                <c:forEach var="classRoom" items="${classList}">
+                                    <option value="${classRoom.classroomName}" data-class-id="${classRoom.classRoomID}">
+                                            ${classRoom.classroomName}
+                                    </option>
+                                </c:forEach>
+                            </select>
                         </div>
                         <div class="form-col">
                             <label class="form-label">Ngày nộp đơn <span class="required">*</span></label>
@@ -314,7 +322,8 @@
                                   placeholder="Vui lòng mô tả chi tiết lý do chuyển lớp, tình huống cụ thể..."
                                   required></textarea>
                         <small style="color: #6c757d; font-size: 0.875rem; margin-top: 5px; display: block;">
-                            <i class="fas fa-info-circle"></i> Tối thiểu 50 ký tự. Mô tả càng chi tiết càng giúp việc xét duyệt nhanh chóng.
+                            <i class="fas fa-info-circle"></i> Tối thiểu 50 ký tự. Mô tả càng chi tiết càng giúp việc
+                            xét duyệt nhanh chóng.
                         </small>
                     </div>
 
@@ -349,7 +358,7 @@
     </div>
 </div>
 
-<jsp:include page="footer.jsp" />
+<jsp:include page="footer.jsp"/>
 
 <script>
     // mặc định là ngyaf hiện tại

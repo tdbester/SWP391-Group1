@@ -133,7 +133,6 @@ public class RequestDAO {
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setInt(1, senderId);
 
             try (ResultSet rs = stmt.executeQuery()) {

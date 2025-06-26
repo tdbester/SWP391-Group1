@@ -17,12 +17,11 @@
 
 package org.example.talentcenter.controller;
 
+import org.example.talentcenter.dao.StudentClassDAO;
 import org.example.talentcenter.dao.StudentDAO;
 import org.example.talentcenter.dao.CourseDAO;
 import org.example.talentcenter.dao.RequestDAO;
-import org.example.talentcenter.model.Account;
-import org.example.talentcenter.model.Course;
-import org.example.talentcenter.model.Request;
+import org.example.talentcenter.model.*;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -42,6 +41,8 @@ public class StudentApplicationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         Integer studentId = (Integer) session.getAttribute("accountId");
+        Account account = (Account) session.getAttribute("account");
+        System.out.println("studentId trong session = " + studentId);
         String action = request.getParameter("action");
         if ("list".equals(action)) {
             RequestDAO requestDAO = new RequestDAO();
@@ -50,16 +51,16 @@ public class StudentApplicationServlet extends HttpServlet {
             request.getRequestDispatcher("/View/student-application-list.jsp").forward(request, response);
         } else {
             StudentDAO studentDAO = new StudentDAO();
-            CourseDAO courseDAO = new CourseDAO();
-
-            Student student = studentDAO.getStudentById(studentId);
-            ArrayList<Course> courseList = courseDAO.getAllCourses();
-
+            StudentClassDAO classDAO = new StudentClassDAO();
+            Student student = studentDAO.getStudentByStudentId(studentId);
+            ArrayList<StudentClass> classList = classDAO.getAllStudentClassByStudentId(studentId);
             request.setAttribute("student", student);
-            request.setAttribute("courseList", courseList);
-
+            request.setAttribute("classList", classList);
+            request.setAttribute("studentName", account.getFullName());
+            request.setAttribute("phoneNumber", account.getPhoneNumber());
             request.getRequestDispatcher("/View/student-application.jsp").forward(request, response);
-        }  }
+        }
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -78,6 +79,12 @@ public class StudentApplicationServlet extends HttpServlet {
             String parentPhone = request.getParameter("parentPhone");
             String detailedReason = request.getParameter("detailedReason");
             String requestDateStr = request.getParameter("requestDate");
+
+            if (detailedReason == null || detailedReason.trim().length() < 50) {
+                session.setAttribute("error", "Mô tả lý do phải có ít nhất 50 ký tự!");
+                response.sendRedirect("StudentApplication");
+                return;
+            }
 
             java.util.Date utilDate;
             try {

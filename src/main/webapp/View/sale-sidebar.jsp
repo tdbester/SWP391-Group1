@@ -5,22 +5,22 @@
   Time: 11:33 PM
   To change this template use File | Settings | File Templates.
 --%>
-/*
-*  Copyright (C) 2025 <Group 1>
-    *  All rights reserved.
-    *
-    *  This file is part of the <Talent Center Management> project.
-    *  Unauthorized copying of this file, via any medium is strictly prohibited.
-    *  Proprietary and confidential.
-    *
-    *  Created on:        2025-06-01
-    *  Author:            Cù Thị Huyền Trang
-    *
-    *  ========================== Change History ==========================
-    *  Date        | Author               | Description
-    *  ------------|----------------------|--------------------------------
-    *  2025-06-01  | Cù Thị Huyền Trang   | Initial creation
-    */
+<%--/*--%>
+<%--*  Copyright (C) 2025 <Group 1>--%>
+<%--    *  All rights reserved.--%>
+<%--    *--%>
+<%--    *  This file is part of the <Talent Center Management> project.--%>
+<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
+<%--    *  Proprietary and confidential.--%>
+<%--    *--%>
+<%--    *  Created on:        2025-06-01--%>
+<%--    *  Author:            Cù Thị Huyền Trang--%>
+<%--    *--%>
+<%--    *  ========================== Change History ==========================--%>
+<%--    *  Date        | Author               | Description--%>
+<%--    *  ------------|----------------------|----------------------------------%>
+<%--    *  2025-06-01  | Cù Thị Huyền Trang   | Initial creation--%>
+<%--    */--%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">

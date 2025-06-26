@@ -5,22 +5,22 @@
   Time: 11:46 PM
   To change this template use File | Settings | File Templates.
 --%>
-/*
-*  Copyright (C) 2025 <Group 1>
-    *  All rights reserved.
-    *
-    *  This file is part of the <Talent Center Management> project.
-    *  Unauthorized copying of this file, via any medium is strictly prohibited.
-    *  Proprietary and confidential.
-    *
-    *  Created on:        2025-05-31
-    *  Author:            Cù Thị Huyền Trang
-    *
-    *  ========================== Change History ==========================
-    *  Date        | Author               | Description
-    *  ------------|----------------------|--------------------------------
-    *  2025-05-31  | Cù Thị Huyền Trang   | Initial creation
-    */
+<%--/*--%>
+<%--*  Copyright (C) 2025 <Group 1>--%>
+<%--    *  All rights reserved.--%>
+<%--    *--%>
+<%--    *  This file is part of the <Talent Center Management> project.--%>
+<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
+<%--    *  Proprietary and confidential.--%>
+<%--    *--%>
+<%--    *  Created on:        2025-05-31--%>
+<%--    *  Author:            Cù Thị Huyền Trang--%>
+<%--    *--%>
+<%--    *  ========================== Change History ==========================--%>
+<%--    *  Date        | Author               | Description--%>
+<%--    *  ------------|----------------------|----------------------------------%>
+<%--    *  2025-05-31  | Cù Thị Huyền Trang   | Initial creation--%>
+<%--    */--%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
@@ -60,9 +60,10 @@
             <div class="sale-quick-nav">
                 <h2>Quick Actions</h2>
                 <div class="sale-nav-buttons">
-                    <a href="consultationList.jsp" class="sale-nav-btn"><i class="fas fa-users"></i> View Consultations</a>
-                    <a href="addConsultation.jsp" class="sale-nav-btn"><i class="fas fa-user-plus"></i> Add New Lead</a>
-                    <a href="courseList.jsp" class="sale-nav-btn"><i class="fas fa-book-open"></i> Courses</a>
+                    <a href="consultation-list.jsp" class="sale-nav-btn"><i class="fas fa-users"></i>Xem danh sách tư vấn</a>
+                    <a href="blog.jsp" class="sale-nav-btn"><i class="fas fa-user-plus"></i>Viết blog</a>
+                    <a href="student-account-request.jsp" class="sale-nav-btn"><i class="fas fa-book-open"></i>Yêu cầu cấp tài khoản học viên</a>
+                    <a href="" class="sale-nav-btn"><i class="fas fa-book-open"></i>Xem danh sách khoá học</a>
                 </div>
             </div>
 

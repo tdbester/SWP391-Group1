@@ -3,25 +3,25 @@
   User: admin
   Date: 6/21/2025
   Time: 10:59 PM
-  To change this template use File | Settings | File Templates.
---%>
+<%--  To change this template use File | Settings | File Templates.--%>
+<%--&ndash;%&gt;--%>
 
-/*
-*  Copyright (C) 2025 <Group1>
-    *  All rights reserved.
-    *
-    *  This file is part of the <TalentCenterManagement> project.
-    *  Unauthorized copying of this file, via any medium is strictly prohibited.
-    *  Proprietary and confidential.
-    *
-    *  Created on:        2025-06-21
-    *  Author:            Cù Thị Huyền Trang
-    *
-    *  ========================== Change History ==========================
-    *  Date        | Author               | Description
-    *  ------------|----------------------|--------------------------------
-    *  2025-06-21  | Cù Thị Huyền Trang   | Initial creation
-    */
+<%--/*--%>
+<%--*  Copyright (C) 2025 <Group1>--%>
+<%--    *  All rights reserved.--%>
+<%--    *--%>
+<%--    *  This file is part of the <TalentCenterManagement> project.--%>
+<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
+<%--    *  Proprietary and confidential.--%>
+<%--    *--%>
+<%--    *  Created on:        2025-06-21--%>
+<%--    *  Author:            Cù Thị Huyền Trang--%>
+<%--    *--%>
+<%--    *  ========================== Change History ==========================--%>
+<%--    *  Date        | Author               | Description--%>
+<%--    *  ------------|----------------------|----------------------------------%>
+<%--    *  2025-06-21  | Cù Thị Huyền Trang   | Initial creation--%>
+<%--    */--%>
 
 <%@ page import="java.util.*" %>
 <%@ page import="java.time.*" %>

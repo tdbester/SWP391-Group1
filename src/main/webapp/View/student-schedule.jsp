@@ -5,23 +5,24 @@
   Time: 10:59 PM
   To change this template use File | Settings | File Templates.
 --%>
-/*
-*  Copyright (C) 2025 <Group 1>
-*  All rights reserved.
-*
-*  This file is part of the <Talent Center Management> project.
-    *  Unauthorized copying of this file, via any medium is strictly prohibited.
-    *  Proprietary and confidential.
-    *
-    *  Created on:        2025-06-15
-    *  Author:            Nguyễn Minh Cao
-    *
-    *  ========================== Change History ==========================
-    *  Date        | Author               | Description
-    *  ------------|----------------------|--------------------------------
-    *  2025-06-15  | Nguyễn Minh Cao      | Schedule for teacher
-    *  2025-06-18  | Cù Thị Huyền Trang   | Schedule for student
-    */
+
+<%--/*--%>
+<%--*  Copyright (C) 2025 <Group 1>--%>
+<%--*  All rights reserved.--%>
+<%--*--%>
+<%--*  This file is part of the <Talent Center Management> project.--%>
+<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
+<%--    *  Proprietary and confidential.--%>
+<%--    *--%>
+<%--    *  Created on:        2025-06-15--%>
+<%--    *  Author:            Nguyễn Minh Cao--%>
+<%--    *--%>
+<%--    *  ========================== Change History ==========================--%>
+<%--    *  Date        | Author               | Description--%>
+<%--    *  ------------|----------------------|----------------------------------%>
+<%--    *  2025-06-15  | Nguyễn Minh Cao      | Schedule for teacher--%>
+<%--    *  2025-06-18  | Cù Thị Huyền Trang   | Schedule for student--%>
+<%--    */--%>
 
 <%@ page import="java.util.*" %>
 <%@ page import="java.time.*" %>
@@ -141,7 +142,6 @@
                         <%
                             if (daySlotSchedules.isEmpty()) {
                         %>
-                        -
                         <%
                         } else {
                             for (StudentSchedule schedule : daySlotSchedules) {

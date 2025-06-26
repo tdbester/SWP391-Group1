@@ -5,22 +5,22 @@
   Time: 10:08 PM
   To change this template use File | Settings | File Templates.
 --%>
-/*
-*  Copyright (C) 2025 <Group 1>
-    *  All rights reserved.
-    *
-    *  This file is part of the <Talent Center Management> project.
-    *  Unauthorized copying of this file, via any medium is strictly prohibited.
-    *  Proprietary and confidential.
-    *
-    *  Created on:        2025-06-12
-    *  Author:            Cù Thị Huyền Trang
-    *
-    *  ========================== Change History ==========================
-    *  Date        | Author               | Description
-    *  ------------|----------------------|--------------------------------
-    *  2025-06-12  | Cù Thị Huyền Trang   | Initial creation
-    */
+<%--/*--%>
+<%--*  Copyright (C) 2025 <Group 1>--%>
+<%--    *  All rights reserved.--%>
+<%--    *--%>
+<%--    *  This file is part of the <Talent Center Management> project.--%>
+<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
+<%--    *  Proprietary and confidential.--%>
+<%--    *--%>
+<%--    *  Created on:        2025-06-12--%>
+<%--    *  Author:            Cù Thị Huyền Trang--%>
+<%--    *--%>
+<%--    *  ========================== Change History ==========================--%>
+<%--    *  Date        | Author               | Description--%>
+<%--    *  ------------|----------------------|----------------------------------%>
+<%--    *  2025-06-12  | Cù Thị Huyền Trang   | Initial creation--%>
+<%--    */--%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <div class="sidebar">
@@ -63,7 +63,7 @@
                role="link"
                aria-current="${pageContext.request.requestURI.contains('student-application.jsp') ? 'page' : 'false'}">
                 <i class="fas fa-briefcase" aria-hidden="true"></i>
-                <span>Chuyển lớp</span>
+                <span>Gửi đơn</span>
             </a>
         </div>
         <div class="nav-section">
