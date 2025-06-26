@@ -76,7 +76,7 @@ public class BlogDAO {
                             rs.getInt("AuthorId"),
                             rs.getDate("CreatedAt"),
                             rs.getString("Description"),
-                            rs.getInt("Category")
+                            rs.getInt("CategoryId")
                     );
                 }
             }

@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 
 import static org.example.talentcenter.utilities.Const.TYPE_COURSE;
 
@@ -170,7 +171,15 @@ public class CourseServlet extends HttpServlet {
             return;
         }
 
-        String imageUrl = uploadToCloudinary(imagePart);
+
+        String imageUrl;
+
+        //3. lấy ảnh và upload ln cloudinary, lấy về URL ảnh để lưu vào database
+        if (imagePart != null && imagePart.getSize() > 0) {
+            imageUrl = uploadToCloudinary(imagePart);
+        } else {
+            imageUrl = "https://placehold.co/600x400?text=img";
+        }
         Category category;
         try {
             category = categoryDAO.getById(Integer.parseInt(catParam));
@@ -199,15 +208,9 @@ public class CourseServlet extends HttpServlet {
         String info     = req.getParameter("information");
         String catParam = req.getParameter("category");
         Part   imagePart= req.getPart("imageFile");
-        int    createdBy;
-
-        try {
-            createdBy = Integer.parseInt(req.getParameter("createdBy"));
-        } catch (NumberFormatException e) {
-            req.setAttribute("errorMessage", "Invalid creator ID.");
-            showEditCourseForm(req, resp);
-            return;
-        }
+//        int    createdBy;
+        HttpSession session = req.getSession(false);
+        int createdBy= (int) session.getAttribute("accountId");
 
         double price;
         try {
@@ -253,15 +256,30 @@ public class CourseServlet extends HttpServlet {
         resp.sendRedirect("courses");
     }
 
-    private String uploadToCloudinary(Part filePart) throws IOException {
+    private String uploadToCloudinary(Part filePart) throws IOException, ServletException {
+        //1. Tạo kết nối web của mình đến cloudinary
         Cloudinary cloudinary = Singleton.getCloudinary();
-        File temp = File.createTempFile("upload", ".tmp");
-        try (InputStream in = filePart.getInputStream()) {
-            Files.copy(in, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            var result = cloudinary.uploader().upload(temp, ObjectUtils.emptyMap());
-            return (String) result.get("secure_url");
-        } finally {
-            temp.delete();
+        if (cloudinary == null) {
+            throw new ServletException("Cloudinary not configured");
         }
+
+        //2. Khởi tạo đối tượng file- là file người dùng upload lên
+        // ( đối tượng file được lưu trong bộ nhớ hệ thống)
+        File tempFile;
+        try (InputStream input = filePart.getInputStream()) {
+            String fileName  = filePart.getSubmittedFileName();
+            String extension = fileName.substring(fileName.lastIndexOf('.'));
+            tempFile = File.createTempFile("upload", extension);
+            Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        //3. Gửi ảnh lên cloudinary
+        Map<?,?> uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.emptyMap());
+
+        //4. xóa đối tượng file tạm trong bộ nhớ hệ thống
+        tempFile.delete();
+
+        //5. trả về URL ảnh đã upload
+        return (String) uploadResult.get("secure_url");
     }
 }
