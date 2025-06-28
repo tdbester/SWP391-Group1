@@ -22,7 +22,7 @@
       </a>
     </div>
     <div class="nav-section">
-      <a href="${pageContext.request.contextPath}/requestForm" class="nav-item">
+      <a href="${pageContext.request.contextPath}/teacherRequest" class="nav-item">
         <i class="fas fa-paper-plane"></i>
         <span>Gửi đơn</span>
       </a>

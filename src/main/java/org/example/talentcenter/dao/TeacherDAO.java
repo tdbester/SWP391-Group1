@@ -51,7 +51,7 @@ public class TeacherDAO {
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
 
-            ps.setInt(1, accountId);  // ✅ Dùng accountId thay vì teacherId
+            ps.setInt(1, accountId);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {

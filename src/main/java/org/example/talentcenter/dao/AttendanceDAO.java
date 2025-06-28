@@ -311,30 +311,121 @@ public class AttendanceDAO {
         return attendances;
     }
 
-
-    //Biểu đồ
-    public static Map<String, Double> getAttendanceRateByDay(int teacherId) {
-        Map<String, Double> map = new LinkedHashMap<>();
-        String sql = "SELECT FORMAT(a.Date, 'yyyy-MM-dd') AS Day, " +
-                "AVG(CASE WHEN a.Status = 'Present' THEN 1.0 ELSE 0 END) * 100 AS AttendanceRate " +
-                "FROM Attendance a " +
-                "JOIN ClassRooms c ON a.ClassId = c.Id " +
-                "WHERE c.TeacherId = ? " +
-                "GROUP BY FORMAT(a.Date, 'yyyy-MM-dd') " +
-                "ORDER BY Day DESC OFFSET 0 ROWS FETCH NEXT 7 ROWS ONLY";
+    // Kiểm tra xem có học sinh mới chưa được điểm danh không
+    public boolean hasNewStudentsForAttendance(int scheduleId, int classId) {
+        String sql = """
+        SELECT COUNT(*) as NewStudents
+        FROM Student s
+        JOIN Student_Class sc ON s.Id = sc.StudentId
+        WHERE sc.ClassRoomId = ? 
+        AND s.Id NOT IN (
+            SELECT att.StudentId 
+            FROM Attendance att 
+            WHERE att.ScheduleId = ?
+        )
+        """;
 
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, teacherId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                map.put(rs.getString("Day"), rs.getDouble("AttendanceRate"));
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, classId);
+            pstmt.setInt(2, scheduleId);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("NewStudents") > 0;
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
+    }
 
-        return map;
+    // Lấy danh sách học sinh với thông tin điểm danh (có thể chưa được điểm danh)
+    public List<Student> getStudentsWithAttendanceStatus(int classId, int scheduleId) {
+        List<Student> students = new ArrayList<>();
+        String sql = """
+        SELECT s.Id, a.FullName, s.ParentPhone, s.MotherPhone, 
+               s.AccountId, s.EnrollmentDate,
+               att.Id as AttendanceId, att.Status, att.Note
+        FROM Student s
+        JOIN Account a ON s.AccountId = a.Id
+        JOIN Student_Class sc ON s.Id = sc.StudentId
+        LEFT JOIN Attendance att ON s.Id = att.StudentId AND att.ScheduleId = ?
+        WHERE sc.ClassRoomId = ?
+        ORDER BY a.FullName
+        """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, scheduleId);
+            pstmt.setInt(2, classId);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                Student student = new Student();
+                student.setId(rs.getInt("Id"));
+                student.setFullName(rs.getString("FullName"));
+                student.setParentPhone(rs.getString("ParentPhone"));
+                student.setMotherPhone(rs.getString("MotherPhone"));
+                student.setAccountId(rs.getInt("AccountId"));
+                student.setEnrollmentDate(rs.getDate("EnrollmentDate").toLocalDate());
+
+                // Thông tin điểm danh (nếu có)
+                int attendanceId = rs.getInt("AttendanceId");
+                if (attendanceId > 0) {
+                    student.setAttendanceId(attendanceId);
+                    student.setAttendanceStatus(rs.getString("Status"));
+                    student.setAttendanceNote(rs.getString("Note"));
+                    student.setHasAttendance(true);
+                } else {
+                    student.setHasAttendance(false);
+                    student.setAttendanceStatus("Present"); // Mặc định
+                    student.setAttendanceNote("");
+                }
+
+                students.add(student);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return students;
+    }
+
+    // Thêm điểm danh cho học sinh mới
+    public boolean addAttendanceForNewStudents(int scheduleId, List<Attendance> newAttendances) {
+        if (newAttendances.isEmpty()) {
+            return true; // Không có học sinh mới thì coi như thành công
+        }
+
+        String sql = "INSERT INTO Attendance (ScheduleId, StudentId, Status, Note) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            for (Attendance attendance : newAttendances) {
+                pstmt.setInt(1, attendance.getScheduleId());
+                pstmt.setInt(2, attendance.getStudentId());
+                pstmt.setString(3, attendance.getStatus());
+                pstmt.setString(4, attendance.getNote());
+                pstmt.addBatch();
+            }
+
+            int[] results = pstmt.executeBatch();
+
+            // Kiểm tra tất cả đều thành công
+            for (int result : results) {
+                if (result <= 0) {
+                    return false;
+                }
+            }
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

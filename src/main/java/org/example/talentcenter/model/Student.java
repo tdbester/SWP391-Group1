@@ -14,6 +14,44 @@ public class Student {
     private int presentCount;
     private int absentCount;
 
+    // Thuộc tính để xử lý điểm danh
+    private Integer attendanceId;
+    private String attendanceStatus;
+    private String attendanceNote;
+    private boolean hasAttendance;
+
+    public Integer getAttendanceId() {
+        return attendanceId;
+    }
+
+    public void setAttendanceId(Integer attendanceId) {
+        this.attendanceId = attendanceId;
+    }
+
+    public boolean isHasAttendance() {
+        return hasAttendance;
+    }
+
+    public void setHasAttendance(boolean hasAttendance) {
+        this.hasAttendance = hasAttendance;
+    }
+
+    public String getAttendanceNote() {
+        return attendanceNote;
+    }
+
+    public void setAttendanceNote(String attendanceNote) {
+        this.attendanceNote = attendanceNote;
+    }
+
+    public String getAttendanceStatus() {
+        return attendanceStatus;
+    }
+
+    public void setAttendanceStatus(String attendanceStatus) {
+        this.attendanceStatus = attendanceStatus;
+    }
+
     public Student() {}
 
     public Student(int id,String fullName, LocalDate enrollmentDate, int accountId, String motherPhone, String parentPhone) {

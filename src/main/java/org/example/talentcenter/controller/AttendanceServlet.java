@@ -154,7 +154,6 @@ public class AttendanceServlet extends HttpServlet {
         String dateParam = request.getParameter("date");
         LocalDate attendanceDate;
 
-        // Nếu không có tham số date, sử dụng ngày hôm nay
         if (dateParam != null && !dateParam.isEmpty()) {
             try {
                 attendanceDate = LocalDate.parse(dateParam);
@@ -177,12 +176,21 @@ public class AttendanceServlet extends HttpServlet {
         boolean isAttendanceExist = attendanceDAO.isAttendanceExist(scheduleId);
 
         if (isAttendanceExist) {
-            // Nếu đã điểm danh, chuyển sang chế độ edit
-            response.sendRedirect("attendance?action=edit&scheduleId=" + scheduleId);
-            return;
+            // Kiểm tra có học sinh mới chưa được điểm danh không
+            boolean hasNewStudents = attendanceDAO.hasNewStudentsForAttendance(scheduleId, classRoomId);
+
+            if (hasNewStudents) {
+                // Có học sinh mới, hiển thị form điểm danh kết hợp
+                showMixedAttendanceForm(request, response, classRoomId, scheduleId, attendanceDate);
+                return;
+            } else {
+                // Không có học sinh mới, chuyển sang chế độ edit
+                response.sendRedirect("attendance?action=edit&scheduleId=" + scheduleId);
+                return;
+            }
         }
 
-        // Lấy danh sách học sinh
+        // Chưa điểm danh, hiển thị form điểm danh bình thường
         List<Student> students = attendanceDAO.getStudentsByClassId(classRoomId);
 
         request.setAttribute("students", students);
@@ -190,6 +198,24 @@ public class AttendanceServlet extends HttpServlet {
         request.setAttribute("classRoomId", classRoomId);
         request.setAttribute("attendanceDate", attendanceDate);
         request.setAttribute("currentDate", java.sql.Date.valueOf(LocalDate.now()));
+        request.setAttribute("isNewAttendance", true);
+        request.getRequestDispatcher("View/attendance.jsp").forward(request, response);
+    }
+
+    //hiển thị form điểm danh kết hợp (có cả học sinh đã điểm danh và chưa điểm danh)
+    private void showMixedAttendanceForm(HttpServletRequest request, HttpServletResponse response,
+                                         int classRoomId, int scheduleId, LocalDate attendanceDate)
+            throws ServletException, IOException {
+
+        // Lấy danh sách học sinh với thông tin điểm danh
+        List<Student> studentsWithAttendance = attendanceDAO.getStudentsWithAttendanceStatus(classRoomId, scheduleId);
+
+        request.setAttribute("studentsWithAttendance", studentsWithAttendance);
+        request.setAttribute("scheduleId", scheduleId);
+        request.setAttribute("classRoomId", classRoomId);
+        request.setAttribute("attendanceDate", attendanceDate);
+        request.setAttribute("currentDate", java.sql.Date.valueOf(LocalDate.now()));
+        request.setAttribute("isMixedAttendance", true);
         request.getRequestDispatcher("View/attendance.jsp").forward(request, response);
     }
 
@@ -260,51 +286,90 @@ public class AttendanceServlet extends HttpServlet {
         }
 
         String[] studentIds = request.getParameterValues("studentId");
-
         if (studentIds == null || studentIds.length == 0) {
             request.setAttribute("error", "Không có học sinh nào để điểm danh");
             showAttendanceForm(request, response);
             return;
         }
 
-        List<Attendance> attendances = new ArrayList<>();
+        List<Attendance> newAttendances = new ArrayList<>();
+        List<Attendance> updateAttendances = new ArrayList<>();
 
         for (String studentIdStr : studentIds) {
             if (studentIdStr == null || studentIdStr.trim().isEmpty()) {
-                continue; // Bỏ qua nếu rỗng
+                continue;
             }
 
             int studentId;
             try {
                 studentId = Integer.parseInt(studentIdStr);
             } catch (NumberFormatException e) {
-                continue; // Bỏ qua nếu không hợp lệ
+                continue;
             }
 
             String status = request.getParameter("status_" + studentId);
             String note = request.getParameter("note_" + studentId);
+            String attendanceIdStr = request.getParameter("attendanceId_" + studentId);
 
             if (status == null || status.trim().isEmpty()) {
                 status = Attendance.ABSENT;
             }
 
-            Attendance attendance = new Attendance(scheduleId, studentId, status, note);
-            attendances.add(attendance);
+            if (attendanceIdStr != null && !attendanceIdStr.trim().isEmpty()) {
+                // Học sinh đã có điểm danh, cần cập nhật
+                try {
+                    int attendanceId = Integer.parseInt(attendanceIdStr);
+                    Attendance attendance = new Attendance();
+                    attendance.setId(attendanceId);
+                    attendance.setStatus(status);
+                    attendance.setNote(note);
+                    updateAttendances.add(attendance);
+                } catch (NumberFormatException e) {
+                    // Ignore invalid attendance ID
+                }
+            } else {
+                // Học sinh mới, cần thêm điểm danh
+                Attendance attendance = new Attendance(scheduleId, studentId, status, note);
+                newAttendances.add(attendance);
+            }
         }
 
-        if (attendances.isEmpty()) {
-            request.setAttribute("error", "Không có dữ liệu điểm danh hợp lệ");
-            showAttendanceForm(request, response);
-            return;
+        boolean success = true;
+        String message = "";
+
+        // Thêm điểm danh cho học sinh mới
+        if (!newAttendances.isEmpty()) {
+            boolean addSuccess = attendanceDAO.addBulkAttendance(scheduleId, newAttendances);
+            if (!addSuccess) {
+                success = false;
+                message += "Lỗi khi thêm điểm danh cho học sinh mới. ";
+            }
         }
 
-        // Lưu điểm danh hàng loạt
-        boolean success = attendanceDAO.addBulkAttendance(scheduleId, attendances);
+        // Cập nhật điểm danh cho học sinh đã có
+        if (!updateAttendances.isEmpty()) {
+            for (Attendance attendance : updateAttendances) {
+                boolean updateSuccess = attendanceDAO.updateAttendance(attendance);
+                if (!updateSuccess) {
+                    success = false;
+                    message += "Lỗi khi cập nhật điểm danh. ";
+                    break;
+                }
+            }
+        }
 
         if (success) {
-            request.setAttribute("success", "Điểm danh thành công!");
+            if (!newAttendances.isEmpty() && !updateAttendances.isEmpty()) {
+                request.setAttribute("success", "Đã thêm điểm danh cho học sinh mới và cập nhật điểm danh thành công!");
+            } else if (!newAttendances.isEmpty()) {
+                request.setAttribute("success", "Đã thêm điểm danh cho học sinh mới thành công!");
+            } else if (!updateAttendances.isEmpty()) {
+                request.setAttribute("success", "Cập nhật điểm danh thành công!");
+            } else {
+                request.setAttribute("success", "Điểm danh thành công!");
+            }
         } else {
-            request.setAttribute("error", "Có lỗi xảy ra khi điểm danh");
+            request.setAttribute("error", message.trim());
         }
 
         showAllClasses(request, response);

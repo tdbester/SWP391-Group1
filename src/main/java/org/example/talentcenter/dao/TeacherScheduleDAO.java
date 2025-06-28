@@ -135,6 +135,138 @@ public class TeacherScheduleDAO {
         return schedules;
     }
 
+    /**
+     * Lấy thông tin chi tiết của một lịch học
+     */
+    public Schedule getScheduleById(int scheduleId) {
+        String sql = """
+            SELECT s.Id, s.Date, s.RoomId, s.ClassRoomId, s.SlotId,
+                   c.Name as ClassName, cr.Name as CourseName, cr.Title as CourseTitle,
+                   r.Code as RoomCode, sl.StartTime, sl.EndTime
+            FROM Schedule s
+            INNER JOIN ClassRooms cr ON s.ClassRoomId = cr.Id
+            INNER JOIN Class c ON cr.ClassId = c.Id
+            INNER JOIN Room r ON s.RoomId = r.Id
+            INNER JOIN Slot sl ON s.SlotId = sl.Id
+            WHERE s.Id = ?
+        """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, scheduleId);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Schedule schedule = new Schedule();
+                schedule.setId(rs.getInt("Id"));
+                schedule.setDate(rs.getDate("Date").toLocalDate());
+                schedule.setRoomId(rs.getInt("RoomId"));
+                schedule.setClassRoomId(rs.getInt("ClassRoomId"));
+                schedule.setSlotId(rs.getInt("SlotId"));
+                schedule.setClassName(rs.getString("ClassName"));
+                schedule.setCourseTitle(rs.getString("CourseTitle"));
+                schedule.setRoomCode(rs.getString("RoomCode"));
+                schedule.setSlotStartTime(rs.getTime("StartTime").toLocalTime());
+                schedule.setSlotEndTime(rs.getTime("EndTime").toLocalTime());
+
+                return schedule;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Kiểm tra xem có lịch học nào trong ngày và slot cụ thể không
+     */
+    public boolean hasScheduleInSlot(LocalDate date, int slotId, int roomId) {
+        String sql = "SELECT COUNT(*) FROM Schedule WHERE Date = ? AND SlotId = ? AND RoomId = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDate(1, Date.valueOf(date));
+            ps.setInt(2, slotId);
+            ps.setInt(3, roomId);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    /**
+     * Cập nhật phòng học cho một lịch học
+     */
+    public boolean updateScheduleRoom(int scheduleId, int newRoomId) {
+        String sql = "UPDATE Schedule SET RoomId = ? WHERE Id = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, newRoomId);
+            ps.setInt(2, scheduleId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    /**
+     * Cập nhật ngày học cho một lịch học
+     */
+    public boolean updateScheduleDate(int scheduleId, LocalDate newDate) {
+        String sql = "UPDATE Schedule SET Date = ? WHERE Id = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setDate(1, Date.valueOf(newDate));
+            ps.setInt(2, scheduleId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    /**
+     * Xóa lịch học (để xử lý nghỉ phép)
+     */
+    public boolean deleteSchedule(int scheduleId) {
+        String sql = "DELETE FROM Schedule WHERE Id = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, scheduleId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     // Helper method để tạo Schedule object từ ResultSet
     private Schedule createScheduleFromResultSet(ResultSet rs) throws SQLException {
         Schedule schedule = new Schedule();

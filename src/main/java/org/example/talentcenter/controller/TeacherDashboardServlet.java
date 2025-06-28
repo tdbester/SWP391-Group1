@@ -47,11 +47,6 @@ public class TeacherDashboardServlet extends HttpServlet {
             request.setAttribute("todaySchedules", todaySchedules);
             request.setAttribute("currentDate", today);
 
-            //Biểu đồ
-            Map<String, Double> chartData = AttendanceDAO.getAttendanceRateByDay(teacherId);
-            request.setAttribute("chartLabels", new ArrayList<>(chartData.keySet()));
-            request.setAttribute("chartValues", new ArrayList<>(chartData.values()));
-
             // Forward đến teacher-dashboard.jsp
             request.getRequestDispatcher("View/teacher-dashboard.jsp").forward(request, response);
 

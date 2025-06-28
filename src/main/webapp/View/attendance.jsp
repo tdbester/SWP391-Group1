@@ -250,6 +250,117 @@
                 </div>
             </div>
         </c:if>
+        <!-- Mixed Attendance Form Section (học sinh đã điểm danh + học sinh mới) -->
+        <c:if test="${isMixedAttendance}">
+            <div class="attendance-section">
+                <div class="section-header">
+                    <h2>Điểm danh lớp - Có học sinh mới</h2>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Lớp này đã được điểm danh trước đó nhưng có học sinh mới. Bạn có thể cập nhật điểm danh cho tất cả học sinh.
+                    </div>
+                </div>
+
+                <div class="students-table-container">
+                    <form method="post" action="attendance">
+                        <input type="hidden" name="action" value="save">
+                        <input type="hidden" name="scheduleId" value="${scheduleId}">
+                        <input type="hidden" name="classRoomId" value="${classRoomId}">
+
+                        <div class="table-controls">
+                            <div class="batch-actions">
+                                <button type="button" class="btn-batch" onclick="setAllStatus('Present')">
+                                    <i class="fas fa-check-double"></i> Có mặt tất cả
+                                </button>
+                                <button type="button" class="btn-batch" onclick="setAllStatus('Absent')">
+                                    <i class="fas fa-times-circle"></i> Vắng tất cả
+                                </button>
+                                <button type="button" class="btn-batch" onclick="setNewStudentsStatus('Present')">
+                                    <i class="fas fa-user-plus"></i> Có mặt (học sinh mới)
+                                </button>
+                            </div>
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Tìm kiếm học sinh..." onkeyup="filterStudents(this.value)">
+                            </div>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table class="students-table">
+                                <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Họ và Tên</th>
+                                    <th>ID</th>
+                                    <th>Trạng thái</th>
+                                    <th>Điểm danh</th>
+                                    <th>Ghi chú</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <c:forEach var="student" items="${studentsWithAttendance}" varStatus="status">
+                                    <tr class="${student.hasAttendance ? 'existing-student' : 'new-student'}">
+                                        <td>
+                                                ${status.index + 1}
+                                            <input type="hidden" name="studentId" value="${student.id}">
+                                            <c:if test="${student.hasAttendance}">
+                                                <input type="hidden" name="attendanceId_${student.id}" value="${student.attendanceId}">
+                                            </c:if>
+                                        </td>
+                                        <td>
+                                                ${student.fullName}
+                                            <c:if test="${!student.hasAttendance}">
+                                                <span class="badge badge-new"> (Mới)</span>
+                                            </c:if>
+                                        </td>
+                                        <td>${student.id}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${student.hasAttendance}">
+                                            <span class="status-badge ${student.attendanceStatus.toLowerCase()}">
+                                                <c:choose>
+                                                    <c:when test="${student.attendanceStatus == 'Present'}">Có mặt</c:when>
+                                                    <c:when test="${student.attendanceStatus == 'Absent'}">Vắng</c:when>
+                                                    <c:when test="${student.attendanceStatus == 'Late'}">Đi muộn</c:when>
+                                                </c:choose>
+                                            </span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="status-badge new">Chưa điểm danh</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <select name="status_${student.id}" class="status-select ${student.hasAttendance ? 'existing' : 'new'}">
+                                                <option value="Present" ${student.attendanceStatus == 'Present' ? 'selected' : ''}>Có mặt</option>
+                                                <option value="Absent" ${student.attendanceStatus == 'Absent' ? 'selected' : ''}>Vắng</option>
+                                                <option value="Late" ${student.attendanceStatus == 'Late' ? 'selected' : ''}>Đi muộn</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" name="note_${student.id}"
+                                                   value="${student.attendanceNote}"
+                                                   class="note-input ${student.hasAttendance ? 'existing' : 'new'}"
+                                                   placeholder="Ghi chú...">
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="form-actions">
+                            <a href="attendance" class="btn-cancel">
+                                <i class="fas fa-times"></i> Hủy
+                            </a>
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-save"></i> Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </c:if>
 
         <!-- Edit Attendance Section -->
         <c:if test="${isEdit}">
@@ -262,6 +373,13 @@
                     <form method="post" action="attendance">
                         <input type="hidden" name="action" value="update">
                         <input type="hidden" name="scheduleId" value="${scheduleId}">
+
+                        <div class="table-controls">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Tìm kiếm học sinh..." onkeyup="filterStudents(this.value)">
+                            </div>
+                        </div>
 
                         <div class="table-wrapper">
                             <table class="students-table">
@@ -328,6 +446,14 @@
                 </div>
 
                 <div class="students-table-container">
+
+                    <div class="table-controls">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Tìm kiếm học sinh..." onkeyup="filterStudents(this.value)">
+                        </div>
+                    </div>
+
                     <div class="table-wrapper">
                         <table class="students-table">
                             <thead>
@@ -375,5 +501,35 @@
 <!-- Include Footer -->
 <%@ include file="footer.jsp" %>
 
+<script>
+    // JavaScript functions cho form điểm danh kết hợp
+    function setAllStatus(status) {
+        document.querySelectorAll('select[name^="status_"]').forEach(select => {
+            select.value = status;
+        });
+    }
+
+    function setNewStudentsStatus(status) {
+        document.querySelectorAll('select.new[name^="status_"]').forEach(select => {
+            select.value = status;
+        });
+    }
+
+    function filterStudents(searchTerm) {
+        const rows = document.querySelectorAll('.students-table tbody tr');
+        const term = searchTerm.toLowerCase();
+
+        rows.forEach(row => {
+            const studentName = row.cells[1].textContent.toLowerCase();
+            const studentId = row.cells[2].textContent.toLowerCase();
+
+            if (studentName.includes(term) || studentId.includes(term)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>
 </body>
 </html>

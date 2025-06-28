@@ -111,43 +111,5 @@ public class RequestDAO {
         }
     }
 
-    //Teacher's request
-    public boolean insertRequest(Request req) {
-        String sql = "INSERT INTO Request (Type, SenderId, Reason, Status) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, req.getType());
-            ps.setInt(2, req.getSenderID());
-            ps.setString(3, req.getReason());
-            ps.setString(4, req.getStatus());
-            int rows = ps.executeUpdate();
-            return rows > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-
-    public List<Request> getRequestsBySender(int senderId) throws SQLException {
-        List<Request> list = new ArrayList<>();
-        String sql = "SELECT * FROM Request WHERE SenderId = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, senderId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Request req = new Request();
-                req.setId(rs.getInt("Id"));
-                req.setType(rs.getString("Type"));
-                req.setSenderID(rs.getInt("SenderId"));
-                req.setReason(rs.getString("Reason"));
-                req.setStatus(rs.getString("Status"));
-                list.add(req);
-            }
-        }
-        return list;
-    }
-
 }
 
