@@ -40,19 +40,28 @@ public class StudentApplicationServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        Integer studentId = (Integer) session.getAttribute("accountId");
+        RequestDAO requestDAO = new RequestDAO();
+        Integer accountId = (Integer) session.getAttribute("accountId");
         Account account = (Account) session.getAttribute("account");
-        System.out.println("studentId trong session = " + studentId);
         String action = request.getParameter("action");
+        ArrayList<Request> requestTypeList = requestDAO.getStudentRequestType();
+        request.setAttribute("requestTypeList", requestTypeList);
         if ("list".equals(action)) {
-            RequestDAO requestDAO = new RequestDAO();
-            ArrayList<Request> requestList = requestDAO.getRequestBySenderId(studentId);
+            String filterTypeIdParam = request.getParameter("filterTypeId");
+            ArrayList<Request> requestList;
+            if (filterTypeIdParam != null && !filterTypeIdParam.isEmpty()) {
+                int filterTypeId = Integer.parseInt(filterTypeIdParam);
+                requestList = requestDAO.getRequestBySenderIdAndType(accountId, filterTypeId);
+            } else {
+                requestList = requestDAO.getRequestBySenderId(accountId);
+            }
             request.setAttribute("requestList", requestList);
             request.getRequestDispatcher("/View/student-application-list.jsp").forward(request, response);
         } else {
-            StudentDAO studentDAO = new StudentDAO();
             StudentClassDAO classDAO = new StudentClassDAO();
-            Student student = studentDAO.getStudentByStudentId(studentId);
+            StudentDAO studentDAO = new StudentDAO();
+            Student student = studentDAO.getStudentById(accountId);
+            int studentId = student.getId();
             ArrayList<StudentClass> classList = classDAO.getAllStudentClassByStudentId(studentId);
             request.setAttribute("student", student);
             request.setAttribute("classList", classList);
@@ -79,7 +88,13 @@ public class StudentApplicationServlet extends HttpServlet {
             String parentPhone = request.getParameter("parentPhone");
             String detailedReason = request.getParameter("detailedReason");
             String requestDateStr = request.getParameter("requestDate");
-
+            String requestTypeIdStr = request.getParameter("requestTypeId");
+            if (requestTypeIdStr == null || requestTypeIdStr.trim().isEmpty()) {
+                session.setAttribute("error", "Vui lòng chọn loại đơn!");
+                response.sendRedirect("StudentApplication");
+                return;
+            }
+            int requestTypeId = Integer.parseInt(requestTypeIdStr);
             if (detailedReason == null || detailedReason.trim().length() < 50) {
                 session.setAttribute("error", "Mô tả lý do phải có ít nhất 50 ký tự!");
                 response.sendRedirect("StudentApplication");
@@ -92,22 +107,27 @@ public class StudentApplicationServlet extends HttpServlet {
             } catch (Exception e) {
                 e.printStackTrace();
                 session.setAttribute("error", "Định dạng ngày không hợp lệ!");
-                response.sendRedirect("TransferRequest");
+                response.sendRedirect("StudentApplication");
                 return;
             }
 
-            Request transferRequest = new Request();
-            transferRequest.setSenderID(senderId);
-            transferRequest.setPhoneNumber(phoneNumber);
-            transferRequest.setCourseName(currentClass);
-            transferRequest.setParentPhone(parentPhone);
-            transferRequest.setReason(detailedReason);
-            transferRequest.setCreatedAt(utilDate);
+            Request studentRequest = new Request();
+            studentRequest.setSenderID(senderId);
+            studentRequest.setPhoneNumber(phoneNumber);
+            studentRequest.setCourseName(currentClass);
+            studentRequest.setParentPhone(parentPhone);
+            studentRequest.setReason(detailedReason);
+            studentRequest.setCreatedAt(utilDate);
+            studentRequest.setTypeId(requestTypeId);
 
             RequestDAO dao = new RequestDAO();
-            dao.insert(transferRequest);
-
-            session.setAttribute("message", "Đơn xin chuyển lớp đã được gửi thành công!");
+            boolean success = dao.insert(studentRequest);
+            System.out.println("Insert result: " + success);
+            if (success) {
+                session.setAttribute("message", "Đơn xin chuyển lớp đã được gửi thành công!");
+            } else {
+                session.setAttribute("error", "Gửi đơn thất bại! Vui lòng thử lại.");
+            }
             response.sendRedirect("StudentApplication");
         }
     }

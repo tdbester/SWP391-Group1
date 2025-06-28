@@ -23,6 +23,7 @@
 <%--    */--%>
 
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="java.util.*, java.text.SimpleDateFormat" %>
 <%@ page import="org.example.talentcenter.model.Request" %>
 
@@ -82,6 +83,18 @@
 <div class="main-content">
     <div class="container">
         <h2>Danh sách đơn đã gửi</h2>
+        <form action="StudentApplication" method="get" style="margin-bottom: 20px;">
+            <input type="hidden" name="action" value="list" />
+            <label for="filterTypeId">Lọc theo loại đơn:</label>
+            <select name="filterTypeId" id="filterTypeId" onchange="this.form.submit()">
+                <option value="">-- Tất cả --</option>
+                <c:forEach var="request" items="${requestTypeList}">
+                    <option value="${request.typeId}" ${param.filterTypeId == request.typeId ? "selected" : ""}>
+                            ${request.typeName}
+                    </option>
+                </c:forEach>
+            </select>
+        </form>
         <table style="width: 100%; border-collapse: collapse;">
             <thead>
             <tr>
@@ -104,7 +117,7 @@
                 for (Request r : requestList) {
             %>
             <tr>
-                <td><%= r.getReason() != null ? r.getReason() : "" %></td>
+                <td style="white-space: pre-wrap; word-wrap: break-word; max-width: 300px;"><%= r.getReason() != null ? r.getReason() : "" %></td>
                 <td><%= r.getCreatedAt() != null ? dateFormat.format(r.getCreatedAt()) : "" %></td>
                 <td><%= r.getResponse() != null ? r.getResponse() : "" %></td>
                 <td><%= r.getStatus() != null ? r.getStatus() : "" %></td>
@@ -117,7 +130,7 @@
             </tbody>
         </table>
     </div>
-</div> 
+</div>
 
 <jsp:include page="footer.jsp"/>
 </body>

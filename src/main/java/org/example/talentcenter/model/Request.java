@@ -15,11 +15,13 @@ public class Request {
     private String courseName;
     private String parentPhone;
     private String phoneNumber;
-
+    private String typeName;
+    private String description;
+    private int typeId;
     public Request() {
     }
 
-    public Request(int id, String type, int senderID, String reason, String status, String response, Date createdAt, Date responseAt, int processedBy) {
+    public Request(int id, String type, int senderID, String reason, String status, String response, Date createdAt, Date responseAt, int processedBy, String courseName, String parentPhone, String phoneNumber, String typeName, String description, int typeId) {
         this.id = id;
         this.type = type;
         this.senderID = senderID;
@@ -29,6 +31,12 @@ public class Request {
         this.createdAt = createdAt;
         this.responseAt = responseAt;
         this.processedBy = processedBy;
+        this.courseName = courseName;
+        this.parentPhone = parentPhone;
+        this.phoneNumber = phoneNumber;
+        this.typeName = typeName;
+        this.description = description;
+        this.typeId = typeId;
     }
 
     public Request(int senderID, String reason, String courseName, String parentPhone, Date createdAt) {
@@ -136,6 +144,30 @@ public class Request {
 
     public String getPhoneNumber() {
         return phoneNumber;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(int typeId) {
+        this.typeId = typeId;
     }
 
     public void setPhoneNumber(String phoneNumber) {

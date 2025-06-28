@@ -270,6 +270,13 @@
             <c:remove var="message" scope="session"/>
         </c:if>
 
+        <c:if test="${not empty sessionScope.error}">
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle"></i> ${sessionScope.error}
+            </div>
+            <c:remove var="error" scope="session"/>
+        </c:if>
+
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-edit"></i> Nhập thông tin đơn
@@ -296,15 +303,22 @@
                             <select class="form-control" name="currentClass" required>
                                 <option value="">-- Chọn lớp hiện tại --</option>
                                 <c:forEach var="classRoom" items="${classList}">
-                                    <option value="${classRoom.classroomName}" data-class-id="${classRoom.classRoomID}">
+                                    <option value="${classRoom.classroomName}" data-class-id="${classRoom.classroomID}">
                                             ${classRoom.classroomName}
                                     </option>
                                 </c:forEach>
                             </select>
                         </div>
                         <div class="form-col">
-                            <label class="form-label">Ngày nộp đơn <span class="required">*</span></label>
-                            <input type="date" class="form-control" name="requestDate" required>
+                            <label class="form-label">Loại đơn<span class="required">*</span></label>
+                            <select class="form-control" name="requestTypeId" required>
+                                <option value="">-- Chọn loại đơn --</option>
+                                <c:forEach var="request" items="${requestTypeList}">
+                                    <option value="${request.typeId}" data-type-id="${request.typeId}">
+                                            ${request.typeName}
+                                    </option>
+                                </c:forEach>
+                            </select>
                         </div>
                     </div>
 
@@ -313,6 +327,10 @@
                             <label class="form-label">Số điện thoại phụ huynh <span class="required">*</span></label>
                             <input type="tel" class="form-control" name="parentPhone"
                                    placeholder="Nhập số điện thoại phụ huynh" required>
+                        </div>
+                        <div class="form-col">
+                            <label class="form-label">Ngày nộp đơn <span class="required">*</span></label>
+                            <input type="date" class="form-control" name="requestDate" required>
                         </div>
                     </div>
 

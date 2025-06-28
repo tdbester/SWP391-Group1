@@ -16,7 +16,6 @@ public class StudentClassDAO {
                 SELECT c.Id, c.Name FROM Student s join Student_Class sc on s.id = sc.StudentId
                 join ClassRooms c on sc.ClassRoomId = c.Id where s.Id = ?
                 """;
-
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
             ps.setInt(1, studentId);
