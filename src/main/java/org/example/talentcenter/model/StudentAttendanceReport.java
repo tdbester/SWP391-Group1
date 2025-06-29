@@ -6,8 +6,9 @@ import java.time.LocalTime;
 public class StudentAttendanceReport {
     private int id;
     private LocalDate date;
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private int slotId;
+    private LocalTime slotStartTime;
+    private LocalTime slotEndTime;
     private int roomId;
     private int classRoomId;
     private String className;
@@ -22,10 +23,11 @@ public class StudentAttendanceReport {
     public StudentAttendanceReport() {
     }
 
-    public StudentAttendanceReport(int id, LocalTime startTime, LocalTime endTime, String className, String courseTitle, String teacherName, String status, String note, String roomCode) {
+    public StudentAttendanceReport(int id, int slotId, LocalTime slotStartTime, LocalTime slotEndTime, String className, String courseTitle, String teacherName, String status, String note, String roomCode) {
         this.id = id;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.slotId = slotId;
+        this.slotStartTime = slotStartTime;
+        this.slotEndTime = slotEndTime;
         this.className = className;
         this.courseTitle = courseTitle;
         this.teacherName = teacherName;
@@ -50,20 +52,28 @@ public class StudentAttendanceReport {
         this.date = date;
     }
 
-    public LocalTime getStartTime() {
-        return startTime;
+    public int getSlotId() {
+        return slotId;
     }
 
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
+    public void setSlotId(int slotId) {
+        this.slotId = slotId;
     }
 
-    public LocalTime getEndTime() {
-        return endTime;
+    public LocalTime getSlotStartTime() {
+        return slotStartTime;
     }
 
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
+    public void setSlotStartTime(LocalTime slotStartTime) {
+        this.slotStartTime = slotStartTime;
+    }
+
+    public LocalTime getSlotEndTime() {
+        return slotEndTime;
+    }
+
+    public void setSlotEndTime(LocalTime slotEndTime) {
+        this.slotEndTime = slotEndTime;
     }
 
     public int getRoomId() {

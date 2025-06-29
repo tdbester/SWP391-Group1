@@ -34,4 +34,29 @@ public class StudentClassDAO {
         }
         return studentClasses;
     }
+
+    public ArrayList<String> getClassNamesByStudentId(int studentId) {
+        ArrayList<String> classNames = new ArrayList<>();
+        String sql = """
+                    SELECT DISTINCT c.Name
+                    FROM ClassRooms c
+                    JOIN Student_Class sc ON c.Id = sc.ClassRoomId
+                    WHERE sc.StudentId = ?
+                """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, studentId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                classNames.add(rs.getString("Name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return classNames;
+    }
+
 }

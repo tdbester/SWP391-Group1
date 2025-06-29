@@ -27,12 +27,21 @@
 <%@ page import="java.time.*" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="org.example.talentcenter.model.StudentAttendanceReport" %>
+<%@ page import="java.time.temporal.WeekFields" %>
 <%
     @SuppressWarnings("unchecked")
     List<StudentAttendanceReport> attendanceReports = (List<StudentAttendanceReport>) request.getAttribute("attendanceReports");
     if (attendanceReports == null) {
         attendanceReports = new ArrayList<>();
     }
+
+    Integer selectedYear = (Integer) request.getAttribute("selectedYear");
+    Integer selectedWeekNumber = (Integer) request.getAttribute("selectedWeekNumber");
+    Integer totalWeeksInYear = (Integer) request.getAttribute("totalWeeksInYear");
+
+    if (selectedYear == null) selectedYear = LocalDate.now().getYear();
+    if (selectedWeekNumber == null) selectedWeekNumber = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfYear());
+    if (totalWeeksInYear == null) totalWeeksInYear = 52;
 
     // Lấy thông tin môn học từ record đầu tiên
     String courseTitle = "Báo cáo điểm danh";
@@ -372,7 +381,63 @@
             </div>
         </div>
 
+        <form method="GET" action="${pageContext.request.contextPath}/StudentAttendanceReport" style="display: flex; gap: 10px;">
+            <label for="class">Lọc theo lớp:</label>
+            <select name="class" id="class" onchange="this.form.submit()">
+                <option value="">Tất cả lớp</option>
+                <%
+                    List<String> classNames = (List<String>) request.getAttribute("classNames");
+                    String selectedClass = (String) request.getAttribute("selectedClass");
+                    for (String className : classNames) {
+                %>
+                <option value="<%=className%>" <%= className.equals(selectedClass) ? "selected" : "" %>><%=className%></option>
+                <% } %>
+            </select>
 
+            <label for="year">Năm:</label>
+            <select name="year">
+                <%
+                    int currentYear = LocalDate.now().getYear();
+                    for (int y = currentYear - 2; y <= currentYear + 1; y++) {
+                %>
+                <option value="<%=y%>" <%= y == selectedYear ? "selected" : "" %>><%=y%></option>
+                <% } %>
+            </select>
+
+            <label for="week">Tuần:</label>
+            <select name="week">
+                <%
+                    WeekFields weekFields = WeekFields.of(Locale.getDefault());
+                    LocalDate firstDayOfYear = LocalDate.of(selectedYear, 1, 1);
+
+                    for (int i = 1; i <= totalWeeksInYear; i++) {
+                        try {
+                            LocalDate weekStart = firstDayOfYear
+                                    .with(weekFields.weekOfYear(), i)
+                                    .with(DayOfWeek.MONDAY);
+                            LocalDate weekEnd = weekStart.plusDays(6);
+
+                            if (weekStart.getYear() == selectedYear || weekEnd.getYear() == selectedYear) {
+                                String weekLabel = "Tuần " + i + ": " + weekStart.format(DateTimeFormatter.ofPattern("dd/MM")) +
+                                        " đến " + weekEnd.format(DateTimeFormatter.ofPattern("dd/MM"));
+                %>
+                <option value="<%=i%>" <%= i == selectedWeekNumber ? "selected" : "" %>><%=weekLabel%></option>
+                <%
+                            }
+                        } catch (Exception e) {
+                        }
+                    }
+                %>
+
+            </select>
+
+            <button type="submit">Lọc</button>
+            <a href="${pageContext.request.contextPath}/StudentAttendanceReport"
+               style="padding: 6px 12px; background: #ccc; border: none; text-decoration: none; color: #000; border-radius: 4px;">
+                Bỏ lọc
+            </a>
+        </form>
+<br>
         <div class="attendance-grid">
             <%
                 if (attendanceReports.isEmpty()) {
@@ -415,7 +480,7 @@
             <div class="attendance-card">
                 <div class="card-date"><%=dayOfWeek%> - <%=report.getDate().format(dateFormatter)%></div>
                 <div class="card-session">
-                    <i class="fas fa-clock"></i> <%=report.getStartTime().format(timeFormatter)%>-<%=report.getEndTime().format(timeFormatter)%>
+                    <i class="fas fa-clock"></i> <%=report.getSlotStartTime().format(timeFormatter)%>-<%=report.getSlotEndTime().format(timeFormatter)%>
                 </div>
                 <div class="card-time"><%=report.getRoomCode() != null ? report.getRoomCode() : "N/A"%></div>
                 <div class="card-room"><%=report.getTeacherName() != null ? report.getTeacherName() : "N/A"%></div>

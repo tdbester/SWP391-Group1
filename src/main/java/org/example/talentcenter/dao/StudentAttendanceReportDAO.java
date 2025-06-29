@@ -30,10 +30,11 @@ public class StudentAttendanceReportDAO {
     public ArrayList<StudentAttendanceReport> getAttendanceByStudentId(int studentId) {
         ArrayList<StudentAttendanceReport> schedules = new ArrayList<>();
         String sql = """
-                SELECT s.Date, s.StartTime, s.EndTime, att.Status, 
+                SELECT s.Date, s.SlotId, sl.StartTime, sl.EndTime, att.Status, 
                                        r.Code AS RoomCode, c.Name AS ClassName, 
                                        co.Title AS CourseTitle, a.FullName AS TeacherName
                                 FROM Schedule s
+                                JOIN Slot sl on s.SlotId = sl.Id
                                 JOIN Room r ON s.RoomId = r.Id
                                 JOIN ClassRooms c ON s.ClassRoomId = c.Id
                                 JOIN Teacher t ON c.TeacherId = t.Id
@@ -43,7 +44,7 @@ public class StudentAttendanceReportDAO {
                                 JOIN Student st ON sc.StudentId = st.Id
                                 JOIN Attendance att ON att.ScheduleId = s.Id AND att.StudentId = st.Id
                                 WHERE st.Id = ?
-                                    ORDER BY s.Date, s.StartTime          
+                                    ORDER BY s.Date, sl.StartTime          
                 """;
 
         try (Connection conn = DBConnect.getConnection();
@@ -55,8 +56,9 @@ public class StudentAttendanceReportDAO {
             while (rs.next()) {
                 StudentAttendanceReport studentAttendanceReport = new StudentAttendanceReport();
                 studentAttendanceReport.setDate(rs.getDate("Date").toLocalDate());
-                studentAttendanceReport.setStartTime(rs.getTime("StartTime").toLocalTime());
-                studentAttendanceReport.setEndTime(rs.getTime("EndTime").toLocalTime());
+                studentAttendanceReport.setSlotId(rs.getInt("SlotId"));
+                studentAttendanceReport.setSlotStartTime(rs.getTime("StartTime").toLocalTime());
+                studentAttendanceReport.setSlotEndTime(rs.getTime("EndTime").toLocalTime());
                 studentAttendanceReport.setRoomCode(rs.getString("RoomCode"));
                 studentAttendanceReport.setClassName(rs.getString("ClassName"));
                 studentAttendanceReport.setCourseTitle(rs.getString("CourseTitle"));

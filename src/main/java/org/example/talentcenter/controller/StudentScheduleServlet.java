@@ -65,7 +65,7 @@ public class StudentScheduleServlet extends HttpServlet {
 
                 // Tính toán ngày đầu tuần dựa trên năm và số tuần
                 WeekFields weekFields = WeekFields.of(Locale.getDefault());
-                selectedWeek = LocalDate.of(selectedYear, 1, 4)  // ISO standard: tuần 1 chứa ngày 4/1
+                selectedWeek = LocalDate.of(selectedYear, 1, 1)
                         .with(weekFields.weekOfYear(), selectedWeekNumber)
                         .with(DayOfWeek.MONDAY);
             } else {
