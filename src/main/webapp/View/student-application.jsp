@@ -347,7 +347,7 @@
 
                     <div class="button-group">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i> Gửi đơn xin chuyển lớp
+                            <i class="fas fa-paper-plane"></i> Gửi đơn
                         </button>
                         <button type="reset" class="btn btn-secondary">
                             <i class="fas fa-undo"></i> Làm mới

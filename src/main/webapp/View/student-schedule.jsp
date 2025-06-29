@@ -24,10 +24,13 @@
 <%--    *  2025-06-18  | Cù Thị Huyền Trang   | Schedule for student--%>
 <%--    */--%>
 
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.*" %>
 <%@ page import="java.time.*" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="org.example.talentcenter.model.StudentSchedule" %>
+<%@ page import="java.util.Optional" %>
+<%@ page import="java.time.temporal.WeekFields" %>
 <%
     @SuppressWarnings("unchecked")
     List<StudentSchedule> schedules = (List<StudentSchedule>) request.getAttribute("schedules");
@@ -35,62 +38,58 @@
         schedules = new ArrayList<>();
     }
 
-    // map để nhóm các schedule theo ngày trong tuần và slot
-    Map<String, Map<String, List<StudentSchedule>>> weekSchedule = new HashMap<>();
+    Integer selectedYearObj = (Integer) request.getAttribute("selectedYear");
+    Integer selectedWeekNumberObj = (Integer) request.getAttribute("selectedWeekNumber");
+    Integer totalWeeksInYear = (Integer) request.getAttribute("totalWeeksInYear");
 
-    // Khởi tạo structure cho 7 ngày trong tuần
+    int selectedYear = selectedYearObj != null ? selectedYearObj : LocalDate.now().getYear();
+    int selectedWeekNumber = selectedWeekNumberObj != null ? selectedWeekNumberObj : 1;
+    if (totalWeeksInYear == null) {
+        totalWeeksInYear = 52; // Mặc định 52 tuần
+    }
+
+    // Các ngày trong tuần (theo DayOfWeek)
     String[] days = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
-    String[] slots = {"Sáng", "Chiều", "Tối"};
+    int totalSlots = 10;
 
+    // Map ngày -> slotId -> danh sách lớp
+    Map<String, Map<Integer, List<StudentSchedule>>> weekSchedule = new HashMap<>();
     for (String day : days) {
         weekSchedule.put(day, new HashMap<>());
-        for (String slot : slots) {
+        for (int slot = 1; slot <= totalSlots; slot++) {
             weekSchedule.get(day).put(slot, new ArrayList<>());
         }
     }
 
-    // Phân loại schedule theo ngày và slot
+    // Đưa lịch vào map theo ngày và slotId
     for (StudentSchedule schedule : schedules) {
         LocalDate date = schedule.getDate();
-        LocalTime startTime = schedule.getStartTime();
-
-        // Xác định ngày trong tuần
         DayOfWeek dayOfWeek = date.getDayOfWeek();
         String dayKey = dayOfWeek.toString();
+        int slotId = schedule.getSlotId();
 
-        // Xác định slot dựa trên thời gian
-        String slot;
-        int hour = startTime.getHour();
-        if (hour >= 6 && hour < 12) {
-            slot = "Sáng";
-        } else if (hour >= 12 && hour < 18) {
-            slot = "Chiều";
-        } else {
-            slot = "Tối";
-        }
-
-        // Thêm vào map
-        if (weekSchedule.containsKey(dayKey)) {
-            weekSchedule.get(dayKey).get(slot).add(schedule);
+        if (weekSchedule.containsKey(dayKey) && weekSchedule.get(dayKey).containsKey(slotId)) {
+            weekSchedule.get(dayKey).get(slotId).add(schedule);
         }
     }
 
-    // Sắp xếp các lớp trong cùng slot theo thời gian bắt đầu
-    for (String day : days) {
-        for (String slot : slots) {
-            List<StudentSchedule> slotSchedules = weekSchedule.get(day).get(slot);
-            slotSchedules.sort((s1, s2) -> s1.getStartTime().compareTo(s2.getStartTime()));
-        }
+    // Tính ngày bắt đầu tuần
+    LocalDate startOfWeek = (LocalDate) request.getAttribute("selectedWeek");
+    if (startOfWeek == null) {
+        startOfWeek = LocalDate.now().with(DayOfWeek.MONDAY);
     }
 
-    // Tính toán ngày trong tuần hiện tại
-    LocalDate today = LocalDate.now();
-    LocalDate startOfWeek = today.with(DayOfWeek.MONDAY);
+    // Kiểm tra xem có tuần được chọn không
+    LocalDate selectedWeek = (LocalDate) request.getAttribute("selectedWeek");
+    if (selectedWeek != null) {
+        startOfWeek = selectedWeek;
+    }
+
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM");
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 %>
 <html lang="vi">
 <head>
-    <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thời Khóa Biểu Tuần - TALENT01</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -98,10 +97,66 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
 </head>
 <body>
-<jsp:include page="header.jsp" />
-<jsp:include page="student-sidebar.jsp" />
+<jsp:include page="header.jsp"/>
+<jsp:include page="student-sidebar.jsp"/>
 <div class="main-content">
     <div class="container">
+        <div class="filter-container">
+            <form method="GET" action="${pageContext.request.contextPath}/StudentSchedule"
+                  style="display: flex; align-items: center; gap: 15px;">
+                <div class="filter-group">
+                    <label for="year">YEAR:</label>
+                    <select name="year" id="year">
+                        <%
+                            int currentYear = LocalDate.now().getYear();
+                            for (int year = currentYear - 2; year <= currentYear + 2; year++) {
+                        %>
+                        <option value="<%=year%>" <%= (year == selectedYear) ? "selected" : "" %>><%=year%>
+                        </option>
+                        <%
+                            }
+                        %>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="week">WEEK:</label>
+                    <select name="week" id="week">
+                        <%
+                            // Tạo dropdown cho tất cả các tuần trong năm
+                            WeekFields weekFields = WeekFields.of(Locale.getDefault());
+                            LocalDate firstDayOfYear = LocalDate.of(selectedYear, 1, 1);
+
+                            for (int week = 1; week <= totalWeeksInYear; week++) {
+                                try {
+                                    // Tính toán ngày bắt đầu và kết thúc của tuần
+                                    LocalDate weekStart = firstDayOfYear
+                                            .with(weekFields.weekOfYear(), week)
+                                            .with(DayOfWeek.MONDAY);
+                                    LocalDate weekEnd = weekStart.plusDays(6);
+
+                                    // Kiểm tra xem tuần có thuộc năm được chọn không
+                                    if (weekStart.getYear() == selectedYear || weekEnd.getYear() == selectedYear) {
+                                        String weekRange = weekStart.format(DateTimeFormatter.ofPattern("dd/MM")) +
+                                                " To " + weekEnd.format(DateTimeFormatter.ofPattern("dd/MM"));
+                        %>
+                        <option value="<%=week%>" <%= (week == selectedWeekNumber) ? "selected" : "" %>>
+                            Tuần <%=week%>: <%=weekRange%>
+                        </option>
+                        <%
+                                    }
+                                } catch (Exception e) {
+                                }
+                            }
+                        %>
+                    </select>
+                </div>
+
+                <button type="submit" class="filter-button">
+                    <i class="fas fa-search"></i> Lọc
+                </button>
+            </form>
+        </div>
         <h1>Thời Khóa Biểu</h1>
         <!-- StudentSchedule Table -->
         <div class="schedule-table">
@@ -109,54 +164,60 @@
                 <thead>
                 <tr>
                     <th class="slot-header">SLOT</th>
-                    <th class="day-header">Thứ 2<br><span class="date"><%=startOfWeek.format(dateFormatter)%></span>
+                    <% for (int i = 0; i < 7; i++) { %>
+                    <th class="day-header">
+                        Thứ <%= (i + 2 <= 7 ? i + 2 : "CN") %><br>
+                        <span class="date"><%=startOfWeek.plusDays(i).format(dateFormatter)%></span>
                     </th>
-                    <th class="day-header">Thứ 3<br><span
-                            class="date"><%=startOfWeek.plusDays(1).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 4<br><span
-                            class="date"><%=startOfWeek.plusDays(2).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 5<br><span
-                            class="date"><%=startOfWeek.plusDays(3).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 6<br><span
-                            class="date"><%=startOfWeek.plusDays(4).format(dateFormatter)%></span></th>
-                    <th class="day-header">Thứ 7<br><span
-                            class="date"><%=startOfWeek.plusDays(5).format(dateFormatter)%></span></th>
-                    <th class="day-header">Chủ nhật<br><span
-                            class="date"><%=startOfWeek.plusDays(6).format(dateFormatter)%></span></th>
+                    <% } %>
                 </tr>
                 </thead>
                 <tbody>
                 <%
-                    String[] slotNames = {"Sáng", "Chiều", "Tối"};
-                    String[] dayKeys = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
-                    for (String slotName : slotNames) {
+                    for (int slotId = 1; slotId <= totalSlots; slotId++) {
+                        final int currentSlotId = slotId;
                 %>
                 <tr>
-                    <td class="slot-cell"><%=slotName%>
+                    <td class="slot-cell">
+                        Slot <%=slotId%><br>
+                        <%
+                            Optional<StudentSchedule> sample = schedules.stream()
+                                    .filter(s -> s.getSlotId() == currentSlotId)
+                                    .findFirst();
+                            if (sample.isPresent()) {
+                                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+                                out.print("(" + sample.get().getSlotStartTime().format(timeFormatter)
+                                        + "-" + sample.get().getSlotEndTime().format(timeFormatter) + ")");
+                            }
+                        %>
                     </td>
+
                     <%
-                        for (String dayKey : dayKeys) {
-                            List<StudentSchedule> daySlotSchedules = weekSchedule.get(dayKey).get(slotName);
+                        for (String dayKey : days) {
+                            List<StudentSchedule> daySlotSchedules = weekSchedule.get(dayKey).get(slotId);
                     %>
                     <td class="schedule-cell">
                         <%
                             if (daySlotSchedules.isEmpty()) {
                         %>
+                        -
                         <%
                         } else {
                             for (StudentSchedule schedule : daySlotSchedules) {
-                                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-                                String startTimeStr = schedule.getStartTime().format(timeFormatter);
-                                String endTimeStr = schedule.getEndTime().format(timeFormatter);
                         %>
                         <div class="class-item">
+                            <%
+                                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+                            %>
                             <div class="class-code"><%=schedule.getCourseTitle()%>
                             </div>
                             <div class="class-info">
                                 Lớp: <%=schedule.getClassName()%><br>
                                 Phòng: <%=schedule.getRoomCode()%><br>
                                 Giảng viên: <%=schedule.getTeacherName()%><br>
-                                <span class="time-slot">(<%=startTimeStr%>-<%=endTimeStr%>)</span>
+                                <span class="time-slot">Slot <%= schedule.getSlotId() %>
+                                    (<%= schedule.getSlotStartTime().format(timeFormatter) %>-<%= schedule.getSlotEndTime().format(timeFormatter) %>)
+                                </span>
                             </div>
                         </div>
                         <%
@@ -177,7 +238,7 @@
     </div>
 </div>
 
-<jsp:include page="footer.jsp" />
+<jsp:include page="footer.jsp"/>
 
 
 </body>

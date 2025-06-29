@@ -6,8 +6,6 @@ import java.time.LocalTime;
 public class StudentSchedule {
     private int id;
     private LocalDate date;
-    private LocalTime startTime;
-    private LocalTime endTime;
     private int roomId;
     private int classRoomId;
     private String className;
@@ -15,17 +13,22 @@ public class StudentSchedule {
     private String roomCode;
     private int teacherId;
     private String teacherName;
+    private int slotId;
+    // Derived from Slot table
+    private LocalTime slotStartTime;
+    private LocalTime slotEndTime;
 
-    public StudentSchedule() {}
+    public StudentSchedule() {
+    }
 
-    public StudentSchedule(int id, LocalDate date, LocalTime startTime, LocalTime endTime,
-                    int roomId, int classRoomId) {
+    public StudentSchedule(int id, LocalDate date, int roomId, int classRoomId, int slotId, LocalTime slotStartTime, LocalTime slotEndTime) {
         this.id = id;
         this.date = date;
-        this.startTime = startTime;
-        this.endTime = endTime;
         this.roomId = roomId;
         this.classRoomId = classRoomId;
+        this.slotId = slotId;
+        this.slotStartTime = slotStartTime;
+        this.slotEndTime = slotEndTime;
     }
 
     // Getters and Setters
@@ -43,22 +46,6 @@ public class StudentSchedule {
 
     public void setDate(LocalDate date) {
         this.date = date;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
     }
 
     public int getRoomId() {
@@ -117,13 +104,35 @@ public class StudentSchedule {
         this.teacherName = teacherName;
     }
 
+    public int getSlotId() {
+        return slotId;
+    }
+
+    public void setSlotId(int slotId) {
+        this.slotId = slotId;
+    }
+
+    public LocalTime getSlotStartTime() {
+        return slotStartTime;
+    }
+
+    public void setSlotStartTime(LocalTime slotStartTime) {
+        this.slotStartTime = slotStartTime;
+    }
+
+    public LocalTime getSlotEndTime() {
+        return slotEndTime;
+    }
+
+    public void setSlotEndTime(LocalTime slotEndTime) {
+        this.slotEndTime = slotEndTime;
+    }
+
     @Override
     public String toString() {
         return "Schedule{" +
                 "id=" + id +
                 ", date=" + date +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
                 ", roomId=" + roomId +
                 ", classRoomId=" + classRoomId +
                 ", className='" + className + '\'' +

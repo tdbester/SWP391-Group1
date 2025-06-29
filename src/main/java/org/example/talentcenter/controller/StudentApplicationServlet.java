@@ -95,8 +95,8 @@ public class StudentApplicationServlet extends HttpServlet {
                 return;
             }
             int requestTypeId = Integer.parseInt(requestTypeIdStr);
-            if (detailedReason == null || detailedReason.trim().length() < 50) {
-                session.setAttribute("error", "Mô tả lý do phải có ít nhất 50 ký tự!");
+            if (detailedReason == null || detailedReason.trim().length() < 20) {
+                session.setAttribute("error", "Mô tả lý do phải có ít nhất 20 ký tự!");
                 response.sendRedirect("StudentApplication");
                 return;
             }
@@ -124,7 +124,7 @@ public class StudentApplicationServlet extends HttpServlet {
             boolean success = dao.insert(studentRequest);
             System.out.println("Insert result: " + success);
             if (success) {
-                session.setAttribute("message", "Đơn xin chuyển lớp đã được gửi thành công!");
+                session.setAttribute("message", "Đơn đã được gửi thành công!");
             } else {
                 session.setAttribute("error", "Gửi đơn thất bại! Vui lòng thử lại.");
             }
