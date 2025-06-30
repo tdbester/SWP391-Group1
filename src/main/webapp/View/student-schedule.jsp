@@ -123,19 +123,16 @@
                     <label for="week">WEEK:</label>
                     <select name="week" id="week">
                         <%
-                            // Tạo dropdown cho tất cả các tuần trong năm
                             WeekFields weekFields = WeekFields.of(Locale.getDefault());
                             LocalDate firstDayOfYear = LocalDate.of(selectedYear, 1, 1);
 
                             for (int week = 1; week <= totalWeeksInYear; week++) {
                                 try {
-                                    // Tính toán ngày bắt đầu và kết thúc của tuần
                                     LocalDate weekStart = firstDayOfYear
                                             .with(weekFields.weekOfYear(), week)
                                             .with(DayOfWeek.MONDAY);
                                     LocalDate weekEnd = weekStart.plusDays(6);
 
-                                    // Kiểm tra xem tuần có thuộc năm được chọn không
                                     if (weekStart.getYear() == selectedYear || weekEnd.getYear() == selectedYear) {
                                         String weekRange = weekStart.format(DateTimeFormatter.ofPattern("dd/MM")) +
                                                 " To " + weekEnd.format(DateTimeFormatter.ofPattern("dd/MM"));
@@ -158,7 +155,6 @@
             </form>
         </div>
         <h1>Thời Khóa Biểu</h1>
-        <!-- StudentSchedule Table -->
         <div class="schedule-table">
             <table>
                 <thead>

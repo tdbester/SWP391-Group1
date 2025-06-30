@@ -23,6 +23,11 @@
 <%--    */--%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -84,17 +89,31 @@
                 <!-- Today's Schedule -->
                 <div class="card">
                     <h3 class="card-title"><i class="fas fa-clock"></i> Lịch học hôm nay</h3>
-
-                    <div class="schedule-item">
-                        <div class="schedule-time">10:00</div>
-                        <div class="schedule-info">
-                            <div class="schedule-title">Piano cơ bản</div>
-                            <div class="schedule-details">Phòng B203 - GV: Trần Thị C</div>
-                        </div>
-                        <div class="schedule-actions">
-                            <button class="btn-primary">Sắp tới</button>
-                        </div>
-                    </div>
+                    <c:choose>
+                        <c:when test="${not empty todaySchedules}">
+                            <c:forEach var="s" items="${todaySchedules}">
+                                <div class="schedule-item">
+                                    <div class="schedule-time">
+                                            ${fn:substring(s.slotStartTime, 0, 5)}
+                                    </div>
+                                    <div class="schedule-info">
+                                        <div class="schedule-title">${s.courseTitle}</div>
+                                        <div class="schedule-details">
+                                            Phòng ${s.roomCode} - GV: ${s.teacherName}
+                                        </div>
+                                    </div>
+                                    <div class="schedule-actions">
+                                        <button class="btn-primary">Sắp tới</button>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="schedule-item">
+                                <p>Không có lịch học hôm nay.</p>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
 
                 <div class="card">
