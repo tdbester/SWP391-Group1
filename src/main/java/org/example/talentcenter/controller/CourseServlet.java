@@ -44,12 +44,16 @@ public class CourseServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute("accountId") == null) {
-            resp.sendRedirect("login");
-            return;
-        }
         String action = req.getParameter("action");
         if (action == null) action = "list";
+
+        if (session == null || session.getAttribute("accountId") == null) {
+            if(!action.equals("view")){
+                resp.sendRedirect("login");
+                return;
+            }
+        }
+
 
         switch (action) {
             case "new":   showNewCourseForm(req, resp);      break;

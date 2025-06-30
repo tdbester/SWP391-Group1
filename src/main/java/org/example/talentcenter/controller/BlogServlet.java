@@ -47,12 +47,16 @@ public class BlogServlet extends HttpServlet {
             throws IOException, ServletException {
         // check user login. If user don't login -> redirect to login page
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("accountId") == null) {
-            response.sendRedirect("login");
-            return;
-        }
         String action = request.getParameter("action");
         if (action == null) action = "list";
+
+        if (session == null || session.getAttribute("accountId") == null) {
+            if(!action.equals("view")){
+                response.sendRedirect("login");
+                return;
+            }
+        }
+
 
         switch (action) {
             case "new":
