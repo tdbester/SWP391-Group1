@@ -73,11 +73,11 @@
                         <i class="fas fa-user-check"></i>
                         Báo cáo điểm danh
                     </a>
-                    <a href="${pageContext.request.contextPath}/View/student-application.jsp" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/View/student-request.jsp" class="sale-nav-btn">
                         <i class="fas fa-paper-plane"></i>
-                        Gửi đơn từ
+                        Gửi đơn
                     </a>
-                    <a href="${pageContext.request.contextPath}/View/student-application-list.jsp" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/View/student-request-list.jsp" class="sale-nav-btn">
                         <i class="fas fa-paper-plane"></i>
                         Xem đơn
                     </a>

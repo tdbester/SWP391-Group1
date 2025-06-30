@@ -59,16 +59,16 @@
         </div>
         <div class="nav-section">
             <a href="${pageContext.request.contextPath}/StudentApplication?action=application"
-               class="nav-item ${pageContext.request.requestURI.contains('student-application.jsp') ? 'active' : ''}"
+               class="nav-item ${pageContext.request.requestURI.contains('student-request.jsp') ? 'active' : ''}"
                role="link"
-               aria-current="${pageContext.request.requestURI.contains('student-application.jsp') ? 'page' : 'false'}">
+               aria-current="${pageContext.request.requestURI.contains('student-request.jsp') ? 'page' : 'false'}">
                 <i class="fas fa-briefcase" aria-hidden="true"></i>
                 <span>Gửi đơn</span>
             </a>
         </div>
         <div class="nav-section">
             <a href="${pageContext.request.contextPath}/StudentApplication?action=list"
-               class="nav-item ${pageContext.request.requestURI.contains('student-application-list.jsp') ? 'active' : ''}"
+               class="nav-item ${pageContext.request.requestURI.contains('student-request-list.jsp') ? 'active' : ''}"
                role="link"
                aria-current="${pageContext.request.requestURI.contains('Student-application-list.jsp') ? 'page' : 'false'}">
                 <i class="fas fa-user" aria-hidden="true"></i>

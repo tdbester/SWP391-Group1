@@ -19,7 +19,6 @@ package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.StudentClassDAO;
 import org.example.talentcenter.dao.StudentDAO;
-import org.example.talentcenter.dao.CourseDAO;
 import org.example.talentcenter.dao.RequestDAO;
 import org.example.talentcenter.model.*;
 
@@ -36,7 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 @WebServlet(name = "StudentApplicationServlet", value = "/StudentApplication")
-public class StudentApplicationServlet extends HttpServlet {
+public class StudentRequestServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
@@ -56,7 +55,7 @@ public class StudentApplicationServlet extends HttpServlet {
                 requestList = requestDAO.getRequestBySenderId(accountId);
             }
             request.setAttribute("requestList", requestList);
-            request.getRequestDispatcher("/View/student-application-list.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/student-request-list.jsp").forward(request, response);
         } else {
             StudentClassDAO classDAO = new StudentClassDAO();
             StudentDAO studentDAO = new StudentDAO();
@@ -67,7 +66,7 @@ public class StudentApplicationServlet extends HttpServlet {
             request.setAttribute("classList", classList);
             request.setAttribute("studentName", account.getFullName());
             request.setAttribute("phoneNumber", account.getPhoneNumber());
-            request.getRequestDispatcher("/View/student-application.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/student-request.jsp").forward(request, response);
         }
     }
 
