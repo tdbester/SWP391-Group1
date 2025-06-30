@@ -145,7 +145,6 @@ public class TeacherScheduleDAO {
                    r.Code as RoomCode, sl.StartTime, sl.EndTime
             FROM Schedule s
             INNER JOIN ClassRooms cr ON s.ClassRoomId = cr.Id
-            INNER JOIN Class c ON cr.ClassId = c.Id
             INNER JOIN Room r ON s.RoomId = r.Id
             INNER JOIN Slot sl ON s.SlotId = sl.Id
             WHERE s.Id = ?

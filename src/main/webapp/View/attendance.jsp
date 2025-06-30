@@ -172,7 +172,7 @@
                         </label>
                         <input type="date" name="date" value="${param.date}" onchange="this.form.submit()">
                         <input type="hidden" name="action" value="take">
-                        <input type="hidden" name="classId" value="${classRoom.id}">
+                        <input type="hidden" name="classId" value="${param.classId}">
                     </form>
                 </div>
 

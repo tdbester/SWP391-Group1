@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Request {
     private int id;
-    private String type;
+    private String typeName;
     private int senderID;
     private String reason;
     private String status;
@@ -19,9 +19,8 @@ public class Request {
     public Request() {
     }
 
-    public Request(int id, String type, int senderID, String reason, String status, String response, Date createdAt, Date responseAt, int processedBy) {
+    public Request(int id, int senderID, String reason, String status, String response, Date createdAt, Date responseAt, int processedBy) {
         this.id = id;
-        this.type = type;
         this.senderID = senderID;
         this.reason = reason;
         this.status = status;
@@ -52,14 +51,6 @@ public class Request {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public int getSenderID() {
@@ -140,5 +131,12 @@ public class Request {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 }

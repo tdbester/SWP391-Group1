@@ -28,15 +28,9 @@
       </a>
     </div>
     <div class="nav-section">
-      <a href="${pageContext.request.contextPath}/View/view-request.jsp" class="nav-item">
+      <a href="${pageContext.request.contextPath}/teacherViewRequest" class="nav-item">
         <i class="fas fa-eye"></i>
         <span>Xem đơn</span>
-      </a>
-    </div>
-    <div class="nav-section">
-      <a href="${pageContext.request.contextPath}/View/notifications.jsp" class="nav-item">
-        <i class="fas fa-bell"></i>
-        <span>Thông báo</span>
       </a>
     </div>
   </nav>

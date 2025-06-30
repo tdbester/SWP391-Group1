@@ -30,7 +30,7 @@ public class AttendanceServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
-        if (action == null) action = "list";
+        if (action == null) action = "today";
 
         switch (action) {
             case "today":

@@ -80,7 +80,7 @@
                     <p>Xem lịch giảng dạy</p>
                 </a>
 
-                <a href="${pageContext.request.contextPath}/requestForm" class="action-card">
+                <a href="${pageContext.request.contextPath}/teacherRequest" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-paper-plane"></i>
                     </div>
@@ -88,12 +88,12 @@
                     <p>Tạo đơn xin nghỉ hoặc yêu cầu</p>
                 </a>
 
-                <a href="${pageContext.request.contextPath}/View/notifications.jsp" class="action-card">
+                <a href="${pageContext.request.contextPath}/teacherViewRequest" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-bell"></i>
                     </div>
-                    <h3>Thông báo</h3>
-                    <p>Xem thông báo mới nhất</p>
+                    <h3>Đơn từ</h3>
+                    <p>Xem thông tin đơn từ</p>
                 </a>
             </div>
         </div>
@@ -149,69 +149,69 @@
             <div class="content-card">
                 <div class="card-header">
                     <h3><i class="fas fa-paper-plane"></i> Đơn gần đây</h3>
-                    <a href="${pageContext.request.contextPath}/View/view-request.jsp" class="view-all">Xem tất cả</a>
+                    <a href="${pageContext.request.contextPath}/teacherViewRequest" class="view-all">Xem tất cả</a>
                 </div>
                 <div class="card-content">
-                    <div class="request-item">
-                        <div class="request-status pending">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="request-content">
-                            <h4>Đơn xin nghỉ</h4>
-                            <p>Xin nghỉ ngày 20/06 do có việc cá nhân</p>
-                            <span class="request-date">Gửi: 15/06/2025</span>
-                        </div>
-                    </div>
-                    <div class="request-item">
-                        <div class="request-status approved">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <div class="request-content">
-                            <h4>Đơn xin đổi lịch</h4>
-                            <p>Xin đổi lịch dạy từ thứ 2 sang thứ 3</p>
-                            <span class="request-date">Duyệt: 12/06/2025</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Notifications -->
-            <div class="content-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-bell"></i> Thông báo gần đây</h3>
-                    <a href="${pageContext.request.contextPath}/View/notifications.jsp" class="view-all">Xem tất cả</a>
-                </div>
-                <div class="card-content">
-                    <div class="notification-item">
-                        <div class="notification-icon new">
-                            <i class="fas fa-info-circle"></i>
-                        </div>
-                        <div class="notification-content">
-                            <h4>Thông báo họp khoa</h4>
-                            <p>Họp khoa vào 15:00 ngày mai tại phòng 501</p>
-                            <span class="notification-time">2 giờ trước</span>
-                        </div>
-                    </div>
-                    <div class="notification-item">
-                        <div class="notification-icon">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <div class="notification-content">
-                            <h4>Học sinh mới</h4>
-                            <p>3 học sinh mới được thêm vào lớp A1</p>
-                            <span class="notification-time">1 ngày trước</span>
-                        </div>
-                    </div>
-                    <div class="notification-item">
-                        <div class="notification-icon">
-                            <i class="fas fa-calendar"></i>
-                        </div>
-                        <div class="notification-content">
-                            <h4>Thay đổi lịch học</h4>
-                            <p>Lịch học lớp B2 thay đổi từ thứ 3 tới</p>
-                            <span class="notification-time">2 ngày trước</span>
-                        </div>
-                    </div>
+                    <c:choose>
+                        <c:when test="${not empty recentRequests}">
+                            <c:forEach var="request" items="${recentRequests}">
+                                <div class="request-item">
+                                    <div class="request-status ${request.status.toLowerCase()}">
+                                        <c:choose>
+                                            <c:when test="${request.status == 'Pending'}">
+                                                <i class="fas fa-clock"></i>
+                                            </c:when>
+                                            <c:when test="${request.status == 'Approved'}">
+                                                <i class="fas fa-check"></i>
+                                            </c:when>
+                                            <c:when test="${request.status == 'Rejected'}">
+                                                <i class="fas fa-times"></i>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <i class="fas fa-question"></i>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                    <div class="request-content">
+                                        <h4>${request.typeName}</h4>
+                                        <p>
+                                            <c:choose>
+                                                <c:when test="${request.reason.length() > 60}">
+                                                    ${request.reason.substring(0, 60)}...
+                                                </c:when>
+                                                <c:otherwise>
+                                                    ${request.reason}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </p>
+                                        <span class="request-date">
+                                <c:choose>
+                                    <c:when test="${request.status == 'Approved' or request.status == 'Rejected'}">
+                                        <c:choose>
+                                            <c:when test="${request.status == 'Approved'}">
+                                                Duyệt: <fmt:formatDate value="${request.responseAt}" pattern="dd/MM/yyyy"/>
+                                            </c:when>
+                                            <c:otherwise>
+                                                Từ chối: <fmt:formatDate value="${request.responseAt}" pattern="dd/MM/yyyy"/>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:when>
+                                    <c:otherwise>
+                                        Gửi: <fmt:formatDate value="${request.createdAt}" pattern="dd/MM/yyyy"/>
+                                    </c:otherwise>
+                                </c:choose>
+                            </span>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="no-data">
+                                <i class="fas fa-inbox"></i>
+                                <p>Không có đơn nào gần đây</p>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
         </div>
@@ -283,7 +283,6 @@
             }
         });
     }
-
     // Initialize when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
         updateCurrentDate();

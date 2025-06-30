@@ -2,9 +2,10 @@ package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.TeacherScheduleDAO;
 import org.example.talentcenter.dao.TeacherDAO;
+import org.example.talentcenter.dao.TeacherRequestDAO;
 import org.example.talentcenter.model.Account;
 import org.example.talentcenter.model.Schedule;
-import org.example.talentcenter.dao.AttendanceDAO;
+import org.example.talentcenter.model.Request;
 import org.example.talentcenter.config.DBConnect;
 
 import jakarta.servlet.ServletException;
@@ -17,12 +18,12 @@ import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @WebServlet(name = "TeacherDashboardServlet", value = "/TeacherDashboard")
 public class TeacherDashboardServlet extends HttpServlet {
     private TeacherDAO teacherDAO = new TeacherDAO();
     private TeacherScheduleDAO teacherScheduleDAO = new TeacherScheduleDAO();
+    private TeacherRequestDAO teacherRequestDAO = new TeacherRequestDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -38,14 +39,19 @@ public class TeacherDashboardServlet extends HttpServlet {
 
         try (Connection conn = DBConnect.getConnection()) {
             int teacherId = teacherDAO.getTeacherByAccountId(account.getId()).getId();
+            int accountId = account.getId();
 
             // Lấy lịch hôm nay
             LocalDate today = LocalDate.now();
             List<Schedule> todaySchedules = teacherScheduleDAO.getScheduleByTeacherIdAndDate(teacherId, today);
 
+            // Lấy danh sách đơn gần đây (5 đơn gần nhất trong 7 ngày)
+            ArrayList<Request> recentRequests = teacherRequestDAO.getRecentRequests(accountId, 5);
+
             // Set attributes để JSP sử dụng
             request.setAttribute("todaySchedules", todaySchedules);
             request.setAttribute("currentDate", today);
+            request.setAttribute("recentRequests", recentRequests);
 
             // Forward đến teacher-dashboard.jsp
             request.getRequestDispatcher("View/teacher-dashboard.jsp").forward(request, response);

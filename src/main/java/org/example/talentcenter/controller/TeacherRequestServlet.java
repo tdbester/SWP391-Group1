@@ -35,7 +35,7 @@ public class TeacherRequestServlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("accountId") == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/View/login.jsp");
             return;
         }
 
@@ -56,10 +56,10 @@ public class TeacherRequestServlet extends HttpServlet {
                     handleGetAvailableRooms(request, response, session);
                     break;
                 default:
-                    request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+                    request.getRequestDispatcher("/iew/teacher-request.jsp").forward(request, response);
             }
         } else {
-            request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
         }
     }
 
@@ -69,7 +69,7 @@ public class TeacherRequestServlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("accountId") == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/View/login.jsp");
             return;
         }
 
@@ -81,13 +81,13 @@ public class TeacherRequestServlet extends HttpServlet {
             // Validate chung
             if (type == null || type.trim().isEmpty()) {
                 request.setAttribute("error", "Vui lòng chọn loại đơn yêu cầu!");
-                request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
                 return;
             }
 
             if (reason == null || reason.trim().isEmpty()) {
                 request.setAttribute("error", "Vui lòng nhập lý do!");
-                request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
                 return;
             }
 
@@ -102,7 +102,7 @@ public class TeacherRequestServlet extends HttpServlet {
                     break;
                 case "schedule_change":
                     success = handleScheduleChangeRequest(request, senderId, reason);
-                    errorMessage = "Thay đổi lịch học thất bại!";
+                    errorMessage = "Thay đổi lịch dạy thất bại!";
                     break;
                 case "room_change":
                     success = handleRoomChangeRequest(request, senderId, reason);
@@ -114,7 +114,7 @@ public class TeacherRequestServlet extends HttpServlet {
                     break;
                 default:
                     request.setAttribute("error", "Loại đơn không hợp lệ!");
-                    request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+                    request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
                     return;
             }
 
@@ -129,7 +129,7 @@ public class TeacherRequestServlet extends HttpServlet {
             request.setAttribute("error", "Có lỗi xảy ra, vui lòng thử lại!");
         }
 
-        request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
     }
 
     private void handleCheckLeave(HttpServletRequest request, HttpServletResponse response, HttpSession session)
@@ -138,7 +138,7 @@ public class TeacherRequestServlet extends HttpServlet {
         String dateStr = request.getParameter("date");
         if (dateStr == null || dateStr.trim().isEmpty()) {
             request.setAttribute("error", "Vui lòng chọn ngày nghỉ!");
-            request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
             return;
         }
 
@@ -149,7 +149,7 @@ public class TeacherRequestServlet extends HttpServlet {
             // Kiểm tra ngày đã qua
             if (leaveDate.isBefore(today)) {
                 request.setAttribute("warning", "Ngày bạn chọn đã qua!");
-                request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
                 return;
             }
 
@@ -159,7 +159,7 @@ public class TeacherRequestServlet extends HttpServlet {
 
             if (teacher == null) {
                 request.setAttribute("error", "Không tìm thấy thông tin giáo viên!");
-                request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
                 return;
             }
 
@@ -182,7 +182,7 @@ public class TeacherRequestServlet extends HttpServlet {
             request.setAttribute("error", "Ngày không hợp lệ!");
         }
 
-        request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
     }
 
     private void handleCheckChange(HttpServletRequest request, HttpServletResponse response, HttpSession session)
@@ -191,7 +191,7 @@ public class TeacherRequestServlet extends HttpServlet {
         String dateStr = request.getParameter("date");
         if (dateStr == null || dateStr.trim().isEmpty()) {
             request.setAttribute("error", "Vui lòng chọn ngày muốn thay đổi!");
-            request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
             return;
         }
 
@@ -202,7 +202,7 @@ public class TeacherRequestServlet extends HttpServlet {
             // Kiểm tra ngày đã qua
             if (changeDate.isBefore(today)) {
                 request.setAttribute("warning", "Ngày bạn chọn đã qua!");
-                request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
                 return;
             }
 
@@ -212,7 +212,7 @@ public class TeacherRequestServlet extends HttpServlet {
 
             if (teacher == null) {
                 request.setAttribute("error", "Không tìm thấy thông tin giáo viên!");
-                request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
                 return;
             }
 
@@ -235,7 +235,7 @@ public class TeacherRequestServlet extends HttpServlet {
             request.setAttribute("error", "Ngày không hợp lệ!");
         }
 
-        request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
     }
 
     private void handleCheckRoom(HttpServletRequest request, HttpServletResponse response, HttpSession session)
@@ -244,7 +244,7 @@ public class TeacherRequestServlet extends HttpServlet {
         String dateStr = request.getParameter("date");
         if (dateStr == null || dateStr.trim().isEmpty()) {
             request.setAttribute("error", "Vui lòng chọn ngày muốn đổi phòng!");
-            request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
             return;
         }
 
@@ -255,7 +255,7 @@ public class TeacherRequestServlet extends HttpServlet {
             // Kiểm tra ngày đã qua
             if (changeDate.isBefore(today)) {
                 request.setAttribute("warning", "Ngày bạn chọn đã qua!");
-                request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
                 return;
             }
 
@@ -265,7 +265,7 @@ public class TeacherRequestServlet extends HttpServlet {
 
             if (teacher == null) {
                 request.setAttribute("error", "Không tìm thấy thông tin giáo viên!");
-                request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
                 return;
             }
 
@@ -288,7 +288,7 @@ public class TeacherRequestServlet extends HttpServlet {
             request.setAttribute("error", "Ngày không hợp lệ!");
         }
 
-        request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
     }
 
     private void handleGetAvailableRooms(HttpServletRequest request, HttpServletResponse response, HttpSession session)
@@ -299,7 +299,7 @@ public class TeacherRequestServlet extends HttpServlet {
 
         if (scheduleIdStr == null || dateStr == null) {
             request.setAttribute("error", "Thông tin không hợp lệ!");
-            request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
             return;
         }
 
@@ -311,7 +311,7 @@ public class TeacherRequestServlet extends HttpServlet {
             Schedule currentSchedule = scheduleDAO.getScheduleById(scheduleId);
             if (currentSchedule == null) {
                 request.setAttribute("error", "Không tìm thấy thông tin lịch học!");
-                request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
                 return;
             }
 
@@ -345,7 +345,7 @@ public class TeacherRequestServlet extends HttpServlet {
             request.setAttribute("error", "Có lỗi xảy ra khi tải danh sách phòng!");
         }
 
-        request.getRequestDispatcher("View/teacher-request.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
     }
 
     private boolean handleLeaveRequest(HttpServletRequest request, int senderId, String reason) {
@@ -365,7 +365,7 @@ public class TeacherRequestServlet extends HttpServlet {
 
             // Tạo đơn yêu cầu
             Request req = new Request();
-            req.setType("leave");
+            req.setTypeName("Xin nghỉ phép"); // Sửa từ "leave" thành "Xin nghỉ phép"
             req.setReason("Ngày nghỉ: " + dateStr + "\nLý do: " + reason);
             req.setSenderID(senderId);
             req.setStatus("Pending");
@@ -424,7 +424,7 @@ public class TeacherRequestServlet extends HttpServlet {
 
             // Tạo đơn yêu cầu
             Request req = new Request();
-            req.setType("schedule_change");
+            req.setTypeName("Thay đổi lịch dạy");
             req.setReason(detailReason.toString());
             req.setSenderID(senderId);
             req.setStatus("Pending");
@@ -477,7 +477,7 @@ public class TeacherRequestServlet extends HttpServlet {
 
             // Tạo đơn yêu cầu
             Request req = new Request();
-            req.setType("room_change");
+            req.setTypeName("Thay đổi lớp học"); // Sửa từ "room_change" thành "Thay đổi lớp học"
             req.setReason(detailReason.toString());
             req.setSenderID(senderId);
             req.setStatus("Pending");
@@ -494,7 +494,7 @@ public class TeacherRequestServlet extends HttpServlet {
         try {
             // Tạo đơn yêu cầu
             Request req = new Request();
-            req.setType(type);
+            req.setTypeName("Khác"); // Sửa từ "other" thành "Khác"
             req.setReason(reason);
             req.setSenderID(senderId);
             req.setStatus("Pending");
