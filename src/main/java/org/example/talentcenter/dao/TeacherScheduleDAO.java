@@ -10,46 +10,6 @@ import java.util.ArrayList;
 
 public class TeacherScheduleDAO {
 
-    //Lấy lịch theo teacherId
-    public ArrayList<Schedule> getScheduleByTeacherId(int teacherId) {
-        ArrayList<Schedule> schedules = new ArrayList<>();
-        String sql = """
-        SELECT s.Id, s.Date, s.SlotId, sl.StartTime, sl.EndTime,
-               r.Code AS RoomCode,
-               c.Id AS ClassRoomId, c.Name AS ClassName,
-               co.Title AS CourseTitle,
-               a.FullName AS TeacherName,
-               t.Id AS TeacherId,
-               r.Id AS RoomId
-        FROM Schedule s
-        JOIN Slot sl ON s.SlotId = sl.Id
-        JOIN Room r ON s.RoomId = r.Id
-        JOIN ClassRooms c ON s.ClassRoomId = c.Id
-        JOIN Teacher t ON c.TeacherId = t.Id
-        JOIN Account a ON t.AccountId = a.Id
-        JOIN Course co ON c.CourseId = co.Id
-        WHERE t.Id = ?
-        ORDER BY s.Date, sl.StartTime
-        """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, teacherId);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                Schedule schedule = createScheduleFromResultSet(rs);
-                schedules.add(schedule);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return schedules;
-    }
-
     //Lấy lịch trong tuần
     public ArrayList<Schedule> getScheduleByTeacherIdAndWeek(int teacherId, LocalDate weekStart) {
         ArrayList<Schedule> schedules = new ArrayList<>();
@@ -140,15 +100,16 @@ public class TeacherScheduleDAO {
      */
     public Schedule getScheduleById(int scheduleId) {
         String sql = """
-            SELECT s.Id, s.Date, s.RoomId, s.ClassRoomId, s.SlotId,
-                   c.Name as ClassName, cr.Name as CourseName, cr.Title as CourseTitle,
-                   r.Code as RoomCode, sl.StartTime, sl.EndTime
-            FROM Schedule s
-            INNER JOIN ClassRooms cr ON s.ClassRoomId = cr.Id
-            INNER JOIN Room r ON s.RoomId = r.Id
-            INNER JOIN Slot sl ON s.SlotId = sl.Id
-            WHERE s.Id = ?
-        """;
+        SELECT s.Id, s.Date, s.RoomId, s.ClassRoomId, s.SlotId,
+               cr.Name as ClassName, cr.Name as CourseName, cr.Title as CourseTitle,
+               r.Code as RoomCode, sl.StartTime, sl.EndTime
+        FROM Schedule s
+        INNER JOIN ClassRooms cr ON s.ClassRoomId = cr.Id
+        INNER JOIN Room r ON s.RoomId = r.Id
+        INNER JOIN Slot sl ON s.SlotId = sl.Id
+        WHERE s.Id = ?
+    """;
+
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
