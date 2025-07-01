@@ -13,6 +13,7 @@ public class ResetService {
     private final String from = "talentcenter0001@gmail.com";
     private final String password = "ehmf tner ayhv flzm"; // App password for Gmail
 
+    //create token random
     public String generateToken() {
         return UUID.randomUUID().toString();
     }
@@ -65,7 +66,7 @@ public class ResetService {
         }
     }
 
-
+    //giao dien thu html gui khach hang
     private String buildEmailContent(String name, String link) {
         StringBuilder content = new StringBuilder();
         content.append("<!DOCTYPE html>");
