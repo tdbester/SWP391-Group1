@@ -17,11 +17,14 @@ public class StudentSchedule {
     // Derived from Slot table
     private LocalTime slotStartTime;
     private LocalTime slotEndTime;
+    private String teacherEmail;
+    private String teacherPhoneNumber;
+    private String attendaceStatus;
 
     public StudentSchedule() {
     }
 
-    public StudentSchedule(int id, LocalDate date, int roomId, int classRoomId, int slotId, LocalTime slotStartTime, LocalTime slotEndTime) {
+    public StudentSchedule(int id, LocalDate date, int roomId, int classRoomId, int slotId, LocalTime slotStartTime, LocalTime slotEndTime, String TeacherEmail, String TeacherPhoneNumber, String attendaceStatus) {
         this.id = id;
         this.date = date;
         this.roomId = roomId;
@@ -29,6 +32,9 @@ public class StudentSchedule {
         this.slotId = slotId;
         this.slotStartTime = slotStartTime;
         this.slotEndTime = slotEndTime;
+        this.teacherEmail = TeacherEmail;
+        this.teacherPhoneNumber = TeacherPhoneNumber;
+        this.attendaceStatus = attendaceStatus;
     }
 
     // Getters and Setters
@@ -126,6 +132,30 @@ public class StudentSchedule {
 
     public void setSlotEndTime(LocalTime slotEndTime) {
         this.slotEndTime = slotEndTime;
+    }
+
+    public String getTeacherEmail() {
+        return teacherEmail;
+    }
+
+    public void setTeacherEmail(String teacherEmail) {
+        this.teacherEmail = teacherEmail;
+    }
+
+    public String getAttendaceStatus() {
+        return attendaceStatus;
+    }
+
+    public void setAttendaceStatus(String attendaceStatus) {
+        this.attendaceStatus = attendaceStatus;
+    }
+
+    public String getTeacherPhoneNumber() {
+        return teacherPhoneNumber;
+    }
+
+    public void setTeacherPhoneNumber(String teacherPhoneNumber) {
+        this.teacherPhoneNumber = teacherPhoneNumber;
     }
 
     @Override
