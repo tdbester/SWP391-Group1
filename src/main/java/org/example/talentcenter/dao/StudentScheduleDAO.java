@@ -143,7 +143,6 @@ public class StudentScheduleDAO {
             ps.setDate(2, Date.valueOf(date));
 
             ResultSet rs = ps.executeQuery();
-            int cnt = 0;
             while (rs.next()) {
                 StudentSchedule schedule = new StudentSchedule();
                 schedule.setDate(rs.getDate("Date").toLocalDate());
@@ -155,12 +154,12 @@ public class StudentScheduleDAO {
                 schedule.setCourseTitle(rs.getString("CourseTitle"));
                 schedule.setTeacherName(rs.getString("TeacherName"));
                 list.add(schedule);
-                cnt++;
             }
-            System.out.println("Found " + cnt + " schedules");
         } catch (Exception e) {
             e.printStackTrace();
         }
         return list;
     }
+
+
 }

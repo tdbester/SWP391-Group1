@@ -208,7 +208,10 @@
                             <div class="class-code"><%=schedule.getCourseTitle()%>
                             </div>
                             <div class="class-info">
-                                Lớp: <%=schedule.getClassName()%><br>
+                                Lớp: <a
+                                    href="StudentClass?slotId=<%=schedule.getSlotId()%>&date=<%=schedule.getDate()%>">
+                                <%=schedule.getClassName()%>
+                            </a><br>
                                 Phòng: <%=schedule.getRoomCode()%><br>
                                 Giảng viên: <%=schedule.getTeacherName()%><br>
                                 <span class="time-slot">Slot <%= schedule.getSlotId() %>

@@ -104,7 +104,7 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("course_filter", courseFilter);
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
         } else if (action.equals("filterByStatus")) {
-            String statusFilter = request.getParameter("status_filter");
+            String statusFilter = request.getParameter("statusFilter");
             if (statusFilter == null || statusFilter.trim().isEmpty()) {
                 response.sendRedirect("Consultation?action=list");
                 return;
@@ -112,7 +112,7 @@ public class ConsultationServlet extends HttpServlet {
             ArrayList<Consultation> consultations = consultationDAO.filterConsultationsByStatus(statusFilter.trim());
             request.setAttribute("consultations", consultations);
             request.setAttribute("subjects", subjects);
-            request.setAttribute("course_filter", statusFilter);
+            request.setAttribute("statusFilter", statusFilter);
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
         } else if ("dashboard".equals(action)) {
             request.getRequestDispatcher("View/sale-dashboard.jsp").forward(request, response);
