@@ -169,6 +169,76 @@ public class RequestDAO {
         return requests;
     }
 
+    public Request getRequestDetailById(int requestId) {
+        String sql = """
+        SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, 
+               rt.TypeName, acc.FullName AS SenderName, acc.Email AS SenderEmail, 
+               acc.PhoneNumber AS SenderPhone, role.Name AS SenderRole
+        FROM Request r
+        JOIN RequestType rt ON r.TypeID = rt.TypeID
+        JOIN Account acc ON r.SenderId = acc.Id
+        JOIN Role role ON acc.RoleId = role.Id
+        WHERE r.Id = ?
+    """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, requestId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    request.setSenderName(rs.getString("SenderName"));
+                    request.setSenderRole(rs.getString("SenderRole"));
+                    String fullReason = rs.getString("Reason");
+                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+
+                    if (parts.length >= 4) {
+                        request.setCourseName(parts[0]);
+                        request.setParentPhone(parts[1]);
+                        request.setPhoneNumber(parts[2]);
+                        request.setReason(parts[3]);
+                    } else {
+                        request.setReason(fullReason);
+                    }
+
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setTypeName(rs.getString("TypeName"));
+
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+
+                    return request;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean processRequest(int requestId, String status, String responseNote, Timestamp responseAt) {
+        String sql = "UPDATE Request SET Status = ?, Response = ?, ResponseAt = ? WHERE Id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status);
+            stmt.setString(2, responseNote);
+            stmt.setTimestamp(3, responseAt);
+            stmt.setInt(4, requestId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public ArrayList<Request> getRequestBySenderId(int senderId) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
