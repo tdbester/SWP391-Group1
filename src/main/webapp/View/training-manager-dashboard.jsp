@@ -13,89 +13,76 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
   <!-- Kế thừa hoặc nhúng lại CSS từ trang chính -->
 
 </head>
 <body>
 <jsp:include page="header.jsp" />
-<!-- SIDEBAR -->
-<!-- Tách sidebar thành file riêng để tái sử dụng -->
 
 <!-- dashboard -->
 <div class="container">
   <jsp:include page="training-manager-sidebar.jsp" />
   <div class="main-content">
+    <div class="welcome-section">
+      <div class="welcome-card">
+        <div class="welcome-text">
+          <h1>Xin chào quản lý đào tạo Nguyen Van A!</h1>
+          <p>Hôm nay là ngày tuyệt vời để làm việc</p>
+          <div class="current-time">
+            <i class="fas fa-calendar-alt"></i>
+            <span id="currentDate"></span>
+          </div>
+        </div>
+        <div class="welcome-avatar">
+          <a href="<%=request.getContextPath()%>/profile">
+            <i class="fas fa-user-circle"></i>
+          </a>
+        </div>
+      </div>
+    </div>
     <div class="content-area">
-      <!-- Stats Cards cho Sale -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon"><i class="fa-solid fa-building-user"></i></div>
-          <div class="stat-number" style="color: #3498db;">12</div>
-          <div class="stat-label">Khách hàng mới</div>
-          <div class="stat-status status-info">Trong tuần này</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon"><i class="fa-solid fa-phone-volume"></i></div>
-          <div class="stat-number" style="color: #f39c12;">8</div>
-          <div class="stat-label">Cuộc gọi chưa xử lý</div>
-          <div class="stat-status status-warning">Cần gọi lại</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
-          <div class="stat-number" style="color: #2ecc71;">5</div>
-          <div class="stat-label">Hợp đồng thành công</div>
-          <div class="stat-status status-good">Trong tháng này</div>
+      <div class="sale-quick-nav">
+        <h2>Quick Actions</h2>
+        <div class="sale-nav-buttons">
+          <a href="consultation-list.jsp" class="sale-nav-btn"><i class="fas fa-users"></i>Danh sách đơn cần xử lý</a>
+          <a href="student-account-request.jsp" class="sale-nav-btn"><i class="fas fa-book-open"></i>Yêu cầu cấp tài khoản học viên</a>
+          <a href="" class="sale-nav-btn"><i class="fas fa-book-open"></i>Xem danh sách khoá học</a>
         </div>
       </div>
 
-      <!-- Content Grid (tùy chỉnh tùy ý) -->
-      <div class="content-grid">
-        <!-- Lịch gặp khách hôm nay -->
-        <div class="card">
-          <h2 class="card-title">Lịch hẹn khách hôm nay</h2>
-          <div class="schedule-item">
-            <div class="schedule-time">09:00</div>
-            <div class="schedule-info">
-              <div class="schedule-title">Gặp khách hàng Công ty A</div>
-              <div class="schedule-details">Tòa nhà Pearl Plaza, Quận Bình Thạnh</div>
-            </div>
-            <div class="schedule-actions">
-              <button class="btn-success">Xác nhận</button>
-              <button class="btn-warning">Hủy</button>
-            </div>
-          </div>
-          <div class="schedule-item">
-            <div class="schedule-time">14:00</div>
-            <div class="schedule-info">
-              <div class="schedule-title">Call tư vấn Công ty B</div>
-              <div class="schedule-details">Qua Zoom, khách hàng Nhật</div>
-            </div>
-            <div class="schedule-actions">
-              <button class="btn-primary">Tham gia</button>
-              <button class="btn-warning">Trễ</button>
-            </div>
-          </div>
-        </div>
+      <div class="sale-notifications">
+        <h2>🔔 New Notifications</h2>
+        <ul class="sale-notification-list">
+          <li><strong>03/06:</strong> 5 new registrations waiting for follow-up.</li>
+          <li><strong>02/06:</strong> Consultation success rate report updated.</li>
+          <li><strong>01/06:</strong> New summer courses added to the system.</li>
+        </ul>
+      </div>
 
-        <!-- Yêu cầu báo giá -->
-        <div class="card">
-          <h2 class="card-title">Yêu cầu báo giá</h2>
-
-          <div class="request-item">
-            <div class="request-title">Công ty C - Website giới thiệu</div>
-            <div class="request-date">Gửi lúc: 30/05/2025</div>
-            <div class="request-status pending">Đang xử lý</div>
-          </div>
-
-          <div class="request-item">
-            <div class="request-title">Công ty D - Giải pháp CRM</div>
-            <div class="request-date">Gửi lúc: 29/05/2025</div>
-            <div class="request-status approved">Đã báo giá</div>
-          </div>
-        </div>
+      <div class="sale-new-courses">
+        <h2>📋 Courses Needing Consultation</h2>
+        <table class="sale-course-table">
+          <thead>
+          <tr>
+            <th>Course</th>
+            <th>Start Date</th>
+            <th>Slots Left</th>
+            <th>Interested Leads</th>
+            <th>Action</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td>Piano for Beginners</td>
+            <td>10/07/2025</td>
+            <td>8</td>
+            <td>12</td>
+            <td><a href="#" class="sale-btn-view">View</a></td>
+          </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

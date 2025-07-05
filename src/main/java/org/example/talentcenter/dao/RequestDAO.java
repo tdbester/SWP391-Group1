@@ -128,6 +128,47 @@ public class RequestDAO {
         }
     }
 
+    public ArrayList<Request> getAllRequest() {
+        ArrayList<Request> requests = new ArrayList<>();
+        String sql = """
+                 SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                                                  rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+                                           FROM Request r
+                                           JOIN RequestType rt ON r.TypeID = rt.TypeID
+                                           JOIN Account acc ON r.SenderId = acc.Id
+                                           JOIN Role role ON acc.RoleId = role.Id
+                                           ORDER BY r.CreatedAt DESC
+                """;
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    request.setSenderName(rs.getString("SenderName"));
+                    request.setSenderRole(rs.getString("SenderRole"));
+                    String fullReason = rs.getString("Reason");
+                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+                    String extractedReason = parts.length > 0 ? parts[parts.length - 1] : "";
+                    request.setReason(extractedReason);
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    request.setTypeName(rs.getString("TypeName"));
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
     public ArrayList<Request> getRequestBySenderId(int senderId) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
@@ -189,12 +230,12 @@ public class RequestDAO {
     public ArrayList<Request> getRequestBySenderIdAndType(int senderId, int typeId) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
-            SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, rt.TypeName 
-            FROM Request r 
-            JOIN RequestType rt ON r.TypeID = rt.TypeID 
-            WHERE r.SenderId = ? AND r.TypeID = ? 
-            ORDER BY r.CreatedAt DESC
-            """;
+                SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, rt.TypeName 
+                FROM Request r 
+                JOIN RequestType rt ON r.TypeID = rt.TypeID 
+                WHERE r.SenderId = ? AND r.TypeID = ? 
+                ORDER BY r.CreatedAt DESC
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
