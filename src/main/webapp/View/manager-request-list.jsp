@@ -196,7 +196,7 @@
                 <td><%= r.getCreatedAt() != null ? dateFormat.format(r.getCreatedAt()) : "" %></td>
                 <td class="<%= statusClass %>"><%= r.getStatus() != null ? r.getStatus() : "" %></td>
                 <td>
-                    <a href="RequestDetail?id=<%= r.getId() %>" class="action-btn">Xem</a>
+                    <a href="ProcessRequest?id=<%= r.getId() %>" class="action-btn">Xem</a>
                     <% if ("Chờ xử lý".equals(r.getStatus())) { %>
                     <a href="ProcessRequest?id=<%= r.getId() %>" class="action-btn" style="background-color: #28a745;">Xử lý</a>
                     <% } %>
