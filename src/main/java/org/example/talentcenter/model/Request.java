@@ -18,6 +18,9 @@ public class Request {
     private String typeName;
     private String description;
     private int typeId;
+    private String senderName;
+    private String senderRole;
+
     public Request() {
     }
 
@@ -172,5 +175,21 @@ public class Request {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public String getSenderRole() {
+        return senderRole;
+    }
+
+    public void setSenderRole(String senderRole) {
+        this.senderRole = senderRole;
     }
 }

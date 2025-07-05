@@ -36,6 +36,13 @@
           <i class="fa-solid fa-building" aria-hidden="true"></i>
           <span>Danh sách yêu cầu cấp tài khoản</span>
         </a>
+        <a href="${pageContext.request.contextPath}/ProcessRequest?action=list"
+           class="nav-item ${pageContext.request.requestURI.contains('manager-request-list.jsp') ? 'active' : ''}"
+           role="link"
+           aria-current="${pageContext.request.requestURI.contains('manager-request-list.jsp') ? 'page' : 'false'}">
+          <i class="fa-solid fa-building" aria-hidden="true"></i>
+          <span>Danh sách đơn cần xử lý</span>
+        </a>
       </div>
     </nav>
   </div>
