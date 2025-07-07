@@ -23,6 +23,20 @@
 <%--    */--%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="org.example.talentcenter.model.Notification" %>
+<%@ page import="java.util.ArrayList" %>
+
+<%
+    ArrayList<Notification> latestNotifications = (ArrayList<Notification>) request.getAttribute("latestNotifications");
+    if (latestNotifications == null) latestNotifications = new ArrayList<>();
+
+    Integer unreadCount = (Integer) request.getAttribute("unreadCount");
+    if (unreadCount == null) unreadCount = 0;
+
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -58,7 +72,7 @@
         </div>
         <div class="content-area">
             <div class="sale-quick-nav">
-                <h2>Quick Actions</h2>
+                <h2>Điều hướng nhanh</h2>
                 <div class="sale-nav-buttons">
                     <a href="consultation-list.jsp" class="sale-nav-btn"><i class="fas fa-users"></i>Xem danh sách tư vấn</a>
                     <a href="blog.jsp" class="sale-nav-btn"><i class="fas fa-user-plus"></i>Viết blog</a>
@@ -68,12 +82,53 @@
             </div>
 
             <div class="sale-notifications">
-                <h2>🔔 New Notifications</h2>
-                <ul class="sale-notification-list">
-                    <li><strong>03/06:</strong> 5 new registrations waiting for follow-up.</li>
-                    <li><strong>02/06:</strong> Consultation success rate report updated.</li>
-                    <li><strong>01/06:</strong> New summer courses added to the system.</li>
+                <h2>🔔 Thông báo mới
+                <% if (unreadCount > 0) { %>
+                <span style="background: #dc3545; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">
+                            <%= unreadCount %>
+                        </span>
+                <% } %>
+                </h2>
+                <ul class="sale-notification-list" style="list-style: none; padding: 0;">
+                    <% if (latestNotifications.isEmpty()) { %>
+                    <li style="padding: 15px; background: #f8f9fa; margin-bottom: 10px; border-radius: 6px; text-align: center; color: #666;">
+                        Chưa có thông báo mới
+                    </li>
+                    <% } else { %>
+                    <% for (Notification notification : latestNotifications) { %>
+                    <li style="display: flex; padding: 15px; background: white; margin-bottom: 10px; border-radius: 6px; border: 1px solid #eee; <%= !notification.isRead() ? "border-left: 4px solid #007bff; background: #f0f8ff;" : "" %>">
+                        <div style="margin-right: 15px; font-size: 24px;">📋</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #333; margin-bottom: 5px;">
+                                <%= notification.getTitle() %>
+                            </div>
+                            <div style="color: #666; margin-bottom: 8px; line-height: 1.4;">
+                                <%= notification.getContent() %>
+                            </div>
+                            <div style="font-size: 11px; color: #aaa;">
+                                <i class="fas fa-clock"></i> <%= dateFormat.format(notification.getCreatedAt()) %>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <% if (notification.getRelatedEntityId() != null) { %>
+                            <a href="Consultation?action=edit&id=<%= notification.getRelatedEntityId() %>"
+                               style="background: #007bff; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold;">
+                                <i class="fas fa-eye"></i> Xem
+                            </a>
+                            <% } %>
+                        </div>
+                    </li>
+                    <% } %>
+                    <% } %>
                 </ul>
+
+                <!-- Link xem tất cả thông báo -->
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="Consultation?action=notifications"
+                       style="color: #007bff; text-decoration: none; font-weight: bold; font-size: 14px;">
+                        <i class="fas fa-list"></i> Xem tất cả thông báo
+                    </a>
+                </div>
             </div>
 
             <div class="sale-new-courses">

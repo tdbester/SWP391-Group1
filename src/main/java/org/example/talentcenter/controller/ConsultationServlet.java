@@ -17,10 +17,8 @@
 
 package org.example.talentcenter.controller;
 
-import org.example.talentcenter.dao.CourseDAO;
-import org.example.talentcenter.dao.ConsultationDAO;
-import org.example.talentcenter.model.Consultation;
-import org.example.talentcenter.model.Course;
+import org.example.talentcenter.dao.*;
+import org.example.talentcenter.model.*;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -37,6 +35,7 @@ import java.io.IOException;
 public class ConsultationServlet extends HttpServlet {
     private static final CourseDAO subjectDAO = new CourseDAO();
     private static final ConsultationDAO consultationDAO = new ConsultationDAO();
+    public static final NotificationDAO notificationDAO = new NotificationDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -113,6 +112,10 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("statusFilter", statusFilter);
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
         } else if ("dashboard".equals(action)) {
+            ArrayList<Notification> latestNotifications = notificationDAO.getLatestNotificationsForSale(5);
+            request.setAttribute("latestNotifications", latestNotifications);
+            int unreadCount = notificationDAO.getUnreadCountForSale();
+            request.setAttribute("unreadCount", unreadCount);
             request.getRequestDispatcher("View/sale-dashboard.jsp").forward(request, response);
             return;
         } else {

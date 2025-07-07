@@ -36,4 +36,30 @@ public class CourseDAO {
 
         return subjects;
     }
+
+    public Course getCourseById(int courseId) {
+        String query = "SELECT Id, Title, Price, Information, CreatedBy FROM Course WHERE Id = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, courseId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return new Course(
+                        rs.getInt("Id"),
+                        rs.getString("Title"),
+                        rs.getDouble("Price"),
+                        rs.getString("Information"),
+                        rs.getInt("CreatedBy")
+                );
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi SQL getCourseById: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }

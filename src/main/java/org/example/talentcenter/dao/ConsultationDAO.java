@@ -26,7 +26,7 @@ import java.util.ArrayList;
 public class ConsultationDAO {
 
     // Add consultation to the database
-    public static Consultation addConsultation(Consultation consultation) {
+    public boolean addConsultation(Consultation consultation) {
         String sql = "INSERT INTO Consultations (FullName, Email, Phone, CourseId, CreatedAt, Status) VALUES (?, ?, ?, ?, GETDATE(), N'Đang xử lý')";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement statement = conn.prepareStatement(sql)) {
@@ -41,14 +41,12 @@ public class ConsultationDAO {
                     + ", CourseId: " + consultation.getCourseId());
             int rs = statement.executeUpdate();
             if (rs > 0) {
-                return consultation;
+                return true;
             }
-            System.out.println("Inserting consultation: " + consultation.getFullName() + ", courseId: " + consultation.getCourseId());
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return false;
     }
 
     public Consultation getById(int Id) {
