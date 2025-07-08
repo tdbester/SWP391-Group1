@@ -251,8 +251,8 @@ public class AccountDAO {
             stmt.setString(2, fullName);
             stmt.setString(3, email);
             stmt.setString(4, phone);
-            stmt.setString(5, ""); // Address để trống hoặc null
-            stmt.setInt(6, 2); // RoleId = 2 cho Student (dựa vào bảng của bạn)
+            stmt.setString(5, "");
+            stmt.setInt(6, 2);
 
             return stmt.executeUpdate() > 0;
 

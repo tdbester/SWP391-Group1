@@ -5,6 +5,22 @@
   Time: 1:57 PM
   To change this template use File | Settings | File Templates.
 --%>
+<%--/*--%>
+<%--*  Copyright (C) 2025 <Group 1>--%>
+<%--    *  All rights reserved.--%>
+<%--    *--%>
+<%--    *  This file is part of the <Talent Center Management> project.--%>
+<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
+<%--    *  Proprietary and confidential.--%>
+<%--    *--%>
+<%--    *  Created on:        2025-06-09--%>
+<%--    *  Author:            Cù Thị Huyền Trang--%>
+<%--    *--%>
+<%--    *  ========================== Change History ==========================--%>
+<%--    *  Date        | Author               | Description--%>
+<%--    *  ------------|----------------------|----------------------------------%>
+<%--    *  2025-06-09  | Cù Thị Huyền Trang   | Initial creation--%>
+<%--    */--%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
@@ -12,53 +28,10 @@
 <html>
 <head>
     <title>Yêu cầu cấp tài khoản học viên</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        main {
-            flex: 1; /* chiếm phần còn lại giữa header và footer */
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        form {
-            max-width: 500px;
-            margin: auto;
-            background: #fff;
-            padding: 25px;
-            border-radius: 8px;
-        }
-
-        .form-wrapper {
-            max-width: 500px;
-            margin: 50px auto;
-            background: #fff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        }
-
-        label.form-label {
-            font-weight: 600;
-            color: #333;
-        }
-
-        input.form-control {
-            border-radius: 4px;
-            border: 1px solid #ddd;
-            padding: 8px 12px;
-            font-size: 14px;
-        }
-
         .btn-primary {
             background-color: #7a6ad8;
             border-color: #7a6ad8;
@@ -73,35 +46,65 @@
             background-color: #6a5acd;
             border-color: #6a5acd;
         }
+
+        th {
+            background-color: #7a6ad8;
+            color: white;
+        }
     </style>
 </head>
 <body>
 <jsp:include page="header.jsp"/>
-<main>
-    <div class="form-wrapper">
-        <h1>Yêu cầu cấp tài khoản cho học sinh</h1>
+<jsp:include page="sale-sidebar.jsp"/>
+<div class="dashboard">
+    <div class="main-content">
+        <div class=" container mt-4">
+            <h2 class="mb-4"><i class="fas fa-user-plus me-2"></i>Danh sách học sinh đã đồng ý tư vấn</h2>
 
-        <form method="post" action="StudentAccountRequest">
-            <div class="mb-3">
-                <label for="studentName" class="form-label">Tên học viên</label>
-                <input type="text" class="form-control" name="studentName" required>
-            </div>
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" name="email" required>
-            </div>
-            <div class="mb-3">
-                <label for="phone" class="form-label">Số điện thoại</label>
-                <input type="text" class="form-control" name="phone" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Gửi đơn</button>
-        </form>
-        <c:if test="${not empty message}">
-            <div class="alert alert-info">${message}</div>
-        </c:if>
+            <form method="post" action="${pageContext.request.contextPath}/StudentAccountRequest">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"/></th>
+                        <th>ID</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="s" items="${agreedStudents}">
+                        <tr>
+                            <td><input type="checkbox" name="selectedStudentIds" value="${s.id}"/></td>
+                            <td>${s.id}</td>
+                            <td>${s.fullName}</td>
+                            <td>${s.email}</td>
+                            <td>${s.phone}</td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary mt-3">
+                    <i class="fas fa-paper-plane me-1"></i> Gửi yêu cầu cấp tài khoản
+                </button>
+            </form>
+
+            <c:if test="${not empty message}">
+                <div class="alert alert-info mt-3">${message}</div>
+            </c:if>
+        </div>
     </div>
-</main>
-<jsp:include page="footer.jsp"/>
+</div>
 
+<script>
+    document.getElementById('selectAll').addEventListener('click', function () {
+        const checkboxes = document.querySelectorAll('input[name="selectedStudentIds"]');
+        for (let cb of checkboxes) {
+            cb.checked = this.checked;
+        }
+    });
+</script>
+
+<jsp:include page="footer.jsp"/>
 </body>
 </html>

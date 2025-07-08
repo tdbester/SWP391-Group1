@@ -62,18 +62,28 @@
                         <li class="scroll-to-section"><a href="#top" class="active">Trang chủ</a></li>
                         <li class="scroll-to-section"><a href="#services">Dịch vụ</a></li>
                         <li class="scroll-to-section"><a href="#courses">Khóa học</a></li>
-                        <li class="scroll-to-section"><a href="#events">Sự kiện</a></li>
 
                         <%
                             Object account = session.getAttribute("account");
-                            if (account == null) { %>
-                        <li class="scroll-to-section"><a href="View/login.jsp">Đăng nhập</a></li>
-                        <li class="scroll-to-section"><a href="#contact">Đăng kí</a></li>
-                        <% } else { %>
-                        <li class="scroll-to-section"><a href="View/profile.jsp">Trang cá nhân</a></li>
-                        <li class="scroll-to-section"><a href="logout">Đăng xuất</a></li>
-                        <% } %>
+                            String role = (String) session.getAttribute("userRole");
 
+                            if (account == null) {
+                        %>
+                        <li class="scroll-to-section"><a href="<%= request.getContextPath() %>/login">Đăng nhập</a></li>
+                        <li class="scroll-to-section"><a href="#contact">Đăng kí</a></li>
+                        <%
+                        } else {
+                            String dashboardURL = request.getContextPath() +"/View/home.jsp";
+                            if ("teacher".equalsIgnoreCase(role)) {
+                                dashboardURL = request.getContextPath() +"/View/teacher-dashboard.jsp";
+                            } else if ("sale".equalsIgnoreCase(role)) {
+                                dashboardURL = request.getContextPath() +"/View/sale-dashboard.jsp";
+                            }
+                        %>
+                        <li class="scroll-to-section"><a href="<%=dashboardURL%>">Dashboard</a></li>
+                        <li class="scroll-to-section"><a href= "<%=request.getContextPath() %>/profile">Trang cá nhân</a></li>
+                        <li class="scroll-to-section"><a href="<%= request.getContextPath() %>/logout">Đăng xuất</a></li>
+                        <% } %>
 
                     </ul>
                     <a class='menu-trigger'>

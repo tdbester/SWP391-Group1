@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Request {
     private int id;
-    private String type;
+    private String typeName;
     private int senderID;
     private String reason;
     private String status;
@@ -12,13 +12,15 @@ public class Request {
     private Date createdAt;
     private Date responseAt;
     private int processedBy;
+    private String courseName;
+    private String parentPhone;
+    private String phoneNumber;
 
     public Request() {
     }
 
-    public Request(int id, String type, int senderID, String reason, String status, String response, Date createdAt, Date responseAt, int processedBy) {
+    public Request(int id, int senderID, String reason, String status, String response, Date createdAt, Date responseAt, int processedBy) {
         this.id = id;
-        this.type = type;
         this.senderID = senderID;
         this.reason = reason;
         this.status = status;
@@ -28,11 +30,20 @@ public class Request {
         this.processedBy = processedBy;
     }
 
+    public Request(int senderID, String reason, String courseName, String parentPhone, Date createdAt) {
+        this.senderID = senderID;
+        this.courseName = courseName;
+        this.reason = reason;
+        this.parentPhone = parentPhone;
+        this.createdAt = createdAt;
+    }
+
     public Request(int id, String reason, int senderID) {
         this.id = id;
         this.reason = reason;
         this.senderID = senderID;
     }
+
 
     public int getId() {
         return id;
@@ -40,14 +51,6 @@ public class Request {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public int getSenderID() {
@@ -104,5 +107,36 @@ public class Request {
 
     public void setProcessedBy(int processedBy) {
         this.processedBy = processedBy;
+    }
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+
+    public String getParentPhone() {
+        return parentPhone;
+    }
+
+    public void setParentPhone(String parentPhone) {
+        this.parentPhone = parentPhone;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
 }

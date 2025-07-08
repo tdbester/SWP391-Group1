@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2025 <Group 1>
+ *  All rights reserved.
+ *
+ *  This file is part of the <Talent Center Management> project.
+ *  Unauthorized copying of this file, via any medium is strictly prohibited.
+ *  Proprietary and confidential.
+ *
+ *  Created on:        2025-05-29
+ *  Author:            Cù Thị Huyền Trang
+ *
+ *  ========================== Change History ==========================
+ *  Date        | Author               | Description
+ *  ------------|----------------------|--------------------------------
+ *  2025-05-29  | Cù Thị Huyền Trang   | Initial creation
+ */
+
 package org.example.talentcenter.dao;
 
 import org.example.talentcenter.config.DBConnect;
@@ -54,11 +71,12 @@ public class ConsultationDAO {
         }
         return null;
     }
+
     // Get all Consultations from the database
     public ArrayList<Consultation> getAllConsultations() {
         ArrayList<Consultation> Consultations = new ArrayList<>();
         String query = "SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.Status " +
-                "FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id";
+                "FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id order by CreatedAt desc";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
@@ -178,6 +196,34 @@ public class ConsultationDAO {
         return result;
     }
 
+    // filter by Course
+    public ArrayList<Consultation> filterConsultationsByStatus(String status) {
+        ArrayList<Consultation> result = new ArrayList<>();
+        String sql = "SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.Status " +
+                "FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id WHERE c.Status = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Consultation c = new Consultation();
+                c.setId(rs.getInt("Id"));
+                c.setFullName(rs.getString("FullName"));
+                c.setPhone(rs.getString("Phone"));
+                c.setEmail(rs.getString("Email"));
+                c.setCourseId(rs.getInt("CourseId"));
+                c.setTitle(rs.getString("Title"));
+                c.setStatus(rs.getString("Status"));
+                result.add(c);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public boolean updateStatus(int Id, String Status) {
         String sql = "UPDATE Consultations SET Status = ? WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
@@ -192,4 +238,63 @@ public class ConsultationDAO {
         }
     }
 
+    public ArrayList<Consultation> getConsultationsWithPaging(int offset, int limit) {
+        ArrayList<Consultation> list = new ArrayList<>();
+        String sql = "SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.Status " +
+                "FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id " +
+                "ORDER BY c.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Consultation c = new Consultation(
+                        rs.getInt("Id"),
+                        rs.getString("FullName"),
+                        rs.getString("Email"),
+                        rs.getString("Phone"),
+                        rs.getString("Status"),
+                        rs.getString("Title")
+                );
+                list.add(c);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public ArrayList<Consultation> getAgreedConsultations() {
+        ArrayList<Consultation> list = new ArrayList<>();
+        String sql = "SELECT Id, FullName, Email, Phone, Status FROM Consultations WHERE Status = N'Đồng ý'";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Consultation c = new Consultation();
+                c.setId(rs.getInt("Id"));
+                c.setFullName(rs.getString("FullName"));
+                c.setEmail(rs.getString("Email"));
+                c.setPhone(rs.getString("Phone"));
+                c.setStatus(rs.getString("Status"));
+                list.add(c);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public int getTotalConsultationCount() {
+        String sql = "SELECT COUNT(*) FROM Consultations";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
