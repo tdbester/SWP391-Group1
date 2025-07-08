@@ -27,7 +27,7 @@ public class ConsultationDAO {
 
     // Add consultation to the database
     public boolean addConsultation(Consultation consultation) {
-        String sql = "INSERT INTO Consultations (FullName, Email, Phone, CourseId, CreatedAt, Status) VALUES (?, ?, ?, ?, GETDATE(), N'Đang xử lý')";
+        String sql = "INSERT INTO Consultations (FullName, Email, Phone, CourseId, CreatedAt, Status) VALUES (?, ?, ?, ?, GETDATE(), N'Đang xử lý'); SELECT @@IDENTITY AS ID";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement statement = conn.prepareStatement(sql)) {
 
@@ -35,12 +35,10 @@ public class ConsultationDAO {
             statement.setString(2, consultation.getEmail());
             statement.setString(3, consultation.getPhone());
             statement.setInt(4, consultation.getCourseId());
-            System.out.println("[DEBUG] Add consultation - Name: " + consultation.getFullName()
-                    + ", Email: " + consultation.getEmail()
-                    + ", Phone: " + consultation.getPhone()
-                    + ", CourseId: " + consultation.getCourseId());
-            int rs = statement.executeUpdate();
-            if (rs > 0) {
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                consultation.setId(rs.getInt("ID"));
                 return true;
             }
         } catch (SQLException e) {

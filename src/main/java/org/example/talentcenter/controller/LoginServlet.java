@@ -105,7 +105,7 @@ public class LoginServlet extends HttpServlet {
                             response.sendRedirect("View/training-manager-dashboard.jsp");
                             break;
                         case "sale":
-                            response.sendRedirect("View/sale-dashboard.jsp");
+                            response.sendRedirect("Consultation?action=dashboard");
                             break;
                         default:
                             response.sendRedirect("View/home.jsp");

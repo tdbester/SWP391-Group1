@@ -53,11 +53,9 @@ public class HomeServlet extends HttpServlet {
             if (success) {
                 Course course = courseDAO.getCourseById(consult.getCourseId());
                 String courseName = (course != null) ? course.getTitle() : "Không xác định";
-
                 NotificationService.notifyNewConsultation(
                         name, email, phone, courseName, consult.getId()
                 );
-
                 response.sendRedirect("home?success=true");
             } else {
                 response.sendRedirect("home?error=true");

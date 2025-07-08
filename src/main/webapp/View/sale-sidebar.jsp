@@ -33,7 +33,7 @@
         </div>
         <nav>
             <div class="nav-section">
-                <a href="${pageContext.request.contextPath}/View/sale-dashboard.jsp" class="nav-item ${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'page' : 'false'}">
+                <a href="Consultation?action=dashboard" class="nav-item">
                     <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
                     <span>Dashboard</span>
                 </a>
