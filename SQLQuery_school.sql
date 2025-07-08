@@ -36,10 +36,23 @@ CREATE TABLE Course (
   Id INT PRIMARY KEY IDENTITY(1,1),        -- Khóa chính, tự tăng
   Title NVARCHAR(255),                     -- Tên khóa học
   Price FLOAT,                             -- Giá tiền
-  Information TEXT,                        -- Thông tin mô tả chi tiết
+  Information NVARCHAR(10000),                        -- Thông tin mô tả chi tiết
   CreatedBy INT,                           -- FK: người tạo khóa học (AccountId)
   FOREIGN KEY (CreatedBy) REFERENCES Account(Id)
 );
+
+ALTER TABLE Course
+    ADD Level VARCHAR(20);  -- BEGINNER, INTERMEDIATE, ADVANCED
+
+ALTER TABLE Course
+    ADD Type VARCHAR(20);   -- COMBO, LESSON
+
+-- Add Image and CategoryID columns to Course table (if not exists)
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Course' AND COLUMN_NAME = 'Image')
+ALTER TABLE Course ADD Image NVARCHAR(500);
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Course' AND COLUMN_NAME = 'CategoryID')
+ALTER TABLE Course ADD CategoryID INT;
 
 -- Bảng Student: thông tin chi tiết học sinh
 CREATE TABLE Student (

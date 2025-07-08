@@ -1,6 +1,8 @@
 package org.example.talentcenter.dto;
 
 import org.example.talentcenter.model.Category;
+import org.example.talentcenter.utilities.Level;
+import org.example.talentcenter.utilities.Type;
 
 public class CourseDto {
     private int id;
@@ -11,12 +13,14 @@ public class CourseDto {
     private String fullname;
     private String image;
     private Category category;
+    private Level level;
+    private Type type;
 
     public CourseDto() {
     }
 
     public CourseDto(int id, String title, double price, String information,
-                     int createdBy,String fullname, String image, Category category) {
+                     int createdBy,String fullname, String image, Category category, Level level, Type type) {
         this.id = id;
         this.title = title;
         this.price = price;
@@ -25,6 +29,8 @@ public class CourseDto {
         this.image = image;
         this.fullname = fullname;
         this.category = category;
+        this.level = level;
+        this.type = type;
     }
 
     public int getId() {
@@ -83,5 +89,17 @@ public class CourseDto {
     }
     public void setFullname(String fullname) {
         this.fullname = fullname;
+    }
+    public Level getLevel() {
+        return level;
+    }
+    public void setLevel(Level level) {
+        this.level = level;
+    }
+    public Type getType() {
+        return type;
+    }
+    public void setType(Type type) {
+        this.type = type;
     }
 }

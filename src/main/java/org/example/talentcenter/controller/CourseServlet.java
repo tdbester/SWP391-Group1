@@ -9,6 +9,8 @@ import org.example.talentcenter.dao.CourseDAO;
 import org.example.talentcenter.dto.CourseDto;
 import org.example.talentcenter.model.Course;
 import org.example.talentcenter.model.Category;
+import org.example.talentcenter.utilities.Level;
+import org.example.talentcenter.utilities.Type;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Singleton;
@@ -102,8 +104,8 @@ public class CourseServlet extends HttpServlet {
 
         var categoryFiltered = filterCat != null
                 ? filtered.stream()
-                        .filter(c -> c.getCategory().getId() == filterCat.getId())
-                        .toList()
+                .filter(c -> c.getCategory().getId() == filterCat.getId())
+                .toList()
                 : filtered;
 
         int total   = courseDAO.getTotalCourse();
@@ -163,6 +165,8 @@ public class CourseServlet extends HttpServlet {
         String title       = req.getParameter("title");
         String info        = req.getParameter("information");
         String catParam    = req.getParameter("category");
+        String levelParam  = req.getParameter("level");
+        String typeParam   = req.getParameter("type");
         Part   imagePart   = req.getPart("imageFile");
         HttpSession session = req.getSession(false);
         int createdBy= (int) session.getAttribute("accountId");
@@ -175,8 +179,6 @@ public class CourseServlet extends HttpServlet {
             showNewCourseForm(req, resp);
             return;
         }
-
-
 
         String imageUrl;
 
@@ -195,6 +197,30 @@ public class CourseServlet extends HttpServlet {
             return;
         }
 
+        // Parse Level enum
+        Level level = null;
+        if (levelParam != null && !levelParam.isBlank()) {
+            try {
+                level = Level.valueOf(levelParam);
+            } catch (IllegalArgumentException e) {
+                req.setAttribute("errorMessage", "Invalid level.");
+                showNewCourseForm(req, resp);
+                return;
+            }
+        }
+
+        // Parse Type enum
+        Type type = null;
+        if (typeParam != null && !typeParam.isBlank()) {
+            try {
+                type = Type.valueOf(typeParam);
+            } catch (IllegalArgumentException e) {
+                req.setAttribute("errorMessage", "Invalid type.");
+                showNewCourseForm(req, resp);
+                return;
+            }
+        }
+
         Course c = new Course();
         c.setTitle(title);
         c.setInformation(info);
@@ -202,6 +228,8 @@ public class CourseServlet extends HttpServlet {
         c.setCreatedBy(createdBy);
         c.setImage(imageUrl);
         c.setCategory(category);
+        c.setLevel(level);
+        c.setType(type);
 
         courseDAO.insert(c);
         resp.sendRedirect("courses");
@@ -213,6 +241,8 @@ public class CourseServlet extends HttpServlet {
         String title    = req.getParameter("title");
         String info     = req.getParameter("information");
         String catParam = req.getParameter("category");
+        String levelParam  = req.getParameter("level");
+        String typeParam   = req.getParameter("type");
         Part   imagePart= req.getPart("imageFile");
 //        int    createdBy;
         HttpSession session = req.getSession(false);
@@ -241,6 +271,30 @@ public class CourseServlet extends HttpServlet {
             return;
         }
 
+        // Parse Level enum
+        Level level = null;
+        if (levelParam != null && !levelParam.isBlank()) {
+            try {
+                level = Level.valueOf(levelParam);
+            } catch (IllegalArgumentException e) {
+                req.setAttribute("errorMessage", "Invalid level.");
+                showEditCourseForm(req, resp);
+                return;
+            }
+        }
+
+        // Parse Type enum
+        Type type = null;
+        if (typeParam != null && !typeParam.isBlank()) {
+            try {
+                type = Type.valueOf(typeParam);
+            } catch (IllegalArgumentException e) {
+                req.setAttribute("errorMessage", "Invalid type.");
+                showEditCourseForm(req, resp);
+                return;
+            }
+        }
+
         Course c = new Course();
         c.setId(id);
         c.setTitle(title);
@@ -249,6 +303,8 @@ public class CourseServlet extends HttpServlet {
         c.setCreatedBy(createdBy);
         c.setImage(imageUrl);
         c.setCategory(category);
+        c.setLevel(level);
+        c.setType(type);
 
         courseDAO.update(c);
         resp.sendRedirect("courses");

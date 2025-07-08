@@ -4,6 +4,8 @@ import org.example.talentcenter.config.DBConnect;
 import org.example.talentcenter.dto.CourseDto;
 import org.example.talentcenter.model.Course;
 import org.example.talentcenter.model.Category;
+import org.example.talentcenter.utilities.Level;
+import org.example.talentcenter.utilities.Type;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,7 +14,7 @@ import java.util.List;
 public class CourseDAO {
 
     public void insert(Course course) {
-        String sql = "INSERT INTO Course (Title, Price, Information, CreatedBy, Image, CategoryID) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Course (Title, Price, Information, CreatedBy, Image, CategoryID, Level, Type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -22,6 +24,8 @@ public class CourseDAO {
             stmt.setInt(4, course.getCreatedBy());
             stmt.setString(5, course.getImage());
             stmt.setInt(6, course.getCategory().getId());
+            stmt.setString(7, course.getLevel() != null ? course.getLevel().name() : null);
+            stmt.setString(8, course.getType() != null ? course.getType().name() : null);
 
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -34,11 +38,12 @@ public class CourseDAO {
         String sql = """
             SELECT
                 c.Id, c.Title, c.Price, c.Information, c.CreatedBy, c.Image,
-                c.CategoryID,
+                c.CategoryID, c.Level, c.Type,
                 cat.Name AS CategoryName, cat.Type AS CategoryType,
                 a.FullName
             FROM Course c
             JOIN Category cat ON c.CategoryID = cat.Id
+            LEFT JOIN Account a ON c.CreatedBy = a.Id
             """;
 
         try (Connection conn = DBConnect.getConnection();
@@ -51,6 +56,28 @@ public class CourseDAO {
                         rs.getString("CategoryName"),
                         rs.getInt("CategoryType")
                 );
+
+                // Convert string to enum values
+                Level level = null;
+                String levelStr = rs.getString("Level");
+                if (levelStr != null) {
+                    try {
+                        level = Level.valueOf(levelStr);
+                    } catch (IllegalArgumentException e) {
+                        // Handle invalid enum value
+                    }
+                }
+
+                Type type = null;
+                String typeStr = rs.getString("Type");
+                if (typeStr != null) {
+                    try {
+                        type = Type.valueOf(typeStr);
+                    } catch (IllegalArgumentException e) {
+                        // Handle invalid enum value
+                    }
+                }
+
                 list.add(new Course(
                         rs.getInt("Id"),
                         rs.getString("Title"),
@@ -58,7 +85,9 @@ public class CourseDAO {
                         rs.getString("Information"),
                         rs.getInt("CreatedBy"),
                         rs.getString("Image"),
-                        category
+                        category,
+                        level,
+                        type
                 ));
             }
         } catch (SQLException e) {
@@ -71,7 +100,7 @@ public class CourseDAO {
         String sql = """
             SELECT
                 c.Id, c.Title, c.Price, c.Information, c.CreatedBy, c.Image,
-                c.CategoryID,
+                c.CategoryID, c.Level, c.Type,
                 cat.Name AS CategoryName, cat.Type AS CategoryType
             FROM Course c
             JOIN Category cat ON c.CategoryID = cat.Id
@@ -88,6 +117,28 @@ public class CourseDAO {
                             rs.getString("CategoryName"),
                             rs.getInt("CategoryType")
                     );
+
+                    // Convert string to enum values
+                    Level level = null;
+                    String levelStr = rs.getString("Level");
+                    if (levelStr != null) {
+                        try {
+                            level = Level.valueOf(levelStr);
+                        } catch (IllegalArgumentException e) {
+                            // Handle invalid enum value
+                        }
+                    }
+
+                    Type type = null;
+                    String typeStr = rs.getString("Type");
+                    if (typeStr != null) {
+                        try {
+                            type = Type.valueOf(typeStr);
+                        } catch (IllegalArgumentException e) {
+                            // Handle invalid enum value
+                        }
+                    }
+
                     return new Course(
                             rs.getInt("Id"),
                             rs.getString("Title"),
@@ -95,7 +146,9 @@ public class CourseDAO {
                             rs.getString("Information"),
                             rs.getInt("CreatedBy"),
                             rs.getString("Image"),
-                            category
+                            category,
+                            level,
+                            type
                     );
                 }
             }
@@ -106,7 +159,7 @@ public class CourseDAO {
     }
 
     public void update(Course course) {
-        String sql = "UPDATE Course SET Title = ?, Price = ?, Information = ?, CreatedBy = ?, Image = ?, CategoryID = ? WHERE Id = ?";
+        String sql = "UPDATE Course SET Title = ?, Price = ?, Information = ?, CreatedBy = ?, Image = ?, CategoryID = ?, Level = ?, Type = ? WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -116,7 +169,9 @@ public class CourseDAO {
             stmt.setInt(4, course.getCreatedBy());
             stmt.setString(5, course.getImage());
             stmt.setInt(6, course.getCategory().getId());
-            stmt.setInt(7, course.getId());
+            stmt.setString(7, course.getLevel() != null ? course.getLevel().name() : null);
+            stmt.setString(8, course.getType() != null ? course.getType().name() : null);
+            stmt.setInt(9, course.getId());
 
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -157,12 +212,12 @@ public class CourseDAO {
             SELECT
                 c.Id, c.Title, c.Price, c.Information,
                 c.CreatedBy, a.FullName, c.Image,
-                c.CategoryID,
+                c.CategoryID, c.Level, c.Type,
                 cat.Name AS CategoryName, cat.Type AS CategoryType
             FROM Course c
             JOIN Account a    ON c.CreatedBy  = a.Id
             JOIN Category cat ON c.CategoryID = cat.Id
-            ORDER BY c.Id DESC 
+            ORDER BY c.Id DESC
             OFFSET ? ROWS FETCH NEXT 10 ROWS ONLY
             """;
 
@@ -177,6 +232,28 @@ public class CourseDAO {
                             rs.getString("CategoryName"),
                             rs.getInt("CategoryType")
                     );
+
+                    // Convert string to enum values
+                    Level level = null;
+                    String levelStr = rs.getString("Level");
+                    if (levelStr != null) {
+                        try {
+                            level = Level.valueOf(levelStr);
+                        } catch (IllegalArgumentException e) {
+                            // Handle invalid enum value
+                        }
+                    }
+
+                    Type type = null;
+                    String typeStr = rs.getString("Type");
+                    if (typeStr != null) {
+                        try {
+                            type = Type.valueOf(typeStr);
+                        } catch (IllegalArgumentException e) {
+                            // Handle invalid enum value
+                        }
+                    }
+
                     list.add(new CourseDto(
                             rs.getInt("Id"),
                             rs.getString("Title"),
@@ -185,7 +262,9 @@ public class CourseDAO {
                             rs.getInt("CreatedBy"),
                             rs.getString("FullName"),
                             rs.getString("Image"),
-                            category
+                            category,
+                            level,
+                            type
                     ));
                 }
             }
