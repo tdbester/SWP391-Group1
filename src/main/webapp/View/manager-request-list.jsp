@@ -39,31 +39,21 @@
 <head>
     <title>Quản lý đơn từ - Training Manager</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
 </head>
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    .main-content {
-        margin-left: 320px;
-        padding: 20px;
-        background-color: #fff;
-        min-height: 100vh;
-    }
-
     .container {
-        max-width: 1400px;
-        margin: auto;
+        display: flex;
+        min-height: calc(100vh - 120px); /* Trừ đi height của header/footer */
+        margin-top: 0;
+        padding-top: 0;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
         background-color: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     th, td {
@@ -112,6 +102,7 @@
         font-size: 12px;
     }
 
+
     .action-btn:hover {
         background-color: #0056b3;
         text-decoration: none;
@@ -128,14 +119,15 @@
 
 <body>
 <jsp:include page="header.jsp"/>
-<jsp:include page="training-manager-sidebar.jsp"/>
 
-<div class="main-content">
-    <div class="container">
+<div class="container">
+    <jsp:include page="training-manager-sidebar.jsp"/>
+    <div class="main-content">
         <h2>Quản lý đơn từ</h2>
 
+        <div class="filter-section">
             <form action="ProcessRequest" method="get" style="display: inline-block;">
-                <input type="hidden" name="action" value="list" />
+                <input type="hidden" name="action" value="list"/>
                 <label for="filterStatus">Lọc theo trạng thái:</label>
                 <select name="filterStatus" id="filterStatus" onchange="this.form.submit()">
                     <option value="">-- Tất cả --</option>
@@ -144,6 +136,7 @@
                     <option value="Từ chối" ${param.filterStatus == 'Từ chối' ? 'selected' : ''}>Từ chối</option>
                 </select>
             </form>
+        </div>
 
         <table>
             <thead>
@@ -186,19 +179,26 @@
                     }
             %>
             <tr>
-                <td><%= index++ %></td>
-                <td><%= r.getSenderName() != null ? r.getSenderName() : "" %></td>
-                <td class="<%= roleClass %>"><%= r.getSenderRole() != null ? r.getSenderRole() : "" %></td>
-                <td><%= r.getTypeName() != null ? r.getTypeName() : "" %></td>
+                <td><%= index++ %>
+                </td>
+                <td><%= r.getSenderName() != null ? r.getSenderName() : "" %>
+                </td>
+                <td class="<%= roleClass %>"><%= r.getSenderRole() != null ? r.getSenderRole() : "" %>
+                </td>
+                <td><%= r.getTypeName() != null ? r.getTypeName() : "" %>
+                </td>
                 <td style="white-space: pre-wrap; word-wrap: break-word; max-width: 300px;">
                     <%= r.getReason() != null ? r.getReason() : "" %>
                 </td>
-                <td><%= r.getCreatedAt() != null ? dateFormat.format(r.getCreatedAt()) : "" %></td>
-                <td class="<%= statusClass %>"><%= r.getStatus() != null ? r.getStatus() : "" %></td>
+                <td><%= r.getCreatedAt() != null ? dateFormat.format(r.getCreatedAt()) : "" %>
+                </td>
+                <td class="<%= statusClass %>"><%= r.getStatus() != null ? r.getStatus() : "" %>
+                </td>
                 <td>
                     <a href="ProcessRequest?id=<%= r.getId() %>" class="action-btn">Xem</a>
                     <% if ("Chờ xử lý".equals(r.getStatus())) { %>
-                    <a href="ProcessRequest?id=<%= r.getId() %>" class="action-btn" style="background-color: #28a745;">Xử lý</a>
+                    <a href="ProcessRequest?id=<%= r.getId() %>" class="action-btn" style="background-color: #28a745;">Xử
+                        lý</a>
                     <% } %>
                 </td>
             </tr>
@@ -213,4 +213,5 @@
 
 <jsp:include page="footer.jsp"/>
 </body>
+
 </html>

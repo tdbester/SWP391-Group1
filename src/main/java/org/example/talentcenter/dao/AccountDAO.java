@@ -2,6 +2,7 @@ package org.example.talentcenter.dao;
 
 import org.example.talentcenter.config.DBConnect;
 import org.example.talentcenter.model.Account;
+
 import java.sql.*;
 
 public class AccountDAO {
@@ -138,7 +139,7 @@ public class AccountDAO {
     public boolean updatePasswordByEmail(String email, String password) {
         String sql = "UPDATE Account SET Password = ? WHERE Email = ?";
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement st = conn.prepareStatement(sql)){
+             PreparedStatement st = conn.prepareStatement(sql)) {
             st.setString(1, password);
             st.setString(2, email);
             int rowsAffected = st.executeUpdate();
@@ -240,28 +241,63 @@ public class AccountDAO {
         }
     }
 
-    public boolean createStudentAccount(String password, String fullName, String email, String phone) {
+    public boolean createStudentAccount(String password, String name, String email, String phone) {
+        String sqlAccount = """
+        INSERT INTO Account (Password, Email, FullName, PhoneNumber, RoleId) 
+        VALUES (?, ?, ?, ?, 2)
+    """;
 
-        String sql = "INSERT INTO Account (Password, FullName, Email, PhoneNumber, Address, RoleId) VALUES (?, ?, ?, ?, ?, ?)";
+        String sqlStudent = """
+        INSERT INTO Student (AccountId, parentPhone,EnrollmentDate)
+        VALUES (?, ?, GETDATE())
+    """;
 
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.getConnection()) {
+            conn.setAutoCommit(false);
 
-            stmt.setString(1, password);
-            stmt.setString(2, fullName);
-            stmt.setString(3, email);
-            stmt.setString(4, phone);
-            stmt.setString(5, "");
-            stmt.setInt(6, 2);
+            try {
+                int accountId;
 
-            return stmt.executeUpdate() > 0;
+                try (PreparedStatement stmtAccount = conn.prepareStatement(sqlAccount, Statement.RETURN_GENERATED_KEYS)) {
+                    stmtAccount.setString(1, password);
+                    stmtAccount.setString(2, email);
+                    stmtAccount.setString(3, name);
+                    stmtAccount.setString(4, phone);
 
+                    int result = stmtAccount.executeUpdate();
+                    if (result == 0) {
+                        throw new SQLException("Creating account failed, no rows affected.");
+                    }
+
+                    try (ResultSet generatedKeys = stmtAccount.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            accountId = generatedKeys.getInt(1);
+                        } else {
+                            throw new SQLException("Creating account failed, no ID obtained.");
+                        }
+                    }
+                }
+
+                try (PreparedStatement stmtStudent = conn.prepareStatement(sqlStudent)) {
+                    stmtStudent.setInt(1, accountId);
+                    stmtStudent.setString(2, phone);
+                    stmtStudent.executeUpdate();
+                }
+
+                conn.commit();
+                return true;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                e.printStackTrace();
+                return false;
+            }
         } catch (SQLException e) {
-            System.out.println("Error creating student account: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
     }
+
     public boolean isUsernameExists(String email) {
         String sql = "SELECT COUNT(*) FROM Account WHERE Email = ?";
 

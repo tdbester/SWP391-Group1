@@ -29,7 +29,7 @@
         </a>
       </div>
       <div class="nav-section">
-        <a href="${pageContext.request.contextPath}/StudentAccountRequest?action=list"
+        <a href="${pageContext.request.contextPath}/CreateAccount"
            class="nav-item ${pageContext.request.requestURI.contains('account-request-list.jsp') ? 'active' : ''}"
            role="link"
            aria-current="${pageContext.request.requestURI.contains('account-request-list.jsp') ? 'page' : 'false'}">

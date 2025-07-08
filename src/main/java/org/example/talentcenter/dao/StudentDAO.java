@@ -1,6 +1,7 @@
 package org.example.talentcenter.dao;
 
 import org.example.talentcenter.config.DBConnect;
+import org.example.talentcenter.model.Account;
 import org.example.talentcenter.model.Student;
 
 import java.sql.*;
@@ -10,11 +11,9 @@ public class StudentDAO {
         Student student = null;
         String query = """
                     SELECT s.Id, a.FullName, s.parentPhone, a.PhoneNumber,
-                                     s.AccountId, s.EnrollmentDate, c.Name AS class_name
+                                     s.AccountId, s.EnrollmentDate
                               FROM Student s
                               JOIN Account a ON s.AccountId = a.id
-                              JOIN Student_Class sc ON s.id = sc.StudentId
-                              JOIN ClassRooms c ON sc.ClassRoomId = c.id
                               WHERE s.AccountId = ?
                 """;
 
@@ -29,7 +28,7 @@ public class StudentDAO {
                 student.setId(rs.getInt("Id"));
                 student.setName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("parentPhone"));
-                student.setAccountId(rs.getString("AccountId"));
+                student.setAccountId(rs.getInt("AccountId"));
                 student.setEnrollmentDate(rs.getDate("EnrollmentDate"));
                 student.setClassName(rs.getString("class_name"));
                 student.setPhoneNumber(rs.getString("PhoneNumber"));
@@ -41,6 +40,7 @@ public class StudentDAO {
 
         return student;
     }
+
     public Student getStudentByStudentId(int studentId) {
         Student student = new Student();
         String query = """
@@ -58,7 +58,7 @@ public class StudentDAO {
                 student.setId(rs.getInt("Id"));
                 student.setName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("parentPhone"));
-                student.setAccountId(rs.getString("AccountId"));
+                student.setAccountId(rs.getInt("AccountId"));
                 student.setEnrollmentDate(rs.getDate("EnrollmentDate"));
                 student.setClassName(rs.getString("class_name"));
                 student.setPhoneNumber(rs.getString("PhoneNumber"));
@@ -69,4 +69,5 @@ public class StudentDAO {
         }
         return student;
     }
+
 }

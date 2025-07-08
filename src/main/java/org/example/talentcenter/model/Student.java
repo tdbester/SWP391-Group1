@@ -1,98 +1,31 @@
 package org.example.talentcenter.model;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 public class Student {
     private int id;
-    private String fullName;
+    private String name;
     private String parentPhone;
     private String motherPhone;
     private int accountId;
-    private LocalDate enrollmentDate;
+    private Date enrollmentDate;
+    private int classRoomId;
+    private String className;
+    private String phoneNumber;
 
-    // Thống kê điểm danh
-    private int presentCount;
-    private int absentCount;
-
-    // Thuộc tính để xử lý điểm danh
-    private Integer attendanceId;
-    private String attendanceStatus;
-    private String attendanceNote;
-    private boolean hasAttendance;
-
-    public Integer getAttendanceId() {
-        return attendanceId;
-    }
-
-    public void setAttendanceId(Integer attendanceId) {
-        this.attendanceId = attendanceId;
-    }
-
-    public boolean isHasAttendance() {
-        return hasAttendance;
-    }
-
-    public void setHasAttendance(boolean hasAttendance) {
-        this.hasAttendance = hasAttendance;
-    }
-
-    public String getAttendanceNote() {
-        return attendanceNote;
-    }
-
-    public void setAttendanceNote(String attendanceNote) {
-        this.attendanceNote = attendanceNote;
-    }
-
-    public String getAttendanceStatus() {
-        return attendanceStatus;
-    }
-
-    public void setAttendanceStatus(String attendanceStatus) {
-        this.attendanceStatus = attendanceStatus;
-    }
-
-    public Student() {}
-
-    public Student(int id,String fullName, LocalDate enrollmentDate, int accountId, String motherPhone, String parentPhone) {
+    public Student(int id, String name, String parentPhone, String motherPhone, int accountId, Date enrollmentDate, int classRoomId, String classRoomName, String phoneNumber) {
         this.id = id;
-        this.fullName = fullName;
-        this.enrollmentDate = enrollmentDate;
-        this.accountId = accountId;
-        this.motherPhone = motherPhone;
+        this.name = name;
         this.parentPhone = parentPhone;
-    }
-
-    public LocalDate getEnrollmentDate() {
-        return enrollmentDate;
-    }
-
-    public void setEnrollmentDate(LocalDate enrollmentDate) {
-        this.enrollmentDate = enrollmentDate;
-    }
-
-    public int getAccountId() {
-        return accountId;
-    }
-
-    public void setAccountId(int accountId) {
-        this.accountId = accountId;
-    }
-
-    public String getMotherPhone() {
-        return motherPhone;
-    }
-
-    public void setMotherPhone(String motherPhone) {
         this.motherPhone = motherPhone;
+        this.accountId = accountId;
+        this.enrollmentDate = enrollmentDate;
+        this.classRoomId = classRoomId;
+        this.className = classRoomName;
+        this.phoneNumber = phoneNumber;
     }
 
-    public String getParentPhone() {
-        return parentPhone;
-    }
-
-    public void setParentPhone(String parentPhone) {
-        this.parentPhone = parentPhone;
+    public Student() {
     }
 
     public int getId() {
@@ -103,41 +36,68 @@ public class Student {
         this.id = id;
     }
 
-
-    public int getPresentCount() {
-        return presentCount;
+    public String getName() {
+        return name;
     }
 
-    public void setPresentCount(int presentCount) {
-        this.presentCount = presentCount;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public int getAbsentCount() {
-        return absentCount;
+    public String getParentPhone() {
+        return parentPhone;
     }
 
-    public void setAbsentCount(int absentCount) {
-        this.absentCount = absentCount;
-    }
-    public String getFullName() {
-        return fullName;
-    }
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setParentPhone(String parentPhone) {
+        this.parentPhone = parentPhone;
     }
 
-
-    @Override
-    public String toString() {
-        return "Student{" +
-                "id=" + id +
-                ", fullName='" + fullName + '\'' +
-                ", parentPhone='" + parentPhone + '\'' +
-                ", motherPhone='" + motherPhone + '\'' +
-                ", accountId=" + accountId +
-                ", enrollmentDate=" + enrollmentDate +
-                ", presentCount=" + presentCount +
-                ", absentCount=" + absentCount +
-                '}';
+    public String getMotherPhone() {
+        return motherPhone;
     }
+
+    public void setMotherPhone(String motherPhone) {
+        this.motherPhone = motherPhone;
+    }
+
+    public int getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(int accountId) {
+        this.accountId = accountId;
+    }
+
+    public Date getEnrollmentDate() {
+        return enrollmentDate;
+    }
+
+    public void setEnrollmentDate(Date enrollmentDate) {
+        this.enrollmentDate = enrollmentDate;
+    }
+
+    public int getClassRoomId() {
+        return classRoomId;
+    }
+
+    public void setClassRoomId(int classRoomId) {
+        this.classRoomId = classRoomId;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
 }
