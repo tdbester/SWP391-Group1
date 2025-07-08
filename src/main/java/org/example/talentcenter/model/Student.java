@@ -7,13 +7,13 @@ public class Student {
     private String name;
     private String parentPhone;
     private String motherPhone;
-    private String accountId;
+    private int accountId;
     private Date enrollmentDate;
     private int classRoomId;
     private String className;
     private String phoneNumber;
 
-    public Student(int id, String name, String parentPhone, String motherPhone, String accountId, Date enrollmentDate, int classRoomId, String classRoomName, String phoneNumber) {
+    public Student(int id, String name, String parentPhone, String motherPhone, int accountId, Date enrollmentDate, int classRoomId, String classRoomName, String phoneNumber) {
         this.id = id;
         this.name = name;
         this.parentPhone = parentPhone;
@@ -60,11 +60,11 @@ public class Student {
         this.motherPhone = motherPhone;
     }
 
-    public String getAccountId() {
+    public int getAccountId() {
         return accountId;
     }
 
-    public void setAccountId(String accountId) {
+    public void setAccountId(int accountId) {
         this.accountId = accountId;
     }
 

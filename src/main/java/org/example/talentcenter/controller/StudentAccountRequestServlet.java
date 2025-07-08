@@ -59,7 +59,12 @@ public class StudentAccountRequestServlet extends HttpServlet {
                 }
             }
             request.setAttribute("message", "Đã gửi yêu cầu cho " + successCount + " học sinh.");
+        }else {
+            request.setAttribute("message", "Vui lòng chọn ít nhất một học sinh để gửi yêu cầu.");
         }
+
+        ConsultationDAO consultationDAO = new ConsultationDAO();
+        request.setAttribute("agreedStudents", consultationDAO.getAgreedConsultations());
         request.getRequestDispatcher("View/student-account-request.jsp").forward(request, response);
     }
 

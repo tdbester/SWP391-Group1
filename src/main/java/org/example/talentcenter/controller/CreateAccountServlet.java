@@ -47,7 +47,7 @@ public class CreateAccountServlet extends HttpServlet {
             String studentPhone = parts.length > 2 ? parts[2] : "";
 
             if (accountDAO.isUsernameExists(studentEmail)) {
-                System.out.println("Email exists, redirecting to error page.");
+                System.out.println("Email đã tồn tại");
                 response.sendRedirect("CreateAccount?error=email_exists");
                 return;
             }
@@ -62,7 +62,6 @@ public class CreateAccountServlet extends HttpServlet {
             );
 
             if (accountCreated) {
-                // Gửi email thông báo tài khoản
                 boolean emailSent = service.sendNewAccountEmail(
                         studentEmail,
                         studentEmail,

@@ -28,15 +28,18 @@ import java.util.Map;
 
 public class RequestDAO {
     public boolean sendCreateAccountRequest(int senderId, String name, String email, String phone) {
-        String formattedReason = name + "|" + email + "|" + phone;
-        String sql = "INSERT INTO Request (Type, SenderId, Reason, Status) VALUES (?, ?, ?, ?)";
+        String sql = """
+                    INSERT INTO Request (TypeId, SenderId, Reason, Status, CreatedAt) 
+                    VALUES (6, ?, ?, ?, GETDATE())
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, "CreateStudentAccount");
-            stmt.setInt(2, senderId);
-            stmt.setString(3, formattedReason);
-            stmt.setString(4, "Chờ xử lý");
+
+            stmt.setInt(1, senderId);
+            stmt.setString(2, name + "|" + email + "|" + phone);
+            stmt.setString(3, "Chờ xử lý");
+
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -44,9 +47,10 @@ public class RequestDAO {
         }
     }
 
+
     public List<Map<String, String>> getAllAccountRequests() {
         List<Map<String, String>> requests = new ArrayList<>();
-        String sql = "SELECT r.Id, r.Reason, u.FullName AS SenderName FROM Request r JOIN [Account] u ON r.SenderId = u.Id WHERE r.Type = 'CreateStudentAccount' AND r.Status = N'Chờ xử lý'";
+        String sql = "SELECT r.Id, r.Reason, a.FullName AS SenderName FROM Request r JOIN Account a ON r.SenderId = a.Id WHERE r.TypeID = 6 AND r.Status = N'Chờ xử lý'";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -79,7 +83,7 @@ public class RequestDAO {
     public Request getRequestById(int requestId) {
         String sql = "SELECT r.Id, r.Reason, r.SenderId " +
                 "FROM Request r " +
-                "WHERE r.Id = ? AND r.Type = 'CreateStudentAccount' AND r.Status = N'Chờ xử lý'";
+                "WHERE r.Id = ? AND r.TypeID = 6 AND r.Status = N'Chờ xử lý'";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -171,15 +175,15 @@ public class RequestDAO {
 
     public Request getRequestDetailById(int requestId) {
         String sql = """
-        SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, 
-               rt.TypeName, acc.FullName AS SenderName, acc.Email AS SenderEmail, 
-               acc.PhoneNumber AS SenderPhone, role.Name AS SenderRole
-        FROM Request r
-        JOIN RequestType rt ON r.TypeID = rt.TypeID
-        JOIN Account acc ON r.SenderId = acc.Id
-        JOIN Role role ON acc.RoleId = role.Id
-        WHERE r.Id = ?
-    """;
+                    SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, 
+                           rt.TypeName, acc.FullName AS SenderName, acc.Email AS SenderEmail, 
+                           acc.PhoneNumber AS SenderPhone, role.Name AS SenderRole
+                    FROM Request r
+                    JOIN RequestType rt ON r.TypeID = rt.TypeID
+                    JOIN Account acc ON r.SenderId = acc.Id
+                    JOIN Role role ON acc.RoleId = role.Id
+                    WHERE r.Id = ?
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
