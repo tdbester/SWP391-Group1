@@ -112,16 +112,20 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("statusFilter", statusFilter);
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
         } else if ("dashboard".equals(action)) {
-            ArrayList<Notification> latestNotifications = notificationDAO.getLatestNotificationsForSale(5);
+            ArrayList<Notification> latestNotifications = notificationDAO.getLatestNotificationsForSale(3);
             request.setAttribute("latestNotifications", latestNotifications);
             int unreadCount = notificationDAO.getUnreadCountForSale();
             request.setAttribute("unreadCount", unreadCount);
             request.getRequestDispatcher("View/sale-dashboard.jsp").forward(request, response);
             return;
+        }else if ("all".equals(action)) {
+            ArrayList<Notification> allNotifications = notificationDAO.getAllNotifications();
+            request.setAttribute("allNotifications", allNotifications);
+            request.getRequestDispatcher("View/sale-notification-list.jsp").forward(request, response);
+            return;
         } else {
             response.sendRedirect("Consultation?action=list");
         }
-
 
     }
 

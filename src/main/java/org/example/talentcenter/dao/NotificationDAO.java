@@ -26,7 +26,7 @@ public class NotificationDAO {
             stmt.setObject(6, notification.getRelatedEntityId());
             stmt.setString(7, notification.getRelatedEntityType());
             stmt.setTimestamp(8, notification.getCreatedAt());
-            stmt.setBoolean(9, false);
+            stmt.setBoolean(9, notification.isRead());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -39,7 +39,7 @@ public class NotificationDAO {
         ArrayList<Notification> notifications = new ArrayList<>();
         String sql = """
             SELECT TOP (?) * FROM Notification 
-            WHERE RecipientRole = 'Sale' OR RecipientRole = 'ALL'
+            WHERE RecipientRole = 'Sale'
             ORDER BY CreatedAt DESC
         """;
 
@@ -98,5 +98,38 @@ public class NotificationDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+
+    public ArrayList<Notification> getAllNotifications() {
+        ArrayList<Notification> notifications = new ArrayList<>();
+        String sql = """
+                    SELECT * FROM Notification
+                                           WHERE RecipientRole = 'Sale'
+                                           ORDER BY CreatedAt DESC;
+                """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Notification notification = new Notification();
+                notification.setId(rs.getInt("Id"));
+                notification.setTitle(rs.getString("Title"));
+                notification.setContent(rs.getString("Content"));
+                notification.setSenderName(rs.getString("SenderName"));
+                notification.setRecipientRole(rs.getString("RecipientRole"));
+                notification.setNotificationType(rs.getString("NotificationType"));
+                notification.setRelatedEntityId(rs.getObject("RelatedEntityId", Integer.class));
+                notification.setRelatedEntityType(rs.getString("RelatedEntityType"));
+                notification.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                notification.setRead(rs.getBoolean("IsRead"));
+                notifications.add(notification);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return notifications;
     }
 }

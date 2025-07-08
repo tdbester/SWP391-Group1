@@ -19,7 +19,7 @@ public class NotificationService {
         notification.setRelatedEntityId(consultationId);
         notification.setRelatedEntityType("Consultation");
         notification.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-
+        notification.setRead(false);
         notificationDAO.createNotification(notification);
         System.out.println("Notification created for new consultation: " + customerName);
     }
