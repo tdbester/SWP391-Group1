@@ -533,12 +533,12 @@
     // Toggle view options
     document.querySelectorAll('.view-option').forEach(option => {
         option.addEventListener('click', function() {
-            document.querySelectorAll('.view-option').forEach(opt => opt.classList.remove('active'));
-            this.classList.add('active');
+            document.querySelectorAll('.view-option').forEach(opt => opt.classroomList.remove('active'));
+            this.classroomList.add('active');
 
             // Toggle between grid and list view
             const grid = document.querySelector('.attendance-grid');
-            if (this.querySelector('i').classList.contains('fa-list')) {
+            if (this.querySelector('i').classroomList.contains('fa-list')) {
                 grid.style.gridTemplateColumns = '1fr';
             } else {
                 grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';

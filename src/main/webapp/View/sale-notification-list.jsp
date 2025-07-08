@@ -230,7 +230,7 @@
     <div class="main-content">
         <div class="notification-container">
             <h1>📋 Lịch sử thông báo</h1><br>
-            <a href="Consultation?action=dashboard" class="back-link">
+            <a href="${pageContext.request.contextPath}/SaleDashboard" class="back-link">
                 <i class="fas fa-arrow-left"></i> Quay lại Dashboard
             </a>
         </div>

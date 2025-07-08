@@ -10,13 +10,12 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @WebServlet(name = "StudentClassServlet", value = "/StudentClass")
 public class StudentClassServlet extends HttpServlet {
     private StudentDAO studentDAO = new StudentDAO();
-    private StudentClassDAO studentClassDAO = new StudentClassDAO();
+    private ClassroomDAO classroomDAO = new ClassroomDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -34,7 +33,7 @@ public class StudentClassServlet extends HttpServlet {
             String slotIdParam = request.getParameter("slotId");
             LocalDate selectedDate = LocalDate.parse(dateParam);
             int slotId = Integer.parseInt(slotIdParam);
-            List<StudentSchedule> classDetails = studentClassDAO.getClassDetail(studentId, slotId, selectedDate);
+            List<StudentSchedule> classDetails = classroomDAO.getClassDetail(studentId, slotId, selectedDate);
 
             DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             String formattedDate = selectedDate.format(displayFormatter);

@@ -17,7 +17,7 @@
 
 package org.example.talentcenter.controller;
 
-import org.example.talentcenter.dao.StudentClassDAO;
+import org.example.talentcenter.dao.ClassroomDAO;
 import org.example.talentcenter.dao.StudentDAO;
 import org.example.talentcenter.dao.RequestDAO;
 import org.example.talentcenter.model.*;
@@ -28,6 +28,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.example.talentcenter.model.Classroom;
 import org.example.talentcenter.model.Student;
 
 import java.io.IOException;
@@ -57,13 +58,13 @@ public class StudentRequestServlet extends HttpServlet {
             request.setAttribute("requestList", requestList);
             request.getRequestDispatcher("/View/student-request-list.jsp").forward(request, response);
         } else {
-            StudentClassDAO classDAO = new StudentClassDAO();
+            ClassroomDAO classroomDAO = new ClassroomDAO();
             StudentDAO studentDAO = new StudentDAO();
             Student student = studentDAO.getStudentById(accountId);
             int studentId = student.getId();
-            ArrayList<StudentClass> classList = classDAO.getAllStudentClassByStudentId(studentId);
+            ArrayList<Classroom> classroomList = classroomDAO.getAllStudentClassByStudentId(studentId);
             request.setAttribute("student", student);
-            request.setAttribute("classList", classList);
+            request.setAttribute("classList", classroomList);
             request.setAttribute("studentName", account.getFullName());
             request.setAttribute("phoneNumber", account.getPhoneNumber());
             request.getRequestDispatcher("/View/student-request.jsp").forward(request, response);
