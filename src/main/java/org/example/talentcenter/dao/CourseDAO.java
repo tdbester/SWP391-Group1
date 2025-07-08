@@ -38,7 +38,6 @@ public class CourseDAO {
                 cat.Name AS CategoryName, cat.Type AS CategoryType,
                 a.FullName
             FROM Course c
-            JOIN Account a    ON c.CreatedBy  = a.Id
             JOIN Category cat ON c.CategoryID = cat.Id
             """;
 
@@ -164,13 +163,13 @@ public class CourseDAO {
             JOIN Account a    ON c.CreatedBy  = a.Id
             JOIN Category cat ON c.CategoryID = cat.Id
             ORDER BY c.Id DESC 
-            OFFSET ? ROWS FETCH NEXT 5 ROWS ONLY
+            OFFSET ? ROWS FETCH NEXT 10 ROWS ONLY
             """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, (index - 1) * 5);
+            stmt.setInt(1, (index - 1) * 10);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Category category = new Category(

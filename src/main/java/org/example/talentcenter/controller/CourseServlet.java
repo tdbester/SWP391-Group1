@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
+import java.text.DecimalFormat;
 
 import static org.example.talentcenter.utilities.Const.TYPE_COURSE;
 
@@ -106,7 +107,7 @@ public class CourseServlet extends HttpServlet {
                 : filtered;
 
         int total   = courseDAO.getTotalCourse();
-        int endPage = (int)Math.ceil((double) total / 5);
+        int endPage = (int)Math.ceil((double) total / 10);
 
         req.setAttribute("courseList", categoryFiltered);
         req.setAttribute("endP",        endPage);
@@ -174,6 +175,7 @@ public class CourseServlet extends HttpServlet {
             showNewCourseForm(req, resp);
             return;
         }
+
 
 
         String imageUrl;

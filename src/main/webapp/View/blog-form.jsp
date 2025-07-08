@@ -64,7 +64,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Category</label>
+                    <label class="form-label">Thể loại</label>
                     <select name="category" class="form-select" required>
                         <option value="">-- Chọn loại --</option>
                         <c:forEach var="cat" items="${categories}">
@@ -109,12 +109,14 @@
     const toolbarOptions = [
         [{ header: [1, 2, false] }],
         ['bold','italic','underline'],
-        ['link'],
+        ['link', 'image'],
         [{ list: 'ordered'}, { list: 'bullet' }],
         ['clean']
     ];
     const editorDesc = new Quill('#editor-description', { theme: 'snow', modules: { toolbar: toolbarOptions } });
-    const editorCont = new Quill('#editor-content', { theme: 'snow', modules: { toolbar: toolbarOptions } });
+    const editorCont = new Quill('#editor-content', { theme: 'snow',
+        modules: {
+        toolbar: toolbarOptions } });
 
     // Load existing content
     editorDesc.root.innerHTML = `<c:out value='${blog.description}' default=''/>`;
