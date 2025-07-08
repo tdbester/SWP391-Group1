@@ -27,12 +27,12 @@ public class StudentDAO {
             if (rs.next()) {
                 student = new Student();
                 student.setId(rs.getInt("Id"));
-                student.setName(rs.getString("FullName"));
+//                student.setName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("parentPhone"));
-                student.setAccountId(rs.getString("AccountId"));
-                student.setEnrollmentDate(rs.getDate("EnrollmentDate"));
-                student.setClassName(rs.getString("class_name"));
-                student.setPhoneNumber(rs.getString("PhoneNumber"));
+//                student.setAccountId(rs.getString("AccountId"));
+//                student.setEnrollmentDate(rs.getDate("EnrollmentDate"));
+//                student.setClassName(rs.getString("class_name"));
+//                student.setPhoneNumber(rs.getString("PhoneNumber"));
             }
 
         } catch (SQLException e) {
@@ -56,12 +56,12 @@ public class StudentDAO {
             if (rs.next()) {
                 student = new Student();
                 student.setId(rs.getInt("Id"));
-                student.setName(rs.getString("FullName"));
-                student.setParentPhone(rs.getString("parentPhone"));
-                student.setAccountId(rs.getString("AccountId"));
-                student.setEnrollmentDate(rs.getDate("EnrollmentDate"));
-                student.setClassName(rs.getString("class_name"));
-                student.setPhoneNumber(rs.getString("PhoneNumber"));
+//                student.setName(rs.getString("FullName"));
+//                student.setParentPhone(rs.getString("parentPhone"));
+//                student.setAccountId(rs.getString("AccountId"));
+//                student.setEnrollmentDate(rs.getDate("EnrollmentDate"));
+//                student.setClassName(rs.getString("class_name"));
+//                student.setPhoneNumber(rs.getString("PhoneNumber"));
             }
 
         } catch (SQLException e) {

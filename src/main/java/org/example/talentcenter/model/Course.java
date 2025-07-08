@@ -9,6 +9,7 @@ public class Course {
     private String image;
     private Category category;
 
+
     public Course() {
     }
 

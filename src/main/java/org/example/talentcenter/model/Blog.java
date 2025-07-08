@@ -13,6 +13,7 @@ public class Blog {
     private Date createdAt;
 
 
+
     public Blog(Integer id, String title, String content, String image, Integer authorId, Date createdAt, String description, Integer category) {
         this.id = id;
         this.title = title;

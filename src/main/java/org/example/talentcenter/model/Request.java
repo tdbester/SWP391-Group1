@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Request {
     private int id;
-    private String typeName;
+    private String type;
     private int senderID;
     private String reason;
     private String status;
@@ -15,12 +15,18 @@ public class Request {
     private String courseName;
     private String parentPhone;
     private String phoneNumber;
+    private String typeName;
+    private String description;
+    private int typeId;
+    private String senderName;
+    private String senderRole;
 
     public Request() {
     }
 
-    public Request(int id, int senderID, String reason, String status, String response, Date createdAt, Date responseAt, int processedBy) {
+    public Request(int id, String type, int senderID, String reason, String status, String response, Date createdAt, Date responseAt, int processedBy, String courseName, String parentPhone, String phoneNumber, String typeName, String description, int typeId) {
         this.id = id;
+        this.type = type;
         this.senderID = senderID;
         this.reason = reason;
         this.status = status;
@@ -28,6 +34,12 @@ public class Request {
         this.createdAt = createdAt;
         this.responseAt = responseAt;
         this.processedBy = processedBy;
+        this.courseName = courseName;
+        this.parentPhone = parentPhone;
+        this.phoneNumber = phoneNumber;
+        this.typeName = typeName;
+        this.description = description;
+        this.typeId = typeId;
     }
 
     public Request(int senderID, String reason, String courseName, String parentPhone, Date createdAt) {
@@ -51,6 +63,14 @@ public class Request {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public int getSenderID() {
@@ -129,14 +149,47 @@ public class Request {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
     public String getTypeName() {
         return typeName;
     }
 
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(int typeId) {
+        this.typeId = typeId;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public String getSenderRole() {
+        return senderRole;
+    }
+
+    public void setSenderRole(String senderRole) {
+        this.senderRole = senderRole;
     }
 }
