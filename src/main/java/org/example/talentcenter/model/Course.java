@@ -6,6 +6,7 @@ public class Course {
     private double price;
     private String information;
     private int createdBy;
+    private int classCount;
 
     public Course() {
     }
@@ -16,6 +17,15 @@ public class Course {
         this.price = price;
         this.information = information;
         this.createdBy = createdBy;
+    }
+
+    public Course(int id, String title, double price, String information, int createdBy, int classCount) {
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.information = information;
+        this.createdBy = createdBy;
+        this.classCount = classCount;
     }
 
     public int getId() {
@@ -58,4 +68,11 @@ public class Course {
         this.createdBy = createdBy;
     }
 
+    public int getClassCount() {
+        return classCount;
+    }
+
+    public void setClassCount(int classCount) {
+        this.classCount = classCount;
+    }
 }

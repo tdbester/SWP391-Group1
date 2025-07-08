@@ -33,7 +33,7 @@
         </div>
         <nav>
             <div class="nav-section">
-                <a href="Consultation?action=dashboard" class="nav-item">
+                <a href="${pageContext.request.contextPath}/SaleDashboard" class="nav-item">
                     <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
                     <span>Dashboard</span>
                 </a>
@@ -76,12 +76,12 @@
 <script>
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            this.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classroomList.remove('active'));
+            this.classroomList.add('active');
         });
     });
 
     function toggleSidebar() {
-        document.querySelector('.sidebar').classList.toggle('active');
+        document.querySelector('.sidebar').classroomList.toggle('active');
     }
 </script>

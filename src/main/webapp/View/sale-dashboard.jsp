@@ -127,7 +127,7 @@
                 </ul>
 
                 <div style="text-align: center; margin-top: 15px;">
-                    <a href="${pageContext.request.contextPath}/Consultation?action=all"
+                    <a href="${pageContext.request.contextPath}/SaleDashboard?action=notifications"
                        style="color: #007bff; text-decoration: none; font-weight: bold; font-size: 14px;">
                         <i class="fas fa-list"></i> Xem tất cả thông báo
                     </a>
@@ -139,21 +139,61 @@
                 <table class="sale-course-table">
                     <thead>
                     <tr>
-                        <th>Course</th>
-                        <th>Start Date</th>
-                        <th>Slots Left</th>
-                        <th>Interested Leads</th>
-                        <th>Action</th>
+                        <th>Khoá học</th>
+                        <th>Giá</th>
+                        <th>Số lượng lớp</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td>Piano for Beginners</td>
-                        <td>10/07/2025</td>
-                        <td>8</td>
-                        <td>12</td>
-                        <td><a href="#" class="sale-btn-view">View</a></td>
-                    </tr>
+                    <c:choose>
+                        <c:when test="${empty latestCoursesWithClass}">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #666;">
+                                    Chưa có khóa học nào
+                                </td>
+                            </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach var="course" items="${latestCoursesWithClass}">
+                                <tr>
+                                    <td>
+                                        <strong>${course.title}</strong>
+                                        <c:if test="${not empty course.information}">
+                                            <br><small style="color: #666;">${course.information}</small>
+                                        </c:if>
+                                    </td>
+                                    <td>
+                                <span style="font-weight: bold; color: #007bff;">
+                                    <fmt:formatNumber value="${course.price}" type="currency" currencySymbol="₫"/>
+                                </span>
+                                    </td>
+                                    <td>
+                                <span class="class-count-badge"
+                                      style="background: ${course.classCount > 0 ? '#28a745' : '#dc3545'};
+                                              color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
+                                    ${course.classCount} lớp
+                                </span>
+                                    </td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${course.classCount > 0}">
+                                                <a href="SaleDashboard?action=course&courseId=${course.id}"
+                                                   class="btn-consult"
+                                                   style="background: #007bff; color: white; padding: 6px 12px;
+                                                  text-decoration: none; border-radius: 4px; font-size: 12px;">
+                                                    <i class="fas fa-comments"></i> Chi tiết
+                                                </a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span style="color: #999; font-size: 12px;">Chưa có lớp</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
                     </tbody>
                 </table>
             </div>
