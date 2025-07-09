@@ -7,6 +7,7 @@ import org.example.talentcenter.model.Request;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import org.example.talentcenter.service.NotificationService;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -37,7 +38,6 @@ public class ProcessRequestServlet extends HttpServlet {
                 request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
 
             } else {
-                // Hiển thị chi tiết đơn để xử lý
                 String requestIdParam = request.getParameter("id");
                 if (requestIdParam == null || requestIdParam.trim().isEmpty()) {
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu ID đơn");
@@ -98,10 +98,32 @@ public class ProcessRequestServlet extends HttpServlet {
                 request.getRequestDispatcher("View/error.jsp").forward(request, response);
                 return;
             }
+            // lấy thông tin đơn
+            Request requestDetail = requestDAO.getRequestDetailById(requestId);
+            if (requestDetail == null) {
+                request.setAttribute("errorMessage", "Không tìm thấy đơn cần xử lý.");
+                request.getRequestDispatcher("View/error.jsp").forward(request, response);
+                return;
+            }
 
             boolean success = requestDAO.processRequest(requestId, status, managerNote, new Timestamp(new Date().getTime()));
 
             if (success) {
+                // gửi thông báo cho hs nếu xử lý thành công
+                try {
+                    NotificationService.notifyRequestProcessed(
+                            requestId,
+                            requestDetail.getSenderName(),
+                            requestDetail.getTypeName(),
+                            status,
+                            managerNote,
+                            requestDetail.getSenderID()
+                    );
+                    System.out.println("Notification sent successfully for request " + requestId);
+                } catch (Exception e) {
+                    System.err.println("Failed to send notification for request " + requestId + ": " + e.getMessage());
+                    e.printStackTrace();
+                }
                 response.sendRedirect("ProcessRequest?action=list&success=1");
             } else {
                 request.setAttribute("errorMessage", "Không thể cập nhật trạng thái đơn.");

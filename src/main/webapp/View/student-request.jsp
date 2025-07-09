@@ -302,7 +302,7 @@
                             <label class="form-label">Lớp hiện tại <span class="required">*</span></label>
                             <select class="form-control" name="currentClass" required>
                                 <option value="">-- Chọn lớp hiện tại --</option>
-                                <c:forEach var="classRoom" items="${classroomList}">
+                                <c:forEach var="classRoom" items="${classList}">
                                     <option value="${classRoom.classroomName}" data-class-id="${classRoom.classroomID}">
                                             ${classRoom.classroomName}
                                     </option>
