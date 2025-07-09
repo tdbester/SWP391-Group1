@@ -29,15 +29,15 @@ public class NotificationService {
 
         if ("Đã duyệt".equals(status)) {
             notification.setTitle("Đơn của bạn đã được duyệt");
-            notification.setContent(String.format("Đơn %s của bạn đã được duyệt. %s",
+            notification.setContent(String.format("%s của bạn đã được duyệt. %s",
                     requestType, response != null ? "Phản hồi: " + response : ""));
         } else if ("Từ chối".equals(status)) {
             notification.setTitle("Đơn của bạn bị từ chối");
-            notification.setContent(String.format("Đơn %s của bạn đã bị từ chối. %s",
+            notification.setContent(String.format("%s của bạn đã bị từ chối. %s",
                     requestType, response != null ? "Lý do: " + response : ""));
         } else {
             notification.setTitle("Cập nhật trạng thái đơn");
-            notification.setContent(String.format("Đơn %s của bạn đã được cập nhật trạng thái: %s",
+            notification.setContent(String.format("%s của bạn đã được cập nhật trạng thái: %s",
                     requestType, status));
         }
 

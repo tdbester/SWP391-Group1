@@ -1,11 +1,10 @@
 <%--
   Created by IntelliJ IDEA.
   User: admin
-  Date: 6/9/2025
+  Date: 7/9/2025
   Time: 12:09 PM
   To change this template use File | Settings | File Templates.
 --%>
-
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -234,16 +233,16 @@
 <body>
 <jsp:include page="header.jsp"/>
 <div class="container">
-    <jsp:include page="sale-sidebar.jsp"/>
+    <jsp:include page="student-sidebar.jsp"/>
     <div class="main-content">
         <div class="notification-container">
             <h1>📋 Lịch sử thông báo</h1><br>
-            <a href="${pageContext.request.contextPath}/SaleDashboard" class="back-link">
+            <a href="${pageContext.request.contextPath}/StudentDashboard" class="back-link">
                 <i class="fas fa-arrow-left"></i> Quay lại Dashboard
             </a>
         </div>
 
-        <div class="sale-notifications">
+        <div class="student-notifications">
             <div class="notification-header">
                 <h2 class="notification-title">🔔 Tất cả thông báo</h2>
                 <c:if test="${not empty allNotifications}">
@@ -312,7 +311,7 @@
                                 <!-- Actions -->
                                 <div class="notification-actions">
                                     <c:if test="${not empty notification.relatedEntityId}">
-                                        <a href="Consultation?action=edit&id=${notification.relatedEntityId}"
+                                        <a href="StudentApplication?action=list&id=${notification.relatedEntityId}"
                                            class="btn-view">
                                             <i class="fas fa-eye"></i> Xem
                                         </a>
@@ -342,27 +341,6 @@
         </div>
     </div>
 </div>
-
-<script>
-    function markAsRead(notificationId) {
-        fetch('${pageContext.request.contextPath}/Consultation', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'markReadId=' + notificationId
-        })
-            .then(response => {
-                if (response.ok) {
-                    location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    }
-</script>
-
 <jsp:include page="footer.jsp"/>
 </body>
 </html>

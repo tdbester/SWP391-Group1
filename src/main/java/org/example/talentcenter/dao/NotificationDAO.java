@@ -75,7 +75,6 @@ public class NotificationDAO {
         return notifications;
     }
 
-    // ✅ Method đếm chung
     public int getUnreadCountForRole(String role, Integer accountId) {
         String sql = """
                     SELECT COUNT(*) FROM Notification 
@@ -142,33 +141,18 @@ public class NotificationDAO {
         return notifications;
     }
 
-    public boolean markAllAsReadForRole(String role, Integer accountId) {
-        String sql = """
-                    UPDATE Notification SET IsRead = 1 
-                    WHERE ((RecipientRole = ? AND RecipientAccountId IS NULL) 
-                        OR (RecipientRole = ? AND RecipientAccountId = ?)
-                        OR (RecipientRole = 'ALL'))
-                      AND IsRead = 0
-                """;
-
+    public boolean markAsRead(int notificationId) {
+        String sql = "UPDATE Notification SET IsRead = 1 WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, role);
-            stmt.setString(2, role);
-
-            if (accountId != null) {
-                stmt.setInt(3, accountId);
-            } else {
-                stmt.setNull(3, java.sql.Types.INTEGER);
-            }
-
+            stmt.setInt(1, notificationId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
+
 
     public ArrayList<Notification> getLatestNotificationsForSale(int limit) {
         return getLatestNotificationsForRole("Sale", null, limit);

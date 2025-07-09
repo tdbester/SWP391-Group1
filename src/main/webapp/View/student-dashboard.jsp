@@ -69,7 +69,8 @@
                         <i class="fas fa-calendar-alt"></i>
                         Xem lịch học
                     </a>
-                    <a href="${pageContext.request.contextPath}/View/student-attendance-report.jsp" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/View/student-attendance-report.jsp"
+                       class="sale-nav-btn">
                         <i class="fas fa-user-check"></i>
                         Báo cáo điểm danh
                     </a>
@@ -117,21 +118,81 @@
                 </div>
 
                 <div class="card">
-                    <h3 class="card-title"><i class="fas fa-bell"></i> Thông báo mới</h3>
+                    <div class="student-notifications">
+                        <h3>🔔 Thông báo mới
+                            <c:if test="${unreadCount > 0}">
+                <span style="background: #dc3545; color: white; padding: 2px 8px;
+                             border-radius: 12px; font-size: 12px; margin-left: 10px;">
+                        ${unreadCount}
+                </span>
+                            </c:if>
+                        </h3>
 
-                    <div class="request-item">
-                        <div class="request-title">
-                            <i class="fas fa-info-circle"></i> Thông báo nghỉ học
+                        <ul class="student-notification-list" style="list-style: none; padding: 0;">
+                            <c:choose>
+                                <c:when test="${empty latestNotifications}">
+                                    <li style="padding: 15px; background: #f8f9fa; margin-bottom: 10px;
+                       border-radius: 6px; text-align: center; color: #666;">
+                                        Chưa có thông báo mới
+                                    </li>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:forEach var="notification" items="${latestNotifications}">
+                                        <li style="display: flex; padding: 15px; background: white;
+                                                margin-bottom: 10px; border-radius: 6px; border: 1px solid #eee;
+                                        <c:if test='${!notification.read}'>
+                                                border-left: 4px solid #7a6ad8; background: #f8f9ff;
+                                                </c:if>">
+                                            <div style="margin-right: 15px; font-size: 24px;">
+                                                <c:choose>
+                                                    <c:when test="${notification.notificationType eq 'REQUEST_UPDATE'}">
+                                                        📝
+                                                    </c:when>
+                                                    <c:when test="${notification.notificationType eq 'ACCOUNT_CREATED'}">
+                                                        👨‍🎓
+                                                    </c:when>
+                                                    <c:when test="${notification.notificationType eq 'SCHEDULE_UPDATE'}">
+                                                        📅
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        📢
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: bold; color: #333; margin-bottom: 5px;">
+                                                        ${notification.title}
+                                                </div>
+                                                <div style="color: #666; margin-bottom: 8px; line-height: 1.4;">
+                                                        ${notification.content}
+                                                </div>
+                                                <div style="font-size: 11px; color: #aaa;">
+                                                    <i class="fas fa-clock"></i>
+                                                    <fmt:formatDate value="${notification.createdAt}"
+                                                                    pattern="dd/MM/yyyy HH:mm"/>
+                                                </div>
+                                            </div>
+                                            <div style="display: flex; align-items: center;">
+                                                <c:if test="${!notification.read}">
+                                                    <form method="post" action="StudentDashboard" style="margin: 0;">
+                                                        <input type="hidden" name="action" value="markAsRead">
+                                                        <input type="hidden" name="notificationId" value="${notification.id}">
+
+                                                    </form>
+                                                </c:if>
+                                            </div>
+                                        </li>
+                                    </c:forEach>
+                                </c:otherwise>
+                            </c:choose>
+                        </ul>
+
+                        <div style="text-align: center; margin-top: 15px;">
+                            <a href="${pageContext.request.contextPath}/StudentDashboard?action=notifications"
+                               style="color: #7a6ad8; text-decoration: none; font-weight: bold; font-size: 14px;">
+                                <i class="fas fa-list"></i> Xem tất cả thông báo
+                            </a>
                         </div>
-                        <div class="request-date">2 giờ trước</div>
-                        <div class="request-status approved">Mới</div>
-                    </div>
-                    <div class="request-item">
-                        <div class="request-title">
-                            <i class="fas fa-check-circle"></i> Điểm kiểm tra đã cập nhật
-                        </div>
-                        <div class="request-date">3 ngày trước</div>
-                        <div class="request-status approved">Đã xem</div>
                     </div>
                 </div>
             </div>
