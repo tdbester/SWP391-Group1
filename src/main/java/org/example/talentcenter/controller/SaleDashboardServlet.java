@@ -49,7 +49,7 @@ public class SaleDashboardServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if ("notifications".equals(action)) {
-            ArrayList<Notification> allNotifications = notificationDAO.getLatestNotificationsForSale(50);
+            ArrayList<Notification> allNotifications = notificationDAO.getLatestNotificationsForSale(20);
             request.setAttribute("allNotifications", allNotifications);
             request.getRequestDispatcher("View/sale-notification-list.jsp").forward(request, response);
 

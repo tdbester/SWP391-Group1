@@ -1,10 +1,7 @@
 package org.example.talentcenter.controller;
 
-import org.example.talentcenter.dao.StudentScheduleDAO;
-import org.example.talentcenter.dao.StudentDAO;
-import org.example.talentcenter.model.Account;
-import org.example.talentcenter.model.Student;
-import org.example.talentcenter.model.StudentSchedule;
+import org.example.talentcenter.dao.*;
+import org.example.talentcenter.model.*;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,12 +10,14 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(name = "StudentDashboardServlet", value = "/StudentDashboard")
 public class StudentDashboardServlet extends HttpServlet {
     public static StudentDAO studentDAO = new StudentDAO();
     public static StudentScheduleDAO studentScheduleDAO = new StudentScheduleDAO();
+    private static final NotificationDAO notificationDAO = new NotificationDAO();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -39,11 +38,20 @@ public class StudentDashboardServlet extends HttpServlet {
 
         int studentId = student.getId();
 
+        // lấy lịch hojc hôm nay
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
         List<StudentSchedule> todaySchedules = studentScheduleDAO.getScheduleByStudentIdAndDate(studentId, today);
 
+        // lấy thông báo
+        ArrayList<Notification> notifications = notificationDAO.getLatestNotificationsForStudent(account.getId(), 5);
+        int unreadCount = notificationDAO.getUnreadCountForStudent(account.getId());
+        ArrayList<Notification> allNotifications = notificationDAO.getAllNotificationsForStudent(account.getId());
+
         request.setAttribute("student", student);
         request.setAttribute("todaySchedules", todaySchedules);
+        request.setAttribute("notifications", notifications);
+        request.setAttribute("unreadCount", unreadCount);
+        request.setAttribute("allNotifications", allNotifications);
         request.getRequestDispatcher("View/student-dashboard.jsp").forward(request, response);
     }
 

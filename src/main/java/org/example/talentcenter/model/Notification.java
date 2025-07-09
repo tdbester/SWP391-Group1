@@ -13,6 +13,7 @@ public class Notification {
     private String relatedEntityType;
     private Timestamp createdAt;
     private boolean isRead;
+    private Integer recipientAccountId;
 
     public Notification() {
     }
@@ -95,5 +96,13 @@ public class Notification {
 
     public void setRead(boolean read) {
         isRead = read;
+    }
+
+    public Integer getRecipientAccountId() {
+        return recipientAccountId;
+    }
+
+    public void setRecipientAccountId(Integer recipientAccountId) {
+        this.recipientAccountId = recipientAccountId;
     }
 }

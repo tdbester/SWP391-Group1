@@ -146,23 +146,20 @@ public class ConsultationServlet extends HttpServlet {
                 String name = request.getParameter("name");
                 String email = request.getParameter("email");
                 String phone = request.getParameter("phone");
-                String course = request.getParameter("course_interest");
+                int courseId = Integer.parseInt(request.getParameter("course_interest"));
 
                 Consultation consult = new Consultation();
                 consult.setId(id);
                 consult.setFullName(name);
                 consult.setEmail(email);
                 consult.setPhone(phone);
-                consult.setCourseId(Integer.parseInt(course));
+                consult.setCourseId(courseId);
 
                 consultationDAO.updateConsultation(consult);
-                Consultation updatedConsult = consultationDAO.getById(id);
-                request.setAttribute("consult", updatedConsult);
-                request.setAttribute("subjects", subjectDAO.getAllCourses());
+
                 HttpSession session = request.getSession();
                 session.setAttribute("message", "Cập nhật thành công.");
-                request.getRequestDispatcher("View/edit-consultation.jsp").forward(request, response);
-                return;
+                response.sendRedirect("Consultation");
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
                 consultationDAO.deleteConsultation(id);

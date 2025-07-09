@@ -370,9 +370,19 @@
                                 </form>
                             </td>
                             <td>
-                                <a href="Consultation?action=edit&id=${c.id}" class="btn btn-sm btn-warning me-1">
+                                <button
+                                        type="button"
+                                        class="btn btn-sm btn-warning me-1 editBtn"
+                                        data-id="${c.id}"
+                                        data-name="${c.fullName}"
+                                        data-email="${c.email}"
+                                        data-phone="${c.phone}"
+                                        data-course-id="${c.courseId}"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editModal">
                                     Sửa
-                                </a>
+                                </button>
+
 
                                 <form method="post" action="Consultation" style="display:inline;">
                                     <input type="hidden" name="id" value="${c.id}"/>
@@ -462,8 +472,66 @@
             }
         });
     });
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.editBtn').forEach(function (button) {
+            button.addEventListener('click', function () {
+                document.getElementById('editId').value = this.getAttribute('data-id');
+                document.getElementById('editName').value = this.getAttribute('data-name');
+                document.getElementById('editEmail').value = this.getAttribute('data-email');
+                document.getElementById('editPhone').value = this.getAttribute('data-phone');
+
+                const courseId = this.getAttribute('data-course-id');
+                const courseSelect = document.getElementById('editCourse');
+
+                Array.from(courseSelect.options).forEach(function(option) {
+                    option.selected = (option.value === courseId);
+                });
+            });
+        });
+    });
 </script>
 
 <jsp:include page="footer.jsp"/>
 </body>
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" action="Consultation">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Chỉnh sửa học sinh</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="editId">
+                    <div class="mb-3">
+                        <label for="editName" class="form-label">Họ tên</label>
+                        <input type="text" class="form-control" name="name" id="editName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" id="editEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editPhone" class="form-label">Số điện thoại</label>
+                        <input type="text" class="form-control" name="phone" id="editPhone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCourse" class="form-label">Khóa học quan tâm</label>
+                        <select class="form-select" name="course_interest" id="editCourse" required>
+                            <c:forEach var="subject" items="${subjects}">
+                                <option value="${subject.id}">${subject.title}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" name="action" value="update" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 </html>

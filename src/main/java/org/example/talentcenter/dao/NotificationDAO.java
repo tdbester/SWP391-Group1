@@ -10,10 +10,10 @@ public class NotificationDAO {
 
     public boolean createNotification(Notification notification) {
         String sql = """
-            INSERT INTO Notification 
-            (Title, Content, SenderName, RecipientRole, NotificationType, RelatedEntityId, RelatedEntityType, CreatedAt, IsRead) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """;    
+                    INSERT INTO Notification 
+                    (Title, Content, SenderName, RecipientRole, RecipientAccountId, NotificationType, RelatedEntityId, RelatedEntityType, CreatedAt, IsRead) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -22,11 +22,16 @@ public class NotificationDAO {
             stmt.setString(2, notification.getContent());
             stmt.setString(3, notification.getSenderName());
             stmt.setString(4, notification.getRecipientRole());
-            stmt.setString(5, notification.getNotificationType());
-            stmt.setObject(6, notification.getRelatedEntityId());
-            stmt.setString(7, notification.getRelatedEntityType());
-            stmt.setTimestamp(8, notification.getCreatedAt());
-            stmt.setBoolean(9, notification.isRead());
+            if (notification.getRecipientAccountId() != null) {
+                stmt.setInt(5, notification.getRecipientAccountId());
+            } else {
+                stmt.setNull(5, java.sql.Types.INTEGER);
+            }
+            stmt.setString(6, notification.getNotificationType());
+            stmt.setObject(7, notification.getRelatedEntityId());
+            stmt.setString(8, notification.getRelatedEntityType());
+            stmt.setTimestamp(9, notification.getCreatedAt());
+            stmt.setBoolean(10, notification.isRead());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -35,32 +40,33 @@ public class NotificationDAO {
         }
     }
 
-    public ArrayList<Notification> getLatestNotificationsForSale(int limit) {
+    public ArrayList<Notification> getLatestNotificationsForRole(String role, Integer accountId, int limit) {
         ArrayList<Notification> notifications = new ArrayList<>();
         String sql = """
-            SELECT TOP (?) * FROM Notification 
-            WHERE RecipientRole = 'Sale'
-            ORDER BY CreatedAt DESC
-        """;
+                    SELECT TOP (?) * FROM Notification 
+                    WHERE (RecipientRole = ? AND RecipientAccountId IS NULL) 
+                       OR (RecipientRole = ? AND RecipientAccountId = ?)
+                       OR (RecipientRole = 'ALL')
+                    ORDER BY CreatedAt DESC
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, limit);
+            stmt.setString(2, role);
+            stmt.setString(3, role);
+
+            if (accountId != null) {
+                stmt.setInt(4, accountId);
+            } else {
+                stmt.setNull(4, java.sql.Types.INTEGER);
+            }
+
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                Notification notification = new Notification();
-                notification.setId(rs.getInt("Id"));
-                notification.setTitle(rs.getString("Title"));
-                notification.setContent(rs.getString("Content"));
-                notification.setSenderName(rs.getString("SenderName"));
-                notification.setRecipientRole(rs.getString("RecipientRole"));
-                notification.setNotificationType(rs.getString("NotificationType"));
-                notification.setRelatedEntityId(rs.getObject("RelatedEntityId", Integer.class));
-                notification.setRelatedEntityType(rs.getString("RelatedEntityType"));
-                notification.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                notification.setRead(rs.getBoolean("IsRead"));
+                Notification notification = mapResultSetToNotification(rs);
                 notifications.add(notification);
             }
         } catch (SQLException e) {
@@ -69,15 +75,29 @@ public class NotificationDAO {
         return notifications;
     }
 
-    public int getUnreadCountForSale() {
+    // ✅ Method đếm chung
+    public int getUnreadCountForRole(String role, Integer accountId) {
         String sql = """
-            SELECT COUNT(*) FROM Notification 
-            WHERE (RecipientRole = 'Sale' OR RecipientRole = 'ALL') AND IsRead = 0
-        """;
+                    SELECT COUNT(*) FROM Notification 
+                    WHERE ((RecipientRole = ? AND RecipientAccountId IS NULL) 
+                        OR (RecipientRole = ? AND RecipientAccountId = ?)
+                        OR (RecipientRole = 'ALL'))
+                      AND IsRead = 0
+                """;
 
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, role);
+            stmt.setString(2, role);
+
+            if (accountId != null) {
+                stmt.setInt(3, accountId);
+            } else {
+                stmt.setNull(3, java.sql.Types.INTEGER);
+            }
+
+            ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
                 return rs.getInt(1);
@@ -88,43 +108,32 @@ public class NotificationDAO {
         return 0;
     }
 
-    public boolean markAsRead(int notificationId) {
-        String sql = "UPDATE Notification SET IsRead = 1 WHERE Id = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, notificationId);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-
-    public ArrayList<Notification> getAllNotifications() {
+    public ArrayList<Notification> getAllNotificationsForRole(String role, Integer accountId) {
         ArrayList<Notification> notifications = new ArrayList<>();
         String sql = """
-                    SELECT * FROM Notification
-                                           WHERE RecipientRole = 'Sale'
-                                           ORDER BY CreatedAt DESC;
+                    SELECT * FROM Notification 
+                    WHERE (RecipientRole = ? AND RecipientAccountId IS NULL) 
+                       OR (RecipientRole = ? AND RecipientAccountId = ?)
+                       OR (RecipientRole = 'ALL')
+                    ORDER BY CreatedAt DESC
                 """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, role);
+            stmt.setString(2, role);
+
+            if (accountId != null) {
+                stmt.setInt(3, accountId);
+            } else {
+                stmt.setNull(3, java.sql.Types.INTEGER);
+            }
+
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                Notification notification = new Notification();
-                notification.setId(rs.getInt("Id"));
-                notification.setTitle(rs.getString("Title"));
-                notification.setContent(rs.getString("Content"));
-                notification.setSenderName(rs.getString("SenderName"));
-                notification.setRecipientRole(rs.getString("RecipientRole"));
-                notification.setNotificationType(rs.getString("NotificationType"));
-                notification.setRelatedEntityId(rs.getObject("RelatedEntityId", Integer.class));
-                notification.setRelatedEntityType(rs.getString("RelatedEntityType"));
-                notification.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                notification.setRead(rs.getBoolean("IsRead"));
+                Notification notification = mapResultSetToNotification(rs);
                 notifications.add(notification);
             }
         } catch (SQLException e) {
@@ -132,4 +141,79 @@ public class NotificationDAO {
         }
         return notifications;
     }
+
+    public boolean markAllAsReadForRole(String role, Integer accountId) {
+        String sql = """
+                    UPDATE Notification SET IsRead = 1 
+                    WHERE ((RecipientRole = ? AND RecipientAccountId IS NULL) 
+                        OR (RecipientRole = ? AND RecipientAccountId = ?)
+                        OR (RecipientRole = 'ALL'))
+                      AND IsRead = 0
+                """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, role);
+            stmt.setString(2, role);
+
+            if (accountId != null) {
+                stmt.setInt(3, accountId);
+            } else {
+                stmt.setNull(3, java.sql.Types.INTEGER);
+            }
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public ArrayList<Notification> getLatestNotificationsForSale(int limit) {
+        return getLatestNotificationsForRole("Sale", null, limit);
+    }
+
+    public ArrayList<Notification> getLatestNotificationsForStudent(int accountId, int limit) {
+        return getLatestNotificationsForRole("Student", accountId, limit);
+    }
+
+    public int getUnreadCountForSale() {
+        return getUnreadCountForRole("Sale", null);
+    }
+
+    public int getUnreadCountForStudent(int accountId) {
+        return getUnreadCountForRole("Student", accountId);
+    }
+
+    public ArrayList<Notification> getAllNotifications() {
+        return getAllNotificationsForRole("Sale", null);
+    }
+
+    public ArrayList<Notification> getAllNotificationsForStudent(int accountId) {
+        return getAllNotificationsForRole("Student", accountId);
+    }
+
+    private Notification mapResultSetToNotification(ResultSet rs) throws SQLException {
+        Notification notification = new Notification();
+        notification.setId(rs.getInt("Id"));
+        notification.setTitle(rs.getString("Title"));
+        notification.setContent(rs.getString("Content"));
+        notification.setSenderName(rs.getString("SenderName"));
+        notification.setRecipientRole(rs.getString("RecipientRole"));
+
+        int recipientAccountId = rs.getInt("RecipientAccountId");
+        if (!rs.wasNull()) {
+            notification.setRecipientAccountId(recipientAccountId);
+        }
+
+        notification.setNotificationType(rs.getString("NotificationType"));
+        notification.setRelatedEntityId(rs.getObject("RelatedEntityId", Integer.class));
+        notification.setRelatedEntityType(rs.getString("RelatedEntityType"));
+        notification.setCreatedAt(rs.getTimestamp("CreatedAt"));
+        notification.setRead(rs.getBoolean("IsRead"));
+
+        return notification;
+    }
+
 }
