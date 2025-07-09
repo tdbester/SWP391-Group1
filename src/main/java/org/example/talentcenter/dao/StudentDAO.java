@@ -30,7 +30,6 @@ public class StudentDAO {
                 student.setParentPhone(rs.getString("parentPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
                 student.setEnrollmentDate(rs.getDate("EnrollmentDate"));
-                student.setClassName(rs.getString("class_name"));
                 student.setPhoneNumber(rs.getString("PhoneNumber"));
             }
 
