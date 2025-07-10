@@ -107,15 +107,27 @@ public class NotificationDAO {
         return 0;
     }
 
-    public ArrayList<Notification> getAllNotificationsForRole(String role, Integer accountId) {
-        ArrayList<Notification> notifications = new ArrayList<>();
+
+    public boolean markAsRead(int notificationId) {
+        String sql = "UPDATE Notification SET IsRead = 1 WHERE Id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, notificationId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean markAllAsReadForRole(String role, Integer accountId) {
         String sql = """
-                    SELECT * FROM Notification 
-                    WHERE (RecipientRole = ? AND RecipientAccountId IS NULL) 
-                       OR (RecipientRole = ? AND RecipientAccountId = ?)
-                       OR (RecipientRole = 'ALL')
-                    ORDER BY CreatedAt DESC
-                """;
+        UPDATE Notification SET IsRead = 1 
+        WHERE ((RecipientRole = ? AND RecipientAccountId IS NULL) 
+            OR (RecipientRole = ? AND RecipientAccountId = ?)
+            OR (RecipientRole = 'ALL'))
+          AND IsRead = 0
+    """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -129,25 +141,12 @@ public class NotificationDAO {
                 stmt.setNull(3, java.sql.Types.INTEGER);
             }
 
-            ResultSet rs = stmt.executeQuery();
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("Marked " + rowsAffected + " notifications as read for role: " + role);
+            return rowsAffected > 0;
 
-            while (rs.next()) {
-                Notification notification = mapResultSetToNotification(rs);
-                notifications.add(notification);
-            }
         } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return notifications;
-    }
-
-    public boolean markAsRead(int notificationId) {
-        String sql = "UPDATE Notification SET IsRead = 1 WHERE Id = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, notificationId);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
+            System.err.println("Error marking all notifications as read for role " + role + ": " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -170,13 +169,14 @@ public class NotificationDAO {
         return getUnreadCountForRole("Student", accountId);
     }
 
-    public ArrayList<Notification> getAllNotifications() {
-        return getAllNotificationsForRole("Sale", null);
+    public boolean markAllAsReadForSale() {
+        return markAllAsReadForRole("Sale", null);
     }
 
-    public ArrayList<Notification> getAllNotificationsForStudent(int accountId) {
-        return getAllNotificationsForRole("Student", accountId);
+    public boolean markAllAsReadForStudent(int accountId) {
+        return markAllAsReadForRole("Student", accountId);
     }
+
 
     private Notification mapResultSetToNotification(ResultSet rs) throws SQLException {
         Notification notification = new Notification();

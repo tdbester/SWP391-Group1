@@ -83,9 +83,24 @@ public class StudentDashboardServlet extends HttpServlet {
                 e.printStackTrace();
             }
         } else if ("markAllAsRead".equals(action)) {
-            notificationDAO.markAsRead(account.getId());
-        }
+            try {
+                boolean success = notificationDAO.markAllAsReadForStudent(account.getId());
 
-        response.sendRedirect("StudentDashboard");
+                if (success) {
+                    session.setAttribute("message", "Đã đánh dấu tất cả thông báo đã đọc");
+                } else {
+                    session.setAttribute("error", "Không thể đánh dấu thông báo");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("error", "Có lỗi xảy ra khi đánh dấu thông báo");
+            }
+        }
+        String referer = request.getHeader("Referer");
+        if (referer != null && referer.contains("action=notifications")) {
+            response.sendRedirect("StudentDashboard?action=notifications");
+        } else {
+            response.sendRedirect("StudentDashboard");
+        }
     }
 }

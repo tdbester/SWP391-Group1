@@ -244,12 +244,41 @@
 
         <div class="student-notifications">
             <div class="notification-header">
-                <h2 class="notification-title">🔔 Tất cả thông báo</h2>
-                <c:if test="${not empty allNotifications}">
-                    <span class="notification-badge">
-                        ${allNotifications.size()} thông báo
-                    </span>
-                </c:if>
+                <div class="notification-header-left">
+                    <h2 class="notification-title">🔔 Tất cả thông báo</h2>
+                    <c:if test="${not empty allNotifications}">
+                <span class="notification-badge">
+                    ${allNotifications.size()} thông báo
+                </span>
+                    </c:if>
+                </div>
+
+                <!-- button đánh dấu tất cả đã đọc -->
+                <div class="notification-header-right">
+                    <c:set var="unreadCount" value="0"/>
+                    <c:forEach var="notification" items="${allNotifications}">
+                        <c:if test="${!notification.read}">
+                            <c:set var="unreadCount" value="${unreadCount + 1}"/>
+                        </c:if>
+                    </c:forEach>
+
+                    <c:if test="${unreadCount > 0}">
+                        <form method="post" action="StudentDashboard" style="margin: 0;">
+                            <input type="hidden" name="action" value="markAllAsRead">
+                            <button type="submit" class="btn-mark-all-read"
+                                    onclick="return confirm('Đánh dấu tất cả ${unreadCount} thông báo là đã đọc?')">
+                                <i class="fas fa-check-double"></i>
+                                Đánh dấu tất cả đã đọc (${unreadCount})
+                            </button>
+                        </form>
+                    </c:if>
+
+                    <c:if test="${unreadCount == 0 && not empty allNotifications}">
+                <span style="color: #28a745; font-weight: 600;">
+                    <i class="fas fa-check-circle"></i> Tất cả đã đọc
+                </span>
+                    </c:if>
+                </div>
             </div>
 
             <ul class="notification-list">
@@ -318,10 +347,14 @@
                                     </c:if>
 
                                     <c:if test="${!notification.read}">
-                                        <button onclick="markAsRead(${notification.id})"
-                                                class="btn-mark-read">
-                                            <i class="fas fa-check"></i>
-                                        </button>
+                                        <form method="post" action="StudentDashboard" style="margin: 0; display: inline;">
+                                            <input type="hidden" name="action" value="markAsRead">
+                                            <input type="hidden" name="notificationId" value="${notification.id}">
+                                            <button type="submit" class="btn-mark-read"
+                                                    title="Đánh dấu thông báo này đã đọc">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
                                     </c:if>
                                 </div>
                             </li>

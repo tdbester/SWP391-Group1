@@ -193,4 +193,57 @@ public class ClassroomDAO {
 
         return schedules;
     }
+
+    public ArrayList<Classroom> getAvailableClassrooms() {
+        ArrayList<Classroom> classrooms = new ArrayList<>();
+        String query = """
+                SELECT 
+                    cr.Id as ClassroomID,
+                    cr.Name as ClassroomName,
+                    cr.CourseId,
+                    cr.TeacherId,
+                    cr.MaxCapacity,
+                    COUNT(sc.StudentId) as CurrentStudents,
+                    a.FullName as TeacherName,
+                    c.Title as CourseName
+                FROM ClassRooms cr
+                LEFT JOIN Student_Class sc ON cr.Id = sc.ClassRoomId
+                LEFT JOIN Teacher t ON cr.TeacherId = t.Id
+                LEFT JOIN Account a ON t.AccountId = a.Id
+                LEFT JOIN Course c ON cr.CourseId = c.Id 
+                WHERE cr.CourseId IS NOT NULL
+                GROUP BY cr.Id, cr.Name, cr.CourseId, cr.TeacherId, cr.MaxCapacity, a.FullName, c.Title
+                HAVING COUNT(sc.StudentId) < cr.MaxCapacity
+                ORDER BY cr.Name
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Classroom classRoom = new Classroom();
+                classRoom.setClassroomID(rs.getInt("ClassroomID"));
+                classRoom.setClassroomName(rs.getString("ClassroomName"));
+                classRoom.setCourseId(rs.getInt("CourseId"));
+                classRoom.setTeacherId(rs.getInt("TeacherId"));
+                classRoom.setMaxCapacity(rs.getInt("MaxCapacity"));
+
+                int currentStudents = rs.getInt("CurrentStudents");
+                int availableSeats = rs.getInt("MaxCapacity") - currentStudents;
+                classRoom.setAvailableSeats(availableSeats);
+                classRoom.setTeacherName(rs.getString("TeacherName"));
+
+                classrooms.add(classRoom);
+                System.out.println("Lớp: " + classRoom.getClassroomName() + " - Chỗ trống: " + availableSeats);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi lấy danh sách lớp có chỗ trống: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return classrooms;
+    }
+
 }
