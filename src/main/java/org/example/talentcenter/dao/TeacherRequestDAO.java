@@ -51,9 +51,6 @@ public class TeacherRequestDAO {
             case "schedule_change":
                 typeName = "Thay đổi lịch dạy";
                 break;
-            case "room_change":
-                typeName = "Thay đổi lớp học";
-                break;
             case "other":
                 typeName = "Khác";
                 break;
@@ -121,66 +118,6 @@ public class TeacherRequestDAO {
 
         return requests;
     }
-
-    /**
-     * Cập nhật trạng thái đơn yêu cầu
-     */
-    public boolean updateRequestStatus(int requestId, String status, String response, int processedBy) {
-        String sql = """
-            UPDATE Request 
-            SET Status = ?, Response = ?, ProcessedBy = ?, ResponseAt = GETDATE()
-            WHERE Id = ?
-        """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, status);
-            ps.setString(2, response);
-            ps.setInt(3, processedBy);
-            ps.setInt(4, requestId);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    /**
-     * Kiểm tra xem giáo viên đã gửi đơn nghỉ cho ngày này chưa
-     */
-    public boolean hasLeaveRequestForDate(int teacherId, LocalDate date) {
-        String sql = """
-        SELECT COUNT(*) FROM Request r
-        JOIN Teacher t ON r.SenderId = t.AccountId
-        WHERE t.Id = ? AND r.TypeID = ? 
-        AND r.Status IN ('Pending', 'Approved')
-        AND CAST(r.CreatedAt AS DATE) = ?
-    """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, teacherId);
-            ps.setInt(2, getRequestTypeId("Xin nghỉ phép"));
-            ps.setDate(3, Date.valueOf(date));
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-
 
     /**
      * Lấy thông tin chi tiết của một đơn từ theo ID
@@ -378,91 +315,6 @@ public class TeacherRequestDAO {
         }
 
         return name;
-    }
-
-    /**
-     * Lấy thống kê đơn từ theo trạng thái
-     */
-    public RequestStatistics getRequestStatistics(int senderId) {
-        RequestStatistics stats = new RequestStatistics();
-        String sql = """
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN Status = 'Pending' THEN 1 ELSE 0 END) as pending,
-                SUM(CASE WHEN Status = 'Approved' THEN 1 ELSE 0 END) as approved,
-                SUM(CASE WHEN Status = 'Rejected' THEN 1 ELSE 0 END) as rejected
-            FROM Request 
-            WHERE SenderId = ?
-        """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, senderId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                stats.setTotal(rs.getInt("total"));
-                stats.setPending(rs.getInt("pending"));
-                stats.setApproved(rs.getInt("approved"));
-                stats.setRejected(rs.getInt("rejected"));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return stats;
-    }
-
-    /**
-     * Lấy danh sách các loại đơn từ
-     */
-    public ArrayList<RequestType> getAllRequestTypes() {
-        ArrayList<RequestType> types = new ArrayList<>();
-        String sql = "SELECT TypeID, TypeName FROM RequestType ORDER BY TypeName";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                RequestType type = new RequestType();
-                type.setTypeId(rs.getInt("TypeID"));
-                type.setTypeName(rs.getString("TypeName"));
-                types.add(type);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return types;
-    }
-
-    /**
-     * Kiểm tra quyền sở hữu đơn từ
-     */
-    public boolean isRequestOwner(int requestId, int senderId) {
-        String sql = "SELECT COUNT(*) FROM Request WHERE Id = ? AND SenderId = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, requestId);
-            ps.setInt(2, senderId);
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
     }
 
     /**
