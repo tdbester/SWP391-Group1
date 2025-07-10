@@ -93,7 +93,6 @@
                             <option value="">Tất cả loại đơn</option>
                             <option value="Xin nghỉ phép" ${selectedRequestType == 'Xin nghỉ phép' ? 'selected' : ''}>Xin nghỉ phép</option>
                             <option value="Thay đổi lịch dạy" ${selectedRequestType == 'Thay đổi lịch dạy' ? 'selected' : ''}>Thay đổi lịch dạy</option>
-                            <option value="Thay đổi lớp học" ${selectedRequestType == 'Thay đổi lớp học' ? 'selected' : ''}>Thay đổi lớp học</option>
                             <option value="Khác" ${selectedRequestType == 'Khác' ? 'selected' : ''}>Khác</option>
                         </select>
                     </div>
@@ -151,9 +150,6 @@
                                             </c:when>
                                             <c:when test="${request.typeName == 'Thay đổi lịch dạy'}">
                                                 <span class="request-type schedule-change">${request.typeName}</span>
-                                            </c:when>
-                                            <c:when test="${request.typeName == 'Thay đổi lớp học'}">
-                                                <span class="request-type room-change">${request.typeName}</span>
                                             </c:when>
                                             <c:otherwise>
                                                 <span class="request-type">${request.typeName}</span>

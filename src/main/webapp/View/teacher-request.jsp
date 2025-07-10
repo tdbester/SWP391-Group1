@@ -65,7 +65,6 @@
                             <option value="">-- Chọn loại đơn --</option>
                             <option value="leave" ${param.type == 'Xin nghỉ phép' ? 'selected' : ''}>Xin nghỉ phép</option>
                             <option value="schedule_change" ${param.type == 'Thay đổi lịch dạy' ? 'selected' : ''}>Thay đổi lịch dạy</option>
-                            <option value="room_change" ${param.type == 'Thay đổi lớp học' ? 'selected' : ''}>Thay đổi lớp học</option>
                             <option value="other" ${param.type == 'other' ? 'selected' : ''}>Khác</option>
                         </select>
                     </div>
@@ -126,7 +125,7 @@
                         <!-- Hiển thị lịch học để chọn -->
                         <div id="changeSchedules" class="mt-3">
                             <c:if test="${not empty changeSchedules}">
-                                <h6 class="section-title">Chọn lớp muốn thay đổi (tối đa 2 lớp):</h6>
+                                <h6 class="section-title">Chọn lớp muốn thay đổi (tối đa 1 lớp):</h6>
                                 <c:forEach items="${changeSchedules}" var="schedule" varStatus="status">
                                     <div class="schedule-item">
                                         <div class="form-check">
@@ -158,58 +157,6 @@
                                 <input type="date" name="changeToDate" class="form-control"
                                        value="${param.changeToDate}" min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Form thay đổi phòng học -->
-                    <div id="roomChangeSection" class="form-section">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Ngày muốn đổi phòng <span class="text-danger">*</span></label>
-                                <input type="date" id="roomChangeDate" name="roomChangeDate" class="form-control"
-                                       value="${param.roomChangeDate}" min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
-                            </div>
-                            <div class="col-md-6">
-                                <button type="button" id="checkRoomBtn" class="btn btn-outline-primary mt-4">
-                                    <i class="fas fa-search me-1"></i>Kiểm tra lịch học
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Chọn môn học -->
-                        <div id="roomChangeSchedules" class="mt-3">
-                            <c:if test="${not empty roomChangeSchedules}">
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Chọn môn học:</label>
-                                    <select id="selectedSchedule" name="selectedSchedule" class="form-select">
-                                        <option value="">-- Chọn môn học --</option>
-                                        <c:forEach items="${roomChangeSchedules}" var="schedule">
-                                            <option value="${schedule.id}" data-room-id="${schedule.roomId}" data-slot-id="${schedule.slotId}">
-                                                    ${schedule.courseTitle} - Lớp ${schedule.className}
-                                                (${schedule.slotStartTime} - ${schedule.slotEndTime}, Phòng ${schedule.roomCode})
-                                            </option>
-                                        </c:forEach>
-                                    </select>
-                                </div>
-                            </c:if>
-                        </div>
-
-                        <!-- Hiển thị phòng trống -->
-                        <div id="availableRooms" class="mt-3">
-                            <c:if test="${not empty availableRooms}">
-                                <h6 class="section-title">Phòng học khả dụng:</h6>
-                                <c:forEach items="${availableRooms}" var="room">
-                                    <div class="room-item">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="selectedRoom"
-                                                   value="${room.id}" id="room${room.id}">
-                                            <label class="form-check-label" for="room${room.id}">
-                                                <strong>Phòng ${room.code}</strong>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </c:forEach>
-                            </c:if>
                         </div>
                     </div>
 
@@ -288,8 +235,7 @@
         if (selectedType) {
             const sectionMap = {
                 'leave': 'leaveSection',
-                'schedule_change': 'scheduleChangeSection',
-                'room_change': 'roomChangeSection'
+                'schedule_change': 'scheduleChangeSection'
             };
 
             const sectionId = sectionMap[selectedType];
@@ -320,37 +266,17 @@
         }
     });
 
-    // Kiểm tra lịch đổi phòng
-    document.getElementById('checkRoomBtn').addEventListener('click', function() {
-        const date = document.getElementById('roomChangeDate').value;
-        if (date) {
-            window.location.href = '${pageContext.request.contextPath}/teacherRequest?action=checkRoom&date=' + date;
-        }
-    });
-
     // Giới hạn chọn tối đa 2 checkbox cho thay đổi lịch
     const scheduleCheckboxes = document.querySelectorAll('.schedule-checkbox');
     scheduleCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const checkedBoxes = document.querySelectorAll('.schedule-checkbox:checked');
-            if (checkedBoxes.length > 2) {
+            if (checkedBoxes.length > 1) {
                 this.checked = false;
-                alert('Bạn chỉ có thể chọn tối đa 2 lớp học!');
+                alert('Bạn chỉ có thể chọn tối đa 1 lớp học!');
             }
         });
     });
-
-    // Xử lý chọn môn học để hiển thị phòng trống
-    const selectedScheduleElement = document.getElementById('selectedSchedule');
-    if (selectedScheduleElement) {
-        selectedScheduleElement.addEventListener('change', function() {
-            const scheduleId = this.value;
-            const date = document.getElementById('roomChangeDate').value;
-            if (scheduleId && date) {
-                window.location.href = '${pageContext.request.contextPath}/teacherRequest?action=getAvailableRooms&scheduleId=' + scheduleId + '&date=' + date;
-            }
-        });
-    }
 
     // Validation form trước khi submit
     document.getElementById('requestForm').addEventListener('submit', function(e) {
