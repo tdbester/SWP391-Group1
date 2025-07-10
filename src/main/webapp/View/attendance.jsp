@@ -172,7 +172,7 @@
                         </label>
                         <input type="date" name="date" value="${param.date}" onchange="this.form.submit()">
                         <input type="hidden" name="action" value="take">
-                        <input type="hidden" name="classId" value="${param.classId}">
+                        <input type="hidden" name="classId" value="${classRoom.id}">
                     </form>
                 </div>
 
@@ -181,7 +181,7 @@
                     <form method="post" action="attendance">
                         <input type="hidden" name="action" value="save">
                         <input type="hidden" name="scheduleId" value="${scheduleId}">
-                        <input type="hidden" name="classRoomId" value="${classRoom.id}">
+                        <input type="hidden" name="classId" value="${classRoom.id}">
 
                         <div class="table-controls">
                             <div class="batch-actions">
@@ -216,7 +216,7 @@
                                     <tr>
                                         <td>
                                                 ${status.index + 1}
-                                            <input type="hidden" name="studentId[]" value="${student.id}">
+                                            <input type="hidden" name="studentId" value="${student.id}">
                                         </td>
                                         <td>${student.fullName}</td>
                                         <td>${student.id}</td>
@@ -250,6 +250,7 @@
                 </div>
             </div>
         </c:if>
+
         <!-- Mixed Attendance Form Section (học sinh đã điểm danh + học sinh mới) -->
         <c:if test="${isMixedAttendance}">
             <div class="attendance-section">
@@ -265,7 +266,7 @@
                     <form method="post" action="attendance">
                         <input type="hidden" name="action" value="save">
                         <input type="hidden" name="scheduleId" value="${scheduleId}">
-                        <input type="hidden" name="classRoomId" value="${classRoomId}">
+                        <input type="hidden" name="classId" value="${classRoom.id}">
 
                         <div class="table-controls">
                             <div class="batch-actions">
@@ -317,13 +318,13 @@
                                         <td>
                                             <c:choose>
                                                 <c:when test="${student.hasAttendance}">
-                                            <span class="status-badge ${student.attendanceStatus.toLowerCase()}">
-                                                <c:choose>
-                                                    <c:when test="${student.attendanceStatus == 'Present'}">Có mặt</c:when>
-                                                    <c:when test="${student.attendanceStatus == 'Absent'}">Vắng</c:when>
-                                                    <c:when test="${student.attendanceStatus == 'Late'}">Đi muộn</c:when>
-                                                </c:choose>
-                                            </span>
+                                                    <span class="status-badge ${student.attendanceStatus.toLowerCase()}">
+                                                        <c:choose>
+                                                            <c:when test="${student.attendanceStatus == 'Present'}">Có mặt</c:when>
+                                                            <c:when test="${student.attendanceStatus == 'Absent'}">Vắng</c:when>
+                                                            <c:when test="${student.attendanceStatus == 'Late'}">Đi muộn</c:when>
+                                                        </c:choose>
+                                                    </span>
                                                 </c:when>
                                                 <c:otherwise>
                                                     <span class="status-badge new">Chưa điểm danh</span>
@@ -373,6 +374,7 @@
                     <form method="post" action="attendance">
                         <input type="hidden" name="action" value="update">
                         <input type="hidden" name="scheduleId" value="${scheduleId}">
+                        <input type="hidden" name="classId" value="${classRoom.id}">
 
                         <div class="table-controls">
                             <div class="search-box">
@@ -398,13 +400,13 @@
                                         <td>${status.index + 1}</td>
                                         <td>${attendance.studentName}</td>
                                         <td>
-                                                    <span class="status-badge ${attendance.status.toLowerCase()}">
-                                                        <c:choose>
-                                                            <c:when test="${attendance.status == 'Present'}">Có mặt</c:when>
-                                                            <c:when test="${attendance.status == 'Absent'}">Vắng</c:when>
-                                                            <c:when test="${attendance.status == 'Late'}">Đi muộn</c:when>
-                                                        </c:choose>
-                                                    </span>
+                                            <span class="status-badge ${attendance.status.toLowerCase()}">
+                                                <c:choose>
+                                                    <c:when test="${attendance.status == 'Present'}">Có mặt</c:when>
+                                                    <c:when test="${attendance.status == 'Absent'}">Vắng</c:when>
+                                                    <c:when test="${attendance.status == 'Late'}">Đi muộn</c:when>
+                                                </c:choose>
+                                            </span>
                                         </td>
                                         <td>
                                             <input type="hidden" name="attendanceId" value="${attendance.id}">
@@ -472,13 +474,13 @@
                                     <td><fmt:formatDate value="${attendance.date}" pattern="dd/MM/yyyy"/></td>
                                     <td>${attendance.studentName}</td>
                                     <td>
-                                                <span class="status-badge ${attendance.status.toLowerCase()}">
-                                                    <c:choose>
-                                                        <c:when test="${attendance.status == 'Present'}">Có mặt</c:when>
-                                                        <c:when test="${attendance.status == 'Absent'}">Vắng</c:when>
-                                                        <c:when test="${attendance.status == 'Late'}">Đi muộn</c:when>
-                                                    </c:choose>
-                                                </span>
+                                        <span class="status-badge ${attendance.status.toLowerCase()}">
+                                            <c:choose>
+                                                <c:when test="${attendance.status == 'Present'}">Có mặt</c:when>
+                                                <c:when test="${attendance.status == 'Absent'}">Vắng</c:when>
+                                                <c:when test="${attendance.status == 'Late'}">Đi muộn</c:when>
+                                            </c:choose>
+                                        </span>
                                     </td>
                                     <td>${attendance.note}</td>
                                 </tr>
