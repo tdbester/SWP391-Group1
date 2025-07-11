@@ -14,7 +14,6 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <!-- SIDEBAR -->
-<div class="dashboard">
   <div class="sidebar">
 
     <div class="logo">
@@ -46,7 +45,6 @@
       </div>
     </nav>
   </div>
-</div>
 <script>
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', function() {

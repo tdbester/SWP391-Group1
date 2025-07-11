@@ -177,6 +177,18 @@ public class NotificationDAO {
         return markAllAsReadForRole("Student", accountId);
     }
 
+    public ArrayList<Notification> getLatestNotificationsForTrainingManager(int limit) {
+        return getLatestNotificationsForRole("TrainingManager", null, limit);
+    }
+
+    public int getUnreadCountForTrainingManager() {
+        return getUnreadCountForRole("TrainingManager", null);
+    }
+
+    public boolean markAllAsReadForTrainingManager() {
+        return markAllAsReadForRole("TrainingManager", null);
+    }
+
 
     private Notification mapResultSetToNotification(ResultSet rs) throws SQLException {
         Notification notification = new Notification();

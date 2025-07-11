@@ -141,6 +141,7 @@ public class RequestDAO {
                                            JOIN RequestType rt ON r.TypeID = rt.TypeID
                                            JOIN Account acc ON r.SenderId = acc.Id
                                            JOIN Role role ON acc.RoleId = role.Id
+                                           WHERE r.TypeID <> 6
                                            ORDER BY r.CreatedAt DESC
                 """;
         try (Connection conn = DBConnect.getConnection();
@@ -343,4 +344,63 @@ public class RequestDAO {
         return requests;
     }
 
+    public int getProcessedRequestsThisWeek() {
+        String sql = """
+        SELECT COUNT(*) FROM Request 
+        WHERE Status IN (N'Đã duyệt', N'Từ chối') 
+        AND DATEPART(week, ResponseAt) = DATEPART(week, GETDATE())
+        AND YEAR(ResponseAt) = YEAR(GETDATE())
+        AND TypeID <> 6
+    """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Số đơn chưa xử lý
+     */
+    public int getPendingRequests() {
+        String sql = "SELECT COUNT(*) FROM Request WHERE Status = N'Chờ xử lý' AND TypeID <> 6";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Số học sinh chưa được cấp tài khoản
+     */
+    public int getStudentsWithoutAccount() {
+        String sql = "SELECT COUNT(*) FROM Request WHERE TypeID = 6 AND Status = N'Chờ xử lý'";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
