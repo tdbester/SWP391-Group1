@@ -69,4 +69,33 @@ public class StudentDAO {
         return student;
     }
 
+    public boolean transferStudentToClass(int studentAccountId, String targetClassName) {
+        String sql = """
+        UPDATE StudentClass 
+        SET ClassroomID = (
+            SELECT ClassroomID FROM Classroom WHERE ClassroomName = ?
+        )
+        WHERE StudentID = (
+            SELECT Id FROM Student WHERE AccountID = ?
+        )
+    """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, targetClassName);  // ✅ Dùng String
+            stmt.setInt(2, studentAccountId);
+
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("Rows affected in transfer: " + rowsAffected);
+            System.out.println("Transferred to class: " + targetClassName);
+
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi chuyển lớp: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

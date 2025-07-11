@@ -246,4 +246,20 @@ public class ClassroomDAO {
         return classrooms;
     }
 
+    public int getClassIdByName(String className) {
+        String sql = "SELECT ClassroomID FROM Classroom WHERE ClassroomName = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, className);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("ClassroomID");
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi lấy ClassroomID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
 }
