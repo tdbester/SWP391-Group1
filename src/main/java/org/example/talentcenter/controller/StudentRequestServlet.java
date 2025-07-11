@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.example.talentcenter.model.Classroom;
 import org.example.talentcenter.model.Student;
+import org.example.talentcenter.service.NotificationService;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -191,6 +192,14 @@ public class StudentRequestServlet extends HttpServlet {
             boolean success = dao.insert(studentRequest);
 
             if (success) {
+                String requestTypeName = getRequestTypeName(requestTypeId); // Tạo method helper này
+                NotificationService.notifyStudentRequestSubmitted(
+                        account.getFullName(),
+                        requestTypeName,
+                        studentRequest.getId(), // Cần get ID sau khi insert
+                        account.getId()
+                );
+
                 session.setAttribute("message", "Đơn đã được gửi thành công!");
                 response.sendRedirect("StudentApplication");
             } else {
@@ -244,5 +253,17 @@ public class StudentRequestServlet extends HttpServlet {
         }
 
         response.sendRedirect(redirectUrl.toString());
+    }
+    private String getRequestTypeName(int typeId) {
+        switch (typeId) {
+            case 1:
+                return "Đơn xin chuyển lớp";
+            case 3:
+                return "Đơn xin nghỉ học";
+            case 4:
+                return "Đơn khiếu nại về giảng viên";
+            default:
+                return "Đơn khác";
+        }
     }
 }

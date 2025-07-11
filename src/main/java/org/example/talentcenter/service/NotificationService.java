@@ -54,4 +54,38 @@ public class NotificationService {
         System.out.println("Notification sent to student " + studentName + " about request " + requestId);
     }
 
+    public static void notifyStudentRequestSubmitted(String studentName, String requestType, int requestId, int studentAccountId) {
+        Notification notification = new Notification();
+        notification.setTitle("Đơn học viên mới cần xử lý");
+        notification.setContent(String.format("Học viên %s đã gửi %s cần được xem xét và phê duyệt",
+                studentName, requestType));
+        notification.setSenderName(studentName);
+        notification.setRecipientRole("TrainingManager");
+        notification.setNotificationType("STUDENT_REQUEST");
+        notification.setRelatedEntityId(requestId);
+        notification.setRelatedEntityType("Request");
+        notification.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        notification.setRead(false);
+
+        notificationDAO.createNotification(notification);
+        System.out.println("Notification sent to Training Manager for student request: " + requestId);
+    }
+
+    public static void notifyAccountCreationRequest(String saleName, String studentName, String studentEmail, int requestId) {
+        Notification notification = new Notification();
+        notification.setTitle("Yêu cầu tạo tài khoản học viên");
+        notification.setContent(String.format("Sale %s đã gửi yêu cầu tạo tài khoản cho học viên %s (%s)",
+                saleName, studentName, studentEmail));
+        notification.setSenderName(saleName);
+        notification.setRecipientRole("TrainingManager");
+        notification.setNotificationType("ACCOUNT_CREATION_REQUEST");
+        notification.setRelatedEntityId(requestId);
+        notification.setRelatedEntityType("Request");
+        notification.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        notification.setRead(false);
+
+        notificationDAO.createNotification(notification);
+        System.out.println("Notification sent to Training Manager for account creation request: " + requestId);
+    }
+
 }
