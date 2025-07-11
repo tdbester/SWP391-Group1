@@ -151,6 +151,56 @@ public class NotificationDAO {
             return false;
         }
     }
+    public ArrayList<Notification> searchNotificationsByKeyword(String keyword, String role, Integer accountId) {
+        ArrayList<Notification> notifications = new ArrayList<>();
+        String sql = """
+                SELECT * FROM Notification 
+                WHERE ((RecipientRole = ? AND RecipientAccountId IS NULL) 
+                   OR (RecipientRole = ? AND RecipientAccountId = ?)
+                   OR (RecipientRole = 'ALL'))
+                AND (Title LIKE ? OR Content LIKE ? OR SenderName LIKE ?)
+                ORDER BY CreatedAt DESC
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, role);
+            stmt.setString(2, role);
+
+            if (accountId != null) {
+                stmt.setInt(3, accountId);
+            } else {
+                stmt.setNull(3, java.sql.Types.INTEGER);
+            }
+
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(4, searchPattern);
+            stmt.setString(5, searchPattern);
+            stmt.setString(6, searchPattern);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Notification notification = mapResultSetToNotification(rs);
+                notifications.add(notification);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return notifications;
+    }
+    
+    public boolean deleteNotification(int notificationId) {
+        String sql = "DELETE FROM Notification WHERE Id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, notificationId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 
     public ArrayList<Notification> getLatestNotificationsForSale(int limit) {
@@ -189,7 +239,17 @@ public class NotificationDAO {
         return markAllAsReadForRole("TrainingManager", null);
     }
 
+    public ArrayList<Notification> searchNotificationsForSale(String keyword) {
+        return searchNotificationsByKeyword(keyword, "Sale", null);
+    }
 
+    public ArrayList<Notification> searchNotificationsForStudent(String keyword, int accountId) {
+        return searchNotificationsByKeyword(keyword, "Student", accountId);
+    }
+
+    public ArrayList<Notification> searchNotificationsForTrainingManager(String keyword) {
+        return searchNotificationsByKeyword(keyword, "TrainingManager", null);
+    }
     private Notification mapResultSetToNotification(ResultSet rs) throws SQLException {
         Notification notification = new Notification();
         notification.setId(rs.getInt("Id"));

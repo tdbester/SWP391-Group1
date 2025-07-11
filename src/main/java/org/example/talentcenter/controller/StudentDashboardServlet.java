@@ -39,10 +39,18 @@ public class StudentDashboardServlet extends HttpServlet {
         }
         if ("notifications".equals(action)) {
             // lấy 20 thông báo mơi nhất
-            ArrayList<Notification> allNotifications = notificationDAO.getLatestNotificationsForStudent(account.getId(), 20);
+            String keyword = request.getParameter("keyword");
+            ArrayList<Notification> allNotifications;
+
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                allNotifications = notificationDAO.searchNotificationsForStudent(keyword.trim(), account.getId());
+                request.setAttribute("keyword", keyword);
+            } else {
+                allNotifications = notificationDAO.getLatestNotificationsForStudent(account.getId(), 50);
+            }
+
             request.setAttribute("allNotifications", allNotifications);
             request.getRequestDispatcher("View/student-notification-list.jsp").forward(request, response);
-
         } else {
             // lấy lịch hojc hôm nay
             LocalDate today = LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
@@ -73,8 +81,14 @@ public class StudentDashboardServlet extends HttpServlet {
             return;
         }
 
-        // đánh dấu đã đọc
-        if ("markAsRead".equals(action)) {
+        if ("deleteNotification".equals(action)) {
+            String notificationId = request.getParameter("notificationId");
+            if (notificationId != null) {
+                notificationDAO.deleteNotification(Integer.parseInt(notificationId));
+            }
+            response.sendRedirect("StudentDashboard?action=notifications");
+
+        } else if ("markAsRead".equals(action)) {
             String notificationIdParam = request.getParameter("notificationId");
             try {
                 int notificationId = Integer.parseInt(notificationIdParam);
@@ -82,10 +96,11 @@ public class StudentDashboardServlet extends HttpServlet {
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
+            response.sendRedirect("StudentDashboard?action=notifications");
+
         } else if ("markAllAsRead".equals(action)) {
             try {
                 boolean success = notificationDAO.markAllAsReadForStudent(account.getId());
-
                 if (success) {
                     session.setAttribute("message", "Đã đánh dấu tất cả thông báo đã đọc");
                 } else {
@@ -95,12 +110,7 @@ public class StudentDashboardServlet extends HttpServlet {
                 e.printStackTrace();
                 session.setAttribute("error", "Có lỗi xảy ra khi đánh dấu thông báo");
             }
-        }
-        String referer = request.getHeader("Referer");
-        if (referer != null && referer.contains("action=notifications")) {
             response.sendRedirect("StudentDashboard?action=notifications");
-        } else {
-            response.sendRedirect("StudentDashboard");
         }
     }
 }

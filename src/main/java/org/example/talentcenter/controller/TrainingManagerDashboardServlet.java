@@ -31,7 +31,16 @@ public class TrainingManagerDashboardServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if ("notifications".equals(action)) {
-            ArrayList<Notification> allNotifications = notificationDAO.getLatestNotificationsForTrainingManager(50);
+            String keyword = request.getParameter("keyword");
+            ArrayList<Notification> allNotifications;
+
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                allNotifications = notificationDAO.searchNotificationsForTrainingManager(keyword.trim());
+                request.setAttribute("keyword", keyword);
+            } else {
+                allNotifications = notificationDAO.getLatestNotificationsForTrainingManager(50);
+            }
+
             request.setAttribute("allNotifications", allNotifications);
             request.getRequestDispatcher("/View/training-manager-notification-list.jsp").forward(request, response);
         } else if ("markAllRead".equals(action)) {
@@ -60,11 +69,20 @@ public class TrainingManagerDashboardServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
 
-        if ("markAsRead".equals(action)) {
-            int notificationId = Integer.parseInt(request.getParameter("notificationId"));
-            notificationDAO.markAsRead(notificationId);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"success\": true}");
+        if ("deleteNotification".equals(action)) {
+            // ✅ THÊM XỬ LÝ XÓA
+            String notificationId = request.getParameter("notificationId");
+            if (notificationId != null) {
+                notificationDAO.deleteNotification(Integer.parseInt(notificationId));
+            }
+            response.sendRedirect("TrainingManagerDashboard?action=notifications");
+
+        } else if ("markAsRead".equals(action)) {
+            String notificationId = request.getParameter("notificationId");
+            if (notificationId != null) {
+                notificationDAO.markAsRead(Integer.parseInt(notificationId));
+            }
+            response.sendRedirect("TrainingManagerDashboard?action=notifications");
         }
     }
 }

@@ -21,6 +21,62 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
 
     <style>
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .search-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+            max-width: 500px;
+        }
+
+        .search-input-group input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn-search, .btn-clear {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-search {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-clear {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            padding: 8px 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
         /* Notification Styles */
         .notification-container {
             margin-bottom: 20px;
@@ -242,6 +298,26 @@
                 <i class="fas fa-arrow-left"></i> Quay lại Dashboard
             </a>
         </div>
+        <div class="search-section">
+            <form action="SaleDashboard" method="get" class="search-form">
+                <input type="hidden" name="action" value="notifications">
+                <div class="search-group">
+                    <label for="searchInput">
+                        <i class="fas fa-search"></i> Tìm kiếm thông báo
+                    </label>
+                    <div class="search-input-group">
+                        <input type="text" name="keyword" id="searchInput"
+                               placeholder="Nhập từ khóa..." value="${keyword}">
+                        <button type="submit" class="btn-search">
+                            <i class="fas fa-search"></i> Tìm
+                        </button>
+                        <a href="SaleDashboard?action=notifications" class="btn-clear">
+                            <i class="fas fa-times"></i> Xóa
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
 
         <div class="sale-notifications">
             <div class="notification-header">
@@ -312,18 +388,30 @@
                                 <!-- Actions -->
                                 <div class="notification-actions">
                                     <c:if test="${not empty notification.relatedEntityId}">
-                                        <a href="Consultation?action=edit&id=${notification.relatedEntityId}"
-                                           class="btn-view">
+                                        <a href="Consultation?action=edit&id=${notification.relatedEntityId}" class="btn-view">
                                             <i class="fas fa-eye"></i> Xem
                                         </a>
                                     </c:if>
 
                                     <c:if test="${!notification.read}">
-                                        <button onclick="markAsRead(${notification.id})"
-                                                class="btn-mark-read">
-                                            <i class="fas fa-check"></i>
-                                        </button>
+                                        <form action="SaleDashboard" method="post" style="display: inline;">
+                                            <input type="hidden" name="action" value="markAsRead">
+                                            <input type="hidden" name="notificationId" value="${notification.id}">
+                                            <button type="submit" class="btn-mark-read">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
                                     </c:if>
+
+                                    <!-- Form xóa -->
+                                    <form action="SaleDashboard" method="post" style="display: inline;"
+                                          onsubmit="return confirm('Bạn có chắc muốn xóa thông báo này?')">
+                                        <input type="hidden" name="action" value="deleteNotification">
+                                        <input type="hidden" name="notificationId" value="${notification.id}">
+                                        <button type="submit" class="btn-delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </li>
                         </c:forEach>
@@ -342,26 +430,6 @@
         </div>
     </div>
 </div>
-
-<script>
-    function markAsRead(notificationId) {
-        fetch('${pageContext.request.contextPath}/Consultation', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'markReadId=' + notificationId
-        })
-            .then(response => {
-                if (response.ok) {
-                    location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    }
-</script>
 
 <jsp:include page="footer.jsp"/>
 </body>
