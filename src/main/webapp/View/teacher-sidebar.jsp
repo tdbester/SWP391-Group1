@@ -33,6 +33,12 @@
         <span>Xem đơn</span>
       </a>
     </div>
+    <div class="nav-section">
+      <a href="${pageContext.request.contextPath}/teacherNotification" class="nav-item">
+        <i class="fas fa-bell"></i>
+        <span>Thông báo</span>
+      </a>
+    </div>
   </nav>
 </div>
 

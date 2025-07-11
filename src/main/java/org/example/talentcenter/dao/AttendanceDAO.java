@@ -8,9 +8,7 @@ import org.example.talentcenter.model.Student;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class AttendanceDAO {
 
@@ -102,7 +100,7 @@ public class AttendanceDAO {
         List<Student> students = new ArrayList<>();
         String sql = """
             
-                SELECT s.Id, a.FullName, s.ParentPhone, s.MotherPhone,\s
+                SELECT s.Id, a.FullName, s.ParentPhone, s.MotherPhone,
                                       s.AccountId, s.EnrollmentDate
                                FROM Student s
                                JOIN Account a ON s.AccountId = a.Id
@@ -391,41 +389,6 @@ public class AttendanceDAO {
             e.printStackTrace();
         }
         return students;
-    }
-
-    // Thêm điểm danh cho học sinh mới
-    public boolean addAttendanceForNewStudents(int scheduleId, List<Attendance> newAttendances) {
-        if (newAttendances.isEmpty()) {
-            return true; // Không có học sinh mới thì coi như thành công
-        }
-
-        String sql = "INSERT INTO Attendance (ScheduleId, StudentId, Status, Note) VALUES (?, ?, ?, ?)";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            for (Attendance attendance : newAttendances) {
-                pstmt.setInt(1, attendance.getScheduleId());
-                pstmt.setInt(2, attendance.getStudentId());
-                pstmt.setString(3, attendance.getStatus());
-                pstmt.setString(4, attendance.getNote());
-                pstmt.addBatch();
-            }
-
-            int[] results = pstmt.executeBatch();
-
-            // Kiểm tra tất cả đều thành công
-            for (int result : results) {
-                if (result <= 0) {
-                    return false;
-                }
-            }
-            return true;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     // Lấy thông tin lớp học theo Id

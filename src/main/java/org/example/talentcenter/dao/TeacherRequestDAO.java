@@ -55,7 +55,7 @@ public class TeacherRequestDAO {
                 typeName = "Khác";
                 break;
             default:
-                typeName = type; // Nếu đã là tên đầy đủ
+                typeName = type;
         }
 
         String sql = "SELECT TypeID FROM RequestType WHERE TypeName = ?";

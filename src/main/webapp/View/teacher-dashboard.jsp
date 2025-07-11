@@ -88,12 +88,12 @@
                     <p>Tạo đơn xin nghỉ hoặc yêu cầu</p>
                 </a>
 
-                <a href="${pageContext.request.contextPath}/teacherViewRequest" class="action-card">
+                <a href="${pageContext.request.contextPath}/teacherNotification" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-bell"></i>
                     </div>
-                    <h3>Đơn từ</h3>
-                    <p>Xem thông tin đơn từ</p>
+                    <h3>Thông báo</h3>
+                    <p>Gửi thông báo tới học viên</p>
                 </a>
             </div>
         </div>
