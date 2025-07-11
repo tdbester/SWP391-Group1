@@ -22,6 +22,98 @@
 
     <style>
         /* Notification Styles */
+        /* Search section */
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .search-form {
+            margin: 0;
+        }
+
+        .search-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+            max-width: 500px;
+        }
+
+        .search-input-group input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn-search, .btn-clear {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-search {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-search:hover {
+            background: #1e7e34;
+        }
+
+        .btn-clear {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #545b62;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            padding: 8px 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .btn-mark-all-read {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-mark-all-read:hover {
+            background: #545b62;
+        }
+
         .notification-container {
             margin-bottom: 20px;
         }
@@ -269,6 +361,26 @@
                 <i class="fas fa-arrow-left"></i> Quay lại Dashboard
             </a>
         </div>
+        <div class="search-section">
+            <form action="TrainingManagerDashboard" method="get" class="search-form">
+                <input type="hidden" name="action" value="notifications">
+                <div class="search-group">
+                    <label for="searchInput">
+                        <i class="fas fa-search"></i> Tìm kiếm thông báo
+                    </label>
+                    <div class="search-input-group">
+                        <input type="text" name="keyword" id="searchInput"
+                               placeholder="Nhập từ khóa..." value="${keyword}">
+                        <button type="submit" class="btn-search">
+                            <i class="fas fa-search"></i> Tìm
+                        </button>
+                        <a href="TrainingManagerDashboard?action=notifications" class="btn-clear">
+                            <i class="fas fa-times"></i> Xóa
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
 
         <div class="training-manager-notifications">
             <div class="notification-header">
@@ -362,14 +474,12 @@
                                     <c:if test="${not empty notification.relatedEntityId}">
                                         <c:choose>
                                             <c:when test="${notification.notificationType == 'STUDENT_REQUEST'}">
-                                                <a href="RequestManagement?action=view&id=${notification.relatedEntityId}"
-                                                   class="btn-view">
+                                                <a href="RequestManagement?action=view&id=${notification.relatedEntityId}" class="btn-view">
                                                     <i class="fas fa-eye"></i> Xem đơn
                                                 </a>
                                             </c:when>
                                             <c:when test="${notification.notificationType == 'ACCOUNT_CREATION_REQUEST'}">
-                                                <a href="AccountManagement?action=pending&id=${notification.relatedEntityId}"
-                                                   class="btn-view account-request">
+                                                <a href="AccountManagement?action=pending&id=${notification.relatedEntityId}" class="btn-view account-request">
                                                     <i class="fas fa-user-plus"></i> Xử lý
                                                 </a>
                                             </c:when>
@@ -382,12 +492,37 @@
                                     </c:if>
 
                                     <c:if test="${!notification.read}">
-                                        <button onclick="markAsRead(${notification.id})"
-                                                class="btn-mark-read">
-                                            <i class="fas fa-check"></i>
-                                        </button>
+                                        <form action="TrainingManagerDashboard" method="post" style="display: inline;">
+                                            <input type="hidden" name="action" value="markAsRead">
+                                            <input type="hidden" name="notificationId" value="${notification.id}">
+                                            <button type="submit" class="btn-mark-read">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
                                     </c:if>
+
+                                    <form action="TrainingManagerDashboard" method="post" style="display: inline;"
+                                          onsubmit="return confirm('Bạn có chắc muốn xóa thông báo này?')">
+                                        <input type="hidden" name="action" value="deleteNotification">
+                                        <input type="hidden" name="notificationId" value="${notification.id}">
+                                        <button type="submit" class="btn-delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
+
+                                <!-- Sửa mark all as read - dùng form -->
+                                <c:if test="${not empty allNotifications}">
+                                    <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+                                        <form action="TrainingManagerDashboard" method="get" style="display: inline;">
+                                            <input type="hidden" name="action" value="markAllRead">
+                                            <button type="submit" class="btn-mark-all-read"
+                                                    onclick="return confirm('Đánh dấu tất cả thông báo là đã đọc?')">
+                                                <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
+                                            </button>
+                                        </form>
+                                    </div>
+                                </c:if>
                             </li>
                         </c:forEach>
                     </c:otherwise>
@@ -417,26 +552,6 @@
     </div>
 </div>
 
-<script>
-    function markAsRead(notificationId) {
-        fetch('${pageContext.request.contextPath}/TrainingManagerDashboard', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'action=markAsRead&notificationId=' + notificationId
-        })
-            .then(response => {
-                if (response.ok) {
-                    location.reload();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra khi đánh dấu đã đọc');
-            });
-    }
-</script>
 
 <jsp:include page="footer.jsp"/>
 </body>

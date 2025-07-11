@@ -21,6 +21,118 @@
 
     <style>
         /* Notification Styles */
+        /* Search section */
+        .search-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .search-form {
+            margin: 0;
+        }
+
+        .search-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+            max-width: 500px;
+        }
+
+        .search-input-group input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn-search, .btn-clear {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-search {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-search:hover {
+            background: #0056b3;
+        }
+
+        .btn-clear {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #545b62;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            padding: 8px 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        /* Notification header styling */
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .notification-header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-mark-all-read {
+            background: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-mark-all-read:hover {
+            background: #1e7e34;
+        }
+
         .notification-container {
             margin-bottom: 20px;
         }
@@ -241,7 +353,26 @@
                 <i class="fas fa-arrow-left"></i> Quay lại Dashboard
             </a>
         </div>
-
+        <div class="search-section">
+            <form action="StudentDashboard" method="get" class="search-form">
+                <input type="hidden" name="action" value="notifications">
+                <div class="search-group">
+                    <label for="searchInput">
+                        <i class="fas fa-search"></i> Tìm kiếm thông báo
+                    </label>
+                    <div class="search-input-group">
+                        <input type="text" name="keyword" id="searchInput"
+                               placeholder="Nhập từ khóa..." value="${keyword}">
+                        <button type="submit" class="btn-search">
+                            <i class="fas fa-search"></i> Tìm
+                        </button>
+                        <a href="StudentDashboard?action=notifications" class="btn-clear">
+                            <i class="fas fa-times"></i> Xóa
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
         <div class="student-notifications">
             <div class="notification-header">
                 <div class="notification-header-left">
@@ -340,8 +471,7 @@
                                 <!-- Actions -->
                                 <div class="notification-actions">
                                     <c:if test="${not empty notification.relatedEntityId}">
-                                        <a href="StudentApplication?action=list&id=${notification.relatedEntityId}"
-                                           class="btn-view">
+                                        <a href="StudentApplication?action=list&id=${notification.relatedEntityId}" class="btn-view">
                                             <i class="fas fa-eye"></i> Xem
                                         </a>
                                     </c:if>
@@ -350,12 +480,20 @@
                                         <form method="post" action="StudentDashboard" style="margin: 0; display: inline;">
                                             <input type="hidden" name="action" value="markAsRead">
                                             <input type="hidden" name="notificationId" value="${notification.id}">
-                                            <button type="submit" class="btn-mark-read"
-                                                    title="Đánh dấu thông báo này đã đọc">
+                                            <button type="submit" class="btn-mark-read">
                                                 <i class="fas fa-check"></i>
                                             </button>
                                         </form>
                                     </c:if>
+
+                                    <form action="StudentDashboard" method="post" style="display: inline;"
+                                          onsubmit="return confirm('Bạn có chắc muốn xóa thông báo này?')">
+                                        <input type="hidden" name="action" value="deleteNotification">
+                                        <input type="hidden" name="notificationId" value="${notification.id}">
+                                        <button type="submit" class="btn-delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </li>
                         </c:forEach>

@@ -49,11 +49,18 @@ public class SaleDashboardServlet extends HttpServlet {
         String action = request.getParameter("action");
 
         if ("notifications".equals(action)) {
-            ArrayList<Notification> allNotifications = notificationDAO.getLatestNotificationsForSale(20);
-            request.setAttribute("allNotifications", allNotifications);
-            request.getRequestDispatcher("View/sale-notification-list.jsp").forward(request, response);
+            String keyword = request.getParameter("keyword");
+            ArrayList<Notification> allNotifications;
 
-        } else if ("course".equals(action)) {
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                allNotifications = notificationDAO.searchNotificationsForSale(keyword.trim());
+                request.setAttribute("keyword", keyword);
+            } else {
+                allNotifications = notificationDAO.getLatestNotificationsForSale(50);
+            }
+
+            request.setAttribute("allNotifications", allNotifications);
+            request.getRequestDispatcher("View/sale-notification-list.jsp").forward(request, response); } else if ("course".equals(action)) {
             int courseId = request.getParameter("courseId") == null ? 0 : Integer.parseInt(request.getParameter("courseId"));
             Course course = courseDAO.getCourseById(courseId);
             if (course == null) {
@@ -79,6 +86,28 @@ public class SaleDashboardServlet extends HttpServlet {
             request.setAttribute("latestNotifications", latestNotifications);
             request.setAttribute("unreadCount", unreadCount);
             request.getRequestDispatcher("View/sale-dashboard.jsp").forward(request, response);
+        }
+    }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String action = request.getParameter("action");
+
+        if ("deleteNotification".equals(action)) {
+            String notificationId = request.getParameter("notificationId");
+            if (notificationId != null) {
+                notificationDAO.deleteNotification(Integer.parseInt(notificationId));
+            }
+            response.sendRedirect("SaleDashboard?action=notifications");
+
+
+        } else if ("markReadId".equals(action)) {
+            String notificationId = request.getParameter("markReadId");
+            if (notificationId != null) {
+                notificationDAO.markAsRead(Integer.parseInt(notificationId));
+            }
+            response.sendRedirect("SaleDashboard?action=notifications");
         }
     }
 }
