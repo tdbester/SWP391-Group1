@@ -30,12 +30,59 @@ public class ProcessRequestServlet extends HttpServlet {
             response.sendRedirect("View/login.jsp");
             return;
         }
-
+        ArrayList<Request> requestTypes = requestDAO.getStudentRequestType();
+        request.setAttribute("requestTypes", requestTypes);
         try {
-            if ("list".equals(action)) {
-                // Hiển thị danh sách tất cả đơn
-                ArrayList<Request> requestList = requestDAO.getAllRequest();
+            if ("list".equals(action) || action == null) {
+                int page = 1;
+                int recordsPerPage = 10;
+                try {
+                    String pageParam = request.getParameter("page");
+                    if (pageParam != null) page = Integer.parseInt(pageParam);
+                } catch (NumberFormatException ignored) {
+                }
+
+                int offset = (page - 1) * recordsPerPage;
+                ArrayList<Request> requestList = requestDAO.getAllRequestWithPaging(offset, recordsPerPage);
+                int totalRecords = requestDAO.getTotalRequestCount();
+                int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+
                 request.setAttribute("requestList", requestList);
+                request.setAttribute("currentPage", page);
+                request.setAttribute("totalPages", totalPages);
+                request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
+            } else if (action.equals("search")) {
+                String keyword = request.getParameter("keyword");
+                if (keyword == null || keyword.trim().isEmpty()) {
+                    response.sendRedirect("ProcessRequest?action=list");
+                    return;
+                }
+                ArrayList<Request> requestList = requestDAO.searchRequests(keyword.trim());
+                request.setAttribute("requestList", requestList);
+                request.setAttribute("keyword", keyword);
+                request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
+
+            } else if (action.equals("filterByType")) {
+                String typeFilter = request.getParameter("typeFilter");
+                if (typeFilter == null || typeFilter.trim().isEmpty()) {
+                    response.sendRedirect("ProcessRequest?action=list");
+                    return;
+                }
+                ArrayList<Request> requestList = requestDAO.filterRequestsByType(typeFilter.trim());
+                request.setAttribute("requestList", requestList);
+                request.setAttribute("typeFilter", typeFilter);
+                request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
+
+            } else if (action.equals("filterByStatus")) {
+                // ✅ FILTER THEO TRẠNG THÁI
+                String statusFilter = request.getParameter("statusFilter");
+                if (statusFilter == null || statusFilter.trim().isEmpty()) {
+                    response.sendRedirect("ProcessRequest?action=list");
+                    return;
+                }
+                ArrayList<Request> requestList = requestDAO.filterRequestsByStatus(statusFilter.trim());
+                request.setAttribute("requestList", requestList);
+                request.setAttribute("statusFilter", statusFilter);
                 request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
 
             } else {

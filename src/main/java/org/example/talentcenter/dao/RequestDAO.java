@@ -459,4 +459,253 @@ public class RequestDAO {
         }
         return 0;
     }
+
+    public ArrayList<Request> getAllRequestWithPaging(int offset, int limit) {
+        ArrayList<Request> requests = new ArrayList<>();
+        String sql = """
+             SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                    rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+             FROM Request r
+             JOIN RequestType rt ON r.TypeID = rt.TypeID
+             JOIN Account acc ON r.SenderId = acc.Id
+             JOIN Role role ON acc.RoleId = role.Id
+             WHERE r.TypeID <> 6
+             ORDER BY r.CreatedAt DESC
+             OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+            """;
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, offset);
+            stmt.setInt(2, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    request.setSenderName(rs.getString("SenderName"));
+                    request.setSenderRole(rs.getString("SenderRole"));
+
+                    // Extract reason đơn giản
+                    String fullReason = rs.getString("Reason");
+                    String extractedReason = "";
+                    if (fullReason != null && !fullReason.trim().isEmpty()) {
+                        String[] parts = fullReason.split("\\|");
+                        if (parts.length >= 4) {
+                            extractedReason = parts[3];
+                        } else {
+                            extractedReason = fullReason;
+                        }
+                    }
+                    request.setReason(extractedReason);
+
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setTypeName(rs.getString("TypeName"));
+
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
+    public int getTotalRequestCount() {
+        String sql = "SELECT COUNT(*) FROM Request WHERE TypeID <> 6";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    // ✅ TÌM KIẾM THEO TỪ KHÓA
+    public ArrayList<Request> searchRequests(String keyword) {
+        ArrayList<Request> requests = new ArrayList<>();
+        String sql = """
+             SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                    rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+             FROM Request r
+             JOIN RequestType rt ON r.TypeID = rt.TypeID
+             JOIN Account acc ON r.SenderId = acc.Id
+             JOIN Role role ON acc.RoleId = role.Id
+             WHERE r.TypeID <> 6 
+             AND (acc.FullName LIKE ? OR rt.TypeName LIKE ? OR r.Reason LIKE ?)
+             ORDER BY r.CreatedAt DESC
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            stmt.setString(3, searchPattern);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    request.setSenderName(rs.getString("SenderName"));
+                    request.setSenderRole(rs.getString("SenderRole"));
+
+                    // Extract reason đơn giản
+                    String fullReason = rs.getString("Reason");
+                    String extractedReason = "";
+                    if (fullReason != null && !fullReason.trim().isEmpty()) {
+                        String[] parts = fullReason.split("\\|");
+                        if (parts.length >= 4) {
+                            extractedReason = parts[3];
+                        } else {
+                            extractedReason = fullReason;
+                        }
+                    }
+                    request.setReason(extractedReason);
+
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setTypeName(rs.getString("TypeName"));
+
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
+    // ✅ FILTER THEO LOẠI ĐƠN
+    public ArrayList<Request> filterRequestsByType(String typeName) {
+        ArrayList<Request> requests = new ArrayList<>();
+        String sql = """
+             SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                    rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+             FROM Request r
+             JOIN RequestType rt ON r.TypeID = rt.TypeID
+             JOIN Account acc ON r.SenderId = acc.Id
+             JOIN Role role ON acc.RoleId = role.Id
+             WHERE r.TypeID <> 6 AND rt.TypeName = ?
+             ORDER BY r.CreatedAt DESC
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, typeName);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    request.setSenderName(rs.getString("SenderName"));
+                    request.setSenderRole(rs.getString("SenderRole"));
+
+                    // Extract reason đơn giản
+                    String fullReason = rs.getString("Reason");
+                    String extractedReason = "";
+                    if (fullReason != null && !fullReason.trim().isEmpty()) {
+                        String[] parts = fullReason.split("\\|");
+                        if (parts.length >= 4) {
+                            extractedReason = parts[3];
+                        } else {
+                            extractedReason = fullReason;
+                        }
+                    }
+                    request.setReason(extractedReason);
+
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setTypeName(rs.getString("TypeName"));
+
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
+    // ✅ FILTER THEO TRẠNG THÁI
+    public ArrayList<Request> filterRequestsByStatus(String status) {
+        ArrayList<Request> requests = new ArrayList<>();
+        String sql = """
+             SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                    rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+             FROM Request r
+             JOIN RequestType rt ON r.TypeID = rt.TypeID
+             JOIN Account acc ON r.SenderId = acc.Id
+             JOIN Role role ON acc.RoleId = role.Id
+             WHERE r.TypeID <> 6 AND r.Status = ?
+             ORDER BY r.CreatedAt DESC
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, status);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    request.setSenderName(rs.getString("SenderName"));
+                    request.setSenderRole(rs.getString("SenderRole"));
+
+                    // Extract reason đơn giản
+                    String fullReason = rs.getString("Reason");
+                    String extractedReason = "";
+                    if (fullReason != null && !fullReason.trim().isEmpty()) {
+                        String[] parts = fullReason.split("\\|");
+                        if (parts.length >= 4) {
+                            extractedReason = parts[3];
+                        } else {
+                            extractedReason = fullReason;
+                        }
+                    }
+                    request.setReason(extractedReason);
+
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setTypeName(rs.getString("TypeName"));
+
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
 }
