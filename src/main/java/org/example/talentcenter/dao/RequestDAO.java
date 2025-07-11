@@ -47,7 +47,6 @@ public class RequestDAO {
         }
     }
 
-
     public List<Map<String, String>> getAllAccountRequests() {
         List<Map<String, String>> requests = new ArrayList<>();
         String sql = "SELECT r.Id, r.Reason, a.FullName AS SenderName FROM Request r JOIN Account a ON r.SenderId = a.Id WHERE r.TypeID = 6 AND r.Status = N'Chờ xử lý'";
@@ -107,11 +106,6 @@ public class RequestDAO {
     }
 
     public boolean insert(Request request) {
-        String combinedReason = request.getCourseName() + "|" +
-                request.getParentPhone() + "|" +
-                request.getPhoneNumber() + "|" +
-                request.getReason();
-
         String sql = "INSERT INTO Request (TypeID, SenderId, Reason, Status, CreatedAt) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnect.getConnection();
@@ -119,7 +113,7 @@ public class RequestDAO {
 
             stmt.setInt(1, request.getTypeId());
             stmt.setInt(2, request.getSenderID());
-            stmt.setString(3, combinedReason);
+            stmt.setString(3, request.getReason());
             stmt.setString(4, "Chờ xử lý");
             Timestamp timestamp = new Timestamp(request.getCreatedAt().getTime());
             stmt.setTimestamp(5, timestamp);
@@ -131,6 +125,8 @@ public class RequestDAO {
             return false;
         }
     }
+
+    // ===== METHODS CHO DANH SÁCH (CHỈ HIỂN THỊ LÝ DO) =====
 
     public ArrayList<Request> getAllRequest() {
         ArrayList<Request> requests = new ArrayList<>();
@@ -153,10 +149,25 @@ public class RequestDAO {
                     request.setSenderID(rs.getInt("SenderId"));
                     request.setSenderName(rs.getString("SenderName"));
                     request.setSenderRole(rs.getString("SenderRole"));
+
+                    // CHỈ LẤY LÝ DO CHO DANH SÁCH
                     String fullReason = rs.getString("Reason");
+                    String extractedReason = "";
                     String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
-                    String extractedReason = parts.length > 0 ? parts[parts.length - 1] : "";
+
+                    if (parts.length >= 4) {
+                        // Lấy lý do ở vị trí thứ 4 (index 3)
+                        extractedReason = parts[3];
+                    } else {
+                        // Fallback cho format cũ hoặc không đúng
+                        if (fullReason != null && fullReason.contains("|TRANSFER_TO_CLASS_ID:")) {
+                            extractedReason = fullReason.split("\\|TRANSFER_TO_CLASS_ID:")[0];
+                        } else {
+                            extractedReason = fullReason != null ? fullReason : "";
+                        }
+                    }
                     request.setReason(extractedReason);
+
                     request.setResponse(rs.getString("Response"));
                     request.setResponseAt(rs.getTimestamp("ResponseAt"));
                     request.setStatus(rs.getString("Status"));
@@ -165,6 +176,117 @@ public class RequestDAO {
                     if (createdAt != null) {
                         request.setCreatedAt(new java.util.Date(createdAt.getTime()));
                     }
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
+    public ArrayList<Request> getRequestBySenderId(int senderId) {
+        ArrayList<Request> requests = new ArrayList<>();
+        String sql = """
+            SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, rt.TypeName 
+            FROM Request r join RequestType rt on r.TypeID = rt.TypeID 
+            WHERE SenderId = ? order by CreatedAt DESC
+            """;
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, senderId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+
+                    // CHỈ LẤY LÝ DO CHO DANH SÁCH
+                    String fullReason = rs.getString("Reason");
+                    String extractedReason;
+                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+
+                    if (parts.length >= 4) {
+                        extractedReason = parts[3];
+                    } else {
+                        // Fallback cho format cũ
+                        if (fullReason != null && fullReason.contains("|TRANSFER_TO_CLASS_ID:")) {
+                            extractedReason = fullReason.split("\\|TRANSFER_TO_CLASS_ID:")[0];
+                        } else {
+                            extractedReason = fullReason != null ? fullReason : "";
+                        }
+                    }
+
+                    request.setReason(extractedReason);
+
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    request.setTypeName(rs.getString("TypeName"));
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return requests;
+    }
+
+    public ArrayList<Request> getRequestBySenderIdAndType(int senderId, int typeId) {
+        ArrayList<Request> requests = new ArrayList<>();
+        String sql = """
+            SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, rt.TypeName 
+            FROM Request r 
+            JOIN RequestType rt ON r.TypeID = rt.TypeID 
+            WHERE r.SenderId = ? AND r.TypeID = ? 
+            ORDER BY r.CreatedAt DESC
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, senderId);
+            stmt.setInt(2, typeId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+
+                    // CHỈ LẤY LÝ DO CHO DANH SÁCH
+                    String fullReason = rs.getString("Reason");
+                    String extractedReason;
+                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+
+                    if (parts.length >= 4) {
+                        extractedReason = parts[3]; // ✅ CHỈ LẤY LÝ DO
+                    } else {
+                        // Fallback cho format cũ
+                        if (fullReason != null && fullReason.contains("|TRANSFER_TO_CLASS_ID:")) {
+                            extractedReason = fullReason.split("\\|TRANSFER_TO_CLASS_ID:")[0];
+                        } else {
+                            extractedReason = fullReason != null ? fullReason : "";
+                        }
+                    }
+
+                    request.setReason(extractedReason); // ✅ CHỈ SET MỘT LẦN
+
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    request.setTypeName(rs.getString("TypeName"));
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+
                     requests.add(request);
                 }
             }
@@ -198,15 +320,36 @@ public class RequestDAO {
                     request.setSenderID(rs.getInt("SenderId"));
                     request.setSenderName(rs.getString("SenderName"));
                     request.setSenderRole(rs.getString("SenderRole"));
+
+                    // PARSE ĐẦY ĐỦ THÔNG TIN CHO CHI TIẾT
                     String fullReason = rs.getString("Reason");
+                    // Format: lớp|sdt_phụ_huynh|sdt_học_sinh|lý_do[|TRANSFER_TO_CLASS_ID:x]
                     String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
 
                     if (parts.length >= 4) {
-                        request.setCourseName(parts[0]);
-                        request.setParentPhone(parts[1]);
-                        request.setPhoneNumber(parts[2]);
-                        request.setReason(parts[3]);
+                        request.setCourseName(parts[0]);        // Lớp hiện tại
+                        request.setParentPhone(parts[1]);       // SĐT phụ huynh
+                        request.setPhoneNumber(parts[2]);       // SĐT học sinh
+                        request.setReason(parts[3]);            // Lý do
+
+                        // Xử lý thông tin chuyển lớp nếu có
+                        if (parts.length > 4 && parts[4].startsWith("TRANSFER_TO_CLASS_ID:")) {
+                            String transferClassId = parts[4].split(":")[1];
+
+                            // Chỉ lấy tên lớp
+                            String classNameSql = "SELECT Name FROM Classrooms WHERE id = ?";
+                            try (PreparedStatement classStmt = conn.prepareStatement(classNameSql)) {
+                                classStmt.setInt(1, Integer.parseInt(transferClassId));
+                                ResultSet classRs = classStmt.executeQuery();
+                                if (classRs.next()) {
+                                    String targetClassName = classRs.getString("Name");
+                                    // Thêm tên lớp vào reason
+                                    request.setReason(parts[3] + "|TARGET_CLASS:" + targetClassName);
+                                }
+                            }
+                        }
                     } else {
+                        // Fallback cho format cũ
                         request.setReason(fullReason);
                     }
 
@@ -244,48 +387,9 @@ public class RequestDAO {
         }
     }
 
-    public ArrayList<Request> getRequestBySenderId(int senderId) {
-        ArrayList<Request> requests = new ArrayList<>();
-        String sql = """
-                SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, rt.TypeName 
-                FROM Request r join RequestType rt on r.TypeID = rt.TypeID 
-                WHERE SenderId = ? order by CreatedAt DESC
-                """;
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, senderId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Request request = new Request();
-                    request.setId(rs.getInt("Id"));
-                    request.setSenderID(rs.getInt("SenderId"));
-                    String fullReason = rs.getString("Reason");
-                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
-                    String extractedReason = parts.length > 0 ? parts[parts.length - 1] : "";
-                    request.setReason(extractedReason);
-                    request.setResponse(rs.getString("Response"));
-                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
-                    request.setStatus(rs.getString("Status"));
-                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
-                    request.setTypeName(rs.getString("TypeName"));
-                    if (createdAt != null) {
-                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
-                    }
-
-                    requests.add(request);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return requests;
-    }
-
     public ArrayList<Request> getStudentRequestType() {
         ArrayList<Request> list = new ArrayList<>();
-        String sql = "SELECT TypeID, TypeName FROM RequestType WHERE TypeID IN (1, 2,3,4,5)"; // các loại đơn cho student
+        String sql = "SELECT TypeID, TypeName FROM RequestType WHERE TypeID IN (1, 2,3,4,5)";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -302,56 +406,14 @@ public class RequestDAO {
         return list;
     }
 
-    public ArrayList<Request> getRequestBySenderIdAndType(int senderId, int typeId) {
-        ArrayList<Request> requests = new ArrayList<>();
-        String sql = """
-                SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, rt.TypeName 
-                FROM Request r 
-                JOIN RequestType rt ON r.TypeID = rt.TypeID 
-                WHERE r.SenderId = ? AND r.TypeID = ? 
-                ORDER BY r.CreatedAt DESC
-                """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, senderId);
-            stmt.setInt(2, typeId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Request request = new Request();
-                    request.setId(rs.getInt("Id"));
-                    request.setSenderID(rs.getInt("SenderId"));
-                    String fullReason = rs.getString("Reason");
-                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
-                    String extractedReason = parts.length > 0 ? parts[parts.length - 1] : "";
-                    request.setReason(extractedReason);
-                    request.setResponse(rs.getString("Response"));
-                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
-                    request.setStatus(rs.getString("Status"));
-                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
-                    request.setTypeName(rs.getString("TypeName"));
-                    if (createdAt != null) {
-                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
-                    }
-
-                    requests.add(request);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return requests;
-    }
-
     public int getProcessedRequestsThisWeek() {
         String sql = """
-        SELECT COUNT(*) FROM Request 
-        WHERE Status IN (N'Đã duyệt', N'Từ chối') 
-        AND DATEPART(week, ResponseAt) = DATEPART(week, GETDATE())
-        AND YEAR(ResponseAt) = YEAR(GETDATE())
-        AND TypeID <> 6
-    """;
+                    SELECT COUNT(*) FROM Request 
+                    WHERE Status IN (N'Đã duyệt', N'Từ chối') 
+                    AND DATEPART(week, ResponseAt) = DATEPART(week, GETDATE())
+                    AND YEAR(ResponseAt) = YEAR(GETDATE())
+                    AND TypeID <> 6
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -366,9 +428,6 @@ public class RequestDAO {
         return 0;
     }
 
-    /**
-     * Số đơn chưa xử lý
-     */
     public int getPendingRequests() {
         String sql = "SELECT COUNT(*) FROM Request WHERE Status = N'Chờ xử lý' AND TypeID <> 6";
 
@@ -385,9 +444,6 @@ public class RequestDAO {
         return 0;
     }
 
-    /**
-     * Số học sinh chưa được cấp tài khoản
-     */
     public int getStudentsWithoutAccount() {
         String sql = "SELECT COUNT(*) FROM Request WHERE TypeID = 6 AND Status = N'Chờ xử lý'";
 

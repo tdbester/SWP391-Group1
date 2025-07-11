@@ -1,6 +1,6 @@
 package org.example.talentcenter.controller;
 
-import org.example.talentcenter.dao.RequestDAO;
+import org.example.talentcenter.dao.*;
 import org.example.talentcenter.model.Account;
 import org.example.talentcenter.model.Request;
 
@@ -17,6 +17,7 @@ import java.util.Date;
 @WebServlet(name = "ProcessRequestServlet", value = "/ProcessRequest")
 public class ProcessRequestServlet extends HttpServlet {
     private RequestDAO requestDAO = new RequestDAO();
+    private StudentDAO studentDAO = new StudentDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -88,20 +89,28 @@ public class ProcessRequestServlet extends HttpServlet {
             }
 
             int requestId = Integer.parseInt(requestIdParam);
-            String status;
-            if ("approve".equals(action)) {
-                status = "Đã duyệt";
-            } else if ("reject".equals(action)) {
-                status = "Từ chối";
-            } else {
-                request.setAttribute("errorMessage", "Hành động không hợp lệ.");
-                request.getRequestDispatcher("View/error.jsp").forward(request, response);
-                return;
-            }
             // lấy thông tin đơn
             Request requestDetail = requestDAO.getRequestDetailById(requestId);
             if (requestDetail == null) {
                 request.setAttribute("errorMessage", "Không tìm thấy đơn cần xử lý.");
+                request.getRequestDispatcher("View/error.jsp").forward(request, response);
+                return;
+            }
+
+            String status;
+            if ("approve".equals(action)) {
+                status = "Đã duyệt";
+                if ("Đơn xin chuyển lớp".equals(requestDetail.getTypeName())) {
+                    String reason = requestDetail.getReason();
+                    if (reason != null && reason.contains("TARGET_CLASS:")) {
+                        String targetClassName = reason.split("\\|TARGET_CLASS:")[1];
+                        studentDAO.transferStudentToClass(requestDetail.getSenderID(), targetClassName);
+                    }
+                }
+            } else if ("reject".equals(action)) {
+                status = "Từ chối";
+            } else {
+                request.setAttribute("errorMessage", "Hành động không hợp lệ.");
                 request.getRequestDispatcher("View/error.jsp").forward(request, response);
                 return;
             }
