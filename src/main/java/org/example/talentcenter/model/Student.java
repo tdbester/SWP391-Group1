@@ -1,6 +1,6 @@
 package org.example.talentcenter.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Student {
     private int id;
@@ -8,12 +8,19 @@ public class Student {
     private String parentPhone;
     private String motherPhone;
     private int accountId;
-    private Date enrollmentDate;
     private int classRoomId;
     private String className;
     private String phoneNumber;
+    private int presentCount;
+    private int absentCount;
+    private LocalDate enrollmentDate;
 
-    public Student(int id, String name, String parentPhone, String motherPhone, int accountId, Date enrollmentDate, int classRoomId, String classRoomName, String phoneNumber) {
+    // Thuộc tính để xử lý điểm danh
+    private Integer attendanceId;
+    private String attendanceStatus;
+    private String attendanceNote;
+    private boolean hasAttendance;
+    public Student(int id, String name, String parentPhone, String motherPhone, int accountId, LocalDate enrollmentDate, int classRoomId, String classRoomName, String phoneNumber) {
         this.id = id;
         this.name = name;
         this.parentPhone = parentPhone;
@@ -67,15 +74,6 @@ public class Student {
     public void setAccountId(int accountId) {
         this.accountId = accountId;
     }
-
-    public Date getEnrollmentDate() {
-        return enrollmentDate;
-    }
-
-    public void setEnrollmentDate(Date enrollmentDate) {
-        this.enrollmentDate = enrollmentDate;
-    }
-
     public int getClassRoomId() {
         return classRoomId;
     }
@@ -100,4 +98,55 @@ public class Student {
         this.phoneNumber = phoneNumber;
     }
 
+    public int getPresentCount() {
+        return presentCount;
+    }
+
+    public void setPresentCount(int presentCount) {
+        this.presentCount = presentCount;
+    }
+
+    public int getAbsentCount() {
+        return absentCount;
+    }
+
+    public void setAbsentCount(int absentCount) {
+        this.absentCount = absentCount;
+    }
+
+    public Integer getAttendanceId() {
+        return attendanceId;
+    }
+
+    public void setAttendanceId(Integer attendanceId) {
+        this.attendanceId = attendanceId;
+    }
+
+    public String getAttendanceStatus() {
+        return attendanceStatus;
+    }
+
+    public void setAttendanceStatus(String attendanceStatus) {
+        this.attendanceStatus = attendanceStatus;
+    }
+
+    public String getAttendanceNote() {
+        return attendanceNote;
+    }
+
+    public void setAttendanceNote(String attendanceNote) {
+        this.attendanceNote = attendanceNote;
+    }
+
+    public boolean isHasAttendance() {
+        return hasAttendance;
+    }
+
+    public void setHasAttendance(boolean hasAttendance) {
+        this.hasAttendance = hasAttendance;
+    }
+
+    public void setEnrollmentDate(LocalDate enrollmentDate) {
+        this.enrollmentDate = enrollmentDate;
+    }
 }

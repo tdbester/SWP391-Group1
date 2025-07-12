@@ -58,14 +58,15 @@
                 </c:if>
 
                 <form id="requestForm" method="post" action="${pageContext.request.contextPath}/teacherRequest">
+                    <input type="hidden" name="action" value="create">
+
                     <!-- Chọn loại đơn -->
                     <div class="mb-4">
-                        <label class="form-label fw-bold">Loại đơn yêu cầu <span class="text-danger">*</span></label>
-                        <select id="requestType" name="type" class="form-select" required>
+                        <label class="form-label fw-bold">Loại đơn yêu cầu <span class="text-danger">*</span></label> <select id="requestType" name="type" class="form-select" required>
                             <option value="">-- Chọn loại đơn --</option>
-                            <option value="leave" ${param.type == 'Xin nghỉ phép' ? 'selected' : ''}>Xin nghỉ phép</option>
-                            <option value="schedule_change" ${param.type == 'Thay đổi lịch dạy' ? 'selected' : ''}>Thay đổi lịch dạy</option>
-                            <option value="other" ${param.type == 'other' ? 'selected' : ''}>Khác</option>
+                            <option value="leave" ${param.type == 'Đơn xin nghỉ phép' ? 'selected' : ''}>Đơn xin nghỉ phép</option>
+                            <option value="schedule_change" ${param.type == 'Đơn xin thay đổi lịch dạy' ? 'selected' : ''}>Đơn xin thay đổi lịch dạy</option>
+                            <option value="other" ${param.type == 'Đơn khác' ? 'selected' : ''}>Đơn khác</option>
                         </select>
                     </div>
 
@@ -155,7 +156,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Ngày muốn chuyển sang</label>
                                 <input type="date" name="changeToDate" class="form-control"
-                                       value="${param.changeToDate}" min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
+                                       value="${changeToDate != null ? changeToDate : param.changeToDate}" min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
                             </div>
                         </div>
                     </div>
@@ -163,7 +164,7 @@
                     <!-- Lý do (cho tất cả loại đơn) -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">Lý do <span class="text-danger">*</span></label>
-                        <textarea id="reason" name="reason" class="form-control" rows="6" required>${param.reason}</textarea>
+                        <textarea id="reason" name="reason" class="form-control" rows="6" required>${reason != null ? reason : param.reason}</textarea>
                     </div>
 
                     <!-- Nút gửi -->
@@ -185,52 +186,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Fallback nếu TinyMCE không load được
-    if (typeof tinymce === 'undefined') {
-        console.warn('TinyMCE not loaded, using fallback textarea');
-        window.tinymce = {
-            init: function(config) {
-                console.log('TinyMCE fallback: using regular textarea');
-                const textarea = document.querySelector(config.selector);
-                if (textarea) {
-                    textarea.style.display = 'block';
-                }
-            },
-            get: function(id) {
-                return null;
-            },
-            triggerSave: function() {
-                console.log('TinyMCE fallback: triggerSave called');
-            }
-        };
-    }
-
-    // Initialize TinyMCE
-    document.addEventListener('DOMContentLoaded', function() {
-        tinymce.init({
-            selector: '#reason',
-            height: 200,
-            plugins: 'lists link image code',
-            toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code',
-            content_style: 'body { font-family: Arial, sans-serif; }',
-            setup: function(editor) {
-                editor.on('change', function() {
-                    editor.save();
-                });
-            },
-            init_instance_callback: function(editor) {
-                console.log('TinyMCE initialized successfully');
-            }
-        });
-    });
+    // ✅ XÓA TOÀN BỘ TINYMCE CODE
 
     // Xử lý thay đổi loại đơn
     document.getElementById('requestType').addEventListener('change', function() {
-        // Ẩn tất cả các section
         const sections = document.querySelectorAll('.form-section');
         sections.forEach(section => section.classList.remove('active'));
 
-        // Hiển thị section tương ứng
         const selectedType = this.value;
         if (selectedType) {
             const sectionMap = {
@@ -266,7 +228,7 @@
         }
     });
 
-    // Giới hạn chọn tối đa 2 checkbox cho thay đổi lịch
+    // Giới hạn chọn tối đa 1 checkbox cho thay đổi lịch
     const scheduleCheckboxes = document.querySelectorAll('.schedule-checkbox');
     scheduleCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
@@ -278,33 +240,35 @@
         });
     });
 
-    // Validation form trước khi submit
+    // ✅ VALIDATION ĐƠN GIẢN VÀ CLEAN HTML TAGS
     document.getElementById('requestForm').addEventListener('submit', function(e) {
-        console.log('Form submit triggered');
-
-        // Đợi TinyMCE sẵn sàng
-        if (typeof tinymce !== 'undefined' && tinymce.get('reason')) {
-            tinymce.triggerSave();
-        }
-
         const requestType = document.getElementById('requestType').value;
-        console.log('Request type:', requestType);
 
-        //validation để test
         if (!requestType) {
             e.preventDefault();
             alert('Vui lòng chọn loại đơn yêu cầu!');
             return;
         }
 
-        const reason = document.getElementById('reason').value;
-        if (!reason || reason.trim() === '') {
+        // ✅ LẤY VÀ CLEAN REASON
+        const reasonTextarea = document.getElementById('reason');
+        let reason = reasonTextarea.value;
+
+        // Loại bỏ HTML tags
+        reason = reason.replace(/<[^>]*>/g, '');
+        // Loại bỏ khoảng trắng thừa
+        reason = reason.trim();
+
+        // Set lại giá trị đã clean
+        reasonTextarea.value = reason;
+
+        if (!reason || reason.length < 10) {
             e.preventDefault();
-            alert('Vui lòng nhập lý do!');
+            alert('Lý do phải có ít nhất 10 ký tự!');
             return;
         }
 
-        console.log('Form validation passed, submitting...');
+        console.log('Form validation passed, submitting clean text...');
     });
 </script>
 </body>

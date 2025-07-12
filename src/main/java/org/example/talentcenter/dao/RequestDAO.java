@@ -125,21 +125,18 @@ public class RequestDAO {
             return false;
         }
     }
-
-    // ===== METHODS CHO DANH SÁCH (CHỈ HIỂN THỊ LÝ DO) =====
-
     public ArrayList<Request> getAllRequest() {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
-                 SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
-                                                  rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
-                                           FROM Request r
-                                           JOIN RequestType rt ON r.TypeID = rt.TypeID
-                                           JOIN Account acc ON r.SenderId = acc.Id
-                                           JOIN Role role ON acc.RoleId = role.Id
-                                           WHERE r.TypeID <> 6
-                                           ORDER BY r.CreatedAt DESC
-                """;
+             SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                                              rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+                                       FROM Request r
+                                       JOIN RequestType rt ON r.TypeID = rt.TypeID
+                                       JOIN Account acc ON r.SenderId = acc.Id
+                                       JOIN Role role ON acc.RoleId = role.Id
+                                       WHERE r.TypeID <> 6
+                                       ORDER BY r.CreatedAt DESC
+            """;
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             try (ResultSet rs = stmt.executeQuery()) {
@@ -150,29 +147,63 @@ public class RequestDAO {
                     request.setSenderName(rs.getString("SenderName"));
                     request.setSenderRole(rs.getString("SenderRole"));
 
-                    // CHỈ LẤY LÝ DO CHO DANH SÁCH
+                    // ✅ EXTRACT REASON THEO LOẠI ĐƠN
                     String fullReason = rs.getString("Reason");
+                    String typeName = rs.getString("TypeName");
                     String extractedReason = "";
-                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
 
-                    if (parts.length >= 4) {
-                        // Lấy lý do ở vị trí thứ 4 (index 3)
-                        extractedReason = parts[3];
-                    } else {
-                        // Fallback cho format cũ hoặc không đúng
-                        if (fullReason != null && fullReason.contains("|TRANSFER_TO_CLASS_ID:")) {
-                            extractedReason = fullReason.split("\\|TRANSFER_TO_CLASS_ID:")[0];
-                        } else {
-                            extractedReason = fullReason != null ? fullReason : "";
+                    if (fullReason != null && !fullReason.trim().isEmpty()) {
+                        String[] parts = fullReason.split("\\|");
+
+                        // Xử lý theo loại đơn
+                        switch (typeName) {
+                            case "Đơn xin chuyển lớp":
+                            case "Đơn xin nghỉ học":
+                            case "Đơn khiếu nại về giảng viên":
+                            case "Đơn xin bảo lưu":
+                                // Student format: lớp|sdt_phụ_huynh|sdt_học_sinh|lý_do[|TRANSFER_TO_CLASS_ID:x]
+                                if (parts.length >= 4) {
+                                    extractedReason = parts[3];
+                                } else if (fullReason.contains("|TRANSFER_TO_CLASS_ID:")) {
+                                    extractedReason = fullReason.split("\\|TRANSFER_TO_CLASS_ID:")[0];
+                                } else {
+                                    extractedReason = fullReason;
+                                }
+                                break;
+
+                            case "Đơn xin nghỉ phép":
+                                if (parts.length >= 2) {
+                                    extractedReason = parts[1];
+                                } else {
+                                    extractedReason = fullReason;
+                                }
+                                break;
+                            case "Đơn xin đổi lịch dạy":
+                                if (parts.length >= 4) {
+                                    extractedReason = parts[parts.length - 1];
+                                } else if (parts.length >= 2) {
+                                    extractedReason = parts[parts.length - 1];
+                                } else {
+                                    extractedReason = fullReason;
+                                }
+                                break;
+
+                            case "Đơn khác":
+                            default:
+                                extractedReason = fullReason;
+                                break;
                         }
+                    } else {
+                        extractedReason = "";
                     }
+
                     request.setReason(extractedReason);
 
                     request.setResponse(rs.getString("Response"));
                     request.setResponseAt(rs.getTimestamp("ResponseAt"));
                     request.setStatus(rs.getString("Status"));
                     Timestamp createdAt = rs.getTimestamp("CreatedAt");
-                    request.setTypeName(rs.getString("TypeName"));
+                    request.setTypeName(typeName);
                     if (createdAt != null) {
                         request.setCreatedAt(new java.util.Date(createdAt.getTime()));
                     }
@@ -202,7 +233,6 @@ public class RequestDAO {
                     request.setId(rs.getInt("Id"));
                     request.setSenderID(rs.getInt("SenderId"));
 
-                    // CHỈ LẤY LÝ DO CHO DANH SÁCH
                     String fullReason = rs.getString("Reason");
                     String extractedReason;
                     String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
@@ -459,20 +489,19 @@ public class RequestDAO {
         }
         return 0;
     }
-
     public ArrayList<Request> getAllRequestWithPaging(int offset, int limit) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
-             SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
-                    rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
-             FROM Request r
-             JOIN RequestType rt ON r.TypeID = rt.TypeID
-             JOIN Account acc ON r.SenderId = acc.Id
-             JOIN Role role ON acc.RoleId = role.Id
-             WHERE r.TypeID <> 6
-             ORDER BY r.CreatedAt DESC
-             OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
-            """;
+         SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+         FROM Request r
+         JOIN RequestType rt ON r.TypeID = rt.TypeID
+         JOIN Account acc ON r.SenderId = acc.Id
+         JOIN Role role ON acc.RoleId = role.Id
+         WHERE r.TypeID <> 6
+         ORDER BY r.CreatedAt DESC
+         OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+        """;
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, offset);
@@ -486,23 +515,74 @@ public class RequestDAO {
                     request.setSenderName(rs.getString("SenderName"));
                     request.setSenderRole(rs.getString("SenderRole"));
 
-                    // Extract reason đơn giản
+                    // ✅ EXTRACT REASON THEO LOẠI ĐƠN
                     String fullReason = rs.getString("Reason");
+                    String typeName = rs.getString("TypeName");
                     String extractedReason = "";
+
                     if (fullReason != null && !fullReason.trim().isEmpty()) {
                         String[] parts = fullReason.split("\\|");
-                        if (parts.length >= 4) {
-                            extractedReason = parts[3];
-                        } else {
-                            extractedReason = fullReason;
+
+                        // Xử lý theo loại đơn
+                        switch (typeName) {
+                            case "Đơn xin chuyển lớp":
+                            case "Đơn xin nghỉ học":
+                            case "Đơn khiếu nại về giảng viên":
+                            case "Đơn xin bảo lưu":
+                                // Student format: lớp|sdt_phụ_huynh|sdt_học_sinh|lý_do[|TRANSFER_TO_CLASS_ID:x]
+                                if (parts.length >= 4) {
+                                    extractedReason = parts[3];
+                                    // ✅ Loại bỏ HTML tags nếu có
+                                    extractedReason = extractedReason.replaceAll("<[^>]*>", "").trim();
+                                } else if (fullReason.contains("|TRANSFER_TO_CLASS_ID:")) {
+                                    extractedReason = fullReason.split("\\|TRANSFER_TO_CLASS_ID:")[0];
+                                    extractedReason = extractedReason.replaceAll("<[^>]*>", "").trim();
+                                } else {
+                                    extractedReason = fullReason.replaceAll("<[^>]*>", "").trim();
+                                }
+                                break;
+
+                            case "Đơn xin nghỉ phép":
+                                // Teacher leave format: ngày|lý_do
+                                if (parts.length >= 2) {
+                                    extractedReason = parts[1];
+                                    // ✅ Loại bỏ HTML tags
+                                    extractedReason = extractedReason.replaceAll("<[^>]*>", "").trim();
+                                } else {
+                                    extractedReason = fullReason.replaceAll("<[^>]*>", "").trim();
+                                }
+                                break;
+
+                            case "Đơn xin thay đổi lịch dạy":
+                            case "Đơn xin đổi lịch dạy":
+                                // Teacher schedule change format: ngày_từ|ngày_đến|lớp|lý_do
+                                if (parts.length >= 4) {
+                                    extractedReason = parts[parts.length - 1]; // Lấy phần cuối cùng
+                                } else if (parts.length >= 2) {
+                                    extractedReason = parts[parts.length - 1]; // Lấy phần cuối cùng
+                                } else {
+                                    extractedReason = fullReason;
+                                }
+                                // ✅ Loại bỏ HTML tags
+                                extractedReason = extractedReason.replaceAll("<[^>]*>", "").trim();
+                                break;
+
+                            case "Đơn khác":
+                            default:
+                                // Format đơn giản: chỉ có lý do
+                                extractedReason = fullReason.replaceAll("<[^>]*>", "").trim();
+                                break;
                         }
+                    } else {
+                        extractedReason = "";
                     }
+
                     request.setReason(extractedReason);
 
                     request.setResponse(rs.getString("Response"));
                     request.setResponseAt(rs.getTimestamp("ResponseAt"));
                     request.setStatus(rs.getString("Status"));
-                    request.setTypeName(rs.getString("TypeName"));
+                    request.setTypeName(typeName);
 
                     Timestamp createdAt = rs.getTimestamp("CreatedAt");
                     if (createdAt != null) {
@@ -530,7 +610,7 @@ public class RequestDAO {
         }
         return 0;
     }
-    // ✅ TÌM KIẾM THEO TỪ KHÓA
+
     public ArrayList<Request> searchRequests(String keyword) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """

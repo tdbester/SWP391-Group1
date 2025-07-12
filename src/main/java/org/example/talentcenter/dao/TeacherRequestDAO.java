@@ -15,66 +15,68 @@ public class TeacherRequestDAO {
      * Thêm mới một đơn yêu cầu
      */
     public boolean insertRequest(Request request) {
-        String sql = """
-        INSERT INTO Request (SenderId, Reason, Status, CreatedAt, TypeID)
-        VALUES (?, ?, ?, GETDATE(), ?)
-        """;
-
+        String sql = "INSERT INTO Request (TypeID, SenderId, Reason, Status, CreatedAt) VALUES (?, ?, ?, ?, GETDATE())";
 
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, request.getSenderID());
-            ps.setString(2, request.getReason());
-            ps.setString(3, request.getStatus());
-            ps.setInt(4, getRequestTypeId(request.getTypeName()));
+            stmt.setInt(1, request.getTypeId());
+            stmt.setInt(2, request.getSenderID());
+            stmt.setString(3, request.getReason());
+            stmt.setString(4, request.getStatus() != null ? request.getStatus() : "Chờ xử lý");
 
-            return ps.executeUpdate() > 0;
+            return stmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
+    }
 
-        return false;
+    public ArrayList<Request> getTeacherRequestType() {
+        ArrayList<Request> requestTypes = new ArrayList<>();
+        String sql = "SELECT TypeID, TypeName FROM RequestType WHERE TypeID IN (5,7,8)";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Request requestType = new Request();
+                requestType.setTypeId(rs.getInt("TypeID"));
+                requestType.setTypeName(rs.getString("TypeName"));
+                requestTypes.add(requestType);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requestTypes;
     }
 
     /**
      * Lấy TypeID từ bảng RequestType
      */
-    private int getRequestTypeId(String type) {
-        // Mapping từ type code sang tên trong database
-        String typeName;
-        switch (type) {
-            case "leave":
-                typeName = "Xin nghỉ phép";
-                break;
-            case "schedule_change":
-                typeName = "Thay đổi lịch dạy";
-                break;
-            case "other":
-                typeName = "Khác";
-                break;
-            default:
-                typeName = type; // Nếu đã là tên đầy đủ
+    public int getRequestTypeId(String typeName) {
+        if (typeName == null || typeName.trim().isEmpty()) {
+            return 0;
         }
-
         String sql = "SELECT TypeID FROM RequestType WHERE TypeName = ?";
-
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            ps.setString(1, typeName);
-            ResultSet rs = ps.executeQuery();
+            stmt.setString(1, typeName.trim());
+            ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return rs.getInt("TypeID");
+                int typeId = rs.getInt("TypeID");
+                return typeId;
+            } else {
+                System.err.println("Không tìm thấy TypeID cho TypeName: " + typeName);
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return 1; // Default type
+        return 0;
     }
 
     /**
