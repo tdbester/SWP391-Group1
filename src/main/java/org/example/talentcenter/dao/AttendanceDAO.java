@@ -120,7 +120,7 @@ public class AttendanceDAO {
             while (rs.next()) {
                 Student student = new Student();
                 student.setId(rs.getInt("Id"));
-                student.setFullName(rs.getString("FullName"));
+                student.setName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("ParentPhone"));
                 student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
@@ -366,7 +366,7 @@ public class AttendanceDAO {
             while (rs.next()) {
                 Student student = new Student();
                 student.setId(rs.getInt("Id"));
-                student.setFullName(rs.getString("FullName"));
+                student.setName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("ParentPhone"));
                 student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));

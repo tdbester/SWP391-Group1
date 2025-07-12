@@ -5,6 +5,7 @@ import org.example.talentcenter.model.Account;
 import org.example.talentcenter.model.Student;
 
 import java.sql.*;
+import java.time.LocalDate;
 
 public class StudentDAO {
     public Student getStudentById(int accountId) {
@@ -29,7 +30,7 @@ public class StudentDAO {
                 student.setName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("parentPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
-                student.setEnrollmentDate(rs.getDate("EnrollmentDate"));
+                student.setEnrollmentDate(rs.getDate("EnrollmentDate").toLocalDate());
                 student.setPhoneNumber(rs.getString("PhoneNumber"));
             }
 
@@ -58,7 +59,7 @@ public class StudentDAO {
                 student.setName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("parentPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
-                student.setEnrollmentDate(rs.getDate("EnrollmentDate"));
+                student.setEnrollmentDate(rs.getDate("EnrollmentDate").toLocalDate());
                 student.setClassName(rs.getString("class_name"));
                 student.setPhoneNumber(rs.getString("PhoneNumber"));
             }
