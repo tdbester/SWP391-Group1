@@ -7,6 +7,7 @@ import org.example.talentcenter.model.StudentSchedule;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 public class StudentDAO {
     public Student getStudentById(int accountId) {
@@ -126,6 +127,25 @@ public class StudentDAO {
             e.printStackTrace();
         }
         return null;
+    }
+    public ArrayList<Account> getStudentsByClassId(int classId) {
+        ArrayList<Account> students = new ArrayList<>();
+        String sql = "SELECT * FROM Account a join Student s on a.Id = s.AccountId join Student_Class sc on s.Id = sc.StudentId where ClassRoomId = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, classId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Account acc = new Account();
+                acc.setId(rs.getInt("Id"));
+                acc.setFullName(rs.getString("FullName"));
+                acc.setEmail(rs.getString("Email"));
+                students.add(acc);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return students;
     }
 
 }

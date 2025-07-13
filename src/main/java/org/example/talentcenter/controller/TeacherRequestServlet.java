@@ -6,6 +6,7 @@ import org.example.talentcenter.model.*;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
+import org.example.talentcenter.service.NotificationService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -114,10 +115,28 @@ public class TeacherRequestServlet extends HttpServlet {
                 teacherRequest.setTypeId(typeId);
                 teacherRequest.setStatus("Chờ xử lý");
 
-                // Lưu vào database
                 boolean success = requestDAO.insertRequest(teacherRequest);
-
                 if (success) {
+                    String requestTypeName = "";
+                    switch (type) {
+                        case "leave":
+                            requestTypeName = "Đơn xin nghỉ phép";
+                            break;
+                        case "schedule_change":
+                            requestTypeName = "Đơn xin đổi lịch dạy";
+                            break;
+                        case "other":
+                            requestTypeName = "Đơn khác";
+                            break;
+                        default:
+                            requestTypeName = "Đơn";
+                    }
+                    int newRequestId = teacherRequest.getId();
+                    NotificationService.notifyTeacherRequestSubmitted(
+                            account.getFullName(),
+                            requestTypeName,
+                            newRequestId
+                    );
                     session.setAttribute("success", "Gửi đơn thành công!");
                     response.sendRedirect("teacherRequest");
                 } else {

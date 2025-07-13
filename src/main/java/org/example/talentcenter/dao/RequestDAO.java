@@ -593,6 +593,7 @@ public class RequestDAO {
         }
         return 0;
     }
+
     public ArrayList<Request> getAllRequestWithPaging(int offset, int limit) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
@@ -602,7 +603,7 @@ public class RequestDAO {
          JOIN RequestType rt ON r.TypeID = rt.TypeID
          JOIN Account acc ON r.SenderId = acc.Id
          JOIN Role role ON acc.RoleId = role.Id
-         WHERE r.TypeID <> 6
+         WHERE r.TypeID <> 6 and r.TypeID <> 3
          ORDER BY r.CreatedAt DESC
          OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
         """;
@@ -701,6 +702,8 @@ public class RequestDAO {
         }
         return requests;
     }
+
+
 
     public int getTotalRequestCount() {
         String sql = "SELECT COUNT(*) FROM Request WHERE TypeID <> 6";
