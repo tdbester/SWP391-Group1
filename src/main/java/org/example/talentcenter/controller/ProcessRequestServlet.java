@@ -12,6 +12,7 @@ import org.example.talentcenter.service.NotificationService;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -20,7 +21,7 @@ public class ProcessRequestServlet extends HttpServlet {
     private RequestDAO requestDAO = new RequestDAO();
     private StudentDAO studentDAO = new StudentDAO();
     private TeacherScheduleDAO scheduleDAO = new TeacherScheduleDAO();
-
+private TeacherDAO teacherDAO = new TeacherDAO();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -55,10 +56,9 @@ public class ProcessRequestServlet extends HttpServlet {
                     if (fullReason != null && fullReason.contains("|")) {
                         String[] parts = fullReason.split("\\|");
                         if (parts.length >= 2) {
-                            request.setAttribute("ngayNghi", parts[0]); // Ngày nghỉ
                             requestDetail.setReason(parts[1]);
                             try {
-                                requestDetail.setOffDate(java.time.LocalDate.parse(parts[0])); // ✅ chính chỗ này cần
+                                requestDetail.setOffDate(java.time.LocalDate.parse(parts[0]));
                             } catch (Exception e) {
                                 System.out.println("Lỗi parse ngày nghỉ: " + e.getMessage());
                             }// Cập nhật lại lý do
@@ -202,6 +202,75 @@ public class ProcessRequestServlet extends HttpServlet {
                         studentDAO.transferStudentToClass(requestDetail.getSenderID(), targetClassName);
                     }
                 }
+                if ("Đơn xin đổi lịch dạy".equals(requestDetail.getTypeName())) {
+                    int scheduleId = requestDetail.getScheduleId();
+                    LocalDate toDate = requestDetail.getToDate();
+                    int toSlot = requestDetail.getSlot();
+
+                    if (scheduleId > 0 && toDate != null && toSlot > 0) {
+                        boolean updated = scheduleDAO.updateScheduleDateAndSlot(scheduleId, toDate.toString(), toSlot);
+                        if (!updated) {
+                            request.setAttribute("errorMessage", "Không thể cập nhật lịch học.");
+                            request.getRequestDispatcher("View/error.jsp").forward(request, response);
+                            return;
+                        }
+                        Schedule newSchedule = scheduleDAO.getScheduleById(scheduleId);
+                        if (newSchedule != null) {
+                            // Lấy danh sách học sinh của lớp này
+                            ArrayList<Account> students = studentDAO.getStudentsByClassId(newSchedule.getClassRoomId());
+                            for (Account student : students) {
+                                try {
+                                    NotificationService.notifyStudentScheduleChanged(
+                                            student.getId(),
+                                            requestDetail.getSenderName(),
+                                            newSchedule.getClassName(),
+                                            toDate,
+                                            newSchedule.getSlotStartTime(),
+                                            newSchedule.getSlotEndTime(),
+                                            newSchedule.getId()
+                                    );
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        } else {
+                            request.setAttribute("errorMessage", "Dữ liệu lịch không hợp lệ!");
+                            request.getRequestDispatcher("View/error.jsp").forward(request, response);
+                            return;
+                        }
+                    }
+                    if ("Đơn xin nghỉ phép".equals(requestDetail.getTypeName())) {
+                        LocalDate offDate = requestDetail.getOffDate();
+                        int teacherId = teacherDAO.getTeacherByAccountId(requestDetail.getSenderID()).getId();
+
+                        if (offDate != null) {
+                            ArrayList<Schedule> schedules = scheduleDAO.getScheduleByTeacherIdAndDate(teacherId, offDate);
+                            System.out.println("OffDate: " + offDate);
+                            System.out.println("Số lịch dạy trong ngày nghỉ: " + schedules.size());
+
+                            for (Schedule schedule : schedules) {
+                                ArrayList<Account> students = studentDAO.getStudentsByClassId(schedule.getClassRoomId());
+                                for (Account student : students) {
+
+                                    try {
+                                        NotificationService.notifyStudentAbsence(
+                                                student.getId(),
+                                                requestDetail.getSenderName(),
+                                                schedule.getClassName(),
+                                                offDate,
+                                                schedule.getSlotStartTime(),
+                                                schedule.getSlotEndTime(),
+                                                schedule.getId()
+                                        );
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
             } else if ("reject".equals(action)) {
                 status = "Từ chối";
             } else {

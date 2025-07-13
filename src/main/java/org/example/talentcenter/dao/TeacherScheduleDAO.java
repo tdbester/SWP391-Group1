@@ -72,7 +72,7 @@ public class TeacherScheduleDAO {
         JOIN Teacher t ON c.TeacherId = t.Id
         JOIN Account a ON t.AccountId = a.Id
         JOIN Course co ON c.CourseId = co.Id
-        WHERE t.Id = ? AND s.Date = ?
+        WHERE t.Id = ? AND CONVERT(date, s.Date) = ?
         ORDER BY sl.StartTime
         """;
 
@@ -245,6 +245,20 @@ public class TeacherScheduleDAO {
         return false;
     }
 
+    public boolean updateScheduleDateAndSlot(int scheduleId, String newDate, int newSlot) {
+        String sql = "UPDATE Schedule SET Date = ?, SlotId = ? WHERE Id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newDate);
+            ps.setInt(2, newSlot);
+            ps.setInt(3, scheduleId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // Helper method để tạo Schedule object từ ResultSet
     private Schedule createScheduleFromResultSet(ResultSet rs) throws SQLException {
         Schedule schedule = new Schedule();
@@ -262,4 +276,6 @@ public class TeacherScheduleDAO {
         schedule.setTeacherName(rs.getString("TeacherName"));
         return schedule;
     }
+
+
 }
