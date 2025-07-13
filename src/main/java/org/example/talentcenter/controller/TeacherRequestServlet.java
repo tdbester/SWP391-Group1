@@ -6,6 +6,7 @@ import org.example.talentcenter.model.*;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,13 +28,17 @@ public class TeacherRequestServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
         HttpSession session = request.getSession(false);
         Account account = (Account) session.getAttribute("account");
         if (session == null || account == null) {
             response.sendRedirect(request.getContextPath() + "/View/login.jsp");
             return;
         }
+        ArrayList<Schedule> slotList = scheduleDAO.getAllSlots();
+        request.setAttribute("slotList", slotList);
 
         String action = request.getParameter("action");
         ArrayList<Request> requestTypeList = requestDAO.getTeacherRequestType();
@@ -57,11 +62,13 @@ public class TeacherRequestServlet extends HttpServlet {
             request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
         }
     }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
         String action = request.getParameter("action");
 
         if ("create".equals(action)) {
@@ -77,7 +84,6 @@ public class TeacherRequestServlet extends HttpServlet {
                 String reason = request.getParameter("reason");
                 Integer senderId = account.getId();
 
-                // Validation
                 if (type == null || type.trim().isEmpty()) {
                     session.setAttribute("error", "Vui lòng chọn loại đơn yêu cầu!");
                     redirectWithFormData(request, response);
@@ -124,8 +130,7 @@ public class TeacherRequestServlet extends HttpServlet {
                 session.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
                 redirectWithFormData(request, response);
             }
-        }
-        else {
+        } else {
             doGet(request, response);
         }
     }
@@ -135,22 +140,19 @@ public class TeacherRequestServlet extends HttpServlet {
             case "leave":
                 String leaveDate = request.getParameter("leaveDate");
                 return (leaveDate != null ? leaveDate : "") + "|" + reason;
-
             case "schedule_change":
                 String fromDate = request.getParameter("changeFromDate");
                 String toDate = request.getParameter("changeToDate");
-                String[] selectedSchedules = request.getParameterValues("selectedSchedules");
+                String toSlot = request.getParameter("changeToSlot");
+                String selectedScheduleId = request.getParameter("selectedSchedules");
 
-                StringBuilder detailReason = new StringBuilder();
-                detailReason.append(fromDate != null ? fromDate : "").append("|");
-                detailReason.append(toDate != null ? toDate : "").append("|");
-                if (selectedSchedules != null && selectedSchedules.length > 0) {
-                    detailReason.append(String.join(",", selectedSchedules)).append("|");
-                } else {
-                    detailReason.append("|");
-                }
-                detailReason.append(reason);
-                return detailReason.toString();
+                return String.join("|",
+                        fromDate != null ? fromDate : "",
+                        toDate != null ? toDate : "",
+                        toSlot != null ? toSlot : "",
+                        selectedScheduleId != null ? selectedScheduleId : "",
+                        reason != null ? reason : ""
+                );
 
             default:
                 return reason;
@@ -177,10 +179,12 @@ public class TeacherRequestServlet extends HttpServlet {
         if (type != null) redirectUrl.append("type=").append(type).append("&");
 
         String reason = request.getParameter("reason");
-        if (reason != null) redirectUrl.append("reason=").append(java.net.URLEncoder.encode(reason, "UTF-8")).append("&");
+        if (reason != null)
+            redirectUrl.append("reason=").append(java.net.URLEncoder.encode(reason, "UTF-8")).append("&");
 
         response.sendRedirect(redirectUrl.toString());
     }
+
     private void handleCheckLeave(HttpServletRequest request, HttpServletResponse response, HttpSession session)
             throws ServletException, IOException {
 
@@ -295,7 +299,6 @@ public class TeacherRequestServlet extends HttpServlet {
     }
 
 
-
     private boolean handleLeaveRequest(HttpServletRequest request, int senderId, String reason) {
         try {
             String dateStr = request.getParameter("leaveDate");
@@ -384,7 +387,6 @@ public class TeacherRequestServlet extends HttpServlet {
             return false;
         }
     }
-
 
     private boolean handleOtherRequest(HttpServletRequest request, int senderId, String reason, String type) {
         try {
