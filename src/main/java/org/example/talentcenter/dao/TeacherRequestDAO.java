@@ -104,15 +104,57 @@ public class TeacherRequestDAO {
                 request.setId(rs.getInt("Id"));
                 request.setTypeName(rs.getString("TypeName"));
                 request.setSenderID(rs.getInt("SenderId"));
-                request.setReason(rs.getString("Reason"));
                 request.setStatus(rs.getString("Status"));
                 request.setResponse(rs.getString("Response"));
                 request.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 request.setResponseAt(rs.getTimestamp("ResponseAt"));
                 request.setProcessedBy(rs.getInt("ProcessedBy"));
 
+                String fullReason = rs.getString("Reason");
+                String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+                String type = request.getTypeName();
+
+                if (type != null) {
+                    switch (type) {
+                        case "Đơn xin nghỉ phép":
+                            // Format: date|reason
+                            if (parts.length >= 2) {
+                                request.setReason(parts[1]);
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+
+                        case "Đơn xin đổi lịch dạy":
+                            // Format: from|to|slot|scheduleId|reason
+                            if (parts.length >= 5) {
+                                request.setReason(parts[4]);
+                            } else if (parts.length >= 1) {
+                                request.setReason(parts[parts.length - 1]);
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+
+
+                        default:
+                            if (parts.length >= 4) {
+                                request.setCourseName(parts[0]);
+                                request.setParentPhone(parts[1]);
+                                request.setPhoneNumber(parts[2]);
+                                request.setReason(parts[3]);
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+                    }
+                } else {
+                    request.setReason(fullReason);
+                }
+
                 requests.add(request);
             }
+
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -145,7 +187,48 @@ public class TeacherRequestDAO {
                 request.setId(rs.getInt("Id"));
                 request.setTypeName(rs.getString("TypeName"));
                 request.setSenderID(rs.getInt("SenderId"));
-                request.setReason(rs.getString("Reason"));
+                String fullReason = rs.getString("Reason");
+                String type = rs.getString("TypeName");
+                String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+
+                if (type != null) {
+                    switch (type) {
+                        case "Đơn xin nghỉ phép":
+                            if (parts.length >= 2) {
+                                request.setReason(parts[1]);
+                                request.setOffDate(LocalDate.parse(parts[0]));  // nhớ set vào model
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+
+                        case "Đơn xin đổi lịch dạy":
+                            if (parts.length >= 5) {
+                                request.setReason(parts[4]);
+                                request.setScheduleId(Integer.parseInt(parts[3]));  // nhớ set vào model
+                                request.setFromDate(LocalDate.parse(parts[0]));
+                                request.setToDate(LocalDate.parse(parts[1]));
+                                request.setSlot(Integer.parseInt(parts[2]));
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+
+                        default:
+                            if (parts.length >= 4) {
+                                request.setCourseName(parts[0]);
+                                request.setParentPhone(parts[1]);
+                                request.setPhoneNumber(parts[2]);
+                                request.setReason(parts[3]);
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+                    }
+                } else {
+                    request.setReason(fullReason);
+                }
+
                 request.setStatus(rs.getString("Status"));
                 request.setResponse(rs.getString("Response"));
                 request.setCreatedAt(rs.getTimestamp("CreatedAt"));

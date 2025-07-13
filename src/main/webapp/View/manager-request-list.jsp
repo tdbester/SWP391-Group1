@@ -184,12 +184,13 @@
             background-color: #5a6268;
             border-color: #545b62;
         }
+
         .page-title {
             background: white;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .page-title h2 {
@@ -209,7 +210,7 @@
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .filter-section label {
@@ -228,7 +229,7 @@
             background: white;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         table {
@@ -274,7 +275,7 @@
             background: #f8f9fa;
             padding: 8px;
             border-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .status-badge {
@@ -367,6 +368,7 @@
                 max-width: 150px;
             }
         }
+
         .pagination-wrapper {
             display: flex;
             justify-content: center;
@@ -374,7 +376,7 @@
             padding: 20px;
             background: white;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .pagination {
@@ -494,9 +496,15 @@
                     </label>
                     <select id="statusFilter" name="statusFilter" class="form-select">
                         <option value="">Tất cả trạng thái</option>
-                        <option value="Chờ xử lý" <%= "Chờ xử lý".equals(request.getAttribute("statusFilter")) ? "selected" : "" %>>Chờ xử lý</option>
-                        <option value="Đã duyệt" <%= "Đã duyệt".equals(request.getAttribute("statusFilter")) ? "selected" : "" %>>Đã duyệt</option>
-                        <option value="Từ chối" <%= "Từ chối".equals(request.getAttribute("statusFilter")) ? "selected" : "" %>>Từ chối</option>
+                        <option value="Chờ xử lý" <%= "Chờ xử lý".equals(request.getAttribute("statusFilter")) ? "selected" : "" %>>
+                            Chờ xử lý
+                        </option>
+                        <option value="Đã duyệt" <%= "Đã duyệt".equals(request.getAttribute("statusFilter")) ? "selected" : "" %>>
+                            Đã duyệt
+                        </option>
+                        <option value="Từ chối" <%= "Từ chối".equals(request.getAttribute("statusFilter")) ? "selected" : "" %>>
+                            Từ chối
+                        </option>
                     </select>
                 </div>
 
@@ -557,14 +565,18 @@
                         }
                 %>
                 <tr>
-                    <td style="text-align: center; font-weight: 600;"><%= index++ %></td>
-                    <td><%= r.getSenderName() != null ? r.getSenderName() : "" %></td>
+                    <td style="text-align: center; font-weight: 600;"><%= index++ %>
+                    </td>
+                    <td><%= r.getSenderName() != null ? r.getSenderName() : "" %>
+                    </td>
                     <td class="<%= roleClass %>">
                         <%= r.getSenderRole() != null ? r.getSenderRole() : "" %>
                     </td>
-                    <td><%= r.getTypeName() != null ? r.getTypeName() : "" %></td>
+                    <td><%= r.getTypeName() != null ? r.getTypeName() : "" %>
+                    </td>
                     <td>
-                        <div class="reason-text" title="<%= r.getReason() != null ? r.getReason().replace("\"", "&quot;") : "" %>">
+                        <div class="reason-text"
+                             title="<%= r.getReason() != null ? r.getReason().replace("\"", "&quot;") : "" %>">
                             <%= r.getReason() != null ? r.getReason() : "" %>
                         </div>
                     </td>

@@ -3,6 +3,7 @@ package org.example.talentcenter.dao;
 import org.example.talentcenter.config.DBConnect;
 import org.example.talentcenter.model.Account;
 import org.example.talentcenter.model.Student;
+import org.example.talentcenter.model.StudentSchedule;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -99,4 +100,32 @@ public class StudentDAO {
         }
         return false;
     }
+    public StudentSchedule getScheduleById(int id) {
+        String sql = "SELECT s.*, c.Name as className, c.CourseTitle, r.Code as roomCode " +
+                "FROM Schedule s " +
+                "LEFT JOIN ClassRoom c ON s.ClassRoomId = c.Id " +
+                "LEFT JOIN Room r ON s.RoomId = r.Id " +
+                "WHERE s.Id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    StudentSchedule schedule = new StudentSchedule();
+                    schedule.setId(rs.getInt("Id"));
+                    schedule.setDate(rs.getDate("Date").toLocalDate());
+                    schedule.setSlotId(rs.getInt("SlotId"));
+                    schedule.setClassName(rs.getString("className"));
+                    schedule.setCourseTitle(rs.getString("CourseTitle"));
+                    schedule.setRoomCode(rs.getString("roomCode"));
+                    // Thêm các trường khác nếu cần
+                    return schedule;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

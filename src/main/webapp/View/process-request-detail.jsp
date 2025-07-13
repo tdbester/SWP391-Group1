@@ -20,34 +20,84 @@
 <%--*  Date        | Author               | Description--%>
 <%--*  ------------|----------------------|----------------------------------%>
 <%--*  2025-07-05  | Training Manager     | Request detail processing page--%>
-<%--*/--%><%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%--*/--%>
+
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="org.example.talentcenter.model.Request" %>
-
+<%@ page import="org.example.talentcenter.model.Schedule" %>
 <%
     Request requestDetail = (Request) request.getAttribute("requestDetail");
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-
+    Schedule oldSchedule = (Schedule) request.getAttribute("oldSchedule");
+    String ngayNghi = (String) request.getAttribute("ngayNghi");
     String reason = "";
     String targetClassName = "";
     boolean isTransferRequest = false;
+    String changeFrom = "";
+    String changeTo = "";
+    String changeSlot = "";
+    String scheduleId = "";
+    boolean isChangeRequest = false;
+    boolean isLeaveRequest = false;
 
-    if (requestDetail != null && requestDetail.getReason() != null) {
+    if (requestDetail != null) {
+        String typeName = requestDetail.getTypeName();
         String fullReason = requestDetail.getReason();
-        if (fullReason.contains("TARGET_CLASS:")) {
-            isTransferRequest = true;
-            String[] reasonParts = fullReason.split("\\|TARGET_CLASS:");
-            reason = reasonParts[0];
-            targetClassName = reasonParts[1];
-        } else {
-            reason = fullReason;
+
+        if ("Đơn xin đổi lịch dạy".equals(typeName)) {
+            // Đây là đơn đổi lịch dạy, kiểm tra oldSchedule từ backend
+            isChangeRequest = true;
+            reason = fullReason != null ? fullReason : "";
+
+            // Sử dụng model fields từ DAO thay vì parsing lại
+            if (requestDetail.getFromDate() != null) {
+                changeFrom = requestDetail.getFromDate().toString();
+            }
+            if (requestDetail.getToDate() != null) {
+                changeTo = requestDetail.getToDate().toString();
+            }
+            if (requestDetail.getSlot() > 0) {
+                changeSlot = String.valueOf(requestDetail.getSlot());
+            }
+            if (requestDetail.getScheduleId() > 0) {
+                scheduleId = String.valueOf(requestDetail.getScheduleId());
+            }
         }
+        // Kiểm tra đơn xin nghỉ phép
+        else if ("Đơn xin nghỉ phép".equals(typeName)) {
+            isLeaveRequest = true;
+            reason = fullReason != null ? fullReason : "";
+        }
+        // Kiểm tra đơn chuyển lớp
+        else if ("Đơn xin chuyển lớp".equals(typeName)) {
+            isTransferRequest = true;
+            if (fullReason != null && fullReason.contains("TARGET_CLASS:")) {
+                String[] reasonParts = fullReason.split("\\|TARGET_CLASS:");
+                if (reasonParts.length >= 2) {
+                    reason = reasonParts[0];
+                    targetClassName = reasonParts[1];
+                }
+            } else {
+                reason = fullReason != null ? fullReason : "";
+            }
+        }
+        // Các loại đơn khác
+        else {
+            reason = fullReason != null ? fullReason : "";
+        }
+
+        // Debug information
+        System.out.println("Type: " + typeName);
+        System.out.println("Reason: " + reason);
+        System.out.println("Old Schedule: " + (oldSchedule != null ? "Available" : "Null"));
+        System.out.println("isChangeRequest: " + isChangeRequest);
     }
 %>
-
 <html lang="vi">
 <head>
+    <meta charset="UTF-8">
     <title>Chi tiết đơn - Training Manager</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
@@ -378,6 +428,7 @@
             <h2 class="section-title">
                 <i class="fas fa-user"></i> Thông tin người gửi đơn
             </h2>
+            <% String senderRole = requestDetail.getSenderRole(); %>
             <table class="info-table">
                 <tr>
                     <td><i class="fas fa-id-card"></i> Họ và tên:</td>
@@ -387,19 +438,29 @@
                     <td><i class="fas fa-phone"></i> Số điện thoại:</td>
                     <td><%= requestDetail.getPhoneNumber() != null ? requestDetail.getPhoneNumber() : "" %></td>
                 </tr>
+
+                <% if ("Teacher".equalsIgnoreCase(senderRole)) { %>
+                <tr>
+                    <td><i class="fas fa-envelope"></i> Email:</td>
+                    <td><%= requestDetail.getSenderEmail() != null ? requestDetail.getSenderEmail() : "" %></td>
+                </tr>
+                <% } else { %>
                 <tr>
                     <td><i class="fas fa-phone-alt"></i> SĐT phụ huynh:</td>
                     <td><%= requestDetail.getParentPhone() != null ? requestDetail.getParentPhone() : "" %></td>
                 </tr>
                 <tr>
-                    <td><i class="fas fa-user-tag"></i> Vai trò:</td>
-                    <td><%= requestDetail.getSenderRole() != null ? requestDetail.getSenderRole() : "" %></td>
-                </tr>
-                <tr>
                     <td><i class="fas fa-chalkboard-teacher"></i> Lớp hiện tại:</td>
                     <td><%= requestDetail.getCourseName() != null ? requestDetail.getCourseName() : "" %></td>
                 </tr>
+                <% } %>
+
+                <tr>
+                    <td><i class="fas fa-user-tag"></i> Vai trò:</td>
+                    <td><%= senderRole %></td>
+                </tr>
             </table>
+
         </div>
 
         <!-- Thông tin đơn -->
@@ -418,6 +479,7 @@
                 </tr>
                 <tr>
                     <td><i class="fas fa-flag"></i> Trạng thái:</td>
+
                     <td>
                         <%
                             String status = requestDetail.getStatus();
@@ -443,6 +505,57 @@
                     <h3><i class="fas fa-comment-alt"></i> Lý do chi tiết</h3>
                     <div class="reason-content"><%= reason %></div>
                 </div>
+                <!-- Ngày nghỉ -->
+                <% if (isLeaveRequest && requestDetail.getOffDate() != null) { %>
+                <div class="transfer-box">
+                    <h3><i class="fas fa-calendar-times"></i> Thông tin ngày nghỉ</h3>
+                    <div class="transfer-detail">
+                        <strong><i class="fas fa-calendar-day"></i> Ngày nghỉ:</strong> <%= requestDetail.getOffDate().toString() %>
+                    </div>
+                </div>
+                <% } %>
+
+                <% if (isChangeRequest) { %>
+                <div class="transfer-box">
+                    <h3><i class="fas fa-calendar-alt"></i> Thông tin đổi lịch dạy</h3>
+
+                    <!-- Hiển thị thông tin chi tiết nếu có -->
+                    <% if (!changeFrom.isEmpty()) { %>
+                    <div class="transfer-detail">
+                        <strong><i class="fas fa-calendar-day"></i> Ngày chuyển từ:</strong> <%= changeFrom %>
+                    </div>
+                    <% } %>
+
+                    <% if (!changeTo.isEmpty()) { %>
+                    <div class="transfer-detail">
+                        <strong><i class="fas fa-calendar-check"></i> Ngày chuyển đến:</strong> <%= changeTo %>
+                    </div>
+                    <% } %>
+
+                    <% if (!changeSlot.isEmpty()) { %>
+                    <div class="transfer-detail">
+                        <strong><i class="fas fa-clock"></i> Slot:</strong> <%= changeSlot %>
+                    </div>
+                    <% } %>
+
+                    <!-- Hiển thị thông tin lịch cũ từ database -->
+                    <% if (oldSchedule != null) { %>
+                    <div class="transfer-detail">
+                        <strong><i class="fas fa-chalkboard-teacher"></i> Lớp:</strong> <%= oldSchedule.getClassName() %>
+                    </div>
+                    <div class="transfer-detail">
+                        <strong><i class="fas fa-calendar-alt"></i> Ngày học:</strong> <%= oldSchedule.getDate() %>
+                    </div>
+                    <div class="transfer-detail">
+                        <strong><i class="fas fa-clock"></i> Thời gian:</strong> <%= oldSchedule.getSlotStartTime() %> - <%= oldSchedule.getSlotEndTime() %>
+                    </div>
+                    <div class="transfer-detail">
+                        <strong><i class="fas fa-door-open"></i> Phòng:</strong> <%= oldSchedule.getRoomCode() %>
+                    </div>
+                    <% } %>
+
+                </div>
+                <% } %>
 
                 <!-- Thông tin lớp chuyển -->
                 <% if (isTransferRequest) { %>

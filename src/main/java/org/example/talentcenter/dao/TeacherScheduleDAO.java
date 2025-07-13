@@ -94,6 +94,25 @@ public class TeacherScheduleDAO {
 
         return schedules;
     }
+    public ArrayList<Schedule> getAllSlots() {
+        ArrayList<Schedule> slots = new ArrayList<>();
+        String sql = "SELECT Id, StartTime, EndTime FROM Slot ORDER BY Id";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Schedule slot = new Schedule();
+                slot.setSlotId(rs.getInt("Id"));
+                slot.setSlotStartTime(rs.getTime("StartTime").toLocalTime());
+                slot.setSlotEndTime(rs.getTime("EndTime").toLocalTime());
+                slots.add(slot);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return slots;
+    }
 
     /**
      * Lấy thông tin chi tiết của một lịch học
@@ -101,7 +120,7 @@ public class TeacherScheduleDAO {
     public Schedule getScheduleById(int scheduleId) {
         String sql = """
         SELECT s.Id, s.Date, s.RoomId, s.ClassRoomId, s.SlotId,
-               cr.Name as ClassName, cr.Name as CourseName, cr.Title as CourseTitle,
+               cr.Name as ClassName, cr.Name as CourseName,
                r.Code as RoomCode, sl.StartTime, sl.EndTime
         FROM Schedule s
         INNER JOIN ClassRooms cr ON s.ClassRoomId = cr.Id
@@ -125,7 +144,6 @@ public class TeacherScheduleDAO {
                 schedule.setClassRoomId(rs.getInt("ClassRoomId"));
                 schedule.setSlotId(rs.getInt("SlotId"));
                 schedule.setClassName(rs.getString("ClassName"));
-                schedule.setCourseTitle(rs.getString("CourseTitle"));
                 schedule.setRoomCode(rs.getString("RoomCode"));
                 schedule.setSlotStartTime(rs.getTime("StartTime").toLocalTime());
                 schedule.setSlotEndTime(rs.getTime("EndTime").toLocalTime());

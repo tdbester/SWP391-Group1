@@ -21,6 +21,7 @@ import org.example.talentcenter.config.DBConnect;
 import org.example.talentcenter.model.Request;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -93,7 +94,48 @@ public class RequestDAO {
                 if (rs.next()) {
                     Request request = new Request();
                     request.setId(rs.getInt("Id"));
-                    request.setReason(rs.getString("Reason"));
+                    String fullReason = rs.getString("Reason");
+                    String type = rs.getString("TypeName");
+                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+
+                    if (type != null) {
+                        switch (type) {
+                            case "Đơn xin nghỉ phép":
+                                if (parts.length >= 2) {
+                                    request.setReason(parts[1]);
+                                    request.setOffDate(LocalDate.parse(parts[0]));  // nhớ set vào model
+                                } else {
+                                    request.setReason(fullReason);
+                                }
+                                break;
+
+                            case "Đơn xin đổi lịch dạy":
+                                if (parts.length >= 5) {
+                                    request.setReason(parts[4]);
+                                    request.setScheduleId(Integer.parseInt(parts[3]));
+                                    request.setFromDate(LocalDate.parse(parts[0]));
+                                    request.setToDate(LocalDate.parse(parts[1]));
+                                    request.setSlot(Integer.parseInt(parts[2]));
+                                } else {
+                                    request.setReason(fullReason);
+                                }
+                                break;
+
+                            default:
+                                if (parts.length >= 4) {
+                                    request.setCourseName(parts[0]);
+                                    request.setParentPhone(parts[1]);
+                                    request.setPhoneNumber(parts[2]);
+                                    request.setReason(parts[3]);
+                                } else {
+                                    request.setReason(fullReason);
+                                }
+                                break;
+                        }
+                    } else {
+                        request.setReason(fullReason);
+                    }
+
                     request.setSenderID(rs.getInt("SenderId"));
                     return request;
                 }
@@ -272,12 +314,12 @@ public class RequestDAO {
     public ArrayList<Request> getRequestBySenderIdAndType(int senderId, int typeId) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
-            SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, rt.TypeName 
-            FROM Request r 
-            JOIN RequestType rt ON r.TypeID = rt.TypeID 
-            WHERE r.SenderId = ? AND r.TypeID = ? 
-            ORDER BY r.CreatedAt DESC
-            """;
+        SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, rt.TypeName 
+        FROM Request r 
+        JOIN RequestType rt ON r.TypeID = rt.TypeID 
+        WHERE r.SenderId = ? AND r.TypeID = ? 
+        ORDER BY r.CreatedAt DESC
+        """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -290,29 +332,56 @@ public class RequestDAO {
                     request.setId(rs.getInt("Id"));
                     request.setSenderID(rs.getInt("SenderId"));
 
-                    // CHỈ LẤY LÝ DO CHO DANH SÁCH
                     String fullReason = rs.getString("Reason");
-                    String extractedReason;
                     String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+                    String typeName = rs.getString("TypeName");
+                    String extractedReason = "";
 
-                    if (parts.length >= 4) {
-                        extractedReason = parts[3]; // ✅ CHỈ LẤY LÝ DO
-                    } else {
-                        // Fallback cho format cũ
-                        if (fullReason != null && fullReason.contains("|TRANSFER_TO_CLASS_ID:")) {
-                            extractedReason = fullReason.split("\\|TRANSFER_TO_CLASS_ID:")[0];
-                        } else {
-                            extractedReason = fullReason != null ? fullReason : "";
-                        }
+                    switch (typeName) {
+                        case "Đơn xin chuyển lớp":
+                            if (parts.length >= 4) {
+                                extractedReason = parts[3];
+                            } else if (fullReason != null && fullReason.contains("|TRANSFER_TO_CLASS_ID:")) {
+                                extractedReason = fullReason.split("\\|TRANSFER_TO_CLASS_ID:")[0];
+                            } else {
+                                extractedReason = fullReason != null ? fullReason : "";
+                            }
+                            break;
+
+                        case "Đơn xin nghỉ phép":
+                            if (parts.length >= 2) {
+                                extractedReason = parts[1];
+                            } else {
+                                extractedReason = fullReason != null ? fullReason : "";
+                            }
+                            break;
+
+                        case "Đơn xin đổi lịch dạy":
+                            if (parts.length >= 5) {
+                                extractedReason = parts[4];
+                            } else if (parts.length >= 1) {
+                                extractedReason = parts[parts.length - 1];
+                            } else {
+                                extractedReason = fullReason != null ? fullReason : "";
+                            }
+                            break;
+
+                        default: // Đơn khác
+                            if (parts.length >= 4) {
+                                extractedReason = parts[3];
+                            } else {
+                                extractedReason = fullReason != null ? fullReason : "";
+                            }
+                            break;
                     }
 
-                    request.setReason(extractedReason); // ✅ CHỈ SET MỘT LẦN
-
+                    request.setReason(extractedReason);
                     request.setResponse(rs.getString("Response"));
                     request.setResponseAt(rs.getTimestamp("ResponseAt"));
                     request.setStatus(rs.getString("Status"));
+                    request.setTypeName(typeName);
+
                     Timestamp createdAt = rs.getTimestamp("CreatedAt");
-                    request.setTypeName(rs.getString("TypeName"));
                     if (createdAt != null) {
                         request.setCreatedAt(new java.util.Date(createdAt.getTime()));
                     }
@@ -328,15 +397,15 @@ public class RequestDAO {
 
     public Request getRequestDetailById(int requestId) {
         String sql = """
-                    SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, 
-                           rt.TypeName, acc.FullName AS SenderName, acc.Email AS SenderEmail, 
-                           acc.PhoneNumber AS SenderPhone, role.Name AS SenderRole
-                    FROM Request r
-                    JOIN RequestType rt ON r.TypeID = rt.TypeID
-                    JOIN Account acc ON r.SenderId = acc.Id
-                    JOIN Role role ON acc.RoleId = role.Id
-                    WHERE r.Id = ?
-                """;
+        SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+               rt.TypeName, acc.FullName AS SenderName, acc.Email AS SenderEmail,
+               acc.PhoneNumber AS SenderPhone, role.Name AS SenderRole
+        FROM Request r
+        JOIN RequestType rt ON r.TypeID = rt.TypeID
+        JOIN Account acc ON r.SenderId = acc.Id
+        JOIN Role role ON acc.RoleId = role.Id
+        WHERE r.Id = ?
+    """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -350,47 +419,81 @@ public class RequestDAO {
                     request.setSenderID(rs.getInt("SenderId"));
                     request.setSenderName(rs.getString("SenderName"));
                     request.setSenderRole(rs.getString("SenderRole"));
-
-                    // PARSE ĐẦY ĐỦ THÔNG TIN CHO CHI TIẾT
-                    String fullReason = rs.getString("Reason");
-                    // Format: lớp|sdt_phụ_huynh|sdt_học_sinh|lý_do[|TRANSFER_TO_CLASS_ID:x]
-                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
-
-                    if (parts.length >= 4) {
-                        request.setCourseName(parts[0]);        // Lớp hiện tại
-                        request.setParentPhone(parts[1]);       // SĐT phụ huynh
-                        request.setPhoneNumber(parts[2]);       // SĐT học sinh
-                        request.setReason(parts[3]);            // Lý do
-
-                        // Xử lý thông tin chuyển lớp nếu có
-                        if (parts.length > 4 && parts[4].startsWith("TRANSFER_TO_CLASS_ID:")) {
-                            String transferClassId = parts[4].split(":")[1];
-
-                            // Chỉ lấy tên lớp
-                            String classNameSql = "SELECT Name FROM Classrooms WHERE id = ?";
-                            try (PreparedStatement classStmt = conn.prepareStatement(classNameSql)) {
-                                classStmt.setInt(1, Integer.parseInt(transferClassId));
-                                ResultSet classRs = classStmt.executeQuery();
-                                if (classRs.next()) {
-                                    String targetClassName = classRs.getString("Name");
-                                    // Thêm tên lớp vào reason
-                                    request.setReason(parts[3] + "|TARGET_CLASS:" + targetClassName);
-                                }
-                            }
-                        }
-                    } else {
-                        // Fallback cho format cũ
-                        request.setReason(fullReason);
-                    }
-
+                    request.setSenderEmail(rs.getString("SenderEmail"));
+                    request.setPhoneNumber(rs.getString("SenderPhone"));
+                    request.setTypeName(rs.getString("TypeName"));
+                    request.setStatus(rs.getString("Status"));
                     request.setResponse(rs.getString("Response"));
                     request.setResponseAt(rs.getTimestamp("ResponseAt"));
-                    request.setStatus(rs.getString("Status"));
-                    request.setTypeName(rs.getString("TypeName"));
 
                     Timestamp createdAt = rs.getTimestamp("CreatedAt");
                     if (createdAt != null) {
                         request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+
+                    String typeName = rs.getString("TypeName");
+                    String fullReason = rs.getString("Reason");
+                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+
+                    switch (typeName) {
+                        case "Đơn xin chuyển lớp":
+                            if (parts.length >= 4) {
+                                request.setCourseName(parts[0]);           // lớp hiện tại
+                                request.setParentPhone(parts[1]);          // sđt phụ huynh
+                                request.setPhoneNumber(parts[2]);          // sđt học sinh
+                                request.setReason(parts[3]);               // lý do
+                                if (parts.length > 4 && parts[4].startsWith("TRANSFER_TO_CLASS_ID:")) {
+                                    String transferClassId = parts[4].split(":")[1];
+                                    String classNameSql = "SELECT Name FROM Classrooms WHERE id = ?";
+                                    try (PreparedStatement classStmt = conn.prepareStatement(classNameSql)) {
+                                        classStmt.setInt(1, Integer.parseInt(transferClassId));
+                                        ResultSet classRs = classStmt.executeQuery();
+                                        if (classRs.next()) {
+                                            String targetClassName = classRs.getString("Name");
+                                            request.setReason(parts[3] + "|TARGET_CLASS:" + targetClassName);
+                                        }
+                                    }
+                                }
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+
+                        case "Đơn xin nghỉ phép":
+                            // Format: date|reason
+                            if (parts.length >= 2) {
+                                request.setOffDate(LocalDate.parse(parts[0]));
+                                request.setReason(parts[1]);
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+
+                        case "Đơn xin đổi lịch dạy":
+                            // Format: from|to|slot|scheduleId|reason
+                            if (parts.length >= 5) {
+                                request.setFromDate(LocalDate.parse(parts[0]));
+                                request.setToDate(LocalDate.parse(parts[1]));
+                                request.setSlot(Integer.parseInt(parts[2]));
+                                request.setScheduleId(Integer.parseInt(parts[3]));
+                                request.setReason(parts[4]);
+                            } else if (parts.length >= 1) {
+                                request.setReason(parts[parts.length - 1]);
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+
+                        default:
+                            if (parts.length >= 4) {
+                                request.setCourseName(parts[0]);
+                                request.setParentPhone(parts[1]);
+                                request.setPhoneNumber(parts[2]);
+                                request.setReason(parts[3]);
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
                     }
 
                     return request;
@@ -399,6 +502,7 @@ public class RequestDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return null;
     }
 
@@ -555,22 +659,23 @@ public class RequestDAO {
 
                             case "Đơn xin thay đổi lịch dạy":
                             case "Đơn xin đổi lịch dạy":
-                                // Teacher schedule change format: ngày_từ|ngày_đến|lớp|lý_do
-                                if (parts.length >= 4) {
-                                    extractedReason = parts[parts.length - 1]; // Lấy phần cuối cùng
+                                if (parts.length >= 5) {
+                                    extractedReason = parts[4]; // lấy lý do ở vị trí thứ 5
                                 } else if (parts.length >= 2) {
-                                    extractedReason = parts[parts.length - 1]; // Lấy phần cuối cùng
+                                    extractedReason = parts[parts.length - 1];
                                 } else {
                                     extractedReason = fullReason;
                                 }
-                                // ✅ Loại bỏ HTML tags
                                 extractedReason = extractedReason.replaceAll("<[^>]*>", "").trim();
                                 break;
 
                             case "Đơn khác":
-                            default:
-                                // Format đơn giản: chỉ có lý do
-                                extractedReason = fullReason.replaceAll("<[^>]*>", "").trim();
+                            default: // Đơn khác
+                                if (parts.length >= 4) {
+                                    extractedReason = parts[3];
+                                } else {
+                                    extractedReason = fullReason != null ? fullReason : "";
+                                }
                                 break;
                         }
                     } else {

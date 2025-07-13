@@ -7,6 +7,7 @@ import org.example.talentcenter.model.Request;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import org.example.talentcenter.model.Schedule;
 import org.example.talentcenter.service.NotificationService;
 
 import java.io.IOException;
@@ -18,22 +19,71 @@ import java.util.Date;
 public class ProcessRequestServlet extends HttpServlet {
     private RequestDAO requestDAO = new RequestDAO();
     private StudentDAO studentDAO = new StudentDAO();
+    private TeacherScheduleDAO scheduleDAO = new TeacherScheduleDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
         HttpSession session = request.getSession();
-        String action = request.getParameter("action");
         Account account = (Account) session.getAttribute("account");
 
         if (account == null) {
             response.sendRedirect("View/login.jsp");
             return;
         }
+
         ArrayList<Request> requestTypes = requestDAO.getStudentRequestType();
         request.setAttribute("requestTypes", requestTypes);
+
         try {
-            if ("list".equals(action) || action == null) {
+            String requestIdParam = request.getParameter("id");
+            if (requestIdParam != null && !requestIdParam.trim().isEmpty()) {
+                int requestId = Integer.parseInt(requestIdParam);
+                Request requestDetail = requestDAO.getRequestDetailById(requestId);
+                if (requestDetail == null) {
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy đơn");
+                    return;
+                }
+                request.setAttribute("requestDetail", requestDetail);
+                String type = requestDetail.getTypeName();
+                String fullReason = requestDetail.getReason();
+
+                if ("Đơn xin nghỉ phép".equals(type)) {
+                    if (fullReason != null && fullReason.contains("|")) {
+                        String[] parts = fullReason.split("\\|");
+                        if (parts.length >= 2) {
+                            request.setAttribute("ngayNghi", parts[0]); // Ngày nghỉ
+                            requestDetail.setReason(parts[1]);
+                            try {
+                                requestDetail.setOffDate(java.time.LocalDate.parse(parts[0])); // ✅ chính chỗ này cần
+                            } catch (Exception e) {
+                                System.out.println("Lỗi parse ngày nghỉ: " + e.getMessage());
+                            }// Cập nhật lại lý do
+                        }
+                    }
+                }
+
+                if ("Đơn xin đổi lịch dạy".equals(type) && requestDetail.getScheduleId() > 0) {
+                    try {
+                        Schedule schedule = scheduleDAO.getScheduleById(requestDetail.getScheduleId());
+                        if (schedule != null) {
+                            request.setAttribute("oldSchedule", schedule);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Lỗi khi lấy schedule: " + e.getMessage());
+                    }
+                }
+
+                request.getRequestDispatcher("/View/process-request-detail.jsp").forward(request, response);
+                return;
+            }
+
+            // Nếu không có id thì xử lý theo action
+            String action = request.getParameter("action");
+            if (action == null || action.equals("list")) {
                 int page = 1;
                 int recordsPerPage = 10;
                 try {
@@ -51,6 +101,7 @@ public class ProcessRequestServlet extends HttpServlet {
                 request.setAttribute("currentPage", page);
                 request.setAttribute("totalPages", totalPages);
                 request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
+
             } else if (action.equals("search")) {
                 String keyword = request.getParameter("keyword");
                 if (keyword == null || keyword.trim().isEmpty()) {
@@ -74,7 +125,6 @@ public class ProcessRequestServlet extends HttpServlet {
                 request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
 
             } else if (action.equals("filterByStatus")) {
-                // ✅ FILTER THEO TRẠNG THÁI
                 String statusFilter = request.getParameter("statusFilter");
                 if (statusFilter == null || statusFilter.trim().isEmpty()) {
                     response.sendRedirect("ProcessRequest?action=list");
@@ -86,23 +136,9 @@ public class ProcessRequestServlet extends HttpServlet {
                 request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
 
             } else {
-                String requestIdParam = request.getParameter("id");
-                if (requestIdParam == null || requestIdParam.trim().isEmpty()) {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu ID đơn");
-                    return;
-                }
-
-                int requestId = Integer.parseInt(requestIdParam);
-                Request requestDetail = requestDAO.getRequestDetailById(requestId);
-
-                if (requestDetail == null) {
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy đơn");
-                    return;
-                }
-
-                request.setAttribute("requestDetail", requestDetail);
-                request.getRequestDispatcher("/View/process-request-detail.jsp").forward(request, response);
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
             }
+
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID đơn không hợp lệ");
         } catch (Exception e) {
@@ -114,6 +150,9 @@ public class ProcessRequestServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
         HttpSession session = request.getSession();
         Account account = (Account) session.getAttribute("account");
 
@@ -123,10 +162,9 @@ public class ProcessRequestServlet extends HttpServlet {
         }
 
         try {
-            // Lấy tham số từ form xử lý đơn
             String requestIdParam = request.getParameter("requestId");
             String managerNote = request.getParameter("managerNote");
-            String action = request.getParameter("action"); // "approve" hoặc "reject"
+            String action = request.getParameter("action");
 
             if (requestIdParam == null || managerNote == null || action == null
                     || requestIdParam.trim().isEmpty() || managerNote.trim().isEmpty() || action.trim().isEmpty()) {
@@ -136,8 +174,19 @@ public class ProcessRequestServlet extends HttpServlet {
             }
 
             int requestId = Integer.parseInt(requestIdParam);
-            // lấy thông tin đơn
             Request requestDetail = requestDAO.getRequestDetailById(requestId);
+            String reason = requestDetail.getReason();
+            if (reason != null && reason.contains("|")) {
+                String[] parts = reason.split("\\|");
+                if (parts.length >= 4) {
+                    try {
+                        int scheduleId = Integer.parseInt(parts[3]);
+                        Schedule schedule = scheduleDAO.getScheduleById(scheduleId);
+                        request.setAttribute("oldSchedule", schedule);  // Gửi qua JSP
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
             if (requestDetail == null) {
                 request.setAttribute("errorMessage", "Không tìm thấy đơn cần xử lý.");
                 request.getRequestDispatcher("View/error.jsp").forward(request, response);
@@ -148,7 +197,6 @@ public class ProcessRequestServlet extends HttpServlet {
             if ("approve".equals(action)) {
                 status = "Đã duyệt";
                 if ("Đơn xin chuyển lớp".equals(requestDetail.getTypeName())) {
-                    String reason = requestDetail.getReason();
                     if (reason != null && reason.contains("TARGET_CLASS:")) {
                         String targetClassName = reason.split("\\|TARGET_CLASS:")[1];
                         studentDAO.transferStudentToClass(requestDetail.getSenderID(), targetClassName);
@@ -165,7 +213,6 @@ public class ProcessRequestServlet extends HttpServlet {
             boolean success = requestDAO.processRequest(requestId, status, managerNote, new Timestamp(new Date().getTime()));
 
             if (success) {
-                // gửi thông báo cho hs nếu xử lý thành công
                 try {
                     NotificationService.notifyRequestProcessed(
                             requestId,
@@ -175,11 +222,10 @@ public class ProcessRequestServlet extends HttpServlet {
                             managerNote,
                             requestDetail.getSenderID()
                     );
-                    System.out.println("Notification sent successfully for request " + requestId);
                 } catch (Exception e) {
-                    System.err.println("Failed to send notification for request " + requestId + ": " + e.getMessage());
                     e.printStackTrace();
                 }
+
                 response.sendRedirect("ProcessRequest?action=list&success=1");
             } else {
                 request.setAttribute("errorMessage", "Không thể cập nhật trạng thái đơn.");
@@ -191,4 +237,5 @@ public class ProcessRequestServlet extends HttpServlet {
             request.getRequestDispatcher("View/error.jsp").forward(request, response);
         }
     }
+
 }

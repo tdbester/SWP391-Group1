@@ -6,7 +6,6 @@ public class Teacher {
     private Integer accountId;
     private String department;
     private double salary;
-
     // Constructors
     public Teacher() {}
 
