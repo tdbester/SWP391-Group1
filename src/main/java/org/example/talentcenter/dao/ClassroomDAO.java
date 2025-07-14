@@ -1,3 +1,21 @@
+/*
+ *  Copyright (C) 2025 <Group 1>
+ *  All rights reserved.
+ *
+ *  This file is part of the <Talent Center Management> project.
+ *  Unauthorized copying of this file, via any medium is strictly prohibited.
+ *  Proprietary and confidential.
+ *
+ *  Created on:        2025-06-29
+ *  Author:            Cù Thị Huyền Trang
+ *
+ *  ========================== Change History ==========================
+ *  Date        | Author               | Description
+ *  ------------|----------------------|--------------------------------
+ *  2025-06-29  | Cù Thị Huyền Trang   | Initial creation
+ */
+
+
 package org.example.talentcenter.dao;
 
 import org.example.talentcenter.config.DBConnect;
@@ -9,6 +27,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class ClassroomDAO {
+    /**
+     * Lấy danh sách tất cả các lớp mà học sinh đang hoặc từng học.
+     *
+     * @param studentId ID của học sinh
+     * @return danh sách các lớp thuộc về học sinh đó
+     * @author Huyen Trang
+     */
     public ArrayList<Classroom> getAllStudentClassByStudentId(int studentId) {
         ArrayList<Classroom> aClassrooms = new ArrayList<>();
         String query = """
@@ -34,6 +59,13 @@ public class ClassroomDAO {
         return aClassrooms;
     }
 
+    /**
+     * Lấy danh sách tên các lớp học mà học sinh đã tham gia (không trùng).
+     *
+     * @param studentId ID của học sinh
+     * @return danh sách tên lớp học
+     * @author Huyen Trang
+     */
     public ArrayList<String> getClassNamesByStudentId(int studentId) {
         ArrayList<String> classNames = new ArrayList<>();
         String sql = """
@@ -58,6 +90,16 @@ public class ClassroomDAO {
         return classNames;
     }
 
+    /**
+     * Lấy thông tin chi tiết lịch học theo học sinh, slot và ngày cụ thể.
+     * Bao gồm thông tin lớp, giáo viên, phòng học và trạng thái điểm danh.
+     *
+     * @param studentId ID của học sinh
+     * @param slotId    ID của ca học
+     * @param date      Ngày học cụ thể
+     * @return Danh sách chi tiết lịch học ứng với điều kiện
+     * @author Huyen Trang
+     */
     public ArrayList<StudentSchedule> getClassDetail(int studentId, int slotId, LocalDate date) {
         ArrayList<StudentSchedule> list = new ArrayList<>();
         String sql = """
@@ -108,6 +150,14 @@ public class ClassroomDAO {
         return list;
     }
 
+    /**
+     * Trả về danh sách các lớp thuộc một khóa học cụ thể,
+     * bao gồm số chỗ trống còn lại và tên giáo viên giảng dạy.
+     *
+     * @param courseId ID của khóa học
+     * @return Danh sách các lớp (Classroom) tương ứng với khóa học
+     * @author Huyen Trang
+     */
     public ArrayList<Classroom> getClassesByCourseId(int courseId) {
         ArrayList<Classroom> classrooms = new ArrayList<>();
         String query = """
@@ -157,6 +207,13 @@ public class ClassroomDAO {
         return classrooms;
     }
 
+    /**
+     * Lấy lịch học của một lớp cụ thể, bao gồm ngày học, giờ bắt đầu/kết thúc và mã phòng học.
+     *
+     * @param classId ID của lớp cần lấy lịch
+     * @return Danh sách lịch học (StudentSchedule) của lớp
+     * @author Huyen Trang
+     */
     public ArrayList<StudentSchedule> getClassSchedule(int classId) {
         ArrayList<StudentSchedule> schedules = new ArrayList<>();
         String query = """
@@ -194,6 +251,12 @@ public class ClassroomDAO {
         return schedules;
     }
 
+    /**
+     * Lấy danh sách các lớp học còn chỗ trống (số học viên hiện tại < sức chứa tối đa).
+     *
+     * @return Danh sách lớp học còn chỗ trống kèm theo thông tin giáo viên và khóa học nếu có
+     * @author Huyen Trang
+     */
     public ArrayList<Classroom> getAvailableClassrooms() {
         ArrayList<Classroom> classrooms = new ArrayList<>();
         String query = """
@@ -244,22 +307,6 @@ public class ClassroomDAO {
             e.printStackTrace();
         }
         return classrooms;
-    }
-
-    public int getClassIdByName(String className) {
-        String sql = "SELECT ClassroomID FROM Classroom WHERE ClassroomName = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, className);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("ClassroomID");
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi lấy ClassroomID: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return 0;
     }
 
 }

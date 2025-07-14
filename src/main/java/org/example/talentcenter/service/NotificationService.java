@@ -152,6 +152,7 @@ public class NotificationService {
         boolean ok = notificationDAO.createNotification(notification);
         System.out.println("Sent schedule change notification to student " + studentAccountId + ": " + ok);
     }
+
     public static void notifyTeacherRequestSubmitted(
             String teacherName,
             String requestType,

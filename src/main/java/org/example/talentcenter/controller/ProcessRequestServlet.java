@@ -1,3 +1,21 @@
+/*
+ *  Copyright (C) 2025 <Group 1>
+ *  All rights reserved.
+ *
+ *  This file is part of the <Talent Center Management> project.
+ *  Unauthorized copying of this file, via any medium is strictly prohibited.
+ *  Proprietary and confidential.
+ *
+ *  Created on:        2025-07-04
+ *  Author:            Cù Thị Huyền Trang
+ *
+ *  ========================== Change History ==========================
+ *  Date        | Author               | Description
+ *  ------------|----------------------|--------------------------------
+ *  2025-07-04  | Cù Thị Huyền Trang   | Initial creation
+ */
+
+
 package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.*;

@@ -276,7 +276,7 @@
                 <div class="course-info">Hệ thống quản lý đơn - Trung Tâm Năng Khiếu</div>
             </div>
         </div>
-
+        <%--in ra thông báo--%>
         <c:if test="${not empty sessionScope.message}">
             <div class="alert alert-success">
                 <i class="fas fa-check-circle"></i> ${sessionScope.message}
@@ -296,7 +296,7 @@
                 <i class="fas fa-edit"></i> Nhập thông tin đơn
             </div>
             <div class="card-body">
-                <!-- Form duy nhất cho tất cả thông tin -->
+                <!-- form nhập tất cả thông tin -->
                 <form action="StudentApplication" method="get">
                     <div class="form-row">
                         <div class="form-col">
@@ -347,7 +347,8 @@
 
                     <!-- Phần chuyển lớp -->
                     <c:if test="${isTransferRequest || param.requestType == '1'}">
-                        <div class="form-row" style="background: #f8f9ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <div class="form-row"
+                             style="background: #f8f9ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
                             <div class="form-col">
                                 <label class="form-label">
                                     <i class="fas fa-exchange-alt" style="color: #4c63d2;"></i>
@@ -375,12 +376,14 @@
                                         Thông tin lớp
                                     </label>
                                     <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
-                                        <p style="margin: 0 0 10px 0;"><strong>Giáo viên:</strong> ${selectedClassInfo.teacherName}</p>
+                                        <p style="margin: 0 0 10px 0;"><strong>Giáo
+                                            viên:</strong> ${selectedClassInfo.teacherName}</p>
                                         <p style="margin: 0; font-weight: 600; color: #2c3e50;">Lịch học:</p>
                                         <ul style="margin: 5px 0 0 0; padding-left: 20px;">
                                             <c:forEach var="schedule" items="${classSchedules}">
                                                 <li style="margin-bottom: 3px;">
-                                                    <c:set var="dayOfWeek" value="${schedule.date.dayOfWeek.toString()}"/>
+                                                    <c:set var="dayOfWeek"
+                                                           value="${schedule.date.dayOfWeek.toString()}"/>
                                                     <c:choose>
                                                         <c:when test="${dayOfWeek == 'MONDAY'}">Thứ 2</c:when>
                                                         <c:when test="${dayOfWeek == 'TUESDAY'}">Thứ 3</c:when>
@@ -390,7 +393,8 @@
                                                         <c:when test="${dayOfWeek == 'SATURDAY'}">Thứ 7</c:when>
                                                         <c:when test="${dayOfWeek == 'SUNDAY'}">CN</c:when>
                                                     </c:choose>
-                                                        ${schedule.slotStartTime}-${schedule.slotEndTime} (${schedule.roomCode})
+                                                        ${schedule.slotStartTime}-${schedule.slotEndTime}
+                                                    (${schedule.roomCode})
                                                 </li>
                                             </c:forEach>
                                         </ul>
@@ -404,14 +408,16 @@
                         <label class="form-label">Mô tả chi tiết lý do <span class="required">*</span></label>
                         <textarea class="form-control textarea" name="detailedReason"
                                   placeholder="Vui lòng mô tả chi tiết lý do chuyển lớp, tình huống cụ thể..."
-                                  >${param.detailedReason}</textarea>
+                        >${param.detailedReason}</textarea>
                         <small style="color: #6c757d; font-size: 0.875rem; margin-top: 5px; display: block;">
-                            <i class="fas fa-info-circle"></i> Tối thiểu 20 ký tự. Mô tả càng chi tiết càng giúp việc xét duyệt nhanh chóng.
+                            <i class="fas fa-info-circle"></i> Tối thiểu 20 ký tự. Mô tả càng chi tiết càng giúp việc
+                            xét duyệt nhanh chóng.
                         </small>
                     </div>
 
                     <div class="button-group">
-                        <button type="submit" class="btn btn-primary" formaction="StudentApplication" formmethod="post" name="action" value="create">
+                        <button type="submit" class="btn btn-primary" formaction="StudentApplication" formmethod="post"
+                                name="action" value="create">
                             <i class="fas fa-paper-plane"></i> Gửi đơn
                         </button>
                         <a href="StudentApplication" class="btn btn-secondary">
@@ -441,41 +447,6 @@
         </div>
     </div>
 </div>
-
-<%--<script>--%>
-<%--    function viewSchedule() {--%>
-<%--        var classSelector = document.getElementById('classSelector');--%>
-<%--        var selectedClass = classSelector.value;--%>
-<%--        var targetClassInput = document.getElementById('targetClassInput');--%>
-
-<%--        if (selectedClass) {--%>
-<%--            // Update the hidden input for the main form--%>
-<%--            targetClassInput.value = selectedClass;--%>
-
-<%--            // Get current form data--%>
-<%--            var phoneNumber = document.getElementsByName('phoneNumber')[0].value;--%>
-<%--            var currentClass = document.getElementsByName('currentClass')[0].value;--%>
-<%--            var parentPhone = document.getElementsByName('parentPhone')[0].value;--%>
-<%--            var detailedReason = document.getElementsByName('detailedReason')[0].value;--%>
-<%--            var requestType = document.getElementsByName('requestTypeId')[0].value;--%>
-
-<%--            // Build URL with parameters--%>
-<%--            var url = 'StudentApplication?' +--%>
-<%--                'requestType=' + encodeURIComponent(requestType) +--%>
-<%--                '&selectedClass=' + encodeURIComponent(selectedClass) +--%>
-<%--                '&phoneNumber=' + encodeURIComponent(phoneNumber) +--%>
-<%--                '&currentClass=' + encodeURIComponent(currentClass) +--%>
-<%--                '&parentPhone=' + encodeURIComponent(parentPhone) +--%>
-<%--                '&detailedReason=' + encodeURIComponent(detailedReason);--%>
-
-<%--            // Navigate to view schedule--%>
-<%--            window.location.href = url;--%>
-<%--        } else {--%>
-<%--            alert('Vui lòng chọn lớp trước khi xem lịch!');--%>
-<%--        }--%>
-<%--    }--%>
-<%--</script>--%>
-
 <jsp:include page="footer.jsp"/>
 </body>
 </html>

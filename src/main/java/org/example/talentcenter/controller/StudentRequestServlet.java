@@ -1,3 +1,20 @@
+/*--%>
+<%--*  Copyright (C) 2025 <Group 1>--%>
+<%--    *  All rights reserved.--%>
+<%--    *--%>
+<%--    *  This file is part of the <Talent Center Management> project.--%>
+<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
+<%--    *  Proprietary and confidential.--%>
+<%--    *--%>
+<%--    *  Created on:        2025-06-13--%>
+<%--    *  Author:            Cù Thị Huyền Trang--%>
+<%--    *--%>
+<%--    *  ========================== Change History ==========================--%>
+<%--    *  Date        | Author               | Description--%>
+<%--    *  ------------|----------------------|----------------------------------%>
+<%--    *  2025-06-13  | Cù Thị Huyền Trang   | Initial creation--%>
+<%--    */
+
 package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.*;
@@ -15,7 +32,6 @@ import org.example.talentcenter.service.NotificationService;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
