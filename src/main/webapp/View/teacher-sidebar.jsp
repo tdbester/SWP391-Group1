@@ -39,6 +39,12 @@
         <span>Thông báo</span>
       </a>
     </div>
+    <div class="nav-section">
+      <a href="${pageContext.request.contextPath}/sendNotification" class="nav-item">
+        <i class="fa-solid fa-envelope" style="color: #fbfdfe;"></i>
+        <span>Gửi thông báo</span>
+      </a>
+    </div>
   </nav>
 </div>
 
