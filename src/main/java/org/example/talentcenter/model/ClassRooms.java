@@ -18,12 +18,12 @@ public class ClassRooms {
     public ClassRooms() {
     }
 
-    public ClassRooms(int id, int slotId, int teacherId, int courseId, String name) {
+    public ClassRooms(int id, int teacherId, int courseId, String name, int slotId) {
         this.id = id;
-        this.slotId = slotId;
         this.teacherId = teacherId;
         this.courseId = courseId;
         this.name = name;
+        this.slotId = slotId;
     }
 
     public int getId() {
@@ -98,18 +98,4 @@ public class ClassRooms {
         this.studentCount = studentCount;
     }
 
-    @Override
-    public String toString() {
-        return "ClassRooms{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", courseId=" + courseId +
-                ", teacherId=" + teacherId +
-                ", slotId=" + slotId +
-                ", courseTitle='" + courseTitle + '\'' +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", studentCount=" + studentCount +
-                '}';
-    }
 }

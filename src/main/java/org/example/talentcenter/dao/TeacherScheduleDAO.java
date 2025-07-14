@@ -1,12 +1,14 @@
 package org.example.talentcenter.dao;
 
 import org.example.talentcenter.config.DBConnect;
+import org.example.talentcenter.model.ClassSchedulePattern;
 import org.example.talentcenter.model.Schedule;
 
 import java.sql.*;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TeacherScheduleDAO {
 
@@ -95,137 +97,106 @@ public class TeacherScheduleDAO {
         return schedules;
     }
 
-    /**
-     * Lấy thông tin chi tiết của một lịch học
-     */
-    public Schedule getScheduleById(int scheduleId) {
-        String sql = """
-        SELECT s.Id, s.Date, s.RoomId, s.ClassRoomId, s.SlotId,
-               cr.Name as ClassName, cr.Name as CourseName, cr.Title as CourseTitle,
-               r.Code as RoomCode, sl.StartTime, sl.EndTime
-        FROM Schedule s
-        INNER JOIN ClassRooms cr ON s.ClassRoomId = cr.Id
-        INNER JOIN Room r ON s.RoomId = r.Id
-        INNER JOIN Slot sl ON s.SlotId = sl.Id
-        WHERE s.Id = ?
-    """;
+    // Duyệt các pattern, lặp từ startDate đến endDate, đúng dayOfWeek thì insert
+    public void generateSchedulesFromPattern(List<ClassSchedulePattern> patterns, int classRoomId, int roomId) throws SQLException {
+        if (patterns == null || patterns.isEmpty()) {
+            throw new IllegalArgumentException("Patterns cannot be null or empty");
+        }
 
+        if (classRoomId <= 0 || roomId <= 0) {
+            throw new IllegalArgumentException("ClassRoomId and RoomId must be positive");
+        }
 
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        String insertSql = "INSERT INTO Schedule (Date, SlotId, RoomId, ClassRoomId) VALUES (?, ?, ?, ?)";
+        String checkSql = "SELECT COUNT(*) FROM Schedule WHERE Date = ? AND SlotId = ? AND RoomId = ?";
 
-            ps.setInt(1, scheduleId);
+        Connection conn = null;
+        PreparedStatement insertStmt = null;
+        PreparedStatement checkStmt = null;
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                Schedule schedule = new Schedule();
-                schedule.setId(rs.getInt("Id"));
-                schedule.setDate(rs.getDate("Date").toLocalDate());
-                schedule.setRoomId(rs.getInt("RoomId"));
-                schedule.setClassRoomId(rs.getInt("ClassRoomId"));
-                schedule.setSlotId(rs.getInt("SlotId"));
-                schedule.setClassName(rs.getString("ClassName"));
-                schedule.setCourseTitle(rs.getString("CourseTitle"));
-                schedule.setRoomCode(rs.getString("RoomCode"));
-                schedule.setSlotStartTime(rs.getTime("StartTime").toLocalTime());
-                schedule.setSlotEndTime(rs.getTime("EndTime").toLocalTime());
+        try {
+            conn = DBConnect.getConnection();
+            conn.setAutoCommit(false); // Start transaction
 
-                return schedule;
+            insertStmt = conn.prepareStatement(insertSql);
+            checkStmt = conn.prepareStatement(checkSql);
+
+            int batchCount = 0;
+
+            for (ClassSchedulePattern pattern : patterns) {
+                if (pattern.getStartDate() == null || pattern.getEndDate() == null) {
+                    throw new IllegalArgumentException("Pattern dates cannot be null");
+                }
+
+                LocalDate currentDate = pattern.getStartDate();
+
+                while (!currentDate.isAfter(pattern.getEndDate())) {
+                    // Check if current date matches the pattern's day of week
+                    if (currentDate.getDayOfWeek().getValue() == pattern.getDayOfWeek()) {
+                        // Check for schedule conflicts
+                        checkStmt.setDate(1, Date.valueOf(currentDate));
+                        checkStmt.setInt(2, pattern.getSlotId());
+                        checkStmt.setInt(3, roomId);
+
+                        try (ResultSet rs = checkStmt.executeQuery()) {
+                            if (rs.next() && rs.getInt(1) == 0) { // No conflict found
+                                insertStmt.setDate(1, Date.valueOf(currentDate));
+                                insertStmt.setInt(2, pattern.getSlotId());
+                                insertStmt.setInt(3, roomId);
+                                insertStmt.setInt(4, classRoomId);
+                                insertStmt.addBatch();
+                                batchCount++;
+
+                                // Execute batch every 100 records for performance
+                                if (batchCount % 100 == 0) {
+                                    insertStmt.executeBatch();
+                                    insertStmt.clearBatch();
+                                }
+                            } else {
+                                // Log conflict but continue processing
+                                System.out.println("Schedule conflict detected for date: " + currentDate +
+                                        ", slot: " + pattern.getSlotId() +
+                                        ", room: " + roomId);
+                            }
+                        }
+                    }
+                    currentDate = currentDate.plusDays(1);
+                }
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    /**
-     * Kiểm tra xem có lịch học nào trong ngày và slot cụ thể không
-     */
-    public boolean hasScheduleInSlot(LocalDate date, int slotId, int roomId) {
-        String sql = "SELECT COUNT(*) FROM Schedule WHERE Date = ? AND SlotId = ? AND RoomId = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setDate(1, Date.valueOf(date));
-            ps.setInt(2, slotId);
-            ps.setInt(3, roomId);
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
+            // Execute remaining batch
+            if (batchCount % 100 != 0) {
+                insertStmt.executeBatch();
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    /**
-     * Cập nhật phòng học cho một lịch học
-     */
-    public boolean updateScheduleRoom(int scheduleId, int newRoomId) {
-        String sql = "UPDATE Schedule SET RoomId = ? WHERE Id = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, newRoomId);
-            ps.setInt(2, scheduleId);
-
-            return ps.executeUpdate() > 0;
+            conn.commit(); // Commit transaction
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Rollback on error
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            throw new SQLException("Error generating schedules from pattern: " + e.getMessage(), e);
+        } finally {
+            // Close resources
+            if (checkStmt != null) {
+                try { checkStmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            if (insertStmt != null) {
+                try { insertStmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true); // Reset auto-commit
+                    conn.close();
+                } catch (SQLException e) { e.printStackTrace(); }
+            }
         }
-
-        return false;
     }
 
-    /**
-     * Cập nhật ngày học cho một lịch học
-     */
-    public boolean updateScheduleDate(int scheduleId, LocalDate newDate) {
-        String sql = "UPDATE Schedule SET Date = ? WHERE Id = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setDate(1, Date.valueOf(newDate));
-            ps.setInt(2, scheduleId);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    /**
-     * Xóa lịch học (để xử lý nghỉ phép)
-     */
-    public boolean deleteSchedule(int scheduleId) {
-        String sql = "DELETE FROM Schedule WHERE Id = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, scheduleId);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
 
     // Helper method để tạo Schedule object từ ResultSet
     private Schedule createScheduleFromResultSet(ResultSet rs) throws SQLException {

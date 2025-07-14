@@ -6,6 +6,7 @@ public class Teacher {
     private Integer accountId;
     private String department;
     private double salary;
+    private String fullName;
 
     // Constructors
     public Teacher() {}
@@ -47,6 +48,12 @@ public class Teacher {
 
     public void setSalary(double salary) {
         this.salary = salary;
+    }
+    public String getFullName() {
+        return fullName;
+    }
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     @Override

@@ -97,6 +97,9 @@ public class LoginServlet extends HttpServlet {
                         case "teacher":
                             response.sendRedirect(request.getContextPath() + "/TeacherDashboard");
                             break;
+                        case "training manager":
+                            response.sendRedirect(request.getContextPath() + "/CreateClassRoomServlet");
+                            break;
                         case "sale":
                             response.sendRedirect(request.getContextPath() + "/View/sale-dashboard.jsp");
                             break;

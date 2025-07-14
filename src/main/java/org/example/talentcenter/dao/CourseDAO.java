@@ -273,4 +273,29 @@ public class CourseDAO {
         }
         return list;
     }
+
+    public List<Course> getAllCourses() {
+        List<Course> courses = new ArrayList<>();
+        String sql = "SELECT * FROM Course";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Course course = new Course();
+                course.setId(rs.getInt("Id"));
+                course.setTitle(rs.getString("Title"));
+                course.setPrice(rs.getDouble("Price"));
+                course.setInformation(rs.getString("Information"));
+                course.setCreatedBy(rs.getInt("CreatedBy"));
+                courses.add(course);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return courses;
+    }
+
 }

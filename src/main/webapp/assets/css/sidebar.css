@@ -30,25 +30,6 @@ body {
     overflow-y: auto;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.logo i {
-    font-size: 2rem;
-    margin-right: 10px;
-    color: #4CAF50;
-}
-
-.logo h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-}
-
 .nav-section {
     margin-bottom: 25px;
 }
