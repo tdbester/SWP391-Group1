@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2025 <Group 1>
+ *  All rights reserved.
+ *
+ *  This file is part of the <Talent Center Management> project.
+ *  Unauthorized copying of this file, via any medium is strictly prohibited.
+ *  Proprietary and confidential.
+ *
+ *  Created on:        2025-07-04
+ *  Author:            Cù Thị Huyền Trang
+ *
+ *  ========================== Change History ==========================
+ *  Date        | Author               | Description
+ *  ------------|----------------------|--------------------------------
+ *  2025-07-04  | Cù Thị Huyền Trang   | Initial creation
+ */
+
 package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.*;
@@ -21,7 +38,8 @@ public class ProcessRequestServlet extends HttpServlet {
     private RequestDAO requestDAO = new RequestDAO();
     private StudentDAO studentDAO = new StudentDAO();
     private TeacherScheduleDAO scheduleDAO = new TeacherScheduleDAO();
-private TeacherDAO teacherDAO = new TeacherDAO();
+    private TeacherDAO teacherDAO = new TeacherDAO();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -61,7 +79,7 @@ private TeacherDAO teacherDAO = new TeacherDAO();
                                 requestDetail.setOffDate(java.time.LocalDate.parse(parts[0]));
                             } catch (Exception e) {
                                 System.out.println("Lỗi parse ngày nghỉ: " + e.getMessage());
-                            }// Cập nhật lại lý do
+                            }
                         }
                     }
                 }
@@ -81,15 +99,16 @@ private TeacherDAO teacherDAO = new TeacherDAO();
                 return;
             }
 
-            // Nếu không có id thì xử lý theo action
+            // nếu không có id thì xử lý theo action
             String action = request.getParameter("action");
             if (action == null || action.equals("list")) {
                 int page = 1;
-                int recordsPerPage = 10;
+                int recordsPerPage = 10; //số bản ghi trong 1 trang
                 try {
                     String pageParam = request.getParameter("page");
                     if (pageParam != null) page = Integer.parseInt(pageParam);
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
                 }
 
                 int offset = (page - 1) * recordsPerPage;
@@ -101,7 +120,7 @@ private TeacherDAO teacherDAO = new TeacherDAO();
                 request.setAttribute("currentPage", page);
                 request.setAttribute("totalPages", totalPages);
                 request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
-
+            //tìm kiếm
             } else if (action.equals("search")) {
                 String keyword = request.getParameter("keyword");
                 if (keyword == null || keyword.trim().isEmpty()) {
@@ -112,7 +131,7 @@ private TeacherDAO teacherDAO = new TeacherDAO();
                 request.setAttribute("requestList", requestList);
                 request.setAttribute("keyword", keyword);
                 request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
-
+            // lọc theo loại đơn
             } else if (action.equals("filterByType")) {
                 String typeFilter = request.getParameter("typeFilter");
                 if (typeFilter == null || typeFilter.trim().isEmpty()) {
@@ -123,7 +142,7 @@ private TeacherDAO teacherDAO = new TeacherDAO();
                 request.setAttribute("requestList", requestList);
                 request.setAttribute("typeFilter", typeFilter);
                 request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
-
+            // lọc theo trạng thái
             } else if (action.equals("filterByStatus")) {
                 String statusFilter = request.getParameter("statusFilter");
                 if (statusFilter == null || statusFilter.trim().isEmpty()) {
@@ -182,7 +201,7 @@ private TeacherDAO teacherDAO = new TeacherDAO();
                     try {
                         int scheduleId = Integer.parseInt(parts[3]);
                         Schedule schedule = scheduleDAO.getScheduleById(scheduleId);
-                        request.setAttribute("oldSchedule", schedule);  // Gửi qua JSP
+                        request.setAttribute("oldSchedule", schedule);
                     } catch (NumberFormatException ignored) {
                     }
                 }
@@ -216,7 +235,7 @@ private TeacherDAO teacherDAO = new TeacherDAO();
                         }
                         Schedule newSchedule = scheduleDAO.getScheduleById(scheduleId);
                         if (newSchedule != null) {
-                            // Lấy danh sách học sinh của lớp này
+                            // lấy danh sách học sinh của lớp này
                             ArrayList<Account> students = studentDAO.getStudentsByClassId(newSchedule.getClassRoomId());
                             for (Account student : students) {
                                 try {
@@ -245,8 +264,6 @@ private TeacherDAO teacherDAO = new TeacherDAO();
 
                         if (offDate != null) {
                             ArrayList<Schedule> schedules = scheduleDAO.getScheduleByTeacherIdAndDate(teacherId, offDate);
-                            System.out.println("OffDate: " + offDate);
-                            System.out.println("Số lịch dạy trong ngày nghỉ: " + schedules.size());
 
                             for (Schedule schedule : schedules) {
                                 ArrayList<Account> students = studentDAO.getStudentsByClassId(schedule.getClassRoomId());
@@ -294,7 +311,6 @@ private TeacherDAO teacherDAO = new TeacherDAO();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
                 response.sendRedirect("ProcessRequest?action=list&success=1");
             } else {
                 request.setAttribute("errorMessage", "Không thể cập nhật trạng thái đơn.");

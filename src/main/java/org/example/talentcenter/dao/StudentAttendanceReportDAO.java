@@ -27,6 +27,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class StudentAttendanceReportDAO {
+    /**
+     * Lấy danh sách điểm danh của học sinh theo mã học sinh.
+     *
+     * @param studentId ID của học sinh
+     * @return Danh sách thông tin điểm danh (bao gồm ngày học, tiết, giáo viên, phòng, trạng thái, v.v.)
+     * @author Huyen Trang
+     */
     public ArrayList<StudentAttendanceReport> getAttendanceByStudentId(int studentId) {
         ArrayList<StudentAttendanceReport> schedules = new ArrayList<>();
         String sql = """

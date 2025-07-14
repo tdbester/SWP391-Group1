@@ -47,11 +47,9 @@
         String fullReason = requestDetail.getReason();
 
         if ("Đơn xin đổi lịch dạy".equals(typeName)) {
-            // Đây là đơn đổi lịch dạy, kiểm tra oldSchedule từ backend
             isChangeRequest = true;
             reason = fullReason != null ? fullReason : "";
 
-            // Sử dụng model fields từ DAO thay vì parsing lại
             if (requestDetail.getFromDate() != null) {
                 changeFrom = requestDetail.getFromDate().toString();
             }
@@ -88,11 +86,6 @@
             reason = fullReason != null ? fullReason : "";
         }
 
-        // Debug information
-        System.out.println("Type: " + typeName);
-        System.out.println("Reason: " + reason);
-        System.out.println("Old Schedule: " + (oldSchedule != null ? "Available" : "Null"));
-        System.out.println("isChangeRequest: " + isChangeRequest);
     }
 %>
 <html lang="vi">
