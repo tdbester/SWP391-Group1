@@ -308,7 +308,6 @@ public class TeacherViewRequestServlet extends HttpServlet {
                 return;
             }
 
-            // Lấy thông tin người xử lý (nếu có)
             String processorName = null;
             if (requestDetail.getProcessedBy() > 0) {
                 processorName = requestDAO.getProcessorName(requestDetail.getProcessedBy());

@@ -118,37 +118,37 @@
                         <label>Ngày học trong tuần:</label>
                         <div class="days-container">
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="2" id="monday">
+                                <input type="checkbox" name="daysOfWeek" value="1" id="monday">
                                 <label for="monday">Thứ 2</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="3" id="tuesday">
+                                <input type="checkbox" name="daysOfWeek" value="2" id="tuesday">
                                 <label for="tuesday">Thứ 3</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="4" id="wednesday">
+                                <input type="checkbox" name="daysOfWeek" value="3" id="wednesday">
                                 <label for="wednesday">Thứ 4</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="5" id="thursday">
+                                <input type="checkbox" name="daysOfWeek" value="4" id="thursday">
                                 <label for="thursday">Thứ 5</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="6" id="friday">
+                                <input type="checkbox" name="daysOfWeek" value="5" id="friday">
                                 <label for="friday">Thứ 6</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="7" id="saturday">
+                                <input type="checkbox" name="daysOfWeek" value="6" id="saturday">
                                 <label for="saturday">Thứ 7</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="1" id="sunday">
+                                <input type="checkbox" name="daysOfWeek" value="7" id="sunday">
                                 <label for="sunday">Chủ nhật</label>
                             </div>
                         </div>
@@ -159,7 +159,7 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Tạo lớp học
                         </button>
-                        <a href="${pageContext.request.contextPath}/CreateClassRoomServlet?action=list" class="btn btn-secondary">
+                        <a href="${pageContext.request.contextPath}/View/training-manager-view-course.jsp" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Quay lại
                         </a>
                     </div>

@@ -266,7 +266,7 @@
         }
     });
 
-    // Giới hạn chọn tối đa 2 checkbox cho thay đổi lịch
+    // Giới hạn chọn tối đa 1 checkbox cho thay đổi lịch
     const scheduleCheckboxes = document.querySelectorAll('.schedule-checkbox');
     scheduleCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {

@@ -296,7 +296,7 @@ public class TeacherRequestServlet extends HttpServlet {
             if (toDateStr != null && !toDateStr.trim().isEmpty()) {
                 detailReason.append("Ngày muốn chuyển sang: ").append(toDateStr).append("\n");
             }
-            detailReason.append("Các lớp được chọn: ").append(String.join(", ", selectedSchedules)).append("\n");
+            detailReason.append("Lịch trình đã chọn: ").append(String.join(", ", selectedSchedules)).append("\n");
             detailReason.append("Lý do: ").append(reason);
 
             // Tạo đơn yêu cầu

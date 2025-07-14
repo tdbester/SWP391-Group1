@@ -118,7 +118,7 @@ public class CreateClassRoomServlet extends HttpServlet {
 
             // Success response
             request.setAttribute("success", "Tạo lớp học và thành công!");
-            request.getRequestDispatcher("/View/success.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/training-manager-add-classroom.jsp").forward(request, response);
 
         } catch (IllegalArgumentException e) {
             // Validation errors
