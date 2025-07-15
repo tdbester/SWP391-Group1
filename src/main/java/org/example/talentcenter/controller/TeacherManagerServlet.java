@@ -1,6 +1,10 @@
 package org.example.talentcenter.controller;
 
+import org.example.talentcenter.dao.CourseDAO;
 import org.example.talentcenter.dao.TeacherDAO;
+import org.example.talentcenter.model.Account;
+import org.example.talentcenter.model.ClassRooms;
+import org.example.talentcenter.model.Course;
 import org.example.talentcenter.model.Teacher;
 
 import jakarta.servlet.ServletException;
@@ -12,6 +16,7 @@ import java.util.List;
 @WebServlet(name = "teacher", value = "/teachers")
 public class TeacherManagerServlet extends HttpServlet {
     private TeacherDAO teacherDAO = new TeacherDAO();
+    private CourseDAO courseDAO = new CourseDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -26,7 +31,23 @@ public class TeacherManagerServlet extends HttpServlet {
         }
 
         switch (action) {
+            case "detail": showTeacherDetail(req, resp); break;
             default: listTeachers(req, resp); break;
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("accountId") == null) {
+            resp.sendRedirect("login");
+            return;
+        }
+
+        String action = req.getParameter("action");
+        if ("update".equals(action)) {
+            updateTeacher(req, resp);
         }
     }
 
@@ -54,5 +75,61 @@ public class TeacherManagerServlet extends HttpServlet {
         req.setAttribute("currentIndex", index);
 
         req.getRequestDispatcher("/View/teacher-list.jsp").forward(req, resp);
+    }
+
+    private void showTeacherDetail(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            int id = Integer.parseInt(req.getParameter("id"));
+            Teacher teacher = teacherDAO.getTeacherById(id);
+            if (teacher != null) {
+                // Get teacher's classes
+                List<ClassRooms> classes = teacherDAO.getClassesByTeacherId(id);
+
+                // Get all courses to display course names
+                List<Course> allCourses = courseDAO.getAll();
+
+                req.setAttribute("teacher", teacher);
+                req.setAttribute("classes", classes);
+                req.setAttribute("allCourses", allCourses);
+                req.getRequestDispatcher("/View/teacher-detail.jsp").forward(req, resp);
+            } else {
+                resp.sendRedirect("teachers?error=TeacherNotFound");
+            }
+        } catch (NumberFormatException ex) {
+            resp.sendRedirect("teachers?error=InvalidID");
+        }
+    }
+
+    private void updateTeacher(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            int teacherId = Integer.parseInt(req.getParameter("teacherId"));
+            int accountId = Integer.parseInt(req.getParameter("accountId"));
+
+            Teacher teacher = new Teacher();
+            teacher.setId(teacherId);
+            teacher.setAccountId(accountId);
+            teacher.setDepartment(req.getParameter("department"));
+            teacher.setSalary(Double.parseDouble(req.getParameter("salary")));
+
+            Account account = new Account();
+            account.setId(accountId);
+            account.setFullName(req.getParameter("fullName"));
+            account.setPhoneNumber(req.getParameter("phoneNumber"));
+            account.setAddress(req.getParameter("address"));
+            account.setEmail(req.getParameter("email"));
+            teacher.setAccount(account);
+
+            boolean success = teacherDAO.updateTeacher(teacher);
+            if (success) {
+                resp.sendRedirect("teachers?action=detail&id=" + teacherId + "&success=true");
+            } else {
+                resp.sendRedirect("teachers?action=detail&id=" + teacherId + "&error=UpdateFailed");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.sendRedirect("teachers?error=InvalidData");
+        }
     }
 }

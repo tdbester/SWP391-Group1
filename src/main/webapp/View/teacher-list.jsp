@@ -81,6 +81,7 @@
             <th>Số điện thoại</th>
             <th>Email</th>
             <th>Địa chỉ</th>
+            <th style="width: 150px;">Hành động</th>
         </tr>
         </thead>
 
@@ -96,6 +97,9 @@
                 <td>${teacher.account.phoneNumber}</td>
                 <td>${teacher.account.email}</td>
                 <td>${teacher.account.address}</td>
+                <td>
+                    <a href="teachers?action=detail&id=${teacher.id}" class="btn btn-primary btn-sm">Chi tiết</a>
+                </td>
             </tr>
         </c:forEach>
         </tbody>
