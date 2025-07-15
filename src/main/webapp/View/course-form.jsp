@@ -65,7 +65,7 @@
                            min="0" placeholder="Nhập giá khóa học" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Thông tin</label>
+                    <label class="form-label">Mô Tả</label>
                     <div id="editor-information" style="height:150px;"></div>
                     <input type="hidden" name="information" id="information" />
                 </div>
