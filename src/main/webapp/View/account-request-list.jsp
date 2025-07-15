@@ -12,18 +12,9 @@
 <head>
     <title>Title</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        main {
-            flex: 1; /* chiếm phần còn lại giữa header và footer */
-        }
-
         .no-results {
             color: red;
             font-weight: bold;
@@ -116,8 +107,9 @@
 </head>
 <body>
 <jsp:include page="header.jsp"/>
-<main>
-    <div class="container mt-5">
+<div class="dashboard">
+    <jsp:include page="training-manager-sidebar.jsp"/>
+    <div class="main-content">
         <h1>Danh sách yêu cầu cấp tài khoản</h1>
         <%
             String success = request.getParameter("success");
@@ -205,7 +197,8 @@
             </tbody>
         </table>
     </div>
-</main>
+
+</div>
 <jsp:include page="footer.jsp"/>
 
 </body>

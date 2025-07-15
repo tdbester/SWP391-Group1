@@ -16,15 +16,16 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/teacher-request.css">
 
     <!-- TinyMCE -->
-    <script src="https://cdn.tiny.cloud/1/s9ulrr1k52taw3pfbbdpo04t76gcsewieq7ljy51r2dmau1j/tinymce/5/tinymce.min.js" referrerpolicy="origin" onerror="console.error('Failed to load TinyMCE')"></script>
+    <script src="https://cdn.tiny.cloud/1/s9ulrr1k52taw3pfbbdpo04t76gcsewieq7ljy51r2dmau1j/tinymce/5/tinymce.min.js"
+            referrerpolicy="origin" onerror="console.error('Failed to load TinyMCE')"></script>
 </head>
 <body>
-<jsp:include page="header.jsp" />
+<jsp:include page="header.jsp"/>
 
 <div class="main-container">
     <!-- Sidebar -->
     <div class="sidebar-col">
-        <jsp:include page="teacher-sidebar.jsp" />
+        <jsp:include page="teacher-sidebar.jsp"/>
     </div>
 
     <!-- Main Content -->
@@ -58,15 +59,20 @@
                 </c:if>
 
                 <form id="requestForm" method="post" action="${pageContext.request.contextPath}/teacherRequest">
+                    <input type="hidden" name="action" value="create">
+
                     <!-- Chọn loại đơn -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">Loại đơn yêu cầu <span class="text-danger">*</span></label>
                         <select id="requestType" name="type" class="form-select" required>
                             <option value="">-- Chọn loại đơn --</option>
-                            <option value="leave" ${param.type == 'Xin nghỉ phép' ? 'selected' : ''}>Xin nghỉ phép</option>
-                            <option value="schedule_change" ${param.type == 'Thay đổi lịch dạy' ? 'selected' : ''}>Thay đổi lịch dạy</option>
-                            <option value="room_change" ${param.type == 'Thay đổi lớp học' ? 'selected' : ''}>Thay đổi lớp học</option>
-                            <option value="other" ${param.type == 'other' ? 'selected' : ''}>Khác</option>
+                            <option value="leave" ${param.type == 'Đơn xin nghỉ phép' ? 'selected' : ''}>Đơn xin nghỉ
+                                phép
+                            </option>
+                            <option value="schedule_change" ${param.type == 'Đơn xin thay đổi lịch dạy' ? 'selected' : ''}>
+                                Đơn xin thay đổi lịch dạy
+                            </option>
+                            <option value="other" ${param.type == 'Đơn khác' ? 'selected' : ''}>Đơn khác</option>
                         </select>
                     </div>
 
@@ -76,7 +82,8 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Ngày nghỉ <span class="text-danger">*</span></label>
                                 <input type="date" id="leaveDate" name="leaveDate" class="form-control"
-                                       value="${param.leaveDate}" min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
+                                       value="${param.leaveDate}"
+                                       min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
                             </div>
                             <div class="col-md-6">
                                 <button type="button" id="checkLeaveBtn" class="btn btn-outline-primary mt-4">
@@ -114,7 +121,8 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Ngày muốn thay đổi <span class="text-danger">*</span></label>
                                 <input type="date" id="changeFromDate" name="changeFromDate" class="form-control"
-                                       value="${param.changeFromDate}" min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
+                                       value="${param.changeFromDate}"
+                                       min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
                             </div>
                             <div class="col-md-6">
                                 <button type="button" id="checkChangeBtn" class="btn btn-outline-primary mt-4">
@@ -126,7 +134,7 @@
                         <!-- Hiển thị lịch học để chọn -->
                         <div id="changeSchedules" class="mt-3">
                             <c:if test="${not empty changeSchedules}">
-                                <h6 class="section-title">Chọn lớp muốn thay đổi (tối đa 2 lớp):</h6>
+                                <h6 class="section-title">Chọn lớp muốn thay đổi (tối đa 1 lớp):</h6>
                                 <c:forEach items="${changeSchedules}" var="schedule" varStatus="status">
                                     <div class="schedule-item">
                                         <div class="form-check">
@@ -136,7 +144,8 @@
                                             <label class="form-check-label" for="schedule${status.index}">
                                                 <div class="row">
                                                     <div class="col-md-8">
-                                                        <strong>${schedule.courseTitle}</strong> - Lớp: ${schedule.className}
+                                                        <strong>${schedule.courseTitle}</strong> -
+                                                        Lớp: ${schedule.className}
                                                     </div>
                                                     <div class="col-md-4 text-end">
                                                         <span class="badge bg-primary">
@@ -156,67 +165,28 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Ngày muốn chuyển sang</label>
                                 <input type="date" name="changeToDate" class="form-control"
-                                       value="${param.changeToDate}" min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
+                                       value="${changeToDate != null ? changeToDate : param.changeToDate}"
+                                       min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Form thay đổi phòng học -->
-                    <div id="roomChangeSection" class="form-section">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold">Ngày muốn đổi phòng <span class="text-danger">*</span></label>
-                                <input type="date" id="roomChangeDate" name="roomChangeDate" class="form-control"
-                                       value="${param.roomChangeDate}" min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
-                            </div>
-                            <div class="col-md-6">
-                                <button type="button" id="checkRoomBtn" class="btn btn-outline-primary mt-4">
-                                    <i class="fas fa-search me-1"></i>Kiểm tra lịch học
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Chọn môn học -->
-                        <div id="roomChangeSchedules" class="mt-3">
-                            <c:if test="${not empty roomChangeSchedules}">
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Chọn môn học:</label>
-                                    <select id="selectedSchedule" name="selectedSchedule" class="form-select">
-                                        <option value="">-- Chọn môn học --</option>
-                                        <c:forEach items="${roomChangeSchedules}" var="schedule">
-                                            <option value="${schedule.id}" data-room-id="${schedule.roomId}" data-slot-id="${schedule.slotId}">
-                                                    ${schedule.courseTitle} - Lớp ${schedule.className}
-                                                (${schedule.slotStartTime} - ${schedule.slotEndTime}, Phòng ${schedule.roomCode})
-                                            </option>
-                                        </c:forEach>
-                                    </select>
-                                </div>
-                            </c:if>
-                        </div>
-
-                        <!-- Hiển thị phòng trống -->
-                        <div id="availableRooms" class="mt-3">
-                            <c:if test="${not empty availableRooms}">
-                                <h6 class="section-title">Phòng học khả dụng:</h6>
-                                <c:forEach items="${availableRooms}" var="room">
-                                    <div class="room-item">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="selectedRoom"
-                                                   value="${room.id}" id="room${room.id}">
-                                            <label class="form-check-label" for="room${room.id}">
-                                                <strong>Phòng ${room.code}</strong>
-                                            </label>
-                                        </div>
-                                    </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Slot muốn chuyển đến</label>
+                            <select name="changeToSlot" class="form-select">
+                                <option value="">-- Chọn slot --</option>
+                                <c:forEach var="slot" items="${slotList}">
+                                    <option value="${slot.slotId}"
+                                            <c:if test="${param.changeToSlot == slot.slotId}">selected</c:if>>
+                                        Slot ${slot.slotId} (${slot.slotStartTime} - ${slot.slotEndTime})
+                                    </option>
                                 </c:forEach>
-                            </c:if>
+                            </select>
                         </div>
                     </div>
-
                     <!-- Lý do (cho tất cả loại đơn) -->
                     <div class="mb-4">
                         <label class="form-label fw-bold">Lý do <span class="text-danger">*</span></label>
-                        <textarea id="reason" name="reason" class="form-control" rows="6" required>${param.reason}</textarea>
+                        <textarea id="reason" name="reason" class="form-control" rows="6"
+                                  required>${reason != null ? reason : param.reason}</textarea>
                     </div>
 
                     <!-- Nút gửi -->
@@ -234,62 +204,22 @@
     </div>
 </div>
 
-<jsp:include page="footer.jsp" />
+<jsp:include page="footer.jsp"/>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Fallback nếu TinyMCE không load được
-    if (typeof tinymce === 'undefined') {
-        console.warn('TinyMCE not loaded, using fallback textarea');
-        window.tinymce = {
-            init: function(config) {
-                console.log('TinyMCE fallback: using regular textarea');
-                const textarea = document.querySelector(config.selector);
-                if (textarea) {
-                    textarea.style.display = 'block';
-                }
-            },
-            get: function(id) {
-                return null;
-            },
-            triggerSave: function() {
-                console.log('TinyMCE fallback: triggerSave called');
-            }
-        };
-    }
-
-    // Initialize TinyMCE
-    document.addEventListener('DOMContentLoaded', function() {
-        tinymce.init({
-            selector: '#reason',
-            height: 200,
-            plugins: 'lists link image code',
-            toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code',
-            content_style: 'body { font-family: Arial, sans-serif; }',
-            setup: function(editor) {
-                editor.on('change', function() {
-                    editor.save();
-                });
-            },
-            init_instance_callback: function(editor) {
-                console.log('TinyMCE initialized successfully');
-            }
-        });
-    });
+    // ✅ XÓA TOÀN BỘ TINYMCE CODE
 
     // Xử lý thay đổi loại đơn
-    document.getElementById('requestType').addEventListener('change', function() {
-        // Ẩn tất cả các section
+    document.getElementById('requestType').addEventListener('change', function () {
         const sections = document.querySelectorAll('.form-section');
         sections.forEach(section => section.classList.remove('active'));
 
-        // Hiển thị section tương ứng
         const selectedType = this.value;
         if (selectedType) {
             const sectionMap = {
                 'leave': 'leaveSection',
-                'schedule_change': 'scheduleChangeSection',
-                'room_change': 'roomChangeSection'
+                'schedule_change': 'scheduleChangeSection'
             };
 
             const sectionId = sectionMap[selectedType];
@@ -305,7 +235,7 @@
     }
 
     // Kiểm tra lịch nghỉ phép
-    document.getElementById('checkLeaveBtn').addEventListener('click', function() {
+    document.getElementById('checkLeaveBtn').addEventListener('click', function () {
         const date = document.getElementById('leaveDate').value;
         if (date) {
             window.location.href = '${pageContext.request.contextPath}/teacherRequest?action=checkLeave&date=' + date;
@@ -313,72 +243,54 @@
     });
 
     // Kiểm tra lịch thay đổi
-    document.getElementById('checkChangeBtn').addEventListener('click', function() {
+    document.getElementById('checkChangeBtn').addEventListener('click', function () {
         const date = document.getElementById('changeFromDate').value;
         if (date) {
             window.location.href = '${pageContext.request.contextPath}/teacherRequest?action=checkChange&date=' + date;
         }
     });
 
-    // Kiểm tra lịch đổi phòng
-    document.getElementById('checkRoomBtn').addEventListener('click', function() {
-        const date = document.getElementById('roomChangeDate').value;
-        if (date) {
-            window.location.href = '${pageContext.request.contextPath}/teacherRequest?action=checkRoom&date=' + date;
-        }
-    });
-
-    // Giới hạn chọn tối đa 2 checkbox cho thay đổi lịch
+    // Giới hạn chọn tối đa 1 checkbox cho thay đổi lịch
     const scheduleCheckboxes = document.querySelectorAll('.schedule-checkbox');
     scheduleCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
+        checkbox.addEventListener('change', function () {
             const checkedBoxes = document.querySelectorAll('.schedule-checkbox:checked');
-            if (checkedBoxes.length > 2) {
+            if (checkedBoxes.length > 1) {
                 this.checked = false;
-                alert('Bạn chỉ có thể chọn tối đa 2 lớp học!');
+                alert('Bạn chỉ có thể chọn tối đa 1 lớp học!');
             }
         });
     });
 
-    // Xử lý chọn môn học để hiển thị phòng trống
-    const selectedScheduleElement = document.getElementById('selectedSchedule');
-    if (selectedScheduleElement) {
-        selectedScheduleElement.addEventListener('change', function() {
-            const scheduleId = this.value;
-            const date = document.getElementById('roomChangeDate').value;
-            if (scheduleId && date) {
-                window.location.href = '${pageContext.request.contextPath}/teacherRequest?action=getAvailableRooms&scheduleId=' + scheduleId + '&date=' + date;
-            }
-        });
-    }
-
-    // Validation form trước khi submit
-    document.getElementById('requestForm').addEventListener('submit', function(e) {
-        console.log('Form submit triggered');
-
-        // Đợi TinyMCE sẵn sàng
-        if (typeof tinymce !== 'undefined' && tinymce.get('reason')) {
-            tinymce.triggerSave();
-        }
-
+    // ✅ VALIDATION ĐƠN GIẢN VÀ CLEAN HTML TAGS
+    document.getElementById('requestForm').addEventListener('submit', function (e) {
         const requestType = document.getElementById('requestType').value;
-        console.log('Request type:', requestType);
 
-        //validation để test
         if (!requestType) {
             e.preventDefault();
             alert('Vui lòng chọn loại đơn yêu cầu!');
             return;
         }
 
-        const reason = document.getElementById('reason').value;
-        if (!reason || reason.trim() === '') {
+        // ✅ LẤY VÀ CLEAN REASON
+        const reasonTextarea = document.getElementById('reason');
+        let reason = reasonTextarea.value;
+
+        // Loại bỏ HTML tags
+        reason = reason.replace(/<[^>]*>/g, '');
+        // Loại bỏ khoảng trắng thừa
+        reason = reason.trim();
+
+        // Set lại giá trị đã clean
+        reasonTextarea.value = reason;
+
+        if (!reason || reason.length < 10) {
             e.preventDefault();
-            alert('Vui lòng nhập lý do!');
+            alert('Lý do phải có ít nhất 10 ký tự!');
             return;
         }
 
-        console.log('Form validation passed, submitting...');
+        console.log('Form validation passed, submitting clean text...');
     });
 </script>
 </body>

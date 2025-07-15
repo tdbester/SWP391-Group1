@@ -273,4 +273,47 @@ public class CourseDAO {
         }
         return list;
     }
+
+    /**
+     * Lấy danh sách các khóa học mới nhất kèm số lượng lớp học tương ứng, giới hạn theo số lượng chỉ định.
+     *
+     * @param limit Số lượng khóa học tối đa cần lấy.
+     * @return Danh sách các đối tượng Course mới nhất.
+     * @author Huyen Trang
+     */
+    public ArrayList<Course> getLatestCourses(int limit) {
+        ArrayList<Course> courses = new ArrayList<>();
+        String query = """
+                    SELECT TOP (?) 
+                        c.Id, 
+                        c.Title, 
+                        c.Price, 
+                        c.Information, 
+                        c.CreatedBy,
+                        COUNT(cr.Id) as ClassCount
+                    FROM Course c
+                    LEFT JOIN ClassRooms cr ON c.Id = cr.CourseId
+                    GROUP BY c.Id, c.Title, c.Price, c.Information, c.CreatedBy
+                    ORDER BY c.Id DESC
+                """;
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)){
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Course course = new Course(
+                        rs.getInt("Id"),
+                        rs.getString("Title"),
+                        rs.getDouble("Price"),
+                        rs.getString("Information"),
+                        rs.getInt("CreatedBy"),
+                        rs.getInt("ClassCount")
+                );
+                courses.add(course);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return courses;
+    }
 }

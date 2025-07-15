@@ -24,8 +24,10 @@ import org.example.talentcenter.dao.RequestDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
+import org.example.talentcenter.model.Account;
 import org.example.talentcenter.model.Consultation;
 import org.example.talentcenter.model.Student;
+import org.example.talentcenter.service.NotificationService;
 
 import java.io.IOException;
 
@@ -50,16 +52,30 @@ public class StudentAccountRequestServlet extends HttpServlet {
 
         if (selectedIds != null && selectedIds.length > 0) {
             int successCount = 0;
+            HttpSession session = request.getSession();
+            Account saleAccount = (Account) session.getAttribute("account");
             for (String idStr : selectedIds) {
                 int id = Integer.parseInt(idStr);
                 Consultation consult = dao.getById(id);
                 if (consult != null) {
                     boolean success = requestDao.sendCreateAccountRequest(senderId, consult.getFullName(), consult.getEmail(), consult.getPhone());
-                    if (success) successCount++;
+                    if (success) {
+                        successCount++;
+                        NotificationService.notifyAccountCreationRequest(
+                                saleAccount.getFullName(),
+                                consult.getFullName(),
+                                consult.getEmail(),
+                                0
+                        );
+                    }
                 }
             }
-            request.setAttribute("message", "Đã gửi yêu cầu cho " + successCount + " học sinh.");
+            request.setAttribute("message", "Đã gửi yêu cầu cho " + successCount + " học sinh.");  }else {
+            request.setAttribute("message", "Vui lòng chọn ít nhất một học sinh để gửi yêu cầu.");
         }
+
+        ConsultationDAO consultationDAO = new ConsultationDAO();
+        request.setAttribute("agreedStudents", consultationDAO.getAgreedConsultations());
         request.getRequestDispatcher("View/student-account-request.jsp").forward(request, response);
     }
 

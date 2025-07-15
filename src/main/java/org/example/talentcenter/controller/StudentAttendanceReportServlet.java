@@ -17,18 +17,16 @@
 package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.StudentAttendanceReportDAO;
-import org.example.talentcenter.dao.StudentClassDAO;
+import org.example.talentcenter.dao.ClassroomDAO;
 import org.example.talentcenter.dao.StudentDAO;
 import org.example.talentcenter.model.Account;
 import org.example.talentcenter.model.StudentAttendanceReport;
-import org.example.talentcenter.config.DBConnect;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
@@ -39,7 +37,7 @@ import java.util.Locale;
 public class StudentAttendanceReportServlet extends HttpServlet {
     public static StudentDAO studentDAO = new StudentDAO();
     public static StudentAttendanceReportDAO studentAttendanceReportDAO = new StudentAttendanceReportDAO();
-    public static StudentClassDAO studentClassDAO = new StudentClassDAO();
+    public static ClassroomDAO classroomDAO = new ClassroomDAO();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -90,7 +88,7 @@ public class StudentAttendanceReportServlet extends HttpServlet {
             int totalWeeksInYear = lastDayOfYear.get(weekFields.weekOfYear());
             if (totalWeeksInYear < 10) totalWeeksInYear = 52;
 
-            List<String> classNames = studentClassDAO.getClassNamesByStudentId(studentId);
+            List<String> classNames = classroomDAO.getClassNamesByStudentId(studentId);
             request.setAttribute("classNames", classNames);
             request.setAttribute("selectedClass", selectedClass);
             request.setAttribute("attendanceReports", attendanceReports);

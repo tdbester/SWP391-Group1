@@ -1,9 +1,10 @@
 package org.example.talentcenter.dao;
 
 import org.example.talentcenter.config.DBConnect;
-import org.example.talentcenter.model.Teacher;
+import org.example.talentcenter.model.*;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class TeacherDAO {
 

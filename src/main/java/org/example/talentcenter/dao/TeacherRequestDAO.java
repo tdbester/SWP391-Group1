@@ -15,69 +15,68 @@ public class TeacherRequestDAO {
      * Thêm mới một đơn yêu cầu
      */
     public boolean insertRequest(Request request) {
-        String sql = """
-        INSERT INTO Request (SenderId, Reason, Status, CreatedAt, TypeID)
-        VALUES (?, ?, ?, GETDATE(), ?)
-        """;
-
+        String sql = "INSERT INTO Request (TypeID, SenderId, Reason, Status, CreatedAt) VALUES (?, ?, ?, ?, GETDATE())";
 
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, request.getSenderID());
-            ps.setString(2, request.getReason());
-            ps.setString(3, request.getStatus());
-            ps.setInt(4, getRequestTypeId(request.getTypeName()));
+            stmt.setInt(1, request.getTypeId());
+            stmt.setInt(2, request.getSenderID());
+            stmt.setString(3, request.getReason());
+            stmt.setString(4, request.getStatus() != null ? request.getStatus() : "Chờ xử lý");
 
-            return ps.executeUpdate() > 0;
+            return stmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
+    }
 
-        return false;
+    public ArrayList<Request> getTeacherRequestType() {
+        ArrayList<Request> requestTypes = new ArrayList<>();
+        String sql = "SELECT TypeID, TypeName FROM RequestType WHERE TypeID IN (5,7,8)";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Request requestType = new Request();
+                requestType.setTypeId(rs.getInt("TypeID"));
+                requestType.setTypeName(rs.getString("TypeName"));
+                requestTypes.add(requestType);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requestTypes;
     }
 
     /**
      * Lấy TypeID từ bảng RequestType
      */
-    private int getRequestTypeId(String type) {
-        // Mapping từ type code sang tên trong database
-        String typeName;
-        switch (type) {
-            case "leave":
-                typeName = "Xin nghỉ phép";
-                break;
-            case "schedule_change":
-                typeName = "Thay đổi lịch dạy";
-                break;
-            case "room_change":
-                typeName = "Thay đổi lớp học";
-                break;
-            case "other":
-                typeName = "Khác";
-                break;
-            default:
-                typeName = type; // Nếu đã là tên đầy đủ
+    public int getRequestTypeId(String typeName) {
+        if (typeName == null || typeName.trim().isEmpty()) {
+            return 0;
         }
-
         String sql = "SELECT TypeID FROM RequestType WHERE TypeName = ?";
-
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            ps.setString(1, typeName);
-            ResultSet rs = ps.executeQuery();
+            stmt.setString(1, typeName.trim());
+            ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return rs.getInt("TypeID");
+                int typeId = rs.getInt("TypeID");
+                return typeId;
+            } else {
+                System.err.println("Không tìm thấy TypeID cho TypeName: " + typeName);
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return 1; // Default type
+        return 0;
     }
 
     /**
@@ -86,13 +85,13 @@ public class TeacherRequestDAO {
     public ArrayList<Request> getRequestsBySenderId(int senderId) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
-            SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
-                   r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
-            FROM Request r
-            LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
-            WHERE r.SenderId = ?
-            ORDER BY r.CreatedAt DESC
-        """;
+                    SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
+                           r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
+                    FROM Request r
+                    LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
+                    WHERE r.SenderId = ?
+                    ORDER BY r.CreatedAt DESC
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -105,15 +104,57 @@ public class TeacherRequestDAO {
                 request.setId(rs.getInt("Id"));
                 request.setTypeName(rs.getString("TypeName"));
                 request.setSenderID(rs.getInt("SenderId"));
-                request.setReason(rs.getString("Reason"));
                 request.setStatus(rs.getString("Status"));
                 request.setResponse(rs.getString("Response"));
                 request.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 request.setResponseAt(rs.getTimestamp("ResponseAt"));
                 request.setProcessedBy(rs.getInt("ProcessedBy"));
 
+                String fullReason = rs.getString("Reason");
+                String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+                String type = request.getTypeName();
+
+                if (type != null) {
+                    switch (type) {
+                        case "Đơn xin nghỉ phép":
+                            // Format: date|reason
+                            if (parts.length >= 2) {
+                                request.setReason(parts[1]);
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+
+                        case "Đơn xin đổi lịch dạy":
+                            // Format: from|to|slot|scheduleId|reason
+                            if (parts.length >= 5) {
+                                request.setReason(parts[4]);
+                            } else if (parts.length >= 1) {
+                                request.setReason(parts[parts.length - 1]);
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+
+
+                        default:
+                            if (parts.length >= 4) {
+                                request.setCourseName(parts[0]);
+                                request.setParentPhone(parts[1]);
+                                request.setPhoneNumber(parts[2]);
+                                request.setReason(parts[3]);
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+                    }
+                } else {
+                    request.setReason(fullReason);
+                }
+
                 requests.add(request);
             }
+
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -123,77 +164,17 @@ public class TeacherRequestDAO {
     }
 
     /**
-     * Cập nhật trạng thái đơn yêu cầu
-     */
-    public boolean updateRequestStatus(int requestId, String status, String response, int processedBy) {
-        String sql = """
-            UPDATE Request 
-            SET Status = ?, Response = ?, ProcessedBy = ?, ResponseAt = GETDATE()
-            WHERE Id = ?
-        """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, status);
-            ps.setString(2, response);
-            ps.setInt(3, processedBy);
-            ps.setInt(4, requestId);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    /**
-     * Kiểm tra xem giáo viên đã gửi đơn nghỉ cho ngày này chưa
-     */
-    public boolean hasLeaveRequestForDate(int teacherId, LocalDate date) {
-        String sql = """
-        SELECT COUNT(*) FROM Request r
-        JOIN Teacher t ON r.SenderId = t.AccountId
-        WHERE t.Id = ? AND r.TypeID = ? 
-        AND r.Status IN ('Pending', 'Approved')
-        AND CAST(r.CreatedAt AS DATE) = ?
-    """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, teacherId);
-            ps.setInt(2, getRequestTypeId("Xin nghỉ phép"));
-            ps.setDate(3, Date.valueOf(date));
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-
-
-    /**
      * Lấy thông tin chi tiết của một đơn từ theo ID
      */
     public Request getRequestById(int requestId) {
         Request request = null;
         String sql = """
-            SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
-                   r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
-            FROM Request r
-            LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
-            WHERE r.Id = ?
-        """;
+                    SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
+                           r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
+                    FROM Request r
+                    LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
+                    WHERE r.Id = ?
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -206,7 +187,48 @@ public class TeacherRequestDAO {
                 request.setId(rs.getInt("Id"));
                 request.setTypeName(rs.getString("TypeName"));
                 request.setSenderID(rs.getInt("SenderId"));
-                request.setReason(rs.getString("Reason"));
+                String fullReason = rs.getString("Reason");
+                String type = rs.getString("TypeName");
+                String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+
+                if (type != null) {
+                    switch (type) {
+                        case "Đơn xin nghỉ phép":
+                            if (parts.length >= 2) {
+                                request.setReason(parts[1]);
+                                request.setOffDate(LocalDate.parse(parts[0]));  // nhớ set vào model
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+
+                        case "Đơn xin đổi lịch dạy":
+                            if (parts.length >= 5) {
+                                request.setReason(parts[4]);
+                                request.setScheduleId(Integer.parseInt(parts[3]));  // nhớ set vào model
+                                request.setFromDate(LocalDate.parse(parts[0]));
+                                request.setToDate(LocalDate.parse(parts[1]));
+                                request.setSlot(Integer.parseInt(parts[2]));
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+
+                        default:
+                            if (parts.length >= 4) {
+                                request.setCourseName(parts[0]);
+                                request.setParentPhone(parts[1]);
+                                request.setPhoneNumber(parts[2]);
+                                request.setReason(parts[3]);
+                            } else {
+                                request.setReason(fullReason);
+                            }
+                            break;
+                    }
+                } else {
+                    request.setReason(fullReason);
+                }
+
                 request.setStatus(rs.getString("Status"));
                 request.setResponse(rs.getString("Response"));
                 request.setCreatedAt(rs.getTimestamp("CreatedAt"));
@@ -227,12 +249,12 @@ public class TeacherRequestDAO {
     public ArrayList<Request> getFilteredRequests(int senderId, String requestType, String status) {
         ArrayList<Request> requests = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
-            SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
-                   r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
-            FROM Request r
-            LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
-            WHERE r.SenderId = ?
-        """);
+                    SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
+                           r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
+                    FROM Request r
+                    LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
+                    WHERE r.SenderId = ?
+                """);
 
         ArrayList<Object> params = new ArrayList<>();
         params.add(senderId);
@@ -289,14 +311,14 @@ public class TeacherRequestDAO {
     public ArrayList<Request> searchRequests(int senderId, String keyword) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
-            SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
-                   r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
-            FROM Request r
-            LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
-            WHERE r.SenderId = ? 
-            AND (r.Reason LIKE ? OR rt.TypeName LIKE ? OR r.Status LIKE ? OR r.Response LIKE ?)
-            ORDER BY r.CreatedAt DESC
-        """;
+                    SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
+                           r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
+                    FROM Request r
+                    LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
+                    WHERE r.SenderId = ? 
+                    AND (r.Reason LIKE ? OR rt.TypeName LIKE ? OR r.Status LIKE ? OR r.Response LIKE ?)
+                    ORDER BY r.CreatedAt DESC
+                """;
 
         String searchPattern = "%" + keyword + "%";
 
@@ -358,10 +380,10 @@ public class TeacherRequestDAO {
     public String getProcessorName(int processorId) {
         String name = null;
         String sql = """
-            SELECT a.FullName 
-            FROM Account a 
-            WHERE a.Id = ?
-        """;
+                    SELECT a.FullName 
+                    FROM Account a 
+                    WHERE a.Id = ?
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -381,104 +403,19 @@ public class TeacherRequestDAO {
     }
 
     /**
-     * Lấy thống kê đơn từ theo trạng thái
-     */
-    public RequestStatistics getRequestStatistics(int senderId) {
-        RequestStatistics stats = new RequestStatistics();
-        String sql = """
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN Status = 'Pending' THEN 1 ELSE 0 END) as pending,
-                SUM(CASE WHEN Status = 'Approved' THEN 1 ELSE 0 END) as approved,
-                SUM(CASE WHEN Status = 'Rejected' THEN 1 ELSE 0 END) as rejected
-            FROM Request 
-            WHERE SenderId = ?
-        """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, senderId);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                stats.setTotal(rs.getInt("total"));
-                stats.setPending(rs.getInt("pending"));
-                stats.setApproved(rs.getInt("approved"));
-                stats.setRejected(rs.getInt("rejected"));
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return stats;
-    }
-
-    /**
-     * Lấy danh sách các loại đơn từ
-     */
-    public ArrayList<RequestType> getAllRequestTypes() {
-        ArrayList<RequestType> types = new ArrayList<>();
-        String sql = "SELECT TypeID, TypeName FROM RequestType ORDER BY TypeName";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                RequestType type = new RequestType();
-                type.setTypeId(rs.getInt("TypeID"));
-                type.setTypeName(rs.getString("TypeName"));
-                types.add(type);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return types;
-    }
-
-    /**
-     * Kiểm tra quyền sở hữu đơn từ
-     */
-    public boolean isRequestOwner(int requestId, int senderId) {
-        String sql = "SELECT COUNT(*) FROM Request WHERE Id = ? AND SenderId = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, requestId);
-            ps.setInt(2, senderId);
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    /**
      * Lấy danh sách đơn từ gần đây (7 ngày gần nhất)
      */
     public ArrayList<Request> getRecentRequests(int senderId, int limit) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
-            SELECT TOP (?) r.Id, r.SenderId, r.Reason, r.Status, r.Response,
-                   r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
-            FROM Request r
-            LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
-            WHERE r.SenderId = ? 
-            AND r.CreatedAt >= DATEADD(day, -7, GETDATE())
-            ORDER BY r.CreatedAt DESC
-        """;
+                    SELECT TOP (?) r.Id, r.SenderId, r.Reason, r.Status, r.Response,
+                           r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
+                    FROM Request r
+                    LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
+                    WHERE r.SenderId = ? 
+                    AND r.CreatedAt >= DATEADD(day, -7, GETDATE())
+                    ORDER BY r.CreatedAt DESC
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -506,6 +443,63 @@ public class TeacherRequestDAO {
             e.printStackTrace();
         }
 
+        return requests;
+    }
+
+    public ArrayList<Request> getAllAbsentRequestWithPaging(int offset, int limit) {
+        ArrayList<Request> requests = new ArrayList<>();
+        String sql = """
+         SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+         FROM Request r
+         JOIN RequestType rt ON r.TypeID = rt.TypeID
+         JOIN Account acc ON r.SenderId = acc.Id
+         JOIN Role role ON acc.RoleId = role.Id
+         WHERE r.TypeID = 3
+         ORDER BY r.CreatedAt DESC
+         OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+        """;
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, offset);
+            stmt.setInt(2, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    request.setSenderName(rs.getString("SenderName"));
+                    request.setSenderRole(rs.getString("SenderRole"));
+                    String fullReason = rs.getString("Reason");
+                    String typeName = rs.getString("TypeName");
+                    String extractedReason = "";
+
+                    if (fullReason != null && !fullReason.trim().isEmpty()) {
+                        String[] parts = fullReason.split("\\|");
+                        if (parts.length >= 2) {
+                            extractedReason = parts[1];
+                        } else {
+                            extractedReason = fullReason;
+                        }
+                        extractedReason = extractedReason.replaceAll("<[^>]*>", "").trim();
+                    }
+                    request.setReason(extractedReason);
+
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setTypeName(typeName);
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return requests;
     }
 }

@@ -17,11 +17,8 @@
 
 package org.example.talentcenter.controller;
 
-import org.example.talentcenter.dao.CourseDAO;
-import org.example.talentcenter.dao.ConsultationDAO;
-import org.example.talentcenter.dto.CourseDto;
-import org.example.talentcenter.model.Consultation;
-import org.example.talentcenter.model.Course;
+import org.example.talentcenter.dao.*;
+import org.example.talentcenter.model.*;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -39,6 +36,7 @@ import java.util.List;
 public class ConsultationServlet extends HttpServlet {
     private static final CourseDAO subjectDAO = new CourseDAO();
     private static final ConsultationDAO consultationDAO = new ConsultationDAO();
+    public static final NotificationDAO notificationDAO = new NotificationDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -104,7 +102,7 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("course_filter", courseFilter);
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
         } else if (action.equals("filterByStatus")) {
-            String statusFilter = request.getParameter("status_filter");
+            String statusFilter = request.getParameter("statusFilter");
             if (statusFilter == null || statusFilter.trim().isEmpty()) {
                 response.sendRedirect("Consultation?action=list");
                 return;
@@ -112,15 +110,11 @@ public class ConsultationServlet extends HttpServlet {
             ArrayList<Consultation> consultations = consultationDAO.filterConsultationsByStatus(statusFilter.trim());
             request.setAttribute("consultations", consultations);
             request.setAttribute("subjects", subjects);
-            request.setAttribute("course_filter", statusFilter);
+            request.setAttribute("statusFilter", statusFilter);
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
-        } else if ("dashboard".equals(action)) {
-            request.getRequestDispatcher("View/sale-dashboard.jsp").forward(request, response);
-            return;
         } else {
             response.sendRedirect("Consultation?action=list");
         }
-
 
     }
 
@@ -153,23 +147,20 @@ public class ConsultationServlet extends HttpServlet {
                 String name = request.getParameter("name");
                 String email = request.getParameter("email");
                 String phone = request.getParameter("phone");
-                String course = request.getParameter("course_interest");
+                int courseId = Integer.parseInt(request.getParameter("course_interest"));
 
                 Consultation consult = new Consultation();
                 consult.setId(id);
                 consult.setFullName(name);
                 consult.setEmail(email);
                 consult.setPhone(phone);
-                consult.setCourseId(Integer.parseInt(course));
+                consult.setCourseId(courseId);
 
                 consultationDAO.updateConsultation(consult);
-                Consultation updatedConsult = consultationDAO.getById(id);
-                request.setAttribute("consult", updatedConsult);
-                request.setAttribute("subjects", subjectDAO.getAll());
+
                 HttpSession session = request.getSession();
                 session.setAttribute("message", "Cập nhật thành công.");
-                request.getRequestDispatcher("View/edit-consultation.jsp").forward(request, response);
-                return;
+                response.sendRedirect("Consultation");
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
                 consultationDAO.deleteConsultation(id);

@@ -22,7 +22,6 @@
 <%--    *  ------------|----------------------|----------------------------------%>
 <%--    *  2025-06-13  | Cù Thị Huyền Trang   | Initial creation--%>
 <%--    */--%>
-
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -33,6 +32,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <style>
+        /* CSS giữ nguyên như cũ */
         * {
             margin: 0;
             padding: 0;
@@ -83,7 +83,6 @@
             font-size: 14px;
             margin-top: 5px;
         }
-
 
         .card {
             background: white;
@@ -187,6 +186,15 @@
             background: #5a6268;
         }
 
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
         .alert {
             padding: 15px 20px;
             border-radius: 8px;
@@ -204,6 +212,12 @@
             background-color: #fff3cd;
             border-color: #ffc107;
             color: #856404;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
         }
 
         .info-box {
@@ -262,7 +276,7 @@
                 <div class="course-info">Hệ thống quản lý đơn - Trung Tâm Năng Khiếu</div>
             </div>
         </div>
-
+        <%--in ra thông báo--%>
         <c:if test="${not empty sessionScope.message}">
             <div class="alert alert-success">
                 <i class="fas fa-check-circle"></i> ${sessionScope.message}
@@ -282,39 +296,16 @@
                 <i class="fas fa-edit"></i> Nhập thông tin đơn
             </div>
             <div class="card-body">
-                <form action="StudentApplication" method="post">
-                    <input type="hidden" name="action" value="create">
-
+                <!-- form nhập tất cả thông tin -->
+                <form action="StudentApplication" method="get">
                     <div class="form-row">
-                        <div class="form-col">
-                            <label class="form-label">Họ và Tên<span class="required">*</span></label>
-                            <input type="text" class="form-control" name="studentName" value="${studentName}" readonly>
-                        </div>
-                        <div class="form-col">
-                            <label class="form-label">Số điện thoại<span class="required">*</span></label>
-                            <input type="text" class="form-control" name="phoneNumber" value="${phoneNumber}"
-                                   required>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-col">
-                            <label class="form-label">Lớp hiện tại <span class="required">*</span></label>
-                            <select class="form-control" name="currentClass" required>
-                                <option value="">-- Chọn lớp hiện tại --</option>
-                                <c:forEach var="classRoom" items="${classList}">
-                                    <option value="${classRoom.classroomName}" data-class-id="${classRoom.classroomID}">
-                                            ${classRoom.classroomName}
-                                    </option>
-                                </c:forEach>
-                            </select>
-                        </div>
                         <div class="form-col">
                             <label class="form-label">Loại đơn<span class="required">*</span></label>
-                            <select class="form-control" name="requestTypeId" required>
+                            <select class="form-control" name="requestType" onchange="this.form.submit()">
                                 <option value="">-- Chọn loại đơn --</option>
                                 <c:forEach var="request" items="${requestTypeList}">
-                                    <option value="${request.typeId}" data-type-id="${request.typeId}">
+                                    <option value="${request.typeId}"
+                                            <c:if test="${param.requestType == request.typeId || selectedRequestType == request.typeId}">selected</c:if>>
                                             ${request.typeName}
                                     </option>
                                 </c:forEach>
@@ -324,36 +315,117 @@
 
                     <div class="form-row">
                         <div class="form-col">
-                            <label class="form-label">Số điện thoại phụ huynh <span class="required">*</span></label>
-                            <input type="tel" class="form-control" name="parentPhone"
-                                   placeholder="Nhập số điện thoại phụ huynh" required>
+                            <label class="form-label">Họ và Tên<span class="required">*</span></label>
+                            <input type="text" class="form-control" name="studentName" value="${studentName}" readonly>
                         </div>
                         <div class="form-col">
-                            <label class="form-label">Ngày nộp đơn <span class="required">*</span></label>
-                            <input type="date" class="form-control" name="requestDate" required>
+                            <label class="form-label">Số điện thoại<span class="required">*</span></label>
+                            <input type="text" class="form-control" name="phoneNumber"
+                                   value="${param.phoneNumber != null ? param.phoneNumber : phoneNumber}" required>
                         </div>
                     </div>
+
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label class="form-label">Lớp hiện tại <span class="required">*</span></label>
+                            <select class="form-control" name="currentClass" required>
+                                <option value="">-- Chọn lớp hiện tại --</option>
+                                <c:forEach var="classRoom" items="${classList}">
+                                    <option value="${classRoom.classroomName}"
+                                            <c:if test="${param.currentClass == classRoom.classroomName}">selected</c:if>>
+                                            ${classRoom.classroomName}
+                                    </option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div class="form-col">
+                            <label class="form-label">Số điện thoại phụ huynh<span class="required">*</span></label>
+                            <input type="text" class="form-control" name="parentPhone"
+                                   value="${param.parentPhone}" required>
+                        </div>
+                    </div>
+
+                    <!-- Phần chuyển lớp -->
+                    <c:if test="${isTransferRequest || param.requestType == '1'}">
+                        <div class="form-row"
+                             style="background: #f8f9ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                            <div class="form-col">
+                                <label class="form-label">
+                                    <i class="fas fa-exchange-alt" style="color: #4c63d2;"></i>
+                                    Chọn lớp muốn chuyển tới <span class="required">*</span>
+                                </label>
+                                <select class="form-control" name="selectedClass" required>
+                                    <option value="">-- Chọn lớp --</option>
+                                    <c:forEach var="classroom" items="${availableClasses}">
+                                        <option value="${classroom.classroomID}"
+                                                <c:if test="${param.selectedClass == classroom.classroomID.toString()}">selected</c:if>>
+                                                ${classroom.classroomName}
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                                <button type="submit" class="btn btn-info" style="margin-top: 10px;" formnovalidate>
+                                    <i class="fas fa-calendar-alt"></i> Xem lịch
+                                </button>
+                            </div>
+
+                            <!-- Thông tin lớp đã chọn -->
+                            <c:if test="${not empty selectedClassInfo}">
+                                <div class="form-col">
+                                    <label class="form-label">
+                                        <i class="fas fa-info-circle" style="color: #28a745;"></i>
+                                        Thông tin lớp
+                                    </label>
+                                    <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+                                        <p style="margin: 0 0 10px 0;"><strong>Giáo
+                                            viên:</strong> ${selectedClassInfo.teacherName}</p>
+                                        <p style="margin: 0; font-weight: 600; color: #2c3e50;">Lịch học:</p>
+                                        <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+                                            <c:forEach var="schedule" items="${classSchedules}">
+                                                <li style="margin-bottom: 3px;">
+                                                    <c:set var="dayOfWeek"
+                                                           value="${schedule.date.dayOfWeek.toString()}"/>
+                                                    <c:choose>
+                                                        <c:when test="${dayOfWeek == 'MONDAY'}">Thứ 2</c:when>
+                                                        <c:when test="${dayOfWeek == 'TUESDAY'}">Thứ 3</c:when>
+                                                        <c:when test="${dayOfWeek == 'WEDNESDAY'}">Thứ 4</c:when>
+                                                        <c:when test="${dayOfWeek == 'THURSDAY'}">Thứ 5</c:when>
+                                                        <c:when test="${dayOfWeek == 'FRIDAY'}">Thứ 6</c:when>
+                                                        <c:when test="${dayOfWeek == 'SATURDAY'}">Thứ 7</c:when>
+                                                        <c:when test="${dayOfWeek == 'SUNDAY'}">CN</c:when>
+                                                    </c:choose>
+                                                        ${schedule.slotStartTime}-${schedule.slotEndTime}
+                                                    (${schedule.roomCode})
+                                                </li>
+                                            </c:forEach>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </c:if>
+                        </div>
+                    </c:if>
 
                     <div class="form-group">
                         <label class="form-label">Mô tả chi tiết lý do <span class="required">*</span></label>
                         <textarea class="form-control textarea" name="detailedReason"
                                   placeholder="Vui lòng mô tả chi tiết lý do chuyển lớp, tình huống cụ thể..."
-                                  required></textarea>
+                        >${param.detailedReason}</textarea>
                         <small style="color: #6c757d; font-size: 0.875rem; margin-top: 5px; display: block;">
-                            <i class="fas fa-info-circle"></i> Tối thiểu 50 ký tự. Mô tả càng chi tiết càng giúp việc
+                            <i class="fas fa-info-circle"></i> Tối thiểu 20 ký tự. Mô tả càng chi tiết càng giúp việc
                             xét duyệt nhanh chóng.
                         </small>
                     </div>
 
                     <div class="button-group">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" formaction="StudentApplication" formmethod="post"
+                                name="action" value="create">
                             <i class="fas fa-paper-plane"></i> Gửi đơn
                         </button>
-                        <button type="reset" class="btn btn-secondary">
+                        <a href="StudentApplication" class="btn btn-secondary">
                             <i class="fas fa-undo"></i> Làm mới
-                        </button>
+                        </a>
                     </div>
                 </form>
+
             </div>
         </div>
 
@@ -368,49 +440,13 @@
                         <li>Đơn chỉ được nộp trong thời gian quy định</li>
                         <li>Cần có sự đồng ý của phụ huynh</li>
                         <li>Thời gian xử lý: 5-7 ngày làm việc</li>
-                        <li>Liên hệ GVCN nếu cần hỗ trợ</li>
+                        <li>Liên hệ qua email talencenter@gmail.com nếu cần hỗ trợ</li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <jsp:include page="footer.jsp"/>
-
-<script>
-    // mặc định là ngyaf hiện tại
-    document.addEventListener('DOMContentLoaded', function () {
-        var dateInput = document.querySelector('input[name="requestDate"]');
-        if (dateInput) {
-            var today = new Date().toISOString().split('T')[0];
-            dateInput.value = today;
-        }
-    });
-
-    // validate form
-    function validateForm() {
-        var detailedReason = document.querySelector('textarea[name="detailedReason"]').value;
-        var parentPhone = document.querySelector('input[name="parentPhone"]').value;
-        if (!detailedReason || !parentPhone) {
-            alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
-            return false;
-        }
-        return true;
-    }
-
-    // Add form validation to submit button
-    document.addEventListener('DOMContentLoaded', function () {
-        var form = document.querySelector('form[action="StudentApplication"]');
-        if (form) {
-            form.addEventListener('submit', function (e) {
-                if (!validateForm()) {
-                    e.preventDefault();
-                }
-            });
-        }
-    });
-</script>
-
 </body>
 </html>

@@ -28,49 +28,16 @@ import java.util.*;
 import java.util.ArrayList;
 
 public class StudentScheduleDAO {
-    public ArrayList<StudentSchedule> getScheduleByStudentId(int studentId) {
-        ArrayList<StudentSchedule> schedules = new ArrayList<>();
-        String sql = """
-                    SELECT s.Date, s.SlotId, r.Code AS RoomCode, sl.StartTime, sl.EndTime,
-                           c.Name AS ClassName, co.Title AS CourseTitle, a.FullName AS TeacherName
-                    FROM Schedule s
-                    JOIN Slot sl on s.SlotId = sl.Id
-                    JOIN Room r ON s.RoomId = r.Id
-                    JOIN ClassRooms c ON s.ClassRoomId = c.Id
-                    JOIN Teacher t ON c.TeacherId = t.Id
-                    JOIN Account a ON t.AccountId = a.Id
-                    JOIN Course co ON c.CourseId = co.Id
-                    JOIN Student_Class sc ON c.Id = sc.ClassRoomId
-                    JOIN Student st ON sc.StudentId = st.Id
-                    WHERE st.Id = ?
-                    ORDER BY s.Date 
-                """;
 
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, studentId);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                StudentSchedule schedule = new StudentSchedule();
-                schedule.setDate(rs.getDate("Date").toLocalDate());
-                schedule.setSlotId(rs.getInt("SlotId"));
-                schedule.setRoomCode(rs.getString("RoomCode"));
-                schedule.setSlotStartTime(rs.getTime("StartTime").toLocalTime());
-                schedule.setSlotEndTime(rs.getTime("EndTime").toLocalTime());
-                schedule.setClassName(rs.getString("ClassName"));
-                schedule.setCourseTitle(rs.getString("CourseTitle"));
-                schedule.setTeacherName(rs.getString("TeacherName"));
-                schedules.add(schedule);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return schedules;
-    }
-
+    /**
+     * Lấy danh sách lịch học trong tuần của học sinh theo ID và khoảng ngày.
+     *
+     * @param studentId   ID học sinh
+     * @param startOfWeek Ngày bắt đầu tuần (thứ 2)
+     * @param endOfWeek   Ngày kết thúc tuần (chủ nhật)
+     * @return Danh sách lịch học trong tuần
+     * @author Huyen Trang
+     */
     public ArrayList<StudentSchedule> getScheduleByStudentIdAndWeek(int studentId, LocalDate startOfWeek, LocalDate endOfWeek) {
         ArrayList<StudentSchedule> schedules = new ArrayList<>();
         String sql = """
@@ -119,6 +86,14 @@ public class StudentScheduleDAO {
         return schedules;
     }
 
+    /**
+     * Lấy lịch học của học sinh theo ngày cụ thể.
+     *
+     * @param studentId ID học sinh
+     * @param date      Ngày cần lấy lịch
+     * @return Danh sách lịch học trong ngày
+     * @author Huyen Trang
+     */
     public List<StudentSchedule> getScheduleByStudentIdAndDate(int studentId, LocalDate date) {
         List<StudentSchedule> list = new ArrayList<>();
         String sql = """
@@ -143,7 +118,6 @@ public class StudentScheduleDAO {
             ps.setDate(2, Date.valueOf(date));
 
             ResultSet rs = ps.executeQuery();
-            int cnt = 0;
             while (rs.next()) {
                 StudentSchedule schedule = new StudentSchedule();
                 schedule.setDate(rs.getDate("Date").toLocalDate());
@@ -155,12 +129,12 @@ public class StudentScheduleDAO {
                 schedule.setCourseTitle(rs.getString("CourseTitle"));
                 schedule.setTeacherName(rs.getString("TeacherName"));
                 list.add(schedule);
-                cnt++;
             }
-            System.out.println("Found " + cnt + " schedules");
         } catch (Exception e) {
             e.printStackTrace();
         }
         return list;
     }
+
+
 }

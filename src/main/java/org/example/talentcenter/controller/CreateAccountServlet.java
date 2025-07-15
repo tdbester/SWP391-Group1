@@ -1,3 +1,20 @@
+/*
+ *  Copyright (C) 2025 <Group 1>
+ *  All rights reserved.
+ *
+ *  This file is part of the <Talent Center Management> project.
+ *  Unauthorized copying of this file, via any medium is strictly prohibited.
+ *  Proprietary and confidential.
+ *
+ *  Created on:        2025-06-09
+ *  Author:            Cù Thị Huyền Trang
+ *
+ *  ========================== Change History ==========================
+ *  Date        | Author               | Description
+ *  ------------|----------------------|--------------------------------
+ *  2025-06-09  | Cù Thị Huyền Trang   | Initial creation
+ */
+
 package org.example.talentcenter.controller;
 
 import jakarta.servlet.ServletException;
@@ -47,7 +64,7 @@ public class CreateAccountServlet extends HttpServlet {
             String studentPhone = parts.length > 2 ? parts[2] : "";
 
             if (accountDAO.isUsernameExists(studentEmail)) {
-                System.out.println("Email exists, redirecting to error page.");
+                System.out.println("Email đã tồn tại");
                 response.sendRedirect("CreateAccount?error=email_exists");
                 return;
             }
@@ -62,7 +79,6 @@ public class CreateAccountServlet extends HttpServlet {
             );
 
             if (accountCreated) {
-                // Gửi email thông báo tài khoản
                 boolean emailSent = service.sendNewAccountEmail(
                         studentEmail,
                         studentEmail,

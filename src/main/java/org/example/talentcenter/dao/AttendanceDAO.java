@@ -120,7 +120,7 @@ public class AttendanceDAO {
             while (rs.next()) {
                 Student student = new Student();
                 student.setId(rs.getInt("Id"));
-                student.setFullName(rs.getString("FullName"));
+                student.setName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("ParentPhone"));
                 student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
@@ -366,7 +366,7 @@ public class AttendanceDAO {
             while (rs.next()) {
                 Student student = new Student();
                 student.setId(rs.getInt("Id"));
-                student.setFullName(rs.getString("FullName"));
+                student.setName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("ParentPhone"));
                 student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
@@ -426,6 +426,57 @@ public class AttendanceDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // Lấy thông tin lớp học theo Id
+    public ClassRooms getClassRoomById(int classRoomId) {
+        String sql = """
+        SELECT c.Id, c.Name, c.CourseId, c.TeacherId, c.SlotId,
+               course.Title as CourseTitle,
+               slot.StartTime, slot.EndTime,
+               (SELECT COUNT(*) FROM Student_Class sc WHERE sc.ClassRoomId = c.Id) as StudentCount
+        FROM ClassRooms c
+        JOIN Course course ON c.CourseId = course.Id
+        JOIN Slot slot ON c.SlotId = slot.Id
+        WHERE c.Id = ?
+        """;
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, classRoomId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                ClassRooms classRoom = new ClassRooms();
+                classRoom.setId(rs.getInt("Id"));
+                classRoom.setName(rs.getString("Name"));
+                classRoom.setCourseId(rs.getInt("CourseId"));
+                classRoom.setTeacherId(rs.getInt("TeacherId"));
+                classRoom.setSlotId(rs.getInt("SlotId"));
+                classRoom.setCourseTitle(rs.getString("CourseTitle"));
+                classRoom.setStartTime(rs.getTime("StartTime").toLocalTime());
+                classRoom.setEndTime(rs.getTime("EndTime").toLocalTime());
+                classRoom.setStudentCount(rs.getInt("StudentCount"));
+                return classRoom;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Lấy classRoomId từ scheduleId
+    public int getClassIdByScheduleId(int scheduleId) {
+        String sql = "SELECT ClassRoomId FROM Schedule WHERE Id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, scheduleId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("ClassRoomId");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 
 }

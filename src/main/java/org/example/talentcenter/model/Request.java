@@ -1,5 +1,6 @@
 package org.example.talentcenter.model;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Request {
@@ -20,7 +21,12 @@ public class Request {
     private int typeId;
     private String senderName;
     private String senderRole;
-
+    private String senderEmail;
+    private LocalDate offDate;     // cho đơn xin nghỉ phép
+    private LocalDate fromDate;    // cho đơn đổi lịch
+    private LocalDate toDate;
+    private int slot;
+    private int scheduleId;
     public Request() {
     }
 
@@ -191,5 +197,53 @@ public class Request {
 
     public void setSenderRole(String senderRole) {
         this.senderRole = senderRole;
+    }
+
+    public String getSenderEmail() {
+        return senderEmail;
+    }
+
+    public void setSenderEmail(String senderEmail) {
+        this.senderEmail = senderEmail;
+    }
+
+    public LocalDate getOffDate() {
+        return offDate;
+    }
+
+    public void setOffDate(LocalDate offDate) {
+        this.offDate = offDate;
+    }
+
+    public LocalDate getFromDate() {
+        return fromDate;
+    }
+
+    public void setFromDate(LocalDate fromDate) {
+        this.fromDate = fromDate;
+    }
+
+    public LocalDate getToDate() {
+        return toDate;
+    }
+
+    public void setToDate(LocalDate toDate) {
+        this.toDate = toDate;
+    }
+
+    public int getSlot() {
+        return slot;
+    }
+
+    public void setSlot(int slot) {
+        this.slot = slot;
+    }
+
+    public int getScheduleId() {
+        return scheduleId;
+    }
+
+    public void setScheduleId(int scheduleId) {
+        this.scheduleId = scheduleId;
     }
 }

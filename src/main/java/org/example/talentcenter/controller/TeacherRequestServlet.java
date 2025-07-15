@@ -6,40 +6,44 @@ import org.example.talentcenter.model.*;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
+import org.example.talentcenter.service.NotificationService;
+
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @WebServlet(name = "teacherRequest", value = "/teacherRequest")
 public class TeacherRequestServlet extends HttpServlet {
 
     private TeacherDAO teacherDAO;
     private TeacherScheduleDAO scheduleDAO;
-    private RoomDAO roomDAO;
     private TeacherRequestDAO requestDAO;
 
     @Override
     public void init() throws ServletException {
         teacherDAO = new TeacherDAO();
         scheduleDAO = new TeacherScheduleDAO();
-        roomDAO = new RoomDAO();
         requestDAO = new TeacherRequestDAO();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("accountId") == null) {
+        Account account = (Account) session.getAttribute("account");
+        if (session == null || account == null) {
             response.sendRedirect(request.getContextPath() + "/View/login.jsp");
             return;
         }
+        ArrayList<Schedule> slotList = scheduleDAO.getAllSlots();
+        request.setAttribute("slotList", slotList);
 
         String action = request.getParameter("action");
+        ArrayList<Request> requestTypeList = requestDAO.getTeacherRequestType();
+        request.setAttribute("requestTypeList", requestTypeList);
 
         if (action != null) {
             switch (action) {
@@ -49,16 +53,13 @@ public class TeacherRequestServlet extends HttpServlet {
                 case "checkChange":
                     handleCheckChange(request, response, session);
                     break;
-                case "checkRoom":
-                    handleCheckRoom(request, response, session);
-                    break;
-                case "getAvailableRooms":
-                    handleGetAvailableRooms(request, response, session);
-                    break;
                 default:
-                    request.getRequestDispatcher("/iew/teacher-request.jsp").forward(request, response);
+                    request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
             }
         } else {
+            request.setAttribute("teacherName", account.getFullName());
+            request.setAttribute("phoneNumber", account.getPhoneNumber());
+
             request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
         }
     }
@@ -66,70 +67,141 @@ public class TeacherRequestServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
+        String action = request.getParameter("action");
 
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("accountId") == null) {
-            response.sendRedirect(request.getContextPath() + "/View/login.jsp");
-            return;
-        }
-
-        try {
-            String type = request.getParameter("type");
-            String reason = request.getParameter("reason");
-            int senderId = (int) session.getAttribute("accountId");
-
-            // Validate chung
-            if (type == null || type.trim().isEmpty()) {
-                request.setAttribute("error", "Vui lòng chọn loại đơn yêu cầu!");
-                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
+        if ("create".equals(action)) {
+            HttpSession session = request.getSession(false);
+            Account account = (Account) session.getAttribute("account");
+            if (account == null) {
+                response.sendRedirect("login.jsp");
                 return;
             }
 
-            if (reason == null || reason.trim().isEmpty()) {
-                request.setAttribute("error", "Vui lòng nhập lý do!");
-                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
-                return;
-            }
+            try {
+                String type = request.getParameter("type");
+                String reason = request.getParameter("reason");
+                Integer senderId = account.getId();
 
-            // Xử lý theo từng loại đơn
-            boolean success = false;
-            String errorMessage = "";
-
-            switch (type) {
-                case "leave":
-                    success = handleLeaveRequest(request, senderId, reason);
-                    errorMessage = "Xin nghỉ phép thất bại!";
-                    break;
-                case "schedule_change":
-                    success = handleScheduleChangeRequest(request, senderId, reason);
-                    errorMessage = "Thay đổi lịch dạy thất bại!";
-                    break;
-                case "room_change":
-                    success = handleRoomChangeRequest(request, senderId, reason);
-                    errorMessage = "Thay đổi phòng học thất bại!";
-                    break;
-                case "other":
-                    success = handleOtherRequest(request, senderId, reason, type);
-                    errorMessage = "Gửi đơn thất bại!";
-                    break;
-                default:
-                    request.setAttribute("error", "Loại đơn không hợp lệ!");
-                    request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
+                if (type == null || type.trim().isEmpty()) {
+                    session.setAttribute("error", "Vui lòng chọn loại đơn yêu cầu!");
+                    redirectWithFormData(request, response);
                     return;
-            }
+                }
 
-            if (success) {
-                request.setAttribute("success", "Gửi đơn thành công! Vui lòng chờ phản hồi từ quản trị viên.");
-            } else {
-                request.setAttribute("error", errorMessage);
-            }
+                if (reason == null || reason.trim().length() < 10) {
+                    session.setAttribute("error", "Lý do phải có ít nhất 10 ký tự!");
+                    redirectWithFormData(request, response);
+                    return;
+                }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Có lỗi xảy ra, vui lòng thử lại!");
+                // Tạo combined reason
+                String combinedReason = createCombinedReason(request, type, reason);
+
+                // Lấy TypeID
+                int typeId = getTypeIdFromValue(type);
+                if (typeId == 0) {
+                    session.setAttribute("error", "Loại đơn không hợp lệ!");
+                    redirectWithFormData(request, response);
+                    return;
+                }
+
+                // Tạo request object
+                Request teacherRequest = new Request();
+                teacherRequest.setSenderID(senderId);
+                teacherRequest.setReason(combinedReason);
+                teacherRequest.setTypeId(typeId);
+                teacherRequest.setStatus("Chờ xử lý");
+
+                boolean success = requestDAO.insertRequest(teacherRequest);
+                if (success) {
+                    String requestTypeName = "";
+                    switch (type) {
+                        case "leave":
+                            requestTypeName = "Đơn xin nghỉ phép";
+                            break;
+                        case "schedule_change":
+                            requestTypeName = "Đơn xin đổi lịch dạy";
+                            break;
+                        case "other":
+                            requestTypeName = "Đơn khác";
+                            break;
+                        default:
+                            requestTypeName = "Đơn";
+                    }
+                    int newRequestId = teacherRequest.getId();
+                    NotificationService.notifyTeacherRequestSubmitted(
+                            account.getFullName(),
+                            requestTypeName,
+                            newRequestId
+                    );
+                    session.setAttribute("success", "Gửi đơn thành công!");
+                    response.sendRedirect("teacherRequest");
+                } else {
+                    session.setAttribute("error", "Gửi đơn thất bại!");
+                    redirectWithFormData(request, response);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+                redirectWithFormData(request, response);
+            }
+        } else {
+            doGet(request, response);
         }
+    }
 
-        request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
+    private String createCombinedReason(HttpServletRequest request, String type, String reason) {
+        switch (type) {
+            case "leave":
+                String leaveDate = request.getParameter("leaveDate");
+                return (leaveDate != null ? leaveDate : "") + "|" + reason;
+            case "schedule_change":
+                String fromDate = request.getParameter("changeFromDate");
+                String toDate = request.getParameter("changeToDate");
+                String toSlot = request.getParameter("changeToSlot");
+                String selectedScheduleId = request.getParameter("selectedSchedules");
+
+                return String.join("|",
+                        fromDate != null ? fromDate : "",
+                        toDate != null ? toDate : "",
+                        toSlot != null ? toSlot : "",
+                        selectedScheduleId != null ? selectedScheduleId : "",
+                        reason != null ? reason : ""
+                );
+
+            default:
+                return reason;
+        }
+    }
+
+    private int getTypeIdFromValue(String typeValue) {
+        switch (typeValue) {
+            case "leave":
+                return requestDAO.getRequestTypeId("Đơn xin nghỉ phép");
+            case "schedule_change":
+                return requestDAO.getRequestTypeId("Đơn xin đổi lịch dạy");
+            case "other":
+                return requestDAO.getRequestTypeId("Đơn khác");
+            default:
+                return 0;
+        }
+    }
+
+    private void redirectWithFormData(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        StringBuilder redirectUrl = new StringBuilder("teacherRequest?");
+
+        String type = request.getParameter("type");
+        if (type != null) redirectUrl.append("type=").append(type).append("&");
+
+        String reason = request.getParameter("reason");
+        if (reason != null)
+            redirectUrl.append("reason=").append(java.net.URLEncoder.encode(reason, "UTF-8")).append("&");
+
+        response.sendRedirect(redirectUrl.toString());
     }
 
     private void handleCheckLeave(HttpServletRequest request, HttpServletResponse response, HttpSession session)
@@ -154,8 +226,8 @@ public class TeacherRequestServlet extends HttpServlet {
             }
 
             // Lấy thông tin giáo viên
-            int accountId = (int) session.getAttribute("accountId");
-            Teacher teacher = teacherDAO.getTeacherByAccountId(accountId);
+            Account account = (Account) session.getAttribute("account");
+            Teacher teacher = teacherDAO.getTeacherByAccountId(account.getId());
 
             if (teacher == null) {
                 request.setAttribute("error", "Không tìm thấy thông tin giáo viên!");
@@ -173,10 +245,14 @@ public class TeacherRequestServlet extends HttpServlet {
                 request.setAttribute("leaveSchedules", schedules);
             }
 
-            // Giữ lại các thông tin đã nhập
+            ArrayList<Request> requestTypeList = requestDAO.getTeacherRequestType();
+            request.setAttribute("requestTypeList", requestTypeList);
+            request.setAttribute("teacherName", account.getFullName());
+            request.setAttribute("phoneNumber", account.getPhoneNumber());
+
             request.setAttribute("type", "leave");
             request.setAttribute("leaveDate", dateStr);
-
+            request.setAttribute("reason", request.getParameter("reason"));
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Ngày không hợp lệ!");
@@ -229,6 +305,9 @@ public class TeacherRequestServlet extends HttpServlet {
             // Giữ lại các thông tin đã nhập
             request.setAttribute("type", "schedule_change");
             request.setAttribute("changeFromDate", dateStr);
+            request.setAttribute("changeToDate", request.getParameter("changeToDate"));
+            request.setAttribute("reason", request.getParameter("reason"));
+
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -238,115 +317,6 @@ public class TeacherRequestServlet extends HttpServlet {
         request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
     }
 
-    private void handleCheckRoom(HttpServletRequest request, HttpServletResponse response, HttpSession session)
-            throws ServletException, IOException {
-
-        String dateStr = request.getParameter("date");
-        if (dateStr == null || dateStr.trim().isEmpty()) {
-            request.setAttribute("error", "Vui lòng chọn ngày muốn đổi phòng!");
-            request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
-            return;
-        }
-
-        try {
-            LocalDate changeDate = LocalDate.parse(dateStr);
-            LocalDate today = LocalDate.now();
-
-            // Kiểm tra ngày đã qua
-            if (changeDate.isBefore(today)) {
-                request.setAttribute("warning", "Ngày bạn chọn đã qua!");
-                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
-                return;
-            }
-
-            // Lấy thông tin giáo viên
-            int accountId = (int) session.getAttribute("accountId");
-            Teacher teacher = teacherDAO.getTeacherByAccountId(accountId);
-
-            if (teacher == null) {
-                request.setAttribute("error", "Không tìm thấy thông tin giáo viên!");
-                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
-                return;
-            }
-
-            // Lấy lịch học trong ngày
-            ArrayList<Schedule> schedules = scheduleDAO.getScheduleByTeacherIdAndDate(
-                    teacher.getId(), changeDate);
-
-            if (schedules.isEmpty()) {
-                request.setAttribute("warning", "Ngày " + dateStr + " bạn không có lịch trình!");
-            } else {
-                request.setAttribute("roomChangeSchedules", schedules);
-            }
-
-            // Giữ lại các thông tin đã nhập
-            request.setAttribute("type", "room_change");
-            request.setAttribute("roomChangeDate", dateStr);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Ngày không hợp lệ!");
-        }
-
-        request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
-    }
-
-    private void handleGetAvailableRooms(HttpServletRequest request, HttpServletResponse response, HttpSession session)
-            throws ServletException, IOException {
-
-        String scheduleIdStr = request.getParameter("scheduleId");
-        String dateStr = request.getParameter("date");
-
-        if (scheduleIdStr == null || dateStr == null) {
-            request.setAttribute("error", "Thông tin không hợp lệ!");
-            request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
-            return;
-        }
-
-        try {
-            int scheduleId = Integer.parseInt(scheduleIdStr);
-            LocalDate date = LocalDate.parse(dateStr);
-
-            // Lấy thông tin lịch học hiện tại
-            Schedule currentSchedule = scheduleDAO.getScheduleById(scheduleId);
-            if (currentSchedule == null) {
-                request.setAttribute("error", "Không tìm thấy thông tin lịch học!");
-                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
-                return;
-            }
-
-            // Lấy danh sách phòng trống
-            ArrayList<Room> availableRooms = roomDAO.getAvailableRoomsForSchedule(scheduleId, date);
-
-            // Loại bỏ phòng hiện tại
-            availableRooms.removeIf(room -> room.getId() == currentSchedule.getRoomId());
-
-            if (availableRooms.isEmpty()) {
-                request.setAttribute("warning", "Không có phòng học khả dụng trong thời gian này!");
-            } else {
-                request.setAttribute("availableRooms", availableRooms);
-            }
-
-            // Giữ lại thông tin để hiển thị lại form
-            request.setAttribute("type", "room_change");
-            request.setAttribute("roomChangeDate", dateStr);
-
-            // Lấy lại danh sách lịch học
-            int accountId = (int) session.getAttribute("accountId");
-            Teacher teacher = teacherDAO.getTeacherByAccountId(accountId);
-            if (teacher != null) {
-                ArrayList<Schedule> schedules = scheduleDAO.getScheduleByTeacherIdAndDate(
-                        teacher.getId(), date);
-                request.setAttribute("roomChangeSchedules", schedules);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Có lỗi xảy ra khi tải danh sách phòng!");
-        }
-
-        request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
-    }
 
     private boolean handleLeaveRequest(HttpServletRequest request, int senderId, String reason) {
         try {
@@ -365,10 +335,10 @@ public class TeacherRequestServlet extends HttpServlet {
 
             // Tạo đơn yêu cầu
             Request req = new Request();
-            req.setTypeName("Xin nghỉ phép"); // Sửa từ "leave" thành "Xin nghỉ phép"
+            req.setTypeName("Đơn xin nghỉ phép");
             req.setReason("Ngày nghỉ: " + dateStr + "\nLý do: " + reason);
             req.setSenderID(senderId);
-            req.setStatus("Pending");
+            req.setStatus("Chờ xử lý");
 
             return requestDAO.insertRequest(req);
 
@@ -409,7 +379,7 @@ public class TeacherRequestServlet extends HttpServlet {
                 return false;
             }
 
-            if (selectedSchedules.length > 2) {
+            if (selectedSchedules.length > 1) {
                 return false;
             }
 
@@ -424,63 +394,10 @@ public class TeacherRequestServlet extends HttpServlet {
 
             // Tạo đơn yêu cầu
             Request req = new Request();
-            req.setTypeName("Thay đổi lịch dạy");
+            req.setTypeName("Đơn xin thay đổi lịch dạy");
             req.setReason(detailReason.toString());
             req.setSenderID(senderId);
-            req.setStatus("Pending");
-
-            return requestDAO.insertRequest(req);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private boolean handleRoomChangeRequest(HttpServletRequest request, int senderId, String reason) {
-        try {
-            String dateStr = request.getParameter("roomChangeDate");
-            String scheduleIdStr = request.getParameter("selectedSchedule");
-            String newRoomIdStr = request.getParameter("selectedRoom");
-
-            if (dateStr == null || scheduleIdStr == null || newRoomIdStr == null) {
-                return false;
-            }
-
-            LocalDate changeDate = LocalDate.parse(dateStr);
-            LocalDate today = LocalDate.now();
-
-            // Kiểm tra ngày đã qua
-            if (changeDate.isBefore(today)) {
-                return false;
-            }
-
-            int scheduleId = Integer.parseInt(scheduleIdStr);
-            int newRoomId = Integer.parseInt(newRoomIdStr);
-
-            // Lấy thông tin lịch học và phòng
-            Schedule schedule = scheduleDAO.getScheduleById(scheduleId);
-            Room newRoom = roomDAO.getRoomById(newRoomId);
-
-            if (schedule == null || newRoom == null) {
-                return false;
-            }
-
-            // Tạo lý do chi tiết
-            StringBuilder detailReason = new StringBuilder();
-            detailReason.append("Ngày: ").append(dateStr).append("\n");
-            detailReason.append("Môn học: ").append(schedule.getCourseTitle()).append(" - Lớp ").append(schedule.getClassName()).append("\n");
-            detailReason.append("Thời gian: ").append(schedule.getSlotStartTime()).append(" - ").append(schedule.getSlotEndTime()).append("\n");
-            detailReason.append("Phòng hiện tại: ").append(schedule.getRoomCode()).append("\n");
-            detailReason.append("Phòng muốn chuyển: ").append(newRoom.getCode()).append("\n");
-            detailReason.append("Lý do: ").append(reason);
-
-            // Tạo đơn yêu cầu
-            Request req = new Request();
-            req.setTypeName("Thay đổi lớp học"); // Sửa từ "room_change" thành "Thay đổi lớp học"
-            req.setReason(detailReason.toString());
-            req.setSenderID(senderId);
-            req.setStatus("Pending");
+            req.setStatus("Chờ xử lý");
 
             return requestDAO.insertRequest(req);
 
@@ -494,10 +411,10 @@ public class TeacherRequestServlet extends HttpServlet {
         try {
             // Tạo đơn yêu cầu
             Request req = new Request();
-            req.setTypeName("Khác"); // Sửa từ "other" thành "Khác"
+            req.setTypeName("Khác");
             req.setReason(reason);
             req.setSenderID(senderId);
-            req.setStatus("Pending");
+            req.setStatus("Chờ xử lý");
 
             return requestDAO.insertRequest(req);
 

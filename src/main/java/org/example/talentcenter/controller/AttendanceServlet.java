@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +84,6 @@ public class AttendanceServlet extends HttpServlet {
             return;
         }
 
-        // Lấy thông tin teacher từ accountId
         Teacher teacher = teacherDAO.getTeacherByAccountId(accountId);
         if (teacher == null) {
             request.setAttribute("error", "Không tìm thấy thông tin giáo viên");
@@ -93,12 +91,11 @@ public class AttendanceServlet extends HttpServlet {
             return;
         }
 
-        // Lấy tất cả lớp học của giáo viên
         List<ClassRooms> allClasses = attendanceDAO.getAllClassesByTeacherId(teacher.getId());
 
         request.setAttribute("allClasses", allClasses);
         request.setAttribute("currentDate", java.sql.Date.valueOf(LocalDate.now()));
-        request.setAttribute("viewType", "all"); // Để JSP biết đang hiển thị tất cả lớp
+        request.setAttribute("viewType", "all");
         request.getRequestDispatcher("View/attendance.jsp").forward(request, response);
     }
 
@@ -114,7 +111,6 @@ public class AttendanceServlet extends HttpServlet {
             return;
         }
 
-        // Lấy thông tin teacher từ accountId
         Teacher teacher = teacherDAO.getTeacherByAccountId(accountId);
         if (teacher == null) {
             request.setAttribute("error", "Không tìm thấy thông tin giáo viên");
@@ -122,12 +118,11 @@ public class AttendanceServlet extends HttpServlet {
             return;
         }
 
-        // Lấy danh sách lớp hôm nay
         List<ClassRooms> todayClasses = attendanceDAO.getTodayClassesByTeacherId(teacher.getId());
 
         request.setAttribute("todayClasses", todayClasses);
         request.setAttribute("currentDate", java.sql.Date.valueOf(LocalDate.now()));
-        request.setAttribute("viewType", "today"); // Để JSP biết đang hiển thị lớp hôm nay
+        request.setAttribute("viewType", "today");
         request.getRequestDispatcher("View/attendance.jsp").forward(request, response);
     }
 
@@ -172,47 +167,50 @@ public class AttendanceServlet extends HttpServlet {
             return;
         }
 
+        // Lấy thông tin lớp để truyền sang JSP
+        ClassRooms classRoom = attendanceDAO.getClassRoomById(classRoomId);
+        request.setAttribute("classRoom", classRoom);
+        request.setAttribute("classRoomId", classRoomId);
+
         // Kiểm tra đã điểm danh chưa
         boolean isAttendanceExist = attendanceDAO.isAttendanceExist(scheduleId);
 
         if (isAttendanceExist) {
-            // Kiểm tra có học sinh mới chưa được điểm danh không
             boolean hasNewStudents = attendanceDAO.hasNewStudentsForAttendance(scheduleId, classRoomId);
 
             if (hasNewStudents) {
-                // Có học sinh mới, hiển thị form điểm danh kết hợp
                 showMixedAttendanceForm(request, response, classRoomId, scheduleId, attendanceDate);
                 return;
             } else {
-                // Không có học sinh mới, chuyển sang chế độ edit
                 response.sendRedirect("attendance?action=edit&scheduleId=" + scheduleId);
                 return;
             }
         }
 
-        // Chưa điểm danh, hiển thị form điểm danh bình thường
         List<Student> students = attendanceDAO.getStudentsByClassId(classRoomId);
 
         request.setAttribute("students", students);
         request.setAttribute("scheduleId", scheduleId);
-        request.setAttribute("classRoomId", classRoomId);
         request.setAttribute("attendanceDate", attendanceDate);
         request.setAttribute("currentDate", java.sql.Date.valueOf(LocalDate.now()));
         request.setAttribute("isNewAttendance", true);
         request.getRequestDispatcher("View/attendance.jsp").forward(request, response);
     }
 
-    //hiển thị form điểm danh kết hợp (có cả học sinh đã điểm danh và chưa điểm danh)
+    // Hiển thị form điểm danh kết hợp (có cả học sinh đã điểm danh và chưa điểm danh)
     private void showMixedAttendanceForm(HttpServletRequest request, HttpServletResponse response,
                                          int classRoomId, int scheduleId, LocalDate attendanceDate)
             throws ServletException, IOException {
 
-        // Lấy danh sách học sinh với thông tin điểm danh
         List<Student> studentsWithAttendance = attendanceDAO.getStudentsWithAttendanceStatus(classRoomId, scheduleId);
+
+        // Lấy thông tin lớp để truyền sang JSP
+        ClassRooms classRoom = attendanceDAO.getClassRoomById(classRoomId);
+        request.setAttribute("classRoom", classRoom);
+        request.setAttribute("classRoomId", classRoomId);
 
         request.setAttribute("studentsWithAttendance", studentsWithAttendance);
         request.setAttribute("scheduleId", scheduleId);
-        request.setAttribute("classRoomId", classRoomId);
         request.setAttribute("attendanceDate", attendanceDate);
         request.setAttribute("currentDate", java.sql.Date.valueOf(LocalDate.now()));
         request.setAttribute("isMixedAttendance", true);
@@ -227,6 +225,12 @@ public class AttendanceServlet extends HttpServlet {
 
         // Lấy danh sách điểm danh hiện tại
         List<Attendance> attendances = attendanceDAO.getAttendanceByScheduleId(scheduleId);
+
+        // Lấy classRoomId từ scheduleId (bạn cần có hàm này trong AttendanceDAO)
+        int classRoomId = attendanceDAO.getClassIdByScheduleId(scheduleId);
+        ClassRooms classRoom = attendanceDAO.getClassRoomById(classRoomId);
+        request.setAttribute("classRoom", classRoom);
+        request.setAttribute("classRoomId", classRoomId);
 
         request.setAttribute("attendances", attendances);
         request.setAttribute("scheduleId", scheduleId);
@@ -258,8 +262,12 @@ public class AttendanceServlet extends HttpServlet {
         // Lấy lịch sử điểm danh
         List<Attendance> attendanceHistory = attendanceDAO.getAttendanceHistoryByClassId(classRoomId);
 
-        request.setAttribute("attendanceHistory", attendanceHistory);
+        // Lấy thông tin lớp để truyền sang JSP
+        ClassRooms classRoom = attendanceDAO.getClassRoomById(classRoomId);
+        request.setAttribute("classRoom", classRoom);
         request.setAttribute("classRoomId", classRoomId);
+
+        request.setAttribute("attendanceHistory", attendanceHistory);
         request.setAttribute("currentDate", java.sql.Date.valueOf(LocalDate.now()));
         request.setAttribute("viewType", "history");
         request.getRequestDispatcher("View/attendance.jsp").forward(request, response);
@@ -316,7 +324,6 @@ public class AttendanceServlet extends HttpServlet {
             }
 
             if (attendanceIdStr != null && !attendanceIdStr.trim().isEmpty()) {
-                // Học sinh đã có điểm danh, cần cập nhật
                 try {
                     int attendanceId = Integer.parseInt(attendanceIdStr);
                     Attendance attendance = new Attendance();
@@ -328,7 +335,6 @@ public class AttendanceServlet extends HttpServlet {
                     // Ignore invalid attendance ID
                 }
             } else {
-                // Học sinh mới, cần thêm điểm danh
                 Attendance attendance = new Attendance(scheduleId, studentId, status, note);
                 newAttendances.add(attendance);
             }
@@ -337,7 +343,6 @@ public class AttendanceServlet extends HttpServlet {
         boolean success = true;
         String message = "";
 
-        // Thêm điểm danh cho học sinh mới
         if (!newAttendances.isEmpty()) {
             boolean addSuccess = attendanceDAO.addBulkAttendance(scheduleId, newAttendances);
             if (!addSuccess) {
@@ -346,7 +351,6 @@ public class AttendanceServlet extends HttpServlet {
             }
         }
 
-        // Cập nhật điểm danh cho học sinh đã có
         if (!updateAttendances.isEmpty()) {
             for (Attendance attendance : updateAttendances) {
                 boolean updateSuccess = attendanceDAO.updateAttendance(attendance);

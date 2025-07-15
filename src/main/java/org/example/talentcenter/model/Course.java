@@ -13,6 +13,7 @@ public class Course {
     private Category category;
     private Level level;
     private Type type;
+    private int classCount;
 
 
     public Course() {
@@ -28,6 +29,15 @@ public class Course {
         this.category = category;
         this.level = level;
         this.type = type;
+    }
+
+    public Course(int id, String title, double price, String information, int createdBy, int classCount){
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.information = information;
+        this.createdBy = createdBy;
+        this.classCount = classCount;
     }
 
     public int getId() {
@@ -92,5 +102,11 @@ public class Course {
     }
     public void setType(Type type) {
         this.type = type;
+    }
+    public int getClassCount() {
+        return classCount;
+    }
+    public void setClassCount(int classCount) {
+        this.classCount = classCount;
     }
 }
