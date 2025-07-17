@@ -81,6 +81,8 @@
                                 dashboardURL = request.getContextPath() +"/View/teacher-dashboard.jsp";
                             } else if ("sale".equalsIgnoreCase(role)) {
                                 dashboardURL = request.getContextPath() +"/View/sale-dashboard.jsp";
+                            }else if("training manager".equalsIgnoreCase(role)){
+                                dashboardURL = request.getContextPath() + "/View/training-manager-dashboard.jsp";
                             }
                         %>
                         <li class="scroll-to-section"><a href="<%=dashboardURL%>">Dashboard</a></li>

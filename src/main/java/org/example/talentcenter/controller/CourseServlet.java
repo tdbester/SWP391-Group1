@@ -13,7 +13,7 @@ import org.example.talentcenter.utilities.Level;
 import org.example.talentcenter.utilities.Type;
 
 import com.cloudinary.Cloudinary;
-//import com.cloudinary.Singleton;
+import com.cloudinary.Singleton;
 import com.cloudinary.utils.ObjectUtils;
 
 import java.io.File;
@@ -183,11 +183,11 @@ public class CourseServlet extends HttpServlet {
         String imageUrl;
 
         //3. lấy ảnh và upload ln cloudinary, lấy về URL ảnh để lưu vào database
-        /*if (imagePart != null && imagePart.getSize() > 0) {
+        if (imagePart != null && imagePart.getSize() > 0) {
             imageUrl = uploadToCloudinary(imagePart);
         } else {
             imageUrl = "https://placehold.co/600x400?text=img";
-        }*/
+        }
         Category category;
         try {
             category = categoryDAO.getById(Integer.parseInt(catParam));
@@ -226,7 +226,7 @@ public class CourseServlet extends HttpServlet {
         c.setInformation(info);
         c.setPrice(price);
         c.setCreatedBy(createdBy);
-        //c.setImage(imageUrl);
+        c.setImage(imageUrl);
         c.setCategory(category);
         c.setLevel(level);
         c.setType(type);
@@ -244,9 +244,9 @@ public class CourseServlet extends HttpServlet {
         String levelParam  = req.getParameter("level");
         String typeParam   = req.getParameter("type");
         Part   imagePart= req.getPart("imageFile");
-//        int    createdBy;
+        //int createdBy;
         HttpSession session = req.getSession(false);
-        int createdBy= (int) session.getAttribute("accountId");
+        int createdBy = (int) session.getAttribute("accountId");
 
         double price;
         try {
@@ -257,10 +257,10 @@ public class CourseServlet extends HttpServlet {
             return;
         }
 
-        /*String imageUrl = req.getParameter("currentImageUrl");
+        String imageUrl = req.getParameter("currentImageUrl");
         if (imagePart != null && imagePart.getSize() > 0) {
             imageUrl = uploadToCloudinary(imagePart);
-        }*/
+        }
 
         Category category;
         try {
@@ -301,7 +301,7 @@ public class CourseServlet extends HttpServlet {
         c.setInformation(info);
         c.setPrice(price);
         c.setCreatedBy(createdBy);
-        //c.setImage(imageUrl);
+        c.setImage(imageUrl);
         c.setCategory(category);
         c.setLevel(level);
         c.setType(type);
@@ -318,7 +318,7 @@ public class CourseServlet extends HttpServlet {
         resp.sendRedirect("courses");
     }
 
-    /*private String uploadToCloudinary(Part filePart) throws IOException, ServletException {
+    private String uploadToCloudinary(Part filePart) throws IOException, ServletException {
         //1. Tạo kết nối web của mình đến cloudinary
         Cloudinary cloudinary = Singleton.getCloudinary();
         if (cloudinary == null) {
@@ -343,5 +343,5 @@ public class CourseServlet extends HttpServlet {
 
         //5. trả về URL ảnh đã upload
         return (String) uploadResult.get("secure_url");
-    }*/
+    }
 }

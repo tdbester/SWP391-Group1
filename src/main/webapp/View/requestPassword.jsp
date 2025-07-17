@@ -13,7 +13,7 @@
 <header class="top-header">
     <div class="header-content">
         <div class="logo">TALENT01</div>
-        <a href="View/login.jsp" class="back-home-btn">← Đăng nhập</a>
+        <a href="/View/login.jsp" class="back-home-btn">← Đăng nhập</a>
     </div>
 </header>
 

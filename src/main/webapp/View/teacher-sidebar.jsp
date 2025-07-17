@@ -34,7 +34,7 @@
       </a>
     </div>
     <div class="nav-section">
-      <a href="${pageContext.request.contextPath}/teacherNotification" class="nav-item">
+      <a href="${pageContext.request.contextPath}/teacher-notification" class="nav-item">
         <i class="fas fa-bell"></i>
         <span>Thông báo</span>
       </a>

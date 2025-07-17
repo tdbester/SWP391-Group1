@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class Request {
     private int id;
+    private int typeId;
     private String typeName;
     private int senderID;
     private String reason;
@@ -13,8 +14,11 @@ public class Request {
     private Date responseAt;
     private int processedBy;
     private String courseName;
+    private String senderName;
+    private String processedByName;
     private String parentPhone;
     private String phoneNumber;
+
 
     public Request() {
     }
@@ -34,7 +38,6 @@ public class Request {
         this.senderID = senderID;
         this.courseName = courseName;
         this.reason = reason;
-        this.parentPhone = parentPhone;
         this.createdAt = createdAt;
     }
 
@@ -117,26 +120,41 @@ public class Request {
         this.courseName = courseName;
     }
 
-    public String getParentPhone() {
-        return parentPhone;
-    }
-
-    public void setParentPhone(String parentPhone) {
-        this.parentPhone = parentPhone;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
     public String getTypeName() {
         return typeName;
     }
 
     public void setTypeName(String typeName) {
         this.typeName = typeName;
+    }
+    public int getTypeId() {
+        return typeId;
+    }
+    public void setTypeId(int typeId) {
+        this.typeId = typeId;
+    }
+    public String getSenderName() {
+        return senderName;
+    }
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
+    }
+    public String getProcessedByName() {
+        return processedByName;
+    }
+    public void setProcessedByName(String processedByName) {
+        this.processedByName = processedByName;
+    }
+    public String getParentPhone() {
+        return parentPhone;
+    }
+    public void setParentPhone(String parentPhone) {
+        this.parentPhone = parentPhone;
+    }
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+    public void setPhoneNumber(){
+        this.phoneNumber = phoneNumber;
     }
 }
