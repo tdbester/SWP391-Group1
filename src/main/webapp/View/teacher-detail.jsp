@@ -92,9 +92,9 @@
                  value="${teacher.department}" required>
         </div>
         <div class="mb-3">
-          <label for="salary" class="form-label">Lương</label>
+          <label for="salary" class="form-label">Lương cơ bản</label>
           <input type="number" class="form-control" id="salary" name="salary"
-                 value="${teacher.salary}" step="0.01" required>
+                 value="<fmt:formatNumber value='${teacher.salary}' groupingUsed='true' pattern='#'/>" step="0.01" required min="0"/>
         </div>
       </div>
       <div class="col-md-6">

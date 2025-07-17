@@ -57,6 +57,7 @@
 
 <body>
 <jsp:include page="header.jsp" />
+
 <div class="container mt-5">
     <h2 class="mb-4">Danh sách giáo viên</h2>
     <div class="d-flex justify-content-end">
@@ -77,7 +78,7 @@
             <th>STT</th>
             <th>Họ tên</th>
             <th>Khoa</th>
-            <th>Lương</th>
+            <th>Lương cơ bản</th>
             <th>Số điện thoại</th>
             <th>Email</th>
             <th>Địa chỉ</th>
