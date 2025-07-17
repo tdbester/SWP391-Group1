@@ -38,7 +38,9 @@ CREATE TABLE Course (
   Price FLOAT,                             -- Giá tiền
   Information NVARCHAR(10000),                        -- Thông tin mô tả chi tiết
   CreatedBy INT,                           -- FK: người tạo khóa học (AccountId)
+  Category INT,
   FOREIGN KEY (CreatedBy) REFERENCES Account(Id)
+  FOREIGN KEY (Category) REFERENCES Category(Id)
 );
 
 ALTER TABLE Course
@@ -88,7 +90,9 @@ CREATE TABLE Blog (
   Content TEXT,                            -- Nội dung chi tiết
   AuthorId INT,                            -- FK: người viết, tham chiếu Account(Id)
   CreatedAt DATETIME DEFAULT  GETDATE(), -- Ngày tạo bài viết
+  Category INT,
   FOREIGN KEY (AuthorId) REFERENCES Sale(Id)
+  FOREIGN KEY (Category) REFERENCES Category(Id)
 );
 
 -- Bảng Room: danh sách các phòng học
@@ -238,6 +242,12 @@ CREATE TABLE SalaryPaymentHistory (
     FOREIGN KEY (AccountId) REFERENCES Account(Id),
     FOREIGN KEY (ProcessedBy) REFERENCES Account(Id)
 );
+
+CREATE TABLE Category{
+    Id INT PRIMARY KEY IDENTITY,
+    name NVARCHAR(255),
+    Type INT
+}
 
 
 
