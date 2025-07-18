@@ -22,21 +22,6 @@ public class CreateClassRoomServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Load necessary data for form (slots, teachers, rooms)
         loadFormData(request);
-
-        // Debug: In ra số lượng dữ liệu đã load
-        System.out.println("Courses count: " +
-                (request.getAttribute("courses") != null ?
-                        ((List<?>)request.getAttribute("courses")).size() : "null"));
-        System.out.println("Teachers count: " +
-                (request.getAttribute("teachers") != null ?
-                        ((List<?>)request.getAttribute("teachers")).size() : "null"));
-        System.out.println("Slots count: " +
-                (request.getAttribute("slots") != null ?
-                        ((List<?>)request.getAttribute("slots")).size() : "null"));
-        System.out.println("Rooms count: " +
-                (request.getAttribute("rooms") != null ?
-                        ((List<?>)request.getAttribute("rooms")).size() : "null"));
-
         request.getRequestDispatcher("/View/training-manager-add-classroom.jsp").forward(request, response);
     }
 
@@ -164,25 +149,21 @@ public class CreateClassRoomServlet extends HttpServlet {
             // Load slots
             SlotDAO slotDAO = new SlotDAO();
             List<Slot> slots = slotDAO.getAll();
-            System.out.println("Loaded " + slots.size() + " slots");
             request.setAttribute("slots", slots);
 
             // Load teachers
             TeacherDAO teacherDAO = new TeacherDAO();
             List<Teacher> teachers = teacherDAO.getAll();
-            System.out.println("Loaded " + teachers.size() + " teachers");
             request.setAttribute("teachers", teachers);
 
             // Load rooms
             RoomDAO roomDAO = new RoomDAO();
             ArrayList<Room> rooms = roomDAO.getAllRooms();
-            System.out.println("Loaded " + rooms.size() + " rooms");
             request.setAttribute("rooms", rooms);
 
             // Load courses
             CourseDAO courseDAO = new CourseDAO();
             List<Course> courses = courseDAO.getAllCourses();
-            System.out.println("Loaded " + courses.size() + " courses");
             request.setAttribute("courses", courses);
 
         } catch (Exception e) {

@@ -89,7 +89,7 @@ public class LoginServlet extends HttpServlet {
                 if (roleName != null) {
                     switch (roleName.toLowerCase()) {
                         case "admin":
-                            response.sendRedirect(request.getContextPath() + "/View/home.jsp");
+                            response.sendRedirect(request.getContextPath() + "/teacher-salary");
                             break;
                         case "student":
                             response.sendRedirect(request.getContextPath() + "/View/home.jsp");
