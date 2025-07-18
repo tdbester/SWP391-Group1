@@ -1,0 +1,190 @@
+.no-results {
+    color: red;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn-primary, .btn-success, .btn-warning, .btn-add-custom {
+    background-color: #7a6ad8;
+    border-color: #7a6ad8;
+    color: #fff;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-primary:hover, .btn-success:hover, .btn-warning:hover, .btn-add-custom:hover {
+    background-color: #7a6ad8;
+    border-color: #7a6ad8;
+}
+
+.btn-warning.btn-sm {
+    background-color: #7a6ad8;
+    border-color: #7a6ad8;
+    color: #fff;
+    border-radius: 4px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-warning.btn-sm:hover {
+    background-color: #6a5acd;
+    border-color: #6a5acd;
+}
+
+/* Button Xóa: Đỏ (giữ màu Bootstrap nhưng bo góc theo template) */
+.btn-danger.btn-sm {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    border-radius: 4px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-danger.btn-sm:hover {
+    background-color: #c82333;
+    border-color: #c82333;
+}
+
+/* Button Quay lại: Trắng nền, chữ tím */
+.btn-back-custom {
+    background-color: #fff;
+    color: #7a6ad8;
+    border: 1px solid #7a6ad8;
+    border-radius: 20px;
+    padding: 0px 25px;
+    height: 40px;
+    line-height: 40px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    transition: all .3s;
+}
+
+.btn-back-custom:hover {
+    background-color: #7a6ad8;
+    color: #fff;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Custom styles for search and filter section */
+.search-filter-section {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8eaff 100%);
+    border: 1px solid #e0e6ff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(122, 106, 216, 0.1);
+}
+
+.search-filter-section .form-control,
+.search-filter-section .form-select {
+    border: 1px solid #d0d7ff;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background-color: #fff;
+}
+
+.search-filter-section .form-control:focus,
+.search-filter-section .form-select:focus {
+    border-color: #7a6ad8;
+    box-shadow: 0 0 0 0.2rem rgba(122, 106, 216, 0.25);
+    transform: translateY(-1px);
+}
+
+.search-filter-section .input-group-text {
+    background-color: #7a6ad8;
+    border-color: #7a6ad8;
+    color: white;
+    border-radius: 8px 0 0 8px;
+}
+
+.clear-filters-btn {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.clear-filters-btn:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    transform: translateY(-1px);
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+/* Loading spinner for auto-filtering */
+.loading-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #7a6ad8;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Add form section styling */
+.add-student-section {
+    background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%);
+    border: 1px solid #ffe082;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(255, 193, 7, 0.1);
+}
+
+.add-student-section h2 {
+    color: #f57c00;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+}
+
+/* Table improvements */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.table thead th {
+    background: linear-gradient(135deg, #7a6ad8 0%, #6a5acd 100%);
+    border: none;
+    font-weight: 600;
+    padding: 15px;
+    font-size: 14px;
+}
+
+.table tbody td {
+    padding: 12px 15px;
+    border-color: #f1f3f4;
+    vertical-align: middle;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9ff;
+}

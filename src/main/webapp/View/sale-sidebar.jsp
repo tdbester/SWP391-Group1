@@ -26,11 +26,6 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <!-- SIDEBAR -->
     <div class="sidebar">
-
-        <div class="logo">
-            <i class="fas fa-users-cog"></i>
-            <h2>Trung Tâm Năng Khiếu</h2>
-        </div>
         <nav>
             <div class="nav-section">
                 <a href="${pageContext.request.contextPath}/SaleDashboard" class="nav-item">
@@ -69,6 +64,18 @@
                 <a href="CandidateDetails.jsp" class="nav-item ${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'page' : 'false'}">
                     <i class="fas fa-user" aria-hidden="true"></i>
                     <span>Danh sách lớp</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <a href="CandidateDetails.jsp" class="nav-item ${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'page' : 'false'}">
+                    <i class="fas fa-user" aria-hidden="true"></i>
+                    <span>Trạng thái nộp tiền</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <a href="${pageContext.request.contextPath}/SaleDashboard?action=notifications" class="nav-item ${pageContext.request.requestURI.contains('notifications') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('notifications') ? 'page' : 'false'}">
+                    <i class="fas fa-user" aria-hidden="true"></i>
+                    <span>Thông báo</span>
                 </a>
             </div>
         </nav>

@@ -35,14 +35,12 @@ import java.io.IOException;
 public class ConsultationServlet extends HttpServlet {
     private static final CourseDAO subjectDAO = new CourseDAO();
     private static final ConsultationDAO consultationDAO = new ConsultationDAO();
-    public static final NotificationDAO notificationDAO = new NotificationDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         ArrayList<Course> subjects = subjectDAO.getAllCourses();
         request.setAttribute("subjects", subjects);
         String action = request.getParameter("action");
-        String view = request.getParameter("view");
         if (action == null || action.equals("list")) {
             int page = 1;
             int recordsPerPage = 10;
@@ -126,11 +124,15 @@ public class ConsultationServlet extends HttpServlet {
                 String email = request.getParameter("email");
                 String phone = request.getParameter("phone");
                 String course = request.getParameter("course_interest");
+                String note = request.getParameter("note");
 
                 Consultation consult = new Consultation();
                 consult.setFullName(name);
                 consult.setEmail(email);
                 consult.setPhone(phone);
+                consult.setStatus("Đang xử lý");
+                consult.setPaymentStatus("Chưa thanh toán");
+                consult.setNote(note);
                 try {
                     consult.setCourseId(Integer.parseInt(course));
                 } catch (NumberFormatException e) {
@@ -140,13 +142,13 @@ public class ConsultationServlet extends HttpServlet {
                 HttpSession session = request.getSession();
                 session.setAttribute("message", "Thêm học sinh thành công.");
                 response.sendRedirect("Consultation");
-                return;
             } else if ("update".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
                 String name = request.getParameter("name");
                 String email = request.getParameter("email");
                 String phone = request.getParameter("phone");
                 int courseId = Integer.parseInt(request.getParameter("course_interest"));
+                String note = request.getParameter("note");
 
                 Consultation consult = new Consultation();
                 consult.setId(id);
@@ -154,6 +156,7 @@ public class ConsultationServlet extends HttpServlet {
                 consult.setEmail(email);
                 consult.setPhone(phone);
                 consult.setCourseId(courseId);
+                consult.setNote(note);
 
                 consultationDAO.updateConsultation(consult);
 
@@ -166,7 +169,6 @@ public class ConsultationServlet extends HttpServlet {
                 HttpSession session = request.getSession();
                 session.setAttribute("message", "Xóa thành công.");
                 response.sendRedirect("Consultation");
-                return;
             } else if (action.equals("updateConsultationStatus")) {
                 String idParam = request.getParameter("id");
                 String status = request.getParameter("status");
@@ -189,7 +191,6 @@ public class ConsultationServlet extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("message", "Lỗi xử lý dữ liệu!");
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
-            return;
         }
     }
 }

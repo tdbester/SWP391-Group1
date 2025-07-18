@@ -623,8 +623,8 @@ public class RequestDAO {
          JOIN Role role ON acc.RoleId = role.Id
          WHERE r.TypeID <> 6 and r.TypeID <> 3
          ORDER BY r.CreatedAt DESC
-         OFFSET ? // số dòng bỏ qua
-         ROWS FETCH NEXT ? // số dòng lấy tiếp
+         OFFSET ? -- số dòng bỏ qua
+         ROWS FETCH NEXT ?  -- số dòng lấy tiếp
          ROWS ONLY 
         """;
         try (Connection conn = DBConnect.getConnection();

@@ -9,6 +9,8 @@ public class Consultation {
     private int courseId;
     private int ProcessedBy;
     private String title;
+    private String note;
+    private String PaymentStatus;
 
     public Consultation() {
     }
@@ -23,13 +25,23 @@ public class Consultation {
         this.fullName = fullName;
     }
 
-    public Consultation(int id, String fullName, String email, String phone, String status, String title) {
+    public Consultation(int id, String fullName, String email, String phone, String status, String title, String note) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
         this.phone = phone;
         this.status = status;
         this.title = title;
+        this.note = note;
+    }
+
+    public Consultation(int id, String fullName, String email, String phone , String title, String paymentStatus) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.phone = phone;
+        this.title = title;
+        this.PaymentStatus = paymentStatus;
     }
 
     public int getId() {
@@ -94,5 +106,19 @@ public class Consultation {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+    public String getPaymentStatus() {
+        return PaymentStatus;
+    }
+    public void setPaymentStatus(String PaymentStatus) {
+        this.PaymentStatus = PaymentStatus;
     }
 }
