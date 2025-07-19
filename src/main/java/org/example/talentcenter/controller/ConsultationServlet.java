@@ -60,7 +60,6 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("subjects", subjects);
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
-            return;
         } else if (action.equals("edit")) {
             String idRaw = request.getParameter("id");
             try {

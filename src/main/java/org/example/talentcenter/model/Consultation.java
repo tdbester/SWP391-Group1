@@ -11,6 +11,7 @@ public class Consultation {
     private String title;
     private String note;
     private String PaymentStatus;
+    private boolean accountRequestSent;
 
     public Consultation() {
     }
@@ -42,6 +43,16 @@ public class Consultation {
         this.phone = phone;
         this.title = title;
         this.PaymentStatus = paymentStatus;
+    }
+
+    public Consultation(int id, String fullName, String email, String phone , String title, String paymentStatus, boolean accountRequestSent) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.phone = phone;
+        this.title = title;
+        this.PaymentStatus = paymentStatus;
+        this.accountRequestSent = accountRequestSent;
     }
 
     public int getId() {
@@ -120,5 +131,12 @@ public class Consultation {
     }
     public void setPaymentStatus(String PaymentStatus) {
         this.PaymentStatus = PaymentStatus;
+    }
+    public boolean isAccountRequestSent() {
+        return accountRequestSent;
+    }
+
+    public void setAccountRequestSent(boolean accountRequestSent) {
+        this.accountRequestSent = accountRequestSent;
     }
 }

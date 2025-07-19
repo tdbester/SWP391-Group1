@@ -67,7 +67,7 @@
                 </a>
             </div>
             <div class="nav-section">
-                <a href="CandidateDetails.jsp" class="nav-item ${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'page' : 'false'}">
+                <a href="${pageContext.request.contextPath}/PaymentStatus" class="nav-item ${pageContext.request.requestURI.contains('PaymentStatus') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('PaymentStatus') ? 'page' : 'false'}">
                     <i class="fas fa-user" aria-hidden="true"></i>
                     <span>Trạng thái nộp tiền</span>
                 </a>
