@@ -43,9 +43,9 @@
           <span>Danh sách đơn cần xử lý</span>
         </a>
         <a href="${pageContext.request.contextPath}/courses"
-           class="nav-item ${pageContext.request.requestURI.contains('manager-request-list.jsp') ? 'active' : ''}"
+           class="nav-item ${pageContext.request.requestURI.contains('course.jsp') || pageContext.request.servletPath.contains('/courses') ? 'active' : ''}"
            role="link"
-           aria-current="${pageContext.request.requestURI.contains('manager-request-list.jsp') ? 'page' : 'false'}">
+           aria-current="${pageContext.request.requestURI.contains('course.jsp') || pageContext.request.servletPath.contains('/courses') ? 'page' : 'false'}">
           <i class="fa-solid fa-building" aria-hidden="true"></i>
           <span>Danh sách Khóa học</span>
         </a>
@@ -55,13 +55,13 @@
 <script>
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', function() {
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classroomList.remove('active'));
-      this.classroomList.add('active');
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      this.classList.add('active');
     });
   });
 
   function toggleSidebar() {
-    document.querySelector('.sidebar').classroomList.toggle('active');
+    document.querySelector('.sidebar').classList.toggle('active');
   }
 </script>
 

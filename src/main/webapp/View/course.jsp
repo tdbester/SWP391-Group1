@@ -9,6 +9,7 @@
     <meta charset="UTF-8" />
     <title>Course List</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
