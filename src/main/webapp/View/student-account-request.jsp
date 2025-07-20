@@ -105,24 +105,23 @@
                     </div>
                 </div>
             </div>
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th><input type="checkbox" id="selectAll"/></th>
-                    <th>ID</th>
-                    <th>Họ tên</th>
-                    <th>Email</th>
-                    <th>Số điện thoại</th>
-                    <th>Trạng thái thanh toán</th>
-                    <th>Trạng thái yêu cầu</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                <c:forEach var="s" items="${agreedStudents}">
-                    <form method="post" action="${pageContext.request.contextPath}/StudentAccountRequest">
-                        <input type="hidden" name="action" value="updatePaymentStatus"/>
-                        <input type="hidden" name="id" value="${s.id}"/>
+            <form method="post" action="${pageContext.request.contextPath}/StudentAccountRequest">
+                <input type="hidden" name="action" value="sentRequest"/>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"/></th>
+                        <th>ID</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Trạng thái thanh toán</th>
+                        <th>Trạng thái yêu cầu</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="s" items="${agreedStudents}">
                         <tr>
                             <td><input type="checkbox" name="selectedStudentIds" value="${s.id}"/></td>
                             <td>${s.id}</td>
@@ -130,10 +129,14 @@
                             <td>${s.email}</td>
                             <td>${s.phone}</td>
                             <td>
-                                <select name="status" onchange="this.form.submit()" class="form-select form-select-sm">
-                                    <option value="Đã thanh toán" <c:if test="${s.paymentStatus == 'Đã thanh toán'}">selected</c:if>>Đã thanh toán</option>
-                                    <option value="Chưa thanh toán" <c:if test="${s.paymentStatus == 'Chưa thanh toán'}">selected</c:if>>Chưa thanh toán</option>
-                                </select>
+                                <form method="post" action="${pageContext.request.contextPath}/StudentAccountRequest">
+                                    <input type="hidden" name="action" value="updatePaymentStatus"/>
+                                    <input type="hidden" name="id" value="${s.id}"/>
+                                    <select name="status" onchange="this.form.submit()" class="form-select form-select-sm">
+                                        <option value="Đã thanh toán" <c:if test="${s.paymentStatus == 'Đã thanh toán'}">selected</c:if>>Đã thanh toán</option>
+                                        <option value="Chưa thanh toán" <c:if test="${s.paymentStatus == 'Chưa thanh toán'}">selected</c:if>>Chưa thanh toán</option>
+                                    </select>
+                                </form>
                             </td>
                             <td>
                                 <c:choose>
@@ -145,15 +148,11 @@
                                     </c:otherwise>
                                 </c:choose>
                             </td>
+                            <td></td>
                         </tr>
-                    </form>
-                </c:forEach>
-                </tbody>
-
-
-            </table>
-            <form method="post" action="${pageContext.request.contextPath}/StudentAccountRequest">
-                <input type="hidden" name="action" value="sentRequest"/>
+                    </c:forEach>
+                    </tbody>
+                </table>
                 <button type="submit" class="btn btn-primary mt-3">
                     <i class="fas fa-paper-plane me-1"></i> Gửi yêu cầu cấp tài khoản
                 </button>

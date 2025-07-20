@@ -50,9 +50,9 @@ public class NotificationService {
      * @param status           Trạng thái đơn
      * @param response         Phản hồi hoặc lý do từ người xử lý đơn.
      * @param studentAccountId ID tài khoản học sinh nhận thông báo.
-     *
-     * Thông báo sẽ có tiêu đề và nội dung thay đổi tùy theo trạng thái đơn,
-     * được gửi từ "SYSTEM" đến vai trò "Student" và đánh dấu chưa đọc.
+     *                         <p>
+     *                         Thông báo sẽ có tiêu đề và nội dung thay đổi tùy theo trạng thái đơn,
+     *                         được gửi từ "SYSTEM" đến vai trò "Student" và đánh dấu chưa đọc.
      * @author Huyen Trang
      */
     public static void notifyRequestProcessed(int requestId, String studentName, String requestType, String status, String response, int studentAccountId) {
@@ -88,15 +88,14 @@ public class NotificationService {
     /**
      * Gửi thông báo cho Training Manager khi học viên gửi đơn mới cần xử lý.
      *
-     * @param studentName       Tên học viên gửi đơn.
-     * @param requestType       Loại đơn mà học viên gửi
-     * @param requestId         ID của đơn vừa được gửi.
-     * @param studentAccountId  ID tài khoản học viên gửi đơn.
-     *
-     * Thông báo có tiêu đề và nội dung mô tả học viên cùng loại đơn,
-     * gửi từ tên học viên đến vai trò "TrainingManager",
-     * đánh dấu chưa đọc
-     *
+     * @param studentName      Tên học viên gửi đơn.
+     * @param requestType      Loại đơn mà học viên gửi
+     * @param requestId        ID của đơn vừa được gửi.
+     * @param studentAccountId ID tài khoản học viên gửi đơn.
+     *                         <p>
+     *                         Thông báo có tiêu đề và nội dung mô tả học viên cùng loại đơn,
+     *                         gửi từ tên học viên đến vai trò "TrainingManager",
+     *                         đánh dấu chưa đọc
      * @author Huyen Trang
      */
     public static void notifyStudentRequestSubmitted(String studentName, String requestType, int requestId, int studentAccountId) {
@@ -119,15 +118,14 @@ public class NotificationService {
     /**
      * Gửi thông báo cho Training Manager khi có yêu cầu tạo tài khoản học viên mới từ Sale.
      *
-     * @param saleName    Tên nhân viên Sale gửi yêu cầu.
-     * @param studentName Tên học viên cần tạo tài khoản.
+     * @param saleName     Tên nhân viên Sale gửi yêu cầu.
+     * @param studentName  Tên học viên cần tạo tài khoản.
      * @param studentEmail Email học viên cần tạo tài khoản.
-     * @param requestId   ID của yêu cầu tạo tài khoản.
-     *
-     * Thông báo có tiêu đề, nội dung chi tiết về Sale và học viên,
-     * gửi từ Sale đến vai trò "TrainingManager",
-     * đánh dấu chưa đọc
-     *
+     * @param requestId    ID của yêu cầu tạo tài khoản.
+     *                     <p>
+     *                     Thông báo có tiêu đề, nội dung chi tiết về Sale và học viên,
+     *                     gửi từ Sale đến vai trò "TrainingManager",
+     *                     đánh dấu chưa đọc
      * @author Huyen Trang
      */
     public static void notifyAccountCreationRequest(String saleName, String studentName, String studentEmail, int requestId) {
@@ -157,11 +155,10 @@ public class NotificationService {
      * @param slotStartTime    Thời gian bắt đầu ca học
      * @param slotEndTime      Thời gian kết thúc ca học
      * @param scheduleId       ID lịch học liên quan.
-     *
-     * Thông báo có tiêu đề, nội dung chi tiết ngày, ca học, lớp và giáo viên,
-     * gửi từ hệ thống đến vai trò "Student",
-     * đánh dấu chưa đọc và liên kết đến lịch học tương ứng.
-     *
+     *                         <p>
+     *                         Thông báo có tiêu đề, nội dung chi tiết ngày, ca học, lớp và giáo viên,
+     *                         gửi từ hệ thống đến vai trò "Student",
+     *                         đánh dấu chưa đọc và liên kết đến lịch học tương ứng.
      * @author Huyen Trang
      */
     public static void notifyStudentAbsence(
@@ -206,11 +203,10 @@ public class NotificationService {
      * @param slotStartTime    Thời gian bắt đầu ca học mới
      * @param slotEndTime      Thời gian kết thúc ca học mới
      * @param scheduleId       ID lịch học liên quan.
-     *
-     * Thông báo bao gồm tiêu đề và nội dung mô tả lớp học, ngày và ca học mới,
-     * gửi từ SYSTEM tới vai trò "Student", chưa đọc,
-     * liên kết với lịch học tương ứng.
-     *
+     *                         <p>
+     *                         Thông báo bao gồm tiêu đề và nội dung mô tả lớp học, ngày và ca học mới,
+     *                         gửi từ SYSTEM tới vai trò "Student", chưa đọc,
+     *                         liên kết với lịch học tương ứng.
      * @author Huyen Trang
      */
     public static void notifyStudentScheduleChanged(
@@ -250,12 +246,11 @@ public class NotificationService {
      * @param teacherName Tên giáo viên gửi đơn.
      * @param requestType Loại đơn giáo viên gửi.
      * @param requestId   ID của đơn gửi.
-     *
-     * Thông báo có tiêu đề, nội dung nêu rõ giáo viên và loại đơn,
-     * gửi từ giáo viên đến vai trò TrainingManager,
-     * liên kết với đơn tương ứng,
-     * đánh dấu chưa đọc.
-     *
+     *                    <p>
+     *                    Thông báo có tiêu đề, nội dung nêu rõ giáo viên và loại đơn,
+     *                    gửi từ giáo viên đến vai trò TrainingManager,
+     *                    liên kết với đơn tương ứng,
+     *                    đánh dấu chưa đọc.
      * @author Huyen Trang
      */
     public static void notifyTeacherRequestSubmitted(
@@ -276,6 +271,33 @@ public class NotificationService {
 
         notificationDAO.createNotification(notification);
         System.out.println("Notification sent to Training Manager for teacher request: " + requestId);
+    }
+
+    /**
+     * Gửi thông báo học phí cho student sau khi được cấp tài khoản thành công.
+     *
+     * @param studentAccountId ID tài khoản sinh viên (dùng để gửi notification).
+     * @param studentName      Tên sinh viên.
+     * @param tuitionAmount    Số tiền học phí (chuỗi để tuỳ biến thông báo).
+     */
+    public static void notifyStudentTuitionFee(int studentAccountId, String studentName, String tuitionAmount) {
+        Notification notification = new Notification();
+        notification.setTitle("Thông báo học phí");
+        notification.setContent(String.format(
+                "Chào %s, học phí của bạn là %s. Vui lòng chuyển khoản vào số tài khoản 1234567890 MB Bank và gửi Bill qua email TalenCenter@gmail.com.",
+                studentName, tuitionAmount
+        ));
+        notification.setSenderName("SYSTEM");
+        notification.setRecipientRole("Student");
+        notification.setRecipientAccountId(studentAccountId);
+        notification.setNotificationType("TUITION_NOTICE");
+        notification.setRelatedEntityId(null);
+        notification.setRelatedEntityType("Account");
+        notification.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        notification.setRead(false);
+
+        notificationDAO.createNotification(notification);
+        System.out.println("Tuition notification sent to student " + studentName + ", id=" + studentAccountId);
     }
 
 }

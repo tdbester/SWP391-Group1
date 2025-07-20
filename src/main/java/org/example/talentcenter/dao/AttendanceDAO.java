@@ -18,16 +18,17 @@ public class AttendanceDAO {
     public List<ClassRooms> getAllClassesByTeacherId(int teacherId) {
         List<ClassRooms> classes = new ArrayList<>();
         String sql = """
-            SELECT c.Id, c.Name, c.CourseId, c.TeacherId, c.SlotId,
-                   course.Title as CourseTitle,
-                   slot.StartTime, slot.EndTime,
-                   (SELECT COUNT(*) FROM Student_Class sc WHERE sc.ClassRoomId = c.Id) as StudentCount
-            FROM ClassRooms c
-            JOIN Course course ON c.CourseId = course.Id
-            JOIN Slot slot ON c.SlotId = slot.Id
-            WHERE c.TeacherId = ?
-            ORDER BY c.Name
-            """;
+                
+                    SELECT c.Id, c.Name, c.CourseId, c.TeacherId, c.SlotId,
+                                      course.Title as CourseTitle,
+                                      slot.StartTime, slot.EndTime,
+                                      (SELECT COUNT(*) FROM Student_Class sc WHERE sc.ClassRoomId = c.Id) as StudentCount
+                               FROM ClassRooms c
+                               JOIN Course course ON c.CourseId = course.Id
+                               LEFT JOIN Slot slot ON c.SlotId = slot.Id
+                               WHERE c.TeacherId = ?
+                               ORDER BY c.Name
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -43,8 +44,18 @@ public class AttendanceDAO {
                 classRoom.setTeacherId(rs.getInt("TeacherId"));
                 classRoom.setSlotId(rs.getInt("SlotId"));
                 classRoom.setCourseTitle(rs.getString("CourseTitle"));
-                classRoom.setStartTime(rs.getTime("StartTime").toLocalTime());
-                classRoom.setEndTime(rs.getTime("EndTime").toLocalTime());
+                Time startTime = rs.getTime("StartTime");
+                if (startTime != null) {
+                    classRoom.setStartTime(startTime.toLocalTime());
+                } else {
+                    classRoom.setStartTime(null);
+                }
+                Time endTime = rs.getTime("EndTime");
+                if (endTime != null) {
+                    classRoom.setEndTime(endTime.toLocalTime());
+                } else {
+                    classRoom.setEndTime(null);
+                }
                 classRoom.setStudentCount(rs.getInt("StudentCount"));
 
                 classes.add(classRoom);
@@ -59,17 +70,18 @@ public class AttendanceDAO {
     public List<ClassRooms> getTodayClassesByTeacherId(int teacherId) {
         List<ClassRooms> classes = new ArrayList<>();
         String sql = """
-            SELECT DISTINCT c.Id, c.Name, c.CourseId, c.TeacherId, c.SlotId,
-                   course.Title as CourseTitle,
-                   slot.StartTime, slot.EndTime,
-                   (SELECT COUNT(*) FROM Student_Class sc WHERE sc.ClassRoomId = c.Id) as StudentCount
-            FROM ClassRooms c
-            JOIN Course course ON c.CourseId = course.Id
-            JOIN Slot slot ON c.SlotId = slot.Id
-            JOIN Schedule s ON s.ClassRoomId = c.Id
-            WHERE c.TeacherId = ? AND s.Date = CAST(GETDATE() AS DATE)
-            ORDER BY slot.StartTime
-            """;
+                
+                    SELECT DISTINCT c.Id, c.Name, c.CourseId, c.TeacherId, c.SlotId,
+                                              course.Title as CourseTitle,
+                                              slot.StartTime, slot.EndTime,
+                                              (SELECT COUNT(*) FROM Student_Class sc WHERE sc.ClassRoomId = c.Id) as StudentCount
+                                       FROM ClassRooms c
+                                       JOIN Course course ON c.CourseId = course.Id
+                                       LEFT JOIN Slot slot ON c.SlotId = slot.Id
+                                       JOIN Schedule s ON s.ClassRoomId = c.Id
+                                       WHERE c.TeacherId = ? AND s.Date = CAST(GETDATE() AS DATE)
+                                       ORDER BY slot.StartTime
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -85,8 +97,18 @@ public class AttendanceDAO {
                 classRoom.setTeacherId(rs.getInt("TeacherId"));
                 classRoom.setSlotId(rs.getInt("SlotId"));
                 classRoom.setCourseTitle(rs.getString("CourseTitle"));
-                classRoom.setStartTime(rs.getTime("StartTime").toLocalTime());
-                classRoom.setEndTime(rs.getTime("EndTime").toLocalTime());
+                Time startTime = rs.getTime("StartTime");
+                if (startTime != null) {
+                    classRoom.setStartTime(startTime.toLocalTime());
+                } else {
+                    classRoom.setStartTime(null);
+                }
+                Time endTime = rs.getTime("EndTime");
+                if (endTime != null) {
+                    classRoom.setEndTime(endTime.toLocalTime());
+                } else {
+                    classRoom.setEndTime(null);
+                }
                 classRoom.setStudentCount(rs.getInt("StudentCount"));
 
                 classes.add(classRoom);
@@ -101,8 +123,7 @@ public class AttendanceDAO {
     public List<Student> getStudentsByClassId(int classId) {
         List<Student> students = new ArrayList<>();
         String sql = """
-            
-                SELECT s.Id, a.FullName, s.ParentPhone, s.MotherPhone,\s
+                SELECT s.Id, a.FullName, s.ParentPhone, s.MotherPhone,
                                       s.AccountId, s.EnrollmentDate
                                FROM Student s
                                JOIN Account a ON s.AccountId = a.Id
@@ -452,8 +473,18 @@ public class AttendanceDAO {
                 classRoom.setTeacherId(rs.getInt("TeacherId"));
                 classRoom.setSlotId(rs.getInt("SlotId"));
                 classRoom.setCourseTitle(rs.getString("CourseTitle"));
-                classRoom.setStartTime(rs.getTime("StartTime").toLocalTime());
-                classRoom.setEndTime(rs.getTime("EndTime").toLocalTime());
+                Time startTime = rs.getTime("StartTime");
+                if (startTime != null) {
+                    classRoom.setStartTime(startTime.toLocalTime());
+                } else {
+                    classRoom.setStartTime(null);
+                }
+                Time endTime = rs.getTime("EndTime");
+                if (endTime != null) {
+                    classRoom.setEndTime(endTime.toLocalTime());
+                } else {
+                    classRoom.setEndTime(null);
+                }
                 classRoom.setStudentCount(rs.getInt("StudentCount"));
                 return classRoom;
             }

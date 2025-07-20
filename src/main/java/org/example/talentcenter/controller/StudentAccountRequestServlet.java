@@ -64,7 +64,7 @@ public class StudentAccountRequestServlet extends HttpServlet {
                 response.sendRedirect("Consultation?action=list");
                 return;
             }
-            ArrayList<Consultation> agreedStudents = consultationDAO.searchAgreedConsultations(keyword.trim());
+            ArrayList<Consultation> agreedStudents = consultationDAO.searchConsultations(keyword.trim());
             request.setAttribute("agreedStudents", agreedStudents);
             request.setAttribute("keyword", keyword);
             request.getRequestDispatcher("View/student-account-request.jsp").forward(request, response);
@@ -100,7 +100,7 @@ public class StudentAccountRequestServlet extends HttpServlet {
                         int id = Integer.parseInt(idStr);
                         Consultation consult = consultationDAO.getById(id);
                         if (consult != null) {
-                            boolean success = dao.sendCreateAccountRequest(senderId, consult.getFullName(), consult.getEmail(), consult.getPhone());
+                            boolean success = dao.sendCreateAccountRequest(senderId, consult.getFullName(), consult.getEmail(), consult.getPhone(), consult.getCourseId());
                             if (success) {
                                 consultationDAO.updateAccountRequestSentStatus(id, true);
                                 successCount++;

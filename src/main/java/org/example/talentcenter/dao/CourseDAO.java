@@ -135,5 +135,18 @@ public class CourseDAO {
         }
         return courses;
     }
-
+    public String getTuitionByCourseId(int courseId) {
+        String sql = "SELECT Price FROM Course WHERE Id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, courseId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("Price");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

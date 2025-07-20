@@ -41,17 +41,17 @@ public class RequestDAO {
      * @param phone    Số điện thoại học viên
      * @return true nếu insert thành công, false nếu có lỗi xảy ra
      */
-    public boolean sendCreateAccountRequest(int senderId, String name, String email, String phone) {
+    public boolean sendCreateAccountRequest(int senderId, String name, String email, String phone, int courseId) {
         String sql = """
                     INSERT INTO Request (TypeId, SenderId, Reason, Status, CreatedAt) 
                     VALUES (6, ?, ?, ?, GETDATE())
                 """;
 
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, senderId);
-            stmt.setString(2, name + "|" + email + "|" + phone);
+            stmt.setString(2, name + "|" + email + "|" + phone + "|" + courseId);
             stmt.setString(3, "Chờ xử lý");
 
             return stmt.executeUpdate() > 0;
@@ -119,8 +119,9 @@ public class RequestDAO {
      * @author Huyen Trang
      */
     public Request getRequestById(int requestId) {
-        String sql = "SELECT r.Id, r.Reason, r.SenderId " +
+        String sql = "SELECT r.Id, r.Reason, r.SenderId, rt.TypeName " +
                 "FROM Request r " +
+                "JOIN RequestType rt ON r.TypeID = rt.TypeID " +
                 "WHERE r.Id = ? AND r.TypeID = 6 AND r.Status = N'Chờ xử lý'";
 
         try (Connection conn = DBConnect.getConnection();
@@ -621,17 +622,14 @@ public class RequestDAO {
          JOIN RequestType rt ON r.TypeID = rt.TypeID
          JOIN Account acc ON r.SenderId = acc.Id
          JOIN Role role ON acc.RoleId = role.Id
-         WHERE r.TypeID <> 6 and r.TypeID <> 3
+         WHERE r.TypeID <> 6 AND r.TypeID <> 3
          ORDER BY r.CreatedAt DESC
-         OFFSET ? -- số dòng bỏ qua
-         ROWS FETCH NEXT ?  -- số dòng lấy tiếp
-         ROWS ONLY 
+         OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
         """;
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, offset);
             stmt.setInt(2, limit);
-
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Request request = new Request();
@@ -639,17 +637,13 @@ public class RequestDAO {
                     request.setSenderID(rs.getInt("SenderId"));
                     request.setSenderName(rs.getString("SenderName"));
                     request.setSenderRole(rs.getString("SenderRole"));
-
                     String fullReason = rs.getString("Reason");
                     String typeName = rs.getString("TypeName");
                     String extractedReason = "";
-
                     if (fullReason != null && !fullReason.trim().isEmpty()) {
                         String[] parts = fullReason.split("\\|");
-
                         switch (typeName) {
                             case "Đơn xin chuyển lớp":
-                            case "Đơn xin nghỉ học":
                             case "Đơn khiếu nại về giảng viên":
                             case "Đơn xin bảo lưu":
                                 if (parts.length >= 4) {
@@ -662,7 +656,6 @@ public class RequestDAO {
                                     extractedReason = fullReason.replaceAll("<[^>]*>", "").trim();
                                 }
                                 break;
-
                             case "Đơn xin nghỉ phép":
                                 if (parts.length >= 2) {
                                     extractedReason = parts[1];
@@ -671,7 +664,6 @@ public class RequestDAO {
                                     extractedReason = fullReason.replaceAll("<[^>]*>", "").trim();
                                 }
                                 break;
-
                             case "Đơn xin thay đổi lịch dạy":
                             case "Đơn xin đổi lịch dạy":
                                 if (parts.length >= 5) {
@@ -683,7 +675,6 @@ public class RequestDAO {
                                 }
                                 extractedReason = extractedReason.replaceAll("<[^>]*>", "").trim();
                                 break;
-
                             case "Đơn khác":
                             default:
                                 if (parts.length >= 4) {
@@ -696,14 +687,51 @@ public class RequestDAO {
                     } else {
                         extractedReason = "";
                     }
-
                     request.setReason(extractedReason);
-
                     request.setResponse(rs.getString("Response"));
                     request.setResponseAt(rs.getTimestamp("ResponseAt"));
                     request.setStatus(rs.getString("Status"));
                     request.setTypeName(typeName);
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
 
+    public ArrayList<Request> getAllAbsenceRequests() {
+        ArrayList<Request> requests = new ArrayList<>();
+        String sql = """
+         SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+         FROM Request r
+         JOIN RequestType rt ON r.TypeID = rt.TypeID
+         JOIN Account acc ON r.SenderId = acc.Id
+         JOIN Role role ON acc.RoleId = role.Id
+         WHERE r.TypeID = 3
+         ORDER BY r.CreatedAt DESC
+        """;
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    request.setSenderName(rs.getString("SenderName"));
+                    request.setSenderRole(rs.getString("SenderRole"));
+                    String fullReason = rs.getString("Reason");
+                    request.setReason(fullReason);
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setTypeName(rs.getString("TypeName"));
                     Timestamp createdAt = rs.getTimestamp("CreatedAt");
                     if (createdAt != null) {
                         request.setCreatedAt(new java.util.Date(createdAt.getTime()));
@@ -921,6 +949,99 @@ public class RequestDAO {
                     request.setStatus(rs.getString("Status"));
                     request.setTypeName(rs.getString("TypeName"));
 
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
+    /**
+     * Lấy danh sách đơn xin nghỉ học (TypeID = 3) theo trạng thái
+     */
+    public ArrayList<Request> getAbsenceRequestsByStatus(String status) {
+        ArrayList<Request> requests = new ArrayList<>();
+        String sql = """
+         SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+         FROM Request r
+         JOIN RequestType rt ON r.TypeID = rt.TypeID
+         JOIN Account acc ON r.SenderId = acc.Id
+         JOIN Role role ON acc.RoleId = role.Id
+         WHERE r.TypeID = 3 AND r.Status = ?
+         ORDER BY r.CreatedAt DESC
+        """;
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    request.setSenderName(rs.getString("SenderName"));
+                    request.setSenderRole(rs.getString("SenderRole"));
+                    String fullReason = rs.getString("Reason");
+                    request.setReason(fullReason);
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setTypeName(rs.getString("TypeName"));
+                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
+                    if (createdAt != null) {
+                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
+                    }
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
+    /**
+     * Tìm kiếm đơn xin nghỉ học (TypeID = 3) theo keyword (tên học sinh, lý do, trạng thái)
+     */
+    public ArrayList<Request> searchAbsenceRequests(String keyword) {
+        ArrayList<Request> requests = new ArrayList<>();
+        String sql = """
+         SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+         FROM Request r
+         JOIN RequestType rt ON r.TypeID = rt.TypeID
+         JOIN Account acc ON r.SenderId = acc.Id
+         JOIN Role role ON acc.RoleId = role.Id
+         WHERE r.TypeID = 3 AND (
+            acc.FullName LIKE ? OR r.Reason LIKE ? OR r.Status LIKE ?
+         )
+         ORDER BY r.CreatedAt DESC
+        """;
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String pattern = "%" + keyword + "%";
+            stmt.setString(1, pattern);
+            stmt.setString(2, pattern);
+            stmt.setString(3, pattern);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    request.setSenderName(rs.getString("SenderName"));
+                    request.setSenderRole(rs.getString("SenderRole"));
+                    String fullReason = rs.getString("Reason");
+                    request.setReason(fullReason);
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setTypeName(rs.getString("TypeName"));
                     Timestamp createdAt = rs.getTimestamp("CreatedAt");
                     if (createdAt != null) {
                         request.setCreatedAt(new java.util.Date(createdAt.getTime()));
