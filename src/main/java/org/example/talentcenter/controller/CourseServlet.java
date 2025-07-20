@@ -84,6 +84,7 @@ public class CourseServlet extends HttpServlet {
             throws ServletException, IOException {
         String search    = req.getParameter("search");
         String catParam  = req.getParameter("category");
+        String levelParam = req.getParameter("level");
         Category filterCat;
 
         if (catParam != null && !catParam.isBlank()) {
@@ -108,14 +109,21 @@ public class CourseServlet extends HttpServlet {
                 .toList()
                 : filtered;
 
+        var levelFiltered = levelParam != null && !levelParam.isBlank()
+                ? categoryFiltered.stream()
+                .filter(c -> c.getLevel() != null && c.getLevel().toString().equals(levelParam))
+                .toList()
+                : categoryFiltered;
+
         int total   = courseDAO.getTotalCourse();
         int endPage = (int)Math.ceil((double) total / 10);
 
-        req.setAttribute("courseList", categoryFiltered);
+        req.setAttribute("courseList", levelFiltered);
         req.setAttribute("endP",        endPage);
         req.setAttribute("currentIndex", index);
         req.setAttribute("categories",  categoryDAO.getByType(TYPE_COURSE));
         req.setAttribute("selectedCategory", filterCat != null ? filterCat.getId() : null);
+        req.setAttribute("selectedLevel", levelParam);
 
         req.getRequestDispatcher("/View/course.jsp").forward(req, resp);
     }

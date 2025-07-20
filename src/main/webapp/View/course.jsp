@@ -77,6 +77,14 @@
             </select>
         </div>
         <div class="col-auto">
+            <select name="level" class="form-select">
+                <option value="">Tất cả cấp độ</option>
+                <option value="BEGINNER" ${param.level == 'BEGINNER' ? 'selected' : ''}>Cơ bản</option>
+                <option value="INTERMEDIATE" ${param.level == 'INTERMEDIATE' ? 'selected' : ''}>Trung cấp</option>
+                <option value="ADVANCED" ${param.level == 'ADVANCED' ? 'selected' : ''}>Nâng cao</option>
+            </select>
+        </div>
+        <div class="col-auto">
             <button class="btn btn-primary">Lọc</button>
         </div>
         <div class="col-auto ms-auto">
@@ -151,7 +159,7 @@
         <ul class="pagination">
             <c:forEach begin="1" end="${endP}" var="i">
                 <li class="page-item ${i==currentIndex?'active':''}">
-                    <a class="page-link" href="courses?index=${i}&category=${param.category}&search=${param.search}">
+                    <a class="page-link" href="courses?index=${i}&category=${param.category}&search=${param.search}&level=${param.level}">
                             ${i}
                     </a>
                 </li>
