@@ -118,6 +118,21 @@
                         </option>
                     </select>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Trạng thái</label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status" id="statusPublic" value="1"
+                                   <c:if test="${course == null || course.status == 1}">checked</c:if>>
+                            <label class="form-check-label" for="statusPublic">Công khai</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status" id="statusHidden" value="0"
+                                   <c:if test="${course != null && course.status == 0}">checked</c:if>>
+                            <label class="form-check-label" for="statusHidden">Ẩn</label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

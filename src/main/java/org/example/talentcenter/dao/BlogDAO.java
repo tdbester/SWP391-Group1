@@ -12,8 +12,8 @@ public class BlogDAO {
 
     // CREATE blog by using insert command SQL
     public void insert(Blog blog) {
-        String sql = "INSERT INTO Blog (Title, Description, image, Content, AuthorId, CategoryId, CreatedAt) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Blog (Title, Description, image, Content, AuthorId, CategoryId, CreatedAt, Status) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, blog.getTitle());
@@ -23,6 +23,7 @@ public class BlogDAO {
             stmt.setInt(5, blog.getAuthorId());
             stmt.setInt(6, blog.getCategory());
             stmt.setDate(7, new Date(System.currentTimeMillis()));
+            stmt.setInt(8, blog.getStatus());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -34,7 +35,7 @@ public class BlogDAO {
     public List<BlogDto> getAll() {
         List<BlogDto> list = new ArrayList<>();
 
-        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt, ac.FullName, b.CategoryId " +
+        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt, ac.FullName, b.CategoryId, b.Status " +
                 "FROM Blog b " +
                 "JOIN Account ac ON b.authorId = ac.Id";
         try (Connection conn = DBConnect.getConnection();
@@ -50,7 +51,8 @@ public class BlogDAO {
                         rs.getString("image"),
                         rs.getDate("CreatedAt"),
                         rs.getString("FullName"),
-                        rs.getInt("CategoryId")
+                        rs.getInt("CategoryId"),
+                        rs.getInt("Status")
                 );
                 list.add(blogDto);
             }
@@ -76,7 +78,8 @@ public class BlogDAO {
                             rs.getInt("AuthorId"),
                             rs.getDate("CreatedAt"),
                             rs.getString("Description"),
-                            rs.getInt("CategoryId")
+                            rs.getInt("CategoryId"),
+                            rs.getInt("Status")
                     );
                 }
             }
@@ -89,7 +92,7 @@ public class BlogDAO {
     // UPDATE
     public void update(Blog blog) {
         String sql = "UPDATE Blog SET Title = ?, Description = ?, image = ?, Content = ?, " +
-                "AuthorId = ?, CategoryId = ? WHERE Id = ?";
+                "AuthorId = ?, CategoryId = ?, Status = ? WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, blog.getTitle());
@@ -98,7 +101,8 @@ public class BlogDAO {
             stmt.setString(4, blog.getContent());
             stmt.setInt(5, blog.getAuthorId());
             stmt.setInt(6, blog.getCategory());
-            stmt.setInt(7, blog.getId());
+            stmt.setInt(7, blog.getStatus());
+            stmt.setInt(8, blog.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -155,7 +159,8 @@ public class BlogDAO {
                         rs.getString("image"),
                         new java.util.Date(rs.getDate("CreatedAt").getTime()),
                         rs.getString("FullName"),
-                        rs.getInt("CategoryId")
+                        rs.getInt("CategoryId"),
+                        rs.getInt("Status")
                 ));
             }
         } catch (SQLException e) {
@@ -163,6 +168,40 @@ public class BlogDAO {
         }
 
 
+        return list;
+    }
+
+    /**
+     * Get all public blogs (status = 1)
+     */
+    public List<BlogDto> getPublicBlogs() {
+        List<BlogDto> list = new ArrayList<>();
+
+        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt, ac.FullName, b.CategoryId, b.Status " +
+                "FROM Blog b " +
+                "JOIN Account ac ON b.authorId = ac.Id " +
+                "WHERE b.Status = 1";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                BlogDto blogDto = new
+                        BlogDto(
+                        rs.getInt("Id"),
+                        rs.getString("Title"),
+                        rs.getString("Description"),
+                        rs.getString("Content"),
+                        rs.getString("image"),
+                        rs.getDate("CreatedAt"),
+                        rs.getString("FullName"),
+                        rs.getInt("CategoryId"),
+                        rs.getInt("Status")
+                );
+                list.add(blogDto);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return list;
     }
 

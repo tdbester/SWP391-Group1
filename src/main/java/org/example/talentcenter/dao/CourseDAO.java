@@ -14,7 +14,7 @@ import java.util.List;
 public class CourseDAO {
 
     public void insert(Course course) {
-        String sql = "INSERT INTO Course (Title, Price, Information, CreatedBy, Image, CategoryID, Level, Type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Course (Title, Price, Information, CreatedBy, Image, CategoryID, Level, Type, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -26,6 +26,7 @@ public class CourseDAO {
             stmt.setInt(6, course.getCategory().getId());
             stmt.setString(7, course.getLevel() != null ? course.getLevel().name() : null);
             stmt.setString(8, course.getType() != null ? course.getType().name() : null);
+            stmt.setInt(9, course.getStatus());
 
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -38,7 +39,7 @@ public class CourseDAO {
         String sql = """
             SELECT
                 c.Id, c.Title, c.Price, c.Information, c.CreatedBy, c.Image,
-                c.CategoryID, c.Level, c.Type,
+                c.CategoryID, c.Level, c.Type, c.Status,
                 cat.Name AS CategoryName, cat.Type AS CategoryType,
                 a.FullName
             FROM Course c
@@ -87,7 +88,8 @@ public class CourseDAO {
                         rs.getString("Image"),
                         category,
                         level,
-                        type
+                        type,
+                        rs.getInt("Status")
                 ));
             }
         } catch (SQLException e) {
@@ -100,7 +102,7 @@ public class CourseDAO {
         String sql = """
             SELECT
                 c.Id, c.Title, c.Price, c.Information, c.CreatedBy, c.Image,
-                c.CategoryID, c.Level, c.Type,
+                c.CategoryID, c.Level, c.Type, c.Status,
                 cat.Name AS CategoryName, cat.Type AS CategoryType
             FROM Course c
             JOIN Category cat ON c.CategoryID = cat.Id
@@ -148,7 +150,8 @@ public class CourseDAO {
                             rs.getString("Image"),
                             category,
                             level,
-                            type
+                            type,
+                            rs.getInt("Status")
                     );
                 }
             }
@@ -159,7 +162,7 @@ public class CourseDAO {
     }
 
     public void update(Course course) {
-        String sql = "UPDATE Course SET Title = ?, Price = ?, Information = ?, CreatedBy = ?, Image = ?, CategoryID = ?, Level = ?, Type = ? WHERE Id = ?";
+        String sql = "UPDATE Course SET Title = ?, Price = ?, Information = ?, CreatedBy = ?, Image = ?, CategoryID = ?, Level = ?, Type = ?, Status = ? WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -171,7 +174,8 @@ public class CourseDAO {
             stmt.setInt(6, course.getCategory().getId());
             stmt.setString(7, course.getLevel() != null ? course.getLevel().name() : null);
             stmt.setString(8, course.getType() != null ? course.getType().name() : null);
-            stmt.setInt(9, course.getId());
+            stmt.setInt(9, course.getStatus());
+            stmt.setInt(10, course.getId());
 
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -212,7 +216,7 @@ public class CourseDAO {
             SELECT
                 c.Id, c.Title, c.Price, c.Information,
                 c.CreatedBy, a.FullName, c.Image,
-                c.CategoryID, c.Level, c.Type,
+                c.CategoryID, c.Level, c.Type, c.Status,
                 cat.Name AS CategoryName, cat.Type AS CategoryType
             FROM Course c
             JOIN Account a    ON c.CreatedBy  = a.Id
@@ -264,7 +268,8 @@ public class CourseDAO {
                             rs.getString("Image"),
                             category,
                             level,
-                            type
+                            type,
+                            rs.getInt("Status")
                     ));
                 }
             }
@@ -315,5 +320,73 @@ public class CourseDAO {
             e.printStackTrace();
         }
         return courses;
+    }
+
+    /**
+     * Get all public courses (status = 1)
+     */
+    public List<Course> getPublicCourses() {
+        List<Course> list = new ArrayList<>();
+        String sql = """
+            SELECT
+                c.Id, c.Title, c.Price, c.Information, c.CreatedBy, c.Image,
+                c.CategoryID, c.Level, c.Type, c.Status,
+                cat.Name AS CategoryName, cat.Type AS CategoryType,
+                a.FullName
+            FROM Course c
+            JOIN Category cat ON c.CategoryID = cat.Id
+            LEFT JOIN Account a ON c.CreatedBy = a.Id
+            WHERE c.Status = 1
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Category category = new Category(
+                        rs.getInt("CategoryID"),
+                        rs.getString("CategoryName"),
+                        rs.getInt("CategoryType")
+                );
+
+                // Convert string to enum values
+                Level level = null;
+                String levelStr = rs.getString("Level");
+                if (levelStr != null) {
+                    try {
+                        level = Level.valueOf(levelStr);
+                    } catch (IllegalArgumentException e) {
+                        // Handle invalid enum value
+                    }
+                }
+
+                Type type = null;
+                String typeStr = rs.getString("Type");
+                if (typeStr != null) {
+                    try {
+                        type = Type.valueOf(typeStr);
+                    } catch (IllegalArgumentException e) {
+                        // Handle invalid enum value
+                    }
+                }
+
+                list.add(new Course(
+                        rs.getInt("Id"),
+                        rs.getString("Title"),
+                        rs.getDouble("Price"),
+                        rs.getString("Information"),
+                        rs.getInt("CreatedBy"),
+                        rs.getString("Image"),
+                        category,
+                        level,
+                        type,
+                        rs.getInt("Status")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

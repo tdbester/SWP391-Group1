@@ -8,6 +8,8 @@
 <head>
     <meta charset="UTF-8" />
     <title>Course List</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         .thumb-img {
@@ -59,8 +61,10 @@
 
 <body>
 <jsp:include page="header.jsp" />
-<div class="container mt-5">
-    <h2 class="mb-4">Danh sách khóa học</h2>
+<div class="">
+    <jsp:include page="training-manager-sidebar.jsp" />
+    <div class="main-content">
+        <h2 class="mb-4">Danh sách khóa học</h2>
     <form action="courses" method="get" class="row g-2 mb-3">
         <div class="col-auto">
             <input type="search" name="search" class="form-control" placeholder="Tìm kiếm tiêu đề"
@@ -101,6 +105,7 @@
             <th>Danh mục</th>
             <th>Cấp độ</th>
             <th>Loại</th>
+            <th>Trạng thái</th>
             <th>Ảnh</th>
             <th style="width: 150px;">Hành động</th>
         </tr>
@@ -141,6 +146,16 @@
                     </c:choose>
                 </td>
                 <td>
+                    <c:choose>
+                        <c:when test="${course.status == 1}">
+                            <span class="badge bg-success">Công khai</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="badge bg-secondary">Ẩn</span>
+                        </c:otherwise>
+                    </c:choose>
+                </td>
+                <td>
                     <c:if test="${not empty course.image}">
                         <img src="${course.image}" class="thumb-img" />
                     </c:if>
@@ -166,6 +181,7 @@
             </c:forEach>
         </ul>
     </nav>
+    </div>
 </div>
 <jsp:include page="footer.jsp" />
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

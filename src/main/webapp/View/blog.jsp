@@ -77,6 +77,7 @@
             <th>Mô tả</th>
             <th>Ảnh</th>
             <th>Loại</th>
+            <th>Trạng thái</th>
             <th style="width: 150px;">Hành động</th>
         </tr>
         </thead>
@@ -100,6 +101,16 @@
                             ${cat.name}
                         </c:if>
                     </c:forEach>
+                </td>
+                <td>
+                    <c:choose>
+                        <c:when test="${blog.status == 1}">
+                            <span class="badge bg-success">Công khai</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="badge bg-secondary">Ẩn</span>
+                        </c:otherwise>
+                    </c:choose>
                 </td>
                 <td>
                     <a href="blogs?action=edit&id=${blog.id}" class="btn btn-sm btn-warning">Sửa</a>

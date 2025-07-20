@@ -175,6 +175,7 @@ public class CourseServlet extends HttpServlet {
         String catParam    = req.getParameter("category");
         String levelParam  = req.getParameter("level");
         String typeParam   = req.getParameter("type");
+        String statusParam = req.getParameter("status");
         Part   imagePart   = req.getPart("imageFile");
         HttpSession session = req.getSession(false);
         int createdBy= (int) session.getAttribute("accountId");
@@ -229,6 +230,16 @@ public class CourseServlet extends HttpServlet {
             }
         }
 
+        // Parse status parameter
+        int status = 1; // Default to public
+        if (statusParam != null && !statusParam.isBlank()) {
+            try {
+                status = Integer.parseInt(statusParam);
+            } catch (NumberFormatException e) {
+                // Keep default value
+            }
+        }
+
         Course c = new Course();
         c.setTitle(title);
         c.setInformation(info);
@@ -238,6 +249,7 @@ public class CourseServlet extends HttpServlet {
         c.setCategory(category);
         c.setLevel(level);
         c.setType(type);
+        c.setStatus(status);
 
         courseDAO.insert(c);
         resp.sendRedirect("courses");
@@ -251,6 +263,7 @@ public class CourseServlet extends HttpServlet {
         String catParam = req.getParameter("category");
         String levelParam  = req.getParameter("level");
         String typeParam   = req.getParameter("type");
+        String statusParam = req.getParameter("status");
         Part   imagePart= req.getPart("imageFile");
 //        int    createdBy;
         HttpSession session = req.getSession(false);
@@ -303,6 +316,16 @@ public class CourseServlet extends HttpServlet {
             }
         }
 
+        // Parse status parameter
+        int status = 1; // Default to public
+        if (statusParam != null && !statusParam.isBlank()) {
+            try {
+                status = Integer.parseInt(statusParam);
+            } catch (NumberFormatException e) {
+                // Keep default value
+            }
+        }
+
         Course c = new Course();
         c.setId(id);
         c.setTitle(title);
@@ -313,6 +336,7 @@ public class CourseServlet extends HttpServlet {
         c.setCategory(category);
         c.setLevel(level);
         c.setType(type);
+        c.setStatus(status);
 
         courseDAO.update(c);
         resp.sendRedirect("courses");
