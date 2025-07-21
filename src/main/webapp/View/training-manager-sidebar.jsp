@@ -35,12 +35,20 @@
           <i class="fa-solid fa-building" aria-hidden="true"></i>
           <span>Danh sách yêu cầu cấp tài khoản</span>
         </a>
+      </div>
+      <div class="nav-section">
         <a href="${pageContext.request.contextPath}/ProcessRequest?action=list"
            class="nav-item ${pageContext.request.requestURI.contains('manager-request-list.jsp') ? 'active' : ''}"
            role="link"
            aria-current="${pageContext.request.requestURI.contains('manager-request-list.jsp') ? 'page' : 'false'}">
           <i class="fa-solid fa-building" aria-hidden="true"></i>
           <span>Danh sách đơn cần xử lý</span>
+        </a>
+      </div>
+      <div class="nav-section">
+        <a href="${pageContext.request.contextPath}/TrainingManagerDashboard?action=notifications" class="nav-item ${pageContext.request.requestURI.contains('notifications') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('notifications') ? 'page' : 'false'}">
+          <i class="fas fa-user" aria-hidden="true"></i>
+          <span>Thông báo</span>
         </a>
       </div>
     </nav>

@@ -69,7 +69,6 @@ public class RequestDAO {
      * {@code "id"} (mã yêu cầu), {@code "reason"} (nội dung lý do), {@code "sender"} (tên người gửi).</p>
      *
      * @return Danh sách các yêu cầu chưa xử lý, mỗi yêu cầu là một Map với thông tin cơ bản
-     *
      * @author Huyen Trang
      */
     public List<Map<String, String>> getAllAccountRequests() {
@@ -145,7 +144,7 @@ public class RequestDAO {
                                 if (parts.length >= 2) {
                                     request.setReason(parts[1]); // lý do chính
                                     request.setOffDate(LocalDate.parse(parts[0]));  // ngày nghỉ phép
-                                }else {
+                                } else {
                                     request.setReason(fullReason);
                                 }
                                 break;
@@ -213,154 +212,24 @@ public class RequestDAO {
     }
 
     /**
-     * Lấy danh sách tất cả yêu cầu đã gửi bởi một người dùng theo ID, sắp xếp mới nhất trước.
+     * Đếm tổng số yêu cầu của một người gửi.
      *
-     * @param senderId ID người gửi yêu cầu
-     * @return danh sách các yêu cầu tương ứng
-     * @author Huyen Trang
+     * @param senderId ID của người gửi
+     * @return Tổng số yêu cầu
      */
-    public ArrayList<Request> getRequestBySenderId(int senderId) {
-        ArrayList<Request> requests = new ArrayList<>();
-        String sql = """
-            SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, rt.TypeName 
-            FROM Request r join RequestType rt on r.TypeID = rt.TypeID 
-            WHERE SenderId = ? order by CreatedAt DESC
-            """;
+    public int getTotalRequestCountBySenderId(int senderId) {
+        String sql = "SELECT COUNT(*) FROM Request WHERE SenderId = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, senderId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Request request = new Request();
-                    request.setId(rs.getInt("Id"));
-                    request.setSenderID(rs.getInt("SenderId"));
-
-                    String fullReason = rs.getString("Reason");
-                    String extractedReason;
-                    // tách reason theo dấu | (lớp|sdt ph|sdt hs|lý do|(lớp muốn chuyển đến))
-                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
-
-                    if (parts.length >= 4) {
-                        extractedReason = parts[3]; //chỉ lấy phần lý do
-                    } else {
-                        if (fullReason != null && fullReason.contains("|TRANSFER_TO_CLASS_ID:")) {
-                            extractedReason = fullReason.split("\\|TRANSFER_TO_CLASS_ID:")[0];
-                        } else {
-                            extractedReason = fullReason != null ? fullReason : "";
-                        }
-                    }
-                    request.setReason(extractedReason);
-                    request.setResponse(rs.getString("Response"));
-                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
-                    request.setStatus(rs.getString("Status"));
-                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
-                    request.setTypeName(rs.getString("TypeName"));
-                    if (createdAt != null) {
-                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
-                    }
-
-                    requests.add(request);
-                }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-        return requests;
-    }
-
-    /**
-     * Lấy danh sách yêu cầu theo ID người gửi và loại đơn.
-     * trích phần lý do phù hợp theo từng loại đơn.
-     *
-     * @param senderId ID người gửi
-     * @param typeId   ID loại đơn
-     * @return Danh sách yêu cầu đã xử lý lý do
-     * @author Huyen Trang
-     */
-    public ArrayList<Request> getRequestBySenderIdAndType(int senderId, int typeId) {
-        ArrayList<Request> requests = new ArrayList<>();
-        String sql = """
-        SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, rt.TypeName 
-        FROM Request r 
-        JOIN RequestType rt ON r.TypeID = rt.TypeID 
-        WHERE r.SenderId = ? AND r.TypeID = ? 
-        ORDER BY r.CreatedAt DESC
-        """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, senderId);
-            stmt.setInt(2, typeId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Request request = new Request();
-                    request.setId(rs.getInt("Id"));
-                    request.setSenderID(rs.getInt("SenderId"));
-
-                    String fullReason = rs.getString("Reason");
-                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
-                    String typeName = rs.getString("TypeName");
-                    String extractedReason = "";
-
-                    switch (typeName) {
-                        case "Đơn xin chuyển lớp":
-                            if (parts.length >= 4) {
-                                extractedReason = parts[3];
-                            } else if (fullReason != null && fullReason.contains("|TRANSFER_TO_CLASS_ID:")) {
-                                extractedReason = fullReason.split("\\|TRANSFER_TO_CLASS_ID:")[0];
-                            } else {
-                                extractedReason = fullReason != null ? fullReason : "";
-                            }
-                            break;
-
-                        case "Đơn xin nghỉ phép":
-                            if (parts.length >= 2) {
-                                extractedReason = parts[1];
-                            } else {
-                                extractedReason = fullReason != null ? fullReason : "";
-                            }
-                            break;
-
-                        case "Đơn xin đổi lịch dạy":
-                            if (parts.length >= 5) {
-                                extractedReason = parts[4];
-                            } else if (parts.length >= 1) {
-                                extractedReason = parts[parts.length - 1];
-                            } else {
-                                extractedReason = fullReason != null ? fullReason : "";
-                            }
-                            break;
-
-                        default:
-                            if (parts.length >= 4) {
-                                extractedReason = parts[3];
-                            } else {
-                                extractedReason = fullReason != null ? fullReason : "";
-                            }
-                            break;
-                    }
-
-                    request.setReason(extractedReason);
-                    request.setResponse(rs.getString("Response"));
-                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
-                    request.setStatus(rs.getString("Status"));
-                    request.setTypeName(typeName);
-
-                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
-                    if (createdAt != null) {
-                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
-                    }
-
-                    requests.add(request);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return requests;
+        return 0;
     }
 
     /**
@@ -372,15 +241,15 @@ public class RequestDAO {
      */
     public Request getRequestDetailById(int requestId) {
         String sql = """
-        SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
-               rt.TypeName, acc.FullName AS SenderName, acc.Email AS SenderEmail,
-               acc.PhoneNumber AS SenderPhone, role.Name AS SenderRole
-        FROM Request r
-        JOIN RequestType rt ON r.TypeID = rt.TypeID
-        JOIN Account acc ON r.SenderId = acc.Id
-        JOIN Role role ON acc.RoleId = role.Id
-        WHERE r.Id = ?
-    """;
+                    SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                           rt.TypeName, acc.FullName AS SenderName, acc.Email AS SenderEmail,
+                           acc.PhoneNumber AS SenderPhone, role.Name AS SenderRole
+                    FROM Request r
+                    JOIN RequestType rt ON r.TypeID = rt.TypeID
+                    JOIN Account acc ON r.SenderId = acc.Id
+                    JOIN Role role ON acc.RoleId = role.Id
+                    WHERE r.Id = ?
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -484,10 +353,10 @@ public class RequestDAO {
     /**
      * Cập nhật trạng thái, phản hồi và thời gian phản hồi của một yêu cầu.
      *
-     * @param requestId     ID của yêu cầu
-     * @param status        Trạng thái mới (VD: "Đã xử lý", "Từ chối")
-     * @param responseNote  Nội dung phản hồi
-     * @param responseAt    Thời điểm phản hồi
+     * @param requestId    ID của yêu cầu
+     * @param status       Trạng thái mới (VD: "Đã xử lý", "Từ chối")
+     * @param responseNote Nội dung phản hồi
+     * @param responseAt   Thời điểm phản hồi
      * @return {@code true} nếu cập nhật thành công, ngược lại {@code false}
      * @author Huyen Trang
      */
@@ -604,119 +473,18 @@ public class RequestDAO {
         return 0;
     }
 
-    /**
-     * Lấy danh sách tất cả các yêu cầu (trừ loại tạo tài khoản và nghỉ học) theo phân trang.
-     * Tự động trích xuất lý do phù hợp theo từng loại đơn và loại bỏ các thẻ HTML nếu có.
-     *
-     * @param offset vị trí bắt đầu (dòng)
-     * @param limit  số lượng bản ghi cần lấy
-     * @return Danh sách các yêu cầu đã xử lý dữ liệu lý do
-     * @author Huyen Trang
-     */
-    public ArrayList<Request> getAllRequestWithPaging(int offset, int limit) {
-        ArrayList<Request> requests = new ArrayList<>();
-        String sql = """
-         SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
-                rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
-         FROM Request r
-         JOIN RequestType rt ON r.TypeID = rt.TypeID
-         JOIN Account acc ON r.SenderId = acc.Id
-         JOIN Role role ON acc.RoleId = role.Id
-         WHERE r.TypeID <> 6 AND r.TypeID <> 3
-         ORDER BY r.CreatedAt DESC
-         OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
-        """;
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, offset);
-            stmt.setInt(2, limit);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Request request = new Request();
-                    request.setId(rs.getInt("Id"));
-                    request.setSenderID(rs.getInt("SenderId"));
-                    request.setSenderName(rs.getString("SenderName"));
-                    request.setSenderRole(rs.getString("SenderRole"));
-                    String fullReason = rs.getString("Reason");
-                    String typeName = rs.getString("TypeName");
-                    String extractedReason = "";
-                    if (fullReason != null && !fullReason.trim().isEmpty()) {
-                        String[] parts = fullReason.split("\\|");
-                        switch (typeName) {
-                            case "Đơn xin chuyển lớp":
-                            case "Đơn khiếu nại về giảng viên":
-                            case "Đơn xin bảo lưu":
-                                if (parts.length >= 4) {
-                                    extractedReason = parts[3];
-                                    extractedReason = extractedReason.replaceAll("<[^>]*>", "").trim();
-                                } else if (fullReason.contains("|TRANSFER_TO_CLASS_ID:")) {
-                                    extractedReason = fullReason.split("\\|TRANSFER_TO_CLASS_ID:")[0];
-                                    extractedReason = extractedReason.replaceAll("<[^>]*>", "").trim();
-                                } else {
-                                    extractedReason = fullReason.replaceAll("<[^>]*>", "").trim();
-                                }
-                                break;
-                            case "Đơn xin nghỉ phép":
-                                if (parts.length >= 2) {
-                                    extractedReason = parts[1];
-                                    extractedReason = extractedReason.replaceAll("<[^>]*>", "").trim();
-                                } else {
-                                    extractedReason = fullReason.replaceAll("<[^>]*>", "").trim();
-                                }
-                                break;
-                            case "Đơn xin thay đổi lịch dạy":
-                            case "Đơn xin đổi lịch dạy":
-                                if (parts.length >= 5) {
-                                    extractedReason = parts[4];
-                                } else if (parts.length >= 2) {
-                                    extractedReason = parts[parts.length - 1];
-                                } else {
-                                    extractedReason = fullReason;
-                                }
-                                extractedReason = extractedReason.replaceAll("<[^>]*>", "").trim();
-                                break;
-                            case "Đơn khác":
-                            default:
-                                if (parts.length >= 4) {
-                                    extractedReason = parts[3];
-                                } else {
-                                    extractedReason = fullReason != null ? fullReason : "";
-                                }
-                                break;
-                        }
-                    } else {
-                        extractedReason = "";
-                    }
-                    request.setReason(extractedReason);
-                    request.setResponse(rs.getString("Response"));
-                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
-                    request.setStatus(rs.getString("Status"));
-                    request.setTypeName(typeName);
-                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
-                    if (createdAt != null) {
-                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
-                    }
-                    requests.add(request);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return requests;
-    }
-
     public ArrayList<Request> getAllAbsenceRequests() {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
-         SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
-                rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
-         FROM Request r
-         JOIN RequestType rt ON r.TypeID = rt.TypeID
-         JOIN Account acc ON r.SenderId = acc.Id
-         JOIN Role role ON acc.RoleId = role.Id
-         WHERE r.TypeID = 3
-         ORDER BY r.CreatedAt DESC
-        """;
+                 SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                        rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+                 FROM Request r
+                 JOIN RequestType rt ON r.TypeID = rt.TypeID
+                 JOIN Account acc ON r.SenderId = acc.Id
+                 JOIN Role role ON acc.RoleId = role.Id
+                 WHERE r.TypeID = 3
+                 ORDER BY r.CreatedAt DESC
+                """;
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             try (ResultSet rs = stmt.executeQuery()) {
@@ -746,237 +514,20 @@ public class RequestDAO {
     }
 
     /**
-     * Đếm tổng số yêu cầu (loại trừ yêu cầu tạo tài khoản - TypeID = 6).
-     *
-     * @return Tổng số lượng yêu cầu hợp lệ trong hệ thống
-     * @author Huyen Trang
-     */
-    public int getTotalRequestCount() {
-        String sql = "SELECT COUNT(*) FROM Request WHERE TypeID <> 6";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    /**
-     * Tìm kiếm các yêu cầu dựa trên từ khóa nhập vào.
-     * Tìm theo tên người gửi, loại đơn hoặc nội dung lý do.
-     * Bỏ qua các đơn tạo tài khoản (TypeID = 6).
-     *
-     * @param keyword từ khóa tìm kiếm
-     * @return Danh sách yêu cầu khớp với từ khóa
-     * @author Huyen Trang
-     */
-    public ArrayList<Request> searchRequests(String keyword) {
-        ArrayList<Request> requests = new ArrayList<>();
-        String sql = """
-             SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
-                    rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
-             FROM Request r
-             JOIN RequestType rt ON r.TypeID = rt.TypeID
-             JOIN Account acc ON r.SenderId = acc.Id
-             JOIN Role role ON acc.RoleId = role.Id
-             WHERE r.TypeID <> 6 
-             AND (acc.FullName LIKE ? OR rt.TypeName LIKE ? OR r.Reason LIKE ?)
-             ORDER BY r.CreatedAt DESC
-            """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            String searchPattern = "%" + keyword + "%";
-            stmt.setString(1, searchPattern);
-            stmt.setString(2, searchPattern);
-            stmt.setString(3, searchPattern);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Request request = new Request();
-                    request.setId(rs.getInt("Id"));
-                    request.setSenderID(rs.getInt("SenderId"));
-                    request.setSenderName(rs.getString("SenderName"));
-                    request.setSenderRole(rs.getString("SenderRole"));
-
-                    String fullReason = rs.getString("Reason");
-                    String extractedReason = "";
-                    if (fullReason != null && !fullReason.trim().isEmpty()) {
-                        String[] parts = fullReason.split("\\|");
-                        if (parts.length >= 4) {
-                            extractedReason = parts[3];
-                        } else {
-                            extractedReason = fullReason;
-                        }
-                    }
-                    request.setReason(extractedReason);
-
-                    request.setResponse(rs.getString("Response"));
-                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
-                    request.setStatus(rs.getString("Status"));
-                    request.setTypeName(rs.getString("TypeName"));
-
-                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
-                    if (createdAt != null) {
-                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
-                    }
-                    requests.add(request);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return requests;
-    }
-
-    /**
-     * Lọc các yêu cầu theo tên loại đơn, loại trừ đơn tạo tài khoản (TypeID = 6).
-     *
-     * @param typeName tên loại đơn cần lọc
-     * @return Danh sách các yêu cầu khớp với loại đơn
-     * @author Huyen Trang
-     */
-    public ArrayList<Request> filterRequestsByType(String typeName) {
-        ArrayList<Request> requests = new ArrayList<>();
-        String sql = """
-             SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
-                    rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
-             FROM Request r
-             JOIN RequestType rt ON r.TypeID = rt.TypeID
-             JOIN Account acc ON r.SenderId = acc.Id
-             JOIN Role role ON acc.RoleId = role.Id
-             WHERE r.TypeID <> 6 AND rt.TypeName = ?
-             ORDER BY r.CreatedAt DESC
-            """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, typeName);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Request request = new Request();
-                    request.setId(rs.getInt("Id"));
-                    request.setSenderID(rs.getInt("SenderId"));
-                    request.setSenderName(rs.getString("SenderName"));
-                    request.setSenderRole(rs.getString("SenderRole"));
-
-                    // Extract reason đơn giản
-                    String fullReason = rs.getString("Reason");
-                    String extractedReason = "";
-                    if (fullReason != null && !fullReason.trim().isEmpty()) {
-                        String[] parts = fullReason.split("\\|");
-                        if (parts.length >= 4) {
-                            extractedReason = parts[3];
-                        } else {
-                            extractedReason = fullReason;
-                        }
-                    }
-                    request.setReason(extractedReason);
-
-                    request.setResponse(rs.getString("Response"));
-                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
-                    request.setStatus(rs.getString("Status"));
-                    request.setTypeName(rs.getString("TypeName"));
-
-                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
-                    if (createdAt != null) {
-                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
-                    }
-                    requests.add(request);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return requests;
-    }
-
-    /**
-     * Lọc các yêu cầu theo trạng thái, loại trừ đơn tạo tài khoản (TypeID = 6).
-     *
-     * @param status Trạng thái cần lọc (ví dụ: "Chờ xử lý", "Đã duyệt", "Từ chối")
-     * @return Danh sách các yêu cầu có trạng thái tương ứng
-     * @author Huyen Trang
-     */
-    public ArrayList<Request> filterRequestsByStatus(String status) {
-        ArrayList<Request> requests = new ArrayList<>();
-        String sql = """
-             SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
-                    rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
-             FROM Request r
-             JOIN RequestType rt ON r.TypeID = rt.TypeID
-             JOIN Account acc ON r.SenderId = acc.Id
-             JOIN Role role ON acc.RoleId = role.Id
-             WHERE r.TypeID <> 6 AND r.Status = ?
-             ORDER BY r.CreatedAt DESC
-            """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, status);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Request request = new Request();
-                    request.setId(rs.getInt("Id"));
-                    request.setSenderID(rs.getInt("SenderId"));
-                    request.setSenderName(rs.getString("SenderName"));
-                    request.setSenderRole(rs.getString("SenderRole"));
-
-                    // Extract reason đơn giản
-                    String fullReason = rs.getString("Reason");
-                    String extractedReason = "";
-                    if (fullReason != null && !fullReason.trim().isEmpty()) {
-                        String[] parts = fullReason.split("\\|");
-                        if (parts.length >= 4) {
-                            extractedReason = parts[3];
-                        } else {
-                            extractedReason = fullReason;
-                        }
-                    }
-                    request.setReason(extractedReason);
-
-                    request.setResponse(rs.getString("Response"));
-                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
-                    request.setStatus(rs.getString("Status"));
-                    request.setTypeName(rs.getString("TypeName"));
-
-                    Timestamp createdAt = rs.getTimestamp("CreatedAt");
-                    if (createdAt != null) {
-                        request.setCreatedAt(new java.util.Date(createdAt.getTime()));
-                    }
-                    requests.add(request);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return requests;
-    }
-
-    /**
      * Lấy danh sách đơn xin nghỉ học (TypeID = 3) theo trạng thái
      */
     public ArrayList<Request> getAbsenceRequestsByStatus(String status) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
-         SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
-                rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
-         FROM Request r
-         JOIN RequestType rt ON r.TypeID = rt.TypeID
-         JOIN Account acc ON r.SenderId = acc.Id
-         JOIN Role role ON acc.RoleId = role.Id
-         WHERE r.TypeID = 3 AND r.Status = ?
-         ORDER BY r.CreatedAt DESC
-        """;
+                 SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                        rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+                 FROM Request r
+                 JOIN RequestType rt ON r.TypeID = rt.TypeID
+                 JOIN Account acc ON r.SenderId = acc.Id
+                 JOIN Role role ON acc.RoleId = role.Id
+                 WHERE r.TypeID = 3 AND r.Status = ?
+                 ORDER BY r.CreatedAt DESC
+                """;
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, status);
@@ -1012,17 +563,17 @@ public class RequestDAO {
     public ArrayList<Request> searchAbsenceRequests(String keyword) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
-         SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
-                rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
-         FROM Request r
-         JOIN RequestType rt ON r.TypeID = rt.TypeID
-         JOIN Account acc ON r.SenderId = acc.Id
-         JOIN Role role ON acc.RoleId = role.Id
-         WHERE r.TypeID = 3 AND (
-            acc.FullName LIKE ? OR r.Reason LIKE ? OR r.Status LIKE ?
-         )
-         ORDER BY r.CreatedAt DESC
-        """;
+                 SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                        rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+                 FROM Request r
+                 JOIN RequestType rt ON r.TypeID = rt.TypeID
+                 JOIN Account acc ON r.SenderId = acc.Id
+                 JOIN Role role ON acc.RoleId = role.Id
+                 WHERE r.TypeID = 3 AND (
+                    acc.FullName LIKE ? OR r.Reason LIKE ? OR r.Status LIKE ?
+                 )
+                 ORDER BY r.CreatedAt DESC
+                """;
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             String pattern = "%" + keyword + "%";
@@ -1055,4 +606,314 @@ public class RequestDAO {
         return requests;
     }
 
+    /**
+     * Lấy danh sách yêu cầu của học sinh với bộ lọc và phân trang.
+     *
+     * @param senderId ID của học sinh
+     * @param keyword  Từ khóa tìm kiếm (có thể null)
+     * @param typeId   ID loại đơn (có thể null)
+     * @param status   Trạng thái (có thể null)
+     * @param offset   Vị trí bắt đầu
+     * @param limit    Số lượng bản ghi
+     * @return Danh sách yêu cầu đã lọc
+     */
+    public ArrayList<Request> getStudentRequestsFiltered(int senderId, String keyword, Integer typeId, String status, int offset, int limit) {
+        ArrayList<Request> requests = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+                    SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt, rt.TypeName
+                    FROM Request r JOIN RequestType rt ON r.TypeID = rt.TypeID
+                    WHERE r.SenderId = ?
+                """);
+
+        ArrayList<Object> params = new ArrayList<>();
+        params.add(senderId);
+
+        if (keyword != null && !keyword.isEmpty()) {
+            sql.append(" AND (rt.TypeName LIKE ? OR r.Reason LIKE ? OR r.Status LIKE ? OR r.Response LIKE ?) ");
+            String searchPattern = "%" + keyword + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+        if (typeId != null) {
+            sql.append(" AND r.TypeID = ? ");
+            params.add(typeId);
+        }
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND r.Status = ? ");
+            params.add(status);
+        }
+
+        sql.append(" ORDER BY r.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        params.add(offset);
+        params.add(limit);
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    String fullReason = rs.getString("Reason");
+                    String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
+                    String extractedReason = parts.length >= 4 ? parts[3] : fullReason;
+                    request.setReason(extractedReason);
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setTypeName(rs.getString("TypeName"));
+                    request.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
+    /**
+     * Đếm tổng số yêu cầu của học sinh với bộ lọc.
+     *
+     * @param senderId ID của học sinh
+     * @param keyword  Từ khóa tìm kiếm (có thể null)
+     * @param typeId   ID loại đơn (có thể null)
+     * @param status   Trạng thái (có thể null)
+     * @return Tổng số yêu cầu khớp
+     */
+    public int countStudentRequestsFiltered(int senderId, String keyword, Integer typeId, String status) {
+        StringBuilder sql = new StringBuilder("""
+                    SELECT COUNT(*)
+                    FROM Request r JOIN RequestType rt ON r.TypeID = rt.TypeID
+                    WHERE r.SenderId = ?
+                """);
+
+        ArrayList<Object> params = new ArrayList<>();
+        params.add(senderId);
+
+        if (keyword != null && !keyword.isEmpty()) {
+            sql.append(" AND (rt.TypeName LIKE ? OR r.Reason LIKE ? OR r.Status LIKE ? OR r.Response LIKE ?) ");
+            String searchPattern = "%" + keyword + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+        if (typeId != null) {
+            sql.append(" AND r.TypeID = ? ");
+            params.add(typeId);
+        }
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND r.Status = ? ");
+            params.add(status);
+        }
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Lấy tất cả các loại đơn cho manager (trừ đơn tạo tài khoản và đơn nghỉ học).
+     *
+     * @return Danh sách các loại đơn
+     */
+    public ArrayList<Request> getAllRequestTypesForManager() {
+        ArrayList<Request> requestTypes = new ArrayList<>();
+        String sql = "SELECT TypeID, TypeName FROM RequestType WHERE TypeID NOT IN (3, 6)"; // Exclude absence and account creation
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Request requestType = new Request();
+                requestType.setTypeId(rs.getInt("TypeID"));
+                requestType.setTypeName(rs.getString("TypeName"));
+                requestTypes.add(requestType);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requestTypes;
+    }
+
+    /**
+     * Lấy danh sách yêu cầu của manager với bộ lọc và phân trang.
+     *
+     * @param keyword      Từ khóa tìm kiếm
+     * @param typeFilter   Tên loại đơn
+     * @param statusFilter Trạng thái
+     * @param offset       Vị trí bắt đầu
+     * @param limit        Số lượng bản ghi
+     * @return Danh sách yêu cầu đã lọc
+     */
+    public ArrayList<Request> getManagerRequestsFiltered(String keyword, String typeFilter, String statusFilter, int offset, int limit) {
+        ArrayList<Request> requests = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+                     SELECT r.Id, r.SenderId, r.Reason, r.Status, r.CreatedAt, r.Response, r.ResponseAt,
+                            rt.TypeName, acc.FullName AS SenderName, role.Name AS SenderRole
+                     FROM Request r
+                     JOIN RequestType rt ON r.TypeID = rt.TypeID
+                     JOIN Account acc ON r.SenderId = acc.Id
+                     JOIN Role role ON acc.RoleId = role.Id
+                     WHERE r.TypeID NOT IN (3, 6)
+                """);
+
+        ArrayList<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.isEmpty()) {
+            sql.append(" AND (acc.FullName LIKE ? OR rt.TypeName LIKE ? OR r.Reason LIKE ?) ");
+            String searchPattern = "%" + keyword + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+        if (typeFilter != null && !typeFilter.isEmpty()) {
+            sql.append(" AND rt.TypeName = ? ");
+            params.add(typeFilter);
+        }
+        if (statusFilter != null && !statusFilter.isEmpty()) {
+            sql.append(" AND r.Status = ? ");
+            params.add(statusFilter);
+        }
+
+        sql.append(" ORDER BY r.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ");
+        params.add(offset);
+        params.add(limit);
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Request request = new Request();
+                    request.setId(rs.getInt("Id"));
+                    request.setSenderID(rs.getInt("SenderId"));
+                    request.setSenderName(rs.getString("SenderName"));
+                    request.setSenderRole(rs.getString("SenderRole"));
+
+                    String fullReason = rs.getString("Reason");
+                    String typeName = rs.getString("TypeName");
+                    String senderRole = rs.getString("SenderRole");
+                    String extractedReason = fullReason; // Default to full reason
+
+                    if (fullReason != null && !fullReason.trim().isEmpty() && typeName != null) {
+                        String[] parts = fullReason.split("\\|");
+                        switch (typeName.trim()) {
+                            case "Đơn xin nghỉ phép":
+                                if (parts.length >= 2) {
+                                    extractedReason = parts[1];
+                                }
+                                break;
+                            case "Đơn xin đổi lịch dạy":
+                                if (parts.length >= 5) {
+                                    extractedReason = parts[4];
+                                }
+                                break;
+                            case "Đơn xin chuyển lớp":
+                            case "Đơn khiếu nại về giảng viên":
+                            case "Đơn xin bảo lưu":
+                            case "Đơn xin cấp lại chứng chỉ":
+                            case "Đơn khác":
+                                if (parts.length >= 4) {
+                                    extractedReason = parts[3];
+                                }
+                                break;
+                            default:
+                                extractedReason = fullReason;
+                                break;
+                        }
+                    }
+
+                    if (extractedReason != null) {
+                        request.setReason(extractedReason.replaceAll("<[^>]*>", "").trim());
+                    } else {
+                        request.setReason("");
+                    }
+
+                    request.setResponse(rs.getString("Response"));
+                    request.setResponseAt(rs.getTimestamp("ResponseAt"));
+                    request.setStatus(rs.getString("Status"));
+                    request.setTypeName(rs.getString("TypeName"));
+                    request.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
+    /**
+     * Đếm tổng số yêu cầu của manager với bộ lọc.
+     *
+     * @param keyword      Từ khóa tìm kiếm
+     * @param typeFilter   Tên loại đơn
+     * @param statusFilter Trạng thái
+     * @return Tổng số yêu cầu khớp
+     */
+    public int countManagerRequestsFiltered(String keyword, String typeFilter, String statusFilter) {
+        StringBuilder sql = new StringBuilder("""
+                    SELECT COUNT(*)
+                    FROM Request r
+                    JOIN RequestType rt ON r.TypeID = rt.TypeID
+                    JOIN Account acc ON r.SenderId = acc.Id
+                    JOIN Role role ON acc.RoleId = role.Id
+                    WHERE r.TypeID NOT IN (3, 6)
+                """);
+
+        ArrayList<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.isEmpty()) {
+            sql.append(" AND (acc.FullName LIKE ? OR rt.TypeName LIKE ? OR r.Reason LIKE ?) ");
+            String searchPattern = "%" + keyword + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+        if (typeFilter != null && !typeFilter.isEmpty()) {
+            sql.append(" AND rt.TypeName = ? ");
+            params.add(typeFilter);
+        }
+        if (statusFilter != null && !statusFilter.isEmpty()) {
+            sql.append(" AND r.Status = ? ");
+            params.add(statusFilter);
+        }
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }

@@ -75,6 +75,12 @@
                 <span>Xem đơn</span>
             </a>
         </div>
+        <div class="nav-section">
+            <a href="${pageContext.request.contextPath}/StudentDashboard?action=notifications" class="nav-item ${pageContext.request.requestURI.contains('notifications') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('notifications') ? 'page' : 'false'}">
+                <i class="fas fa-user" aria-hidden="true"></i>
+                <span>Thông báo</span>
+            </a>
+        </div>
     </nav>
 </div>
 <script>

@@ -102,58 +102,13 @@ public class ProcessRequestServlet extends HttpServlet {
             // nếu không có id thì xử lý theo action
             String action = request.getParameter("action");
             if (action == null || action.equals("list")) {
-                int page = 1;
-                int recordsPerPage = 10; //số bản ghi trong 1 trang
-                try {
-                    String pageParam = request.getParameter("page");
-                    if (pageParam != null) page = Integer.parseInt(pageParam);
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-
-                int offset = (page - 1) * recordsPerPage;
-                ArrayList<Request> requestList = requestDAO.getAllRequestWithPaging(offset, recordsPerPage);
-                int totalRecords = requestDAO.getTotalRequestCount();
-                int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
-
-                request.setAttribute("requestList", requestList);
-                request.setAttribute("currentPage", page);
-                request.setAttribute("totalPages", totalPages);
-                request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
-            //tìm kiếm
+                handleListAction(request, response);
             } else if (action.equals("search")) {
-                String keyword = request.getParameter("keyword");
-                if (keyword == null || keyword.trim().isEmpty()) {
-                    response.sendRedirect("ProcessRequest?action=list");
-                    return;
-                }
-                ArrayList<Request> requestList = requestDAO.searchRequests(keyword.trim());
-                request.setAttribute("requestList", requestList);
-                request.setAttribute("keyword", keyword);
-                request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
-            // lọc theo loại đơn
+                handleSearchAction(request, response);
             } else if (action.equals("filterByType")) {
-                String typeFilter = request.getParameter("typeFilter");
-                if (typeFilter == null || typeFilter.trim().isEmpty()) {
-                    response.sendRedirect("ProcessRequest?action=list");
-                    return;
-                }
-                ArrayList<Request> requestList = requestDAO.filterRequestsByType(typeFilter.trim());
-                request.setAttribute("requestList", requestList);
-                request.setAttribute("typeFilter", typeFilter);
-                request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
-            // lọc theo trạng thái
+                handleFilterByTypeAction(request, response);
             } else if (action.equals("filterByStatus")) {
-                String statusFilter = request.getParameter("statusFilter");
-                if (statusFilter == null || statusFilter.trim().isEmpty()) {
-                    response.sendRedirect("ProcessRequest?action=list");
-                    return;
-                }
-                ArrayList<Request> requestList = requestDAO.filterRequestsByStatus(statusFilter.trim());
-                request.setAttribute("requestList", requestList);
-                request.setAttribute("statusFilter", statusFilter);
-                request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
-
+                handleFilterByStatusAction(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Hành động không hợp lệ");
             }
@@ -164,6 +119,47 @@ public class ProcessRequestServlet extends HttpServlet {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Có lỗi xảy ra");
         }
+    }
+
+    private void handleListAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int page = 1;
+        int recordsPerPage = 10;
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
+
+        String keyword = request.getParameter("keyword");
+        String typeFilter = request.getParameter("typeFilter");
+        String statusFilter = request.getParameter("statusFilter");
+
+        RequestDAO requestDAO = new RequestDAO();
+        ArrayList<Request> requestTypes = requestDAO.getAllRequestTypesForManager();
+        int totalRecords = requestDAO.countManagerRequestsFiltered(keyword, typeFilter, statusFilter);
+        ArrayList<Request> requestList = requestDAO.getManagerRequestsFiltered(keyword, typeFilter, statusFilter, (page - 1) * recordsPerPage, recordsPerPage);
+
+        int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+
+        request.setAttribute("requestList", requestList);
+        request.setAttribute("requestTypes", requestTypes);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("typeFilter", typeFilter);
+        request.setAttribute("statusFilter", statusFilter);
+
+        request.getRequestDispatcher("/View/manager-request-list.jsp").forward(request, response);
+    }
+
+    private void handleSearchAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        handleListAction(request, response);
+    }
+
+    private void handleFilterByTypeAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        handleListAction(request, response);
+    }
+
+    private void handleFilterByStatusAction(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        handleListAction(request, response);
     }
 
     @Override

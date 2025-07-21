@@ -40,15 +40,35 @@ public class StudentRequestServlet extends HttpServlet {
         request.setAttribute("requestTypeList", requestTypeList);
 
         if ("list".equals(action)) {
-            String filterTypeIdParam = request.getParameter("filterTypeId");
-            ArrayList<Request> requestList;
-            if (filterTypeIdParam != null && !filterTypeIdParam.isEmpty()) {
-                int filterTypeId = Integer.parseInt(filterTypeIdParam);
-                requestList = requestDAO.getRequestBySenderIdAndType(accountId, filterTypeId);
-            } else {
-                requestList = requestDAO.getRequestBySenderId(accountId);
+            int page = 1;
+            int recordsPerPage = 10;
+            if (request.getParameter("page") != null) {
+                page = Integer.parseInt(request.getParameter("page"));
             }
+
+            String keyword = request.getParameter("keyword");
+            String statusFilter = request.getParameter("statusFilter");
+            String filterTypeIdParam = request.getParameter("filterTypeId");
+            Integer typeId = null;
+            if (filterTypeIdParam != null && !filterTypeIdParam.isEmpty()) {
+                try {
+                    typeId = Integer.parseInt(filterTypeIdParam);
+                } catch (NumberFormatException e) {
+                    // Handle error or ignore
+                }
+            }
+
+            // Count total records with filters
+            int totalRecords = requestDAO.countStudentRequestsFiltered(accountId, keyword, typeId, statusFilter);
+            
+            // Get data for the current page with filters
+            ArrayList<Request> requestList = requestDAO.getStudentRequestsFiltered(accountId, keyword, typeId, statusFilter, (page - 1) * recordsPerPage, recordsPerPage);
+            
+            int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+            
             request.setAttribute("requestList", requestList);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("currentPage", page);
             request.getRequestDispatcher("/View/student-request-list.jsp").forward(request, response);
         } else {
             ClassroomDAO classroomDAO = new ClassroomDAO();
