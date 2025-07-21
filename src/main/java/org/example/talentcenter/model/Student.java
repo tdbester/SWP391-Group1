@@ -14,6 +14,7 @@ public class Student {
     private int presentCount;
     private int absentCount;
     private LocalDate enrollmentDate;
+    private int ConsultationId;
 
     // Thuộc tính để xử lý điểm danh
     private Integer attendanceId;
@@ -148,5 +149,11 @@ public class Student {
 
     public void setEnrollmentDate(LocalDate enrollmentDate) {
         this.enrollmentDate = enrollmentDate;
+    }
+    public void setConsultationId(int consultationId) {
+        this.ConsultationId = consultationId;
+    }
+    public int getConsultationId() {
+        return ConsultationId;
     }
 }
