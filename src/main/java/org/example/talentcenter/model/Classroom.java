@@ -9,6 +9,7 @@ public class Classroom {
     private int teacherId;
     private int maxCapacity;
     private String teacherName;
+    private String courseName;
     private int availableSeats;
     private ArrayList<StudentSchedule> schedules;
 
@@ -73,6 +74,14 @@ public class Classroom {
 
     public void setTeacherName(String teacherName) {
         this.teacherName = teacherName;
+    }
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
     }
 
     public int getAvailableSeats() {
