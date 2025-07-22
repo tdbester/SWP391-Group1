@@ -63,7 +63,18 @@
 <body>
 <jsp:include page="header.jsp" />
 <div class="">
-    <jsp:include page="training-manager-sidebar.jsp" />
+    <%
+        String userRole = (String) session.getAttribute("userRole");
+        if ("admin".equalsIgnoreCase(userRole)) {
+    %>
+        <jsp:include page="admin-sidebar.jsp" />
+    <%
+        } else {
+    %>
+        <jsp:include page="training-manager-sidebar.jsp" />
+    <%
+        }
+    %>
     <div class="main-content">
         <h2 class="mb-4">Danh sách khóa học</h2>
     <form action="courses" method="get" class="row g-2 mb-3">

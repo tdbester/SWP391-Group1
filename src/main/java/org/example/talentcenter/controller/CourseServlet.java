@@ -48,6 +48,7 @@ public class CourseServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         String action = req.getParameter("action");
+        String role = (String) session.getAttribute("userRole");
         if (action == null) action = "list";
 
         if (session == null || session.getAttribute("accountId") == null) {
@@ -59,9 +60,21 @@ public class CourseServlet extends HttpServlet {
 
 
         switch (action) {
-            case "new":   showNewCourseForm(req, resp);      break;
-            case "edit":  showEditCourseForm(req, resp);     break;
-            case "delete":deleteCourse(req, resp);           break;
+            case "new":
+                if(!role.equalsIgnoreCase("Training Manager"))
+                    break;
+                showNewCourseForm(req, resp);
+                break;
+            case "edit":
+                if(!role.equalsIgnoreCase("Training Manager"))
+                  break;
+                showEditCourseForm(req, resp);
+                break;
+            case "delete":
+                if(!role.equalsIgnoreCase("Training Manager"))
+                    break;
+                deleteCourse(req, resp);
+                break;
             case "view":  showCourseDetail(req, resp);       break;
             default:      listCourses(req, resp);            break;
         }

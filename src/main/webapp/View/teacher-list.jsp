@@ -15,6 +15,9 @@
 <head>
     <meta charset="UTF-8" />
     <title>Teacher List</title>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         .btn-primary,
@@ -58,7 +61,20 @@
 <body>
 <jsp:include page="header.jsp" />
 
-<div class="container mt-5">
+<div class=" mt-5">
+        <%
+        String userRole = (String) session.getAttribute("userRole");
+        if ("admin".equalsIgnoreCase(userRole)) {
+    %>
+        <jsp:include page="admin-sidebar.jsp" />
+    <%
+        } else {
+    %>
+        <jsp:include page="training-manager-sidebar.jsp" />
+    <%
+        }
+    %>
+    <div class="main-content">
     <h2 class="mb-4">Danh sách giáo viên</h2>
     <div class="d-flex justify-content-end">
         <form action="teachers" method="get" class="row g-2 mb-3">
@@ -117,6 +133,7 @@
             </c:forEach>
         </ul>
     </nav>
+    </div>
 </div>
 <jsp:include page="footer.jsp" />
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

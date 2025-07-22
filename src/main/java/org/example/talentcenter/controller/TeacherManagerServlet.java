@@ -24,8 +24,11 @@ public class TeacherManagerServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         String action = req.getParameter("action");
         if (action == null) action = "list";
+        String role = (String) session.getAttribute("userRole");
 
-        if (session == null || session.getAttribute("accountId") == null) {
+        if (session == null
+                || session.getAttribute("accountId") == null
+                || !role.equalsIgnoreCase("admin")) {
             resp.sendRedirect("login");
             return;
         }

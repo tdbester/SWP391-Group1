@@ -49,6 +49,7 @@ public class BlogServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         String action = request.getParameter("action");
         if (action == null) action = "list";
+        String role = (String) session.getAttribute("userRole");
 
         if (session == null || session.getAttribute("accountId") == null) {
             if(!action.equals("view")){
@@ -60,12 +61,18 @@ public class BlogServlet extends HttpServlet {
 
         switch (action) {
             case "new":
+                if(!role.equalsIgnoreCase("sale"))
+                    break;
                 showNewBlogForm(request, response);
                 break;
             case "edit":
+                if(!role.equalsIgnoreCase("sale"))
+                    break;
                 showEditBlogForm(request, response);
                 break;
             case "delete":
+                if(!role.equalsIgnoreCase("sale"))
+                    break;
                 deleteBlog(request, response);
                 break;
             case "view":
