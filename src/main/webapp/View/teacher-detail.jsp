@@ -92,16 +92,27 @@
                  value="${teacher.department}" required>
         </div>
         <div class="mb-3">
-          <label for="salary" class="form-label">Lương cơ bản</label>
+          <label for="salary" class="form-label">Lương cơ bản(VNĐ)</label>
           <input type="number" class="form-control" id="salary" name="salary"
-                 value="<fmt:formatNumber value='${teacher.salary}' groupingUsed='true' pattern='#'/>" step="0.01" required min="0"/>
+                 value="<fmt:formatNumber value='${teacher.salary}' groupingUsed='true' pattern='#'/>" step="1" required min="0"/>
         </div>
       </div>
       <div class="col-md-6">
         <div class="mb-3">
-          <label for="phoneNumber" class="form-label">Số điện thoại</label>
-          <input type="text" class="form-control" id="phoneNumber" name="phoneNumber"
-                 value="${teacher.account.phoneNumber}">
+          <label for="phoneNumber" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+          <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber"
+                 value="${teacher.account.phoneNumber}"
+                 pattern="^0[3-9][0-9]{8,9}$"
+                 title="Số điện thoại phải có 10-11 chữ số, bắt đầu bằng số 0"
+                 required
+                 maxlength="11"
+                 placeholder="Ví dụ: 0901234567">
+          <div class="invalid-feedback">
+            Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số, bắt đầu bằng số 0)
+          </div>
+          <div class="valid-feedback">
+            Số điện thoại hợp lệ
+          </div>
         </div>
         <div class="mb-3">
           <label for="email" class="form-label">Email</label>

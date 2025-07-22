@@ -180,7 +180,8 @@ public class BlogDAO {
         String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt, ac.FullName, b.CategoryId, b.Status " +
                 "FROM Blog b " +
                 "JOIN Account ac ON b.authorId = ac.Id " +
-                "WHERE b.Status = 1";
+                "WHERE b.Status = 1"+
+                "order by b.Id DESC\n";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -203,6 +204,38 @@ public class BlogDAO {
             e.printStackTrace();
         }
         return list;
+    }
+
+    /**
+     * Get blog by ID for guests (works with existing database schema)
+     */
+    public BlogDto getPublicBlogById(int id) {
+        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.CreatedAt, ac.FullName, b.Category " +
+                "FROM Blog b " +
+                "JOIN Account ac ON b.authorId = ac.Id " +
+                "WHERE b.Id = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new BlogDto(
+                            rs.getInt("Id"),
+                            rs.getString("Title"),
+                            rs.getString("Description"),
+                            rs.getString("Content"),
+                            rs.getString("image"),
+                            rs.getDate("CreatedAt"),
+                            rs.getString("FullName"),
+                            rs.getInt("Category"),
+                            1 // Default to public status
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }
