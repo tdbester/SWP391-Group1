@@ -153,7 +153,9 @@ public class TrainingManagerClassroomServlet extends HttpServlet {
             throws ServletException, IOException {
 
         try {
+            // xác định classroom cần thêm.
             String classroomIdStr = request.getParameter("classroomId");
+            // danh sách ID của học sinh cần thêm.
             String[] selectedStudentIds = request.getParameterValues("selectedStudents");
 
             if (classroomIdStr == null || classroomIdStr.trim().isEmpty()) {
@@ -181,7 +183,7 @@ public class TrainingManagerClassroomServlet extends HttpServlet {
                 } catch (NumberFormatException e) {
                     response.sendRedirect("TrainingManagerClassroom?action=addStudents&classroomId=" +
                         classroomIdStr + "&error=" +
-                        java.net.URLEncoder.encode("ID học sinh không hợp lệ: " + idStr, "UTF-8"));
+                        java.net.URLEncoder.encode("ID học sinh không hợp lệ: " + idStr, "UTF-8")); //convert để hiển thị tiếng việt
                     return;
                 }
             }

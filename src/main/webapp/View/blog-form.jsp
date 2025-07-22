@@ -29,12 +29,19 @@
 <jsp:include page="header.jsp"/>
 
 <div class="container mt-5">
-    <h2 class="mb-4">
-        <c:choose>
-            <c:when test="${not empty blog}">Chỉnh sửa bài viết</c:when>
-            <c:otherwise>Bài viết mới</c:otherwise>
-        </c:choose>
-    </h2>
+
+
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-4">
+            <c:choose>
+                <c:when test="${not empty blog}">Chỉnh sửa bài viết</c:when>
+                <c:otherwise>Bài viết mới</c:otherwise>
+            </c:choose>
+        </h2>
+        <a href="${pageContext.request.contextPath}/blogs" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
 
     <form action="blogs" method="post" enctype="multipart/form-data" onsubmit="prepareSubmit()">
         <input type="hidden" name="action" value="${not empty blog ? 'update' : 'insert'}"/>
@@ -120,26 +127,75 @@
     </c:if>
 </div>
 
-<script>
-    const toolbarOptions = [
-        [{ header: [1, 2, false] }],
-        ['bold','italic','underline'],
-        ['link', 'image'],
-        [{ list: 'ordered'}, { list: 'bullet' }],
-        ['clean']
-    ];
-    const editorDesc = new Quill('#editor-description', { theme: 'snow', modules: { toolbar: toolbarOptions } });
-    const editorCont = new Quill('#editor-content', { theme: 'snow',
-        modules: {
-        toolbar: toolbarOptions } });
+<!-- Hidden divs to store blog content for JavaScript -->
+<div id="blogDescription" style="display: none;">
+    <c:if test="${not empty blog && not empty blog.description}">
+        ${blog.description}
+    </c:if>
+</div>
 
-    // Load existing content
-    editorDesc.root.innerHTML = `<c:out value='${blog.description}' default=''/>`;
-    editorCont.root.innerHTML = `<c:out value='${blog.content}' default=''/>`;
+<div id="blogContent" style="display: none;">
+    <c:if test="${not empty blog && not empty blog.content}">
+        ${blog.content}
+    </c:if>
+</div>
+
+<script>
+    // Initialize Quill editors
+    let editorDesc, editorCont;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const toolbarOptions = [
+            [{ header: [1, 2, false] }],
+            ['bold','italic','underline'],
+            ['link', 'image'],
+            [{ list: 'ordered'}, { list: 'bullet' }],
+            ['clean']
+        ];
+
+        // Initialize Quill editors with proper configuration
+        editorDesc = new Quill('#editor-description', {
+            theme: 'snow',
+            modules: { toolbar: toolbarOptions }
+        });
+
+        editorCont = new Quill('#editor-content', {
+            theme: 'snow',
+            modules: { toolbar: toolbarOptions }
+        });
+
+        // Load existing content if editing
+        const blogDescDiv = document.getElementById('blogDescription');
+        if (blogDescDiv && blogDescDiv.innerHTML.trim()) {
+            editorDesc.root.innerHTML = blogDescDiv.innerHTML;
+        }
+
+        const blogContentDiv = document.getElementById('blogContent');
+        if (blogContentDiv && blogContentDiv.innerHTML.trim()) {
+            editorCont.root.innerHTML = blogContentDiv.innerHTML;
+        }
+    });
 
     function prepareSubmit() {
-        document.getElementById('description').value = editorDesc.root.innerHTML;
-        document.getElementById('content').value     = editorCont.root.innerHTML;
+        // Get the HTML content from Quill editors and clean empty paragraphs
+        let descriptionContent = editorDesc.root.innerHTML;
+        let contentContent = editorCont.root.innerHTML;
+
+        // Clean up empty paragraph tags that Quill creates
+        descriptionContent = descriptionContent.replace(/<p><br><\/p>/g, '').replace(/<p>\s*<\/p>/g, '').trim();
+        contentContent = contentContent.replace(/<p><br><\/p>/g, '').replace(/<p>\s*<\/p>/g, '').trim();
+
+        // If content is empty after cleaning, set to empty string
+        if (descriptionContent === '' || descriptionContent === '<p></p>') {
+            descriptionContent = '';
+        }
+        if (contentContent === '' || contentContent === '<p></p>') {
+            contentContent = '';
+        }
+
+        document.getElementById('description').value = descriptionContent;
+        document.getElementById('content').value = contentContent;
+        return true;
     }
 
     function previewImage(evt) {

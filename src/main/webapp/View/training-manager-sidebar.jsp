@@ -49,6 +49,13 @@
           <i class="fa-solid fa-building" aria-hidden="true"></i>
           <span>Danh sách Khóa học</span>
         </a>
+        <a href="${pageContext.request.contextPath}/TrainingManagerClassroom"
+           class="nav-item ${pageContext.request.requestURI.contains('training-manager-classrooms.jsp') || pageContext.request.servletPath.contains('/TrainingManagerClassroom') ? 'active' : ''}"
+           role="link"
+           aria-current="${pageContext.request.requestURI.contains('training-manager-classrooms.jsp') || pageContext.request.servletPath.contains('/TrainingManagerClassroom') ? 'page' : 'false'}">
+          <i class="fa-solid fa-building" aria-hidden="true"></i>
+          <span>Danh sách lớp học</span>
+        </a>
       </div>
     </nav>
   </div>

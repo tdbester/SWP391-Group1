@@ -162,6 +162,7 @@
                     </c:if>
                 </td>
                 <td>
+                    <a href="courses?action=view&id=${course.id}" class="btn btn-primary btn-sm">Chi tiết</a>
                     <a href="courses?action=edit&id=${course.id}" class="btn btn-warning btn-sm">Sửa</a>
                     <a href="courses?action=delete&id=${course.id}" class="btn btn-danger btn-sm"
                        onclick="return confirm('Xác nhận xóa?')">Xóa</a>

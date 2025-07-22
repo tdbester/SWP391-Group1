@@ -34,12 +34,18 @@
 <body>
 <jsp:include page="header.jsp" />
 <div class="container mt-5">
-    <h2>
-        <c:choose>
-            <c:when test="${not empty course}">Chỉnh sửa khóa học</c:when>
-            <c:otherwise>Khóa học mới</c:otherwise>
-        </c:choose>
-    </h2>
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>
+            <c:choose>
+                <c:when test="${not empty course}">Chỉnh sửa khóa học</c:when>
+                <c:otherwise>Khóa học mới</c:otherwise>
+            </c:choose>
+        </h2>
+        <a href="${pageContext.request.contextPath}/courses" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
 
     <c:if test="${not empty errorMessage}">
         <div class="alert alert-danger">${errorMessage}</div>

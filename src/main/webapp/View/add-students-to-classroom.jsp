@@ -313,12 +313,6 @@
                                 <i class="fas fa-users"></i>
                                 Chọn học sinh để thêm vào lớp
                             </h3>
-                            <c:if test="${not empty eligibleStudents}">
-                                <div class="select-all-container">
-                                    <input type="checkbox" id="selectAll" class="select-all-checkbox" onchange="toggleAllStudents()">
-                                    <label for="selectAll">Chọn tất cả</label>
-                                </div>
-                            </c:if>
                         </div>
                         
                         <c:choose>

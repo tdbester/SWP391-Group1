@@ -113,7 +113,8 @@
             </span>
                         <span>
               <strong>Học phí:</strong>
-              <fmt:formatNumber value="${course.price}" type="currency" currencySymbol="₫" groupingUsed="true"/>
+                            <fmt:formatNumber value="${course.price}" type="number" groupingUsed="true" /> VNĐ
+
             </span>
                     </div>
 
