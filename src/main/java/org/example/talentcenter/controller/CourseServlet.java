@@ -48,8 +48,8 @@ public class CourseServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         String action = req.getParameter("action");
-        String role = (String) session.getAttribute("userRole");
         if (action == null) action = "list";
+
 
         if (session == null || session.getAttribute("accountId") == null) {
             if(!action.equals("view")){
@@ -57,6 +57,9 @@ public class CourseServlet extends HttpServlet {
                 return;
             }
         }
+        String role = (String) session.getAttribute("userRole");
+        if (action == null) action = "list";
+        if (role == null) role = "";
 
 
         switch (action) {

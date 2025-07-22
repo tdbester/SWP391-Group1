@@ -193,7 +193,7 @@
                         <h4>Blog</h4>
                         <p>Chia sẻ kiến thức âm nhạc, mẹo luyện tập và cảm hứng học nhạc mỗi ngày từ chuyên gia.</p>
                         <div class="main-button">
-                            <a href="#">Read More</a>
+                            <a href="${pageContext.request.contextPath}/guest-blogs">Read More</a>
                         </div>
                     </div>
                 </div>

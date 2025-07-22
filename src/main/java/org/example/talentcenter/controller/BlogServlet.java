@@ -49,7 +49,6 @@ public class BlogServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         String action = request.getParameter("action");
         if (action == null) action = "list";
-        String role = (String) session.getAttribute("userRole");
 
         if (session == null || session.getAttribute("accountId") == null) {
             if(!action.equals("view")){
@@ -57,26 +56,27 @@ public class BlogServlet extends HttpServlet {
                 return;
             }
         }
+        String role = (String) session.getAttribute("userRole");
 
 
         switch (action) {
             case "new":
-                if(!role.equalsIgnoreCase("sale"))
+                if(role!= null &&!role.equalsIgnoreCase("sale"))
                     break;
                 showNewBlogForm(request, response);
                 break;
             case "edit":
-                if(!role.equalsIgnoreCase("sale"))
+                if(role!= null &&!role.equalsIgnoreCase("sale"))
                     break;
                 showEditBlogForm(request, response);
                 break;
             case "delete":
-                if(!role.equalsIgnoreCase("sale"))
+                if(role!= null &&!role.equalsIgnoreCase("sale"))
                     break;
                 deleteBlog(request, response);
                 break;
             case "view":
-                showBlogDetail(request, response);
+                showBlogDetail(request, response,role!= null && role.equalsIgnoreCase("sale"));
                 break;
             default:
                 listBlogs(request, response);
@@ -169,10 +169,13 @@ public class BlogServlet extends HttpServlet {
         request.getRequestDispatcher("/View/blog-form.jsp").forward(request, response);
     }
 
-    private void showBlogDetail(HttpServletRequest request, HttpServletResponse response)
+    private void showBlogDetail(HttpServletRequest request, HttpServletResponse response, boolean isSale)
             throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         Blog blog = blogDAO.getById(id);
+        if(blog.getStatus() == 0 && !isSale){
+            return;
+        }
         request.setAttribute("blog", blog);
         request.getRequestDispatcher("/View/user-blog-detail.jsp").forward(request, response);
     }

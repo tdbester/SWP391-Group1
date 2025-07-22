@@ -25,6 +25,7 @@ public class TeacherManagerServlet extends HttpServlet {
         String action = req.getParameter("action");
         if (action == null) action = "list";
         String role = (String) session.getAttribute("userRole");
+        if (role == null) role = "";
 
         if (session == null
                 || session.getAttribute("accountId") == null
