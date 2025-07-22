@@ -30,6 +30,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet(name = "ConsultationServlet", value = "/Consultation")
 public class ConsultationServlet extends HttpServlet {
@@ -39,7 +40,7 @@ public class ConsultationServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        ArrayList<Course> subjects = subjectDAO.getAllCourses();
+        List<Course> subjects = subjectDAO.getAll();
         request.setAttribute("subjects", subjects);
         String action = request.getParameter("action");
         String view = request.getParameter("view");

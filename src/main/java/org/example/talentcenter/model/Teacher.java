@@ -6,6 +6,7 @@ public class Teacher {
     private Integer accountId;
     private String department;
     private double salary;
+    private Account account;
     // Constructors
     public Teacher() {}
 
@@ -46,6 +47,13 @@ public class Teacher {
 
     public void setSalary(double salary) {
         this.salary = salary;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     @Override

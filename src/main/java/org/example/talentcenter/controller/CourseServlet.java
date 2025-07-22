@@ -9,6 +9,8 @@ import org.example.talentcenter.dao.CourseDAO;
 import org.example.talentcenter.dto.CourseDto;
 import org.example.talentcenter.model.Course;
 import org.example.talentcenter.model.Category;
+import org.example.talentcenter.utilities.Level;
+import org.example.talentcenter.utilities.Type;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Singleton;
@@ -20,6 +22,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
+import java.text.DecimalFormat;
 
 import static org.example.talentcenter.utilities.Const.TYPE_COURSE;
 
@@ -43,12 +47,16 @@ public class CourseServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        if (session == null || session.getAttribute("accountId") == null) {
-            resp.sendRedirect("login");
-            return;
-        }
         String action = req.getParameter("action");
         if (action == null) action = "list";
+
+        if (session == null || session.getAttribute("accountId") == null) {
+            if(!action.equals("view")){
+                resp.sendRedirect("login");
+                return;
+            }
+        }
+
 
         switch (action) {
             case "new":   showNewCourseForm(req, resp);      break;
@@ -76,6 +84,7 @@ public class CourseServlet extends HttpServlet {
             throws ServletException, IOException {
         String search    = req.getParameter("search");
         String catParam  = req.getParameter("category");
+        String levelParam = req.getParameter("level");
         Category filterCat;
 
         if (catParam != null && !catParam.isBlank()) {
@@ -96,18 +105,25 @@ public class CourseServlet extends HttpServlet {
 
         var categoryFiltered = filterCat != null
                 ? filtered.stream()
-                        .filter(c -> c.getCategory().getId() == filterCat.getId())
-                        .toList()
+                .filter(c -> c.getCategory().getId() == filterCat.getId())
+                .toList()
                 : filtered;
 
-        int total   = courseDAO.getTotalCourse();
-        int endPage = (int)Math.ceil((double) total / 5);
+        var levelFiltered = levelParam != null && !levelParam.isBlank()
+                ? categoryFiltered.stream()
+                .filter(c -> c.getLevel() != null && c.getLevel().toString().equals(levelParam))
+                .toList()
+                : categoryFiltered;
 
-        req.setAttribute("courseList", categoryFiltered);
+        int total   = courseDAO.getTotalCourse();
+        int endPage = (int)Math.ceil((double) total / 10);
+
+        req.setAttribute("courseList", levelFiltered);
         req.setAttribute("endP",        endPage);
         req.setAttribute("currentIndex", index);
         req.setAttribute("categories",  categoryDAO.getByType(TYPE_COURSE));
         req.setAttribute("selectedCategory", filterCat != null ? filterCat.getId() : null);
+        req.setAttribute("selectedLevel", levelParam);
 
         req.getRequestDispatcher("/View/course.jsp").forward(req, resp);
     }
@@ -157,6 +173,9 @@ public class CourseServlet extends HttpServlet {
         String title       = req.getParameter("title");
         String info        = req.getParameter("information");
         String catParam    = req.getParameter("category");
+        String levelParam  = req.getParameter("level");
+        String typeParam   = req.getParameter("type");
+        String statusParam = req.getParameter("status");
         Part   imagePart   = req.getPart("imageFile");
         HttpSession session = req.getSession(false);
         int createdBy= (int) session.getAttribute("accountId");
@@ -170,7 +189,14 @@ public class CourseServlet extends HttpServlet {
             return;
         }
 
-        String imageUrl = uploadToCloudinary(imagePart);
+        String imageUrl;
+
+        //3. lấy ảnh và upload ln cloudinary, lấy về URL ảnh để lưu vào database
+        if (imagePart != null && imagePart.getSize() > 0) {
+            imageUrl = uploadToCloudinary(imagePart);
+        } else {
+            imageUrl = "https://placehold.co/600x400?text=img";
+        }
         Category category;
         try {
             category = categoryDAO.getById(Integer.parseInt(catParam));
@@ -180,6 +206,40 @@ public class CourseServlet extends HttpServlet {
             return;
         }
 
+        // Parse Level enum
+        Level level = null;
+        if (levelParam != null && !levelParam.isBlank()) {
+            try {
+                level = Level.valueOf(levelParam);
+            } catch (IllegalArgumentException e) {
+                req.setAttribute("errorMessage", "Invalid level.");
+                showNewCourseForm(req, resp);
+                return;
+            }
+        }
+
+        // Parse Type enum
+        Type type = null;
+        if (typeParam != null && !typeParam.isBlank()) {
+            try {
+                type = Type.valueOf(typeParam);
+            } catch (IllegalArgumentException e) {
+                req.setAttribute("errorMessage", "Invalid type.");
+                showNewCourseForm(req, resp);
+                return;
+            }
+        }
+
+        // Parse status parameter
+        int status = 1; // Default to public
+        if (statusParam != null && !statusParam.isBlank()) {
+            try {
+                status = Integer.parseInt(statusParam);
+            } catch (NumberFormatException e) {
+                // Keep default value
+            }
+        }
+
         Course c = new Course();
         c.setTitle(title);
         c.setInformation(info);
@@ -187,6 +247,9 @@ public class CourseServlet extends HttpServlet {
         c.setCreatedBy(createdBy);
         c.setImage(imageUrl);
         c.setCategory(category);
+        c.setLevel(level);
+        c.setType(type);
+        c.setStatus(status);
 
         courseDAO.insert(c);
         resp.sendRedirect("courses");
@@ -198,16 +261,13 @@ public class CourseServlet extends HttpServlet {
         String title    = req.getParameter("title");
         String info     = req.getParameter("information");
         String catParam = req.getParameter("category");
+        String levelParam  = req.getParameter("level");
+        String typeParam   = req.getParameter("type");
+        String statusParam = req.getParameter("status");
         Part   imagePart= req.getPart("imageFile");
-        int    createdBy;
-
-        try {
-            createdBy = Integer.parseInt(req.getParameter("createdBy"));
-        } catch (NumberFormatException e) {
-            req.setAttribute("errorMessage", "Invalid creator ID.");
-            showEditCourseForm(req, resp);
-            return;
-        }
+//        int    createdBy;
+        HttpSession session = req.getSession(false);
+        int createdBy= (int) session.getAttribute("accountId");
 
         double price;
         try {
@@ -232,6 +292,40 @@ public class CourseServlet extends HttpServlet {
             return;
         }
 
+        // Parse Level enum
+        Level level = null;
+        if (levelParam != null && !levelParam.isBlank()) {
+            try {
+                level = Level.valueOf(levelParam);
+            } catch (IllegalArgumentException e) {
+                req.setAttribute("errorMessage", "Invalid level.");
+                showEditCourseForm(req, resp);
+                return;
+            }
+        }
+
+        // Parse Type enum
+        Type type = null;
+        if (typeParam != null && !typeParam.isBlank()) {
+            try {
+                type = Type.valueOf(typeParam);
+            } catch (IllegalArgumentException e) {
+                req.setAttribute("errorMessage", "Invalid type.");
+                showEditCourseForm(req, resp);
+                return;
+            }
+        }
+
+        // Parse status parameter
+        int status = 1; // Default to public
+        if (statusParam != null && !statusParam.isBlank()) {
+            try {
+                status = Integer.parseInt(statusParam);
+            } catch (NumberFormatException e) {
+                // Keep default value
+            }
+        }
+
         Course c = new Course();
         c.setId(id);
         c.setTitle(title);
@@ -240,6 +334,9 @@ public class CourseServlet extends HttpServlet {
         c.setCreatedBy(createdBy);
         c.setImage(imageUrl);
         c.setCategory(category);
+        c.setLevel(level);
+        c.setType(type);
+        c.setStatus(status);
 
         courseDAO.update(c);
         resp.sendRedirect("courses");
@@ -253,15 +350,30 @@ public class CourseServlet extends HttpServlet {
         resp.sendRedirect("courses");
     }
 
-    private String uploadToCloudinary(Part filePart) throws IOException {
+    private String uploadToCloudinary(Part filePart) throws IOException, ServletException {
+        //1. Tạo kết nối web của mình đến cloudinary
         Cloudinary cloudinary = Singleton.getCloudinary();
-        File temp = File.createTempFile("upload", ".tmp");
-        try (InputStream in = filePart.getInputStream()) {
-            Files.copy(in, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            var result = cloudinary.uploader().upload(temp, ObjectUtils.emptyMap());
-            return (String) result.get("secure_url");
-        } finally {
-            temp.delete();
+        if (cloudinary == null) {
+            throw new ServletException("Cloudinary not configured");
         }
+
+        //2. Khởi tạo đối tượng file- là file người dùng upload lên
+        // ( đối tượng file được lưu trong bộ nhớ hệ thống)
+        File tempFile;
+        try (InputStream input = filePart.getInputStream()) {
+            String fileName  = filePart.getSubmittedFileName();
+            String extension = fileName.substring(fileName.lastIndexOf('.'));
+            tempFile = File.createTempFile("upload", extension);
+            Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        //3. Gửi ảnh lên cloudinary
+        Map<?,?> uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.emptyMap());
+
+        //4. xóa đối tượng file tạm trong bộ nhớ hệ thống
+        tempFile.delete();
+
+        //5. trả về URL ảnh đã upload
+        return (String) uploadResult.get("secure_url");
     }
 }

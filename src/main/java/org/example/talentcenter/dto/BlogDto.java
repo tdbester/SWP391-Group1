@@ -11,6 +11,7 @@ public class BlogDto {
     private Date createdAt;
     private String fullname;
     private int category;
+    private int status; // 0 = not public (hidden), 1 = public (visible)
 
     public BlogDto() {
     }
@@ -24,6 +25,19 @@ public class BlogDto {
         this.createdAt = createdAt;
         this.fullname = fullname;
         this.category = category;
+        this.status = 1; // Default to public
+    }
+
+    public BlogDto(int id, String title, String description, String content, String image, Date createdAt, String fullname, int category, int status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.content = content;
+        this.image = image;
+        this.createdAt = createdAt;
+        this.fullname = fullname;
+        this.category = category;
+        this.status = status;
     }
 
     public int getId() {
@@ -75,6 +89,14 @@ public class BlogDto {
         this.category = category;
     }
 
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "BlogDto{" +
@@ -85,6 +107,7 @@ public class BlogDto {
                 ", image='" + image + '\'' +
                 ", createdAt=" + createdAt +
                 ", fullname='" + fullname + '\'' +
+                ", status=" + status +
                 '}';
     }
 }

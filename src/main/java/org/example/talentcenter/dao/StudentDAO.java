@@ -115,4 +115,70 @@ public class StudentDAO {
         return students;
     }
 
+    /**
+     * Lấy danh sách học sinh có thể được thêm vào lớp học cụ thể.
+     * Điều kiện: Student.ConsultationId -> Consultation.courseId = ClassRooms.courseId
+     * và học sinh chưa có trong lớp đó.
+     *
+     * @param classroomId ID của lớp học
+     * @return Danh sách học sinh có thể thêm vào lớp
+     * @author Training Manager Feature
+     */
+    public ArrayList<Student> getEligibleStudentsForClassroom(int classroomId) {
+        ArrayList<Student> students = new ArrayList<>();
+        String query = """
+                SELECT DISTINCT
+                    s.Id,
+                    a.FullName as Name,
+                    s.ParentPhone,
+                    s.MotherPhone,
+                    s.AccountId,
+                    s.EnrollmentDate,
+                    s.ConsultationId,
+                    a.PhoneNumber,
+                    c.Note as ConsultationNote,
+                    c.FullName as ConsultationName,
+                    c.Email as ConsultationEmail
+                FROM Student s
+                JOIN Account a ON s.AccountId = a.Id
+                JOIN Consultations c ON s.ConsultationId = c.Id
+                JOIN ClassRooms cr ON c.CourseId = cr.CourseId
+                WHERE cr.Id = ?
+                AND s.Id NOT IN (
+                    SELECT sc.StudentId
+                    FROM Student_Class sc
+                    WHERE sc.ClassRoomId = ?
+                )
+                ORDER BY a.FullName
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, classroomId);
+            ps.setInt(2, classroomId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Student student = new Student();
+                student.setId(rs.getInt("Id"));
+                student.setName(rs.getString("Name"));
+                student.setParentPhone(rs.getString("ParentPhone"));
+                student.setMotherPhone(rs.getString("MotherPhone"));
+                student.setAccountId(rs.getInt("AccountId"));
+                student.setEnrollmentDate(rs.getDate("EnrollmentDate") != null ?
+                    rs.getDate("EnrollmentDate").toLocalDate() : null);
+                student.setConsultationId(rs.getInt("ConsultationId"));
+                student.setPhoneNumber(rs.getString("PhoneNumber"));
+                student.setConsultationNote(rs.getString("ConsultationNote"));
+
+                students.add(student);
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi lấy danh sách học sinh có thể thêm vào lớp: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return students;
+    }
+
 }

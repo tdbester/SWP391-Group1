@@ -47,12 +47,16 @@ public class BlogServlet extends HttpServlet {
             throws IOException, ServletException {
         // check user login. If user don't login -> redirect to login page
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("accountId") == null) {
-            response.sendRedirect("login");
-            return;
-        }
         String action = request.getParameter("action");
         if (action == null) action = "list";
+
+        if (session == null || session.getAttribute("accountId") == null) {
+            if(!action.equals("view")){
+                response.sendRedirect("login");
+                return;
+            }
+        }
+
 
         switch (action) {
             case "new":
@@ -176,6 +180,7 @@ public class BlogServlet extends HttpServlet {
         String title       = request.getParameter("title");
         String description = request.getParameter("description");
         String content     = request.getParameter("content");
+        String statusParam = request.getParameter("status");
         int categoryId     = Integer.parseInt(request.getParameter("category"));
         Part imagePart     = request.getPart("imageFile");
         String imageUrl;
@@ -187,6 +192,16 @@ public class BlogServlet extends HttpServlet {
             imageUrl = "https://placehold.co/600x400?text=img";
         }
 
+        // Parse status parameter
+        int status = 1; // Default to public
+        if (statusParam != null && !statusParam.isBlank()) {
+            try {
+                status = Integer.parseInt(statusParam);
+            } catch (NumberFormatException e) {
+                // Keep default value
+            }
+        }
+
         //4. khởi tạo đối tượng blog theo các giá trị đã get ra ở treen
         Blog newBlog = new Blog();
         newBlog.setTitle(title);
@@ -196,6 +211,7 @@ public class BlogServlet extends HttpServlet {
         newBlog.setAuthorId(userId);
         newBlog.setCategory(categoryId);
         newBlog.setCreatedAt(new Date());
+        newBlog.setStatus(status);
 
         //5. Dùng DAO để insert blog vào database
         blogDAO.insert(newBlog);
@@ -213,6 +229,7 @@ public class BlogServlet extends HttpServlet {
         String title    = request.getParameter("title");
         String description = request.getParameter("description");
         String content  = request.getParameter("content");
+        String statusParam = request.getParameter("status");
         int categoryId  = Integer.parseInt(request.getParameter("category"));
         Part imagePart  = request.getPart("imageFile");
         String imageUrl = request.getParameter("currentImageUrl");
@@ -220,6 +237,16 @@ public class BlogServlet extends HttpServlet {
         //3. upload ảnh lên cloudinary
         if (imagePart != null && imagePart.getSize() > 0) {
             imageUrl = uploadToCloudinary(imagePart);
+        }
+
+        // Parse status parameter
+        int status = 1; // Default to public
+        if (statusParam != null && !statusParam.isBlank()) {
+            try {
+                status = Integer.parseInt(statusParam);
+            } catch (NumberFormatException e) {
+                // Keep default value
+            }
         }
 
         //4. Khởi tạo đối tượng blog từ casc giá trị lấy được ở trên
@@ -232,6 +259,7 @@ public class BlogServlet extends HttpServlet {
         blog.setAuthorId(userId);
         blog.setCategory(categoryId);
         blog.setCreatedAt(new Date());
+        blog.setStatus(status);
 
         //5. Gọi đến DAO để update blog
         blogDAO.update(blog);

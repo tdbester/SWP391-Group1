@@ -62,7 +62,7 @@ public class SaleDashboardServlet extends HttpServlet {
             request.setAttribute("allNotifications", allNotifications);
             request.getRequestDispatcher("View/sale-notification-list.jsp").forward(request, response); } else if ("course".equals(action)) {
             int courseId = request.getParameter("courseId") == null ? 0 : Integer.parseInt(request.getParameter("courseId"));
-            Course course = courseDAO.getCourseById(courseId);
+            Course course = courseDAO.getById(courseId);
             if (course == null) {
                 response.sendRedirect("SaleDashboard");
                 return;

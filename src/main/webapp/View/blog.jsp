@@ -6,6 +6,8 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Blog List</title>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <style>
         .thumb-img {
@@ -43,7 +45,11 @@
 <body>
 <jsp:include page="header.jsp"/>
 
-<div class="container mt-5">
+<div class="">
+    <jsp:include page="sale-sidebar.jsp"/>
+        <div class="main-content">
+
+
     <h2 class="mb-4">Danh sách bài viết</h2>
 
     <form action="blogs" method="get" class="row g-2 mb-3">
@@ -77,6 +83,7 @@
             <th>Mô tả</th>
             <th>Ảnh</th>
             <th>Loại</th>
+            <th>Trạng thái</th>
             <th style="width: 150px;">Hành động</th>
         </tr>
         </thead>
@@ -102,6 +109,17 @@
                     </c:forEach>
                 </td>
                 <td>
+                    <c:choose>
+                        <c:when test="${blog.status == 1}">
+                            <span class="badge bg-success">Công khai</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="badge bg-secondary">Ẩn</span>
+                        </c:otherwise>
+                    </c:choose>
+                </td>
+                <td>
+                    <a href="blogs?action=view&id=${blog.id}" class="btn btn-sm btn-primary">Chi tiết</a>
                     <a href="blogs?action=edit&id=${blog.id}" class="btn btn-sm btn-warning">Sửa</a>
                     <a href="blogs?action=delete&id=${blog.id}" class="btn btn-sm btn-danger"
                        onclick="return confirm('Bạn có chắc muốn xóa bài này không?');">
@@ -122,6 +140,7 @@
             </c:forEach>
         </ul>
     </nav>
+    </div>
 
 </div>
 
