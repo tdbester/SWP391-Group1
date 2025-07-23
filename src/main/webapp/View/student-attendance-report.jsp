@@ -1,33 +1,32 @@
 <%--
-  Created by IntelliJ IDEA.
-  User: admin
-  Date: 6/21/2025
-  Time: 10:59 PM
-<%--  To change this template use File | Settings | File Templates.--%>
-<%--&ndash;%&gt;--%>
+Created by IntelliJ IDEA.
+User: admin
+Date: 6/21/2025
+Time: 10:59 PM
+To change this template use File | Settings | File Templates.
+--%>
 
-<%--/*--%>
-<%--*  Copyright (C) 2025 <Group1>--%>
-<%--    *  All rights reserved.--%>
-<%--    *--%>
-<%--    *  This file is part of the <TalentCenterManagement> project.--%>
-<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
-<%--    *  Proprietary and confidential.--%>
-<%--    *--%>
-<%--    *  Created on:        2025-06-21--%>
-<%--    *  Author:            Cù Thị Huyền Trang--%>
-<%--    *--%>
-<%--    *  ========================== Change History ==========================--%>
-<%--    *  Date        | Author               | Description--%>
-<%--    *  ------------|----------------------|----------------------------------%>
-<%--    *  2025-06-21  | Cù Thị Huyền Trang   | Initial creation--%>
-<%--    */--%>
+<%--/*
+* Copyright (C) 2025 <Group1>
+ * All rights reserved.
+ *
+ * This file is part of the <TalentCenterManagement> project.
+ * Unauthorized copying of this file, via any medium is strictly prohibited.
+ * Proprietary and confidential.
+ *
+ * Created on: 2025-06-21
+ * Author: Cù Thị Huyền Trang
+ *
+ * ========================== Change History ==========================
+ * Date | Author | Description
+ * ------------|----------------------|----------------------------------
+ * 2025-06-21 | Cù Thị Huyền Trang | Initial creation
+ */--%>
 
 <%@ page import="java.util.*" %>
 <%@ page import="java.time.*" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="org.example.talentcenter.model.StudentAttendanceReport" %>
-<%@ page import="java.time.temporal.WeekFields" %>
 <%
     @SuppressWarnings("unchecked")
     List<StudentAttendanceReport> attendanceReports = (List<StudentAttendanceReport>) request.getAttribute("attendanceReports");
@@ -36,20 +35,15 @@
     }
 
     Integer selectedYear = (Integer) request.getAttribute("selectedYear");
-    Integer selectedWeekNumber = (Integer) request.getAttribute("selectedWeekNumber");
-    Integer totalWeeksInYear = (Integer) request.getAttribute("totalWeeksInYear");
-
     if (selectedYear == null) selectedYear = LocalDate.now().getYear();
-    if (selectedWeekNumber == null) selectedWeekNumber = LocalDate.now().get(WeekFields.of(Locale.getDefault()).weekOfYear());
-    if (totalWeeksInYear == null) totalWeeksInYear = 52;
 
-    // Lấy thông tin môn học từ record đầu tiên
+// Lấy thông tin môn học từ record đầu tiên
     String courseTitle = "Báo cáo điểm danh";
 
-    // Sắp xếp records theo ngày
+// Sắp xếp records theo ngày
     attendanceReports.sort((r1, r2) -> r1.getDate().compareTo(r2.getDate()));
 
-    // Tính toán thống kê
+// Tính toán thống kê
     int totalSessions = attendanceReports.size();
     int presentCount = 0;
     int absentCount = 0;
@@ -71,7 +65,7 @@
         }
     }
 
-    // Tính phần trăm
+// Tính phần trăm
     double presentPercent = totalSessions > 0 ? (double) presentCount / totalSessions * 100 : 0;
     double absentPercent = totalSessions > 0 ? (double) absentCount / totalSessions * 100 : 0;
     double latePercent = totalSessions > 0 ? (double) lateCount / totalSessions * 100 : 0;
@@ -87,283 +81,19 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
-    <style>
-        .main-content {
-            margin-left: 320px;
-            background-color: #f5f5f5;
-            min-height: 100vh;
-        }
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/student-attendance-report.css">
 
-        .container {
-            max-width: 1200px;
-            margin: auto;
-        }
-
-
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        .header-title {
-            color: #2c3e50;
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .course-info {
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .filter-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .filter-btn {
-            padding: 8px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background: white;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .view-options {
-            display: flex;
-            gap: 10px;
-        }
-
-        .view-option {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background: white;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .view-option.active {
-            background: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
-
-        .attendance-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .attendance-card {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .attendance-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .card-date {
-            font-size: 16px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-
-        .card-session {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-bottom: 8px;
-        }
-
-        .card-time {
-            font-size: 12px;
-            color: #95a5a6;
-            margin-bottom: 8px;
-        }
-
-        .card-room {
-            font-size: 12px;
-            color: #95a5a6;
-            margin-bottom: 15px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .status-present {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status-absent {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .status-late {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .status-unknown {
-            background-color: #f8f9fa;
-            color: #6c757d;
-            border: 1px solid #dee2e6;
-        }
-
-        .statistics-section {
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 2px solid #e9ecef;
-        }
-
-        .statistics-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 20px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-card {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 20px;
-            color: white;
-        }
-
-        .stat-present .stat-icon {
-            background-color: #28a745;
-        }
-
-        .stat-absent .stat-icon {
-            background-color: #dc3545;
-        }
-
-        .stat-late .stat-icon {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-present .stat-number {
-            color: #28a745;
-        }
-
-        .stat-absent .stat-number {
-            color: #dc3545;
-        }
-
-        .stat-late .stat-number {
-            color: #ffc107;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-bottom: 10px;
-        }
-
-        .stat-percent {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .stat-present .stat-percent {
-            color: #28a745;
-        }
-
-        .stat-absent .stat-percent {
-            color: #dc3545;
-        }
-
-        .stat-late .stat-percent {
-            color: #ffc107;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-                padding: 10px;
-            }
-
-            .header-section {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .filter-section {
-                flex-direction: column;
-                align-items: flex-start;
-                width: 100%;
-            }
-
-            .attendance-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
 <body>
 <jsp:include page="header.jsp" />
-<jsp:include page="student-sidebar.jsp" />
 
-<div class="main-content">
-    <div class="container">
+<div class="container">
+    <jsp:include page="student-sidebar.jsp" />
+    <div class="main-content">
+        <a href="StudentDashboard" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại Dashboard
+        </a>
         <div class="header-section">
             <div>
                 <h1 class="header-title"><i class="fas fa-chart-bar"></i> Báo cáo điểm danh</h1>
@@ -381,63 +111,42 @@
             </div>
         </div>
 
-        <form method="GET" action="${pageContext.request.contextPath}/StudentAttendanceReport" style="display: flex; gap: 10px;">
-            <label for="class">Lọc theo lớp:</label>
-            <select name="class" id="class" onchange="this.form.submit()">
-                <option value="">Tất cả lớp</option>
-                <%
-                    List<String> classNames = (List<String>) request.getAttribute("classNames");
-                    String selectedClass = (String) request.getAttribute("selectedClass");
-                    for (String className : classNames) {
-                %>
-                <option value="<%=className%>" <%= className.equals(selectedClass) ? "selected" : "" %>><%=className%></option>
-                <% } %>
-            </select>
+        <form method="GET" action="${pageContext.request.contextPath}/StudentAttendanceReport"
+              style="display: flex; gap: 15px; align-items: center; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="class" style="font-weight: 600;">Lọc theo lớp:</label>
+                <select name="class" id="class" onchange="this.form.submit()"
+                        style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">Tất cả lớp</option>
+                    <%
+                        List<String> classNames = (List<String>) request.getAttribute("classNames");
+                        String selectedClass = (String) request.getAttribute("selectedClass");
+                        for (String className : classNames) {
+                    %>
+                    <option value="<%=className%>" <%= className.equals(selectedClass) ? "selected" : "" %>><%=className%></option>
+                    <% } %>
+                </select>
+            </div>
 
-            <label for="year">Năm:</label>
-            <select name="year">
-                <%
-                    int currentYear = LocalDate.now().getYear();
-                    for (int y = currentYear - 2; y <= currentYear + 1; y++) {
-                %>
-                <option value="<%=y%>" <%= y == selectedYear ? "selected" : "" %>><%=y%></option>
-                <% } %>
-            </select>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label for="year" style="font-weight: 600;">Năm:</label>
+                <select name="year" id="year" onchange="this.form.submit()"
+                        style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px;">
+                    <%
+                        int currentYear = LocalDate.now().getYear();
+                        for (int y = currentYear - 2; y <= currentYear + 1; y++) {
+                    %>
+                    <option value="<%=y%>" <%= y == selectedYear ? "selected" : "" %>><%=y%></option>
+                    <% } %>
+                </select>
+            </div>
 
-            <label for="week">Tuần:</label>
-            <select name="week">
-                <%
-                    WeekFields weekFields = WeekFields.of(Locale.getDefault());
-                    LocalDate firstDayOfYear = LocalDate.of(selectedYear, 1, 1);
-
-                    for (int i = 1; i <= totalWeeksInYear; i++) {
-                        try {
-                            LocalDate weekStart = firstDayOfYear
-                                    .with(weekFields.weekOfYear(), i)
-                                    .with(DayOfWeek.MONDAY);
-                            LocalDate weekEnd = weekStart.plusDays(6);
-
-                            if (weekStart.getYear() == selectedYear || weekEnd.getYear() == selectedYear) {
-                                String weekLabel = "Tuần " + i + ": " + weekStart.format(DateTimeFormatter.ofPattern("dd/MM")) +
-                                        " đến " + weekEnd.format(DateTimeFormatter.ofPattern("dd/MM"));
-                %>
-                <option value="<%=i%>" <%= i == selectedWeekNumber ? "selected" : "" %>><%=weekLabel%></option>
-                <%
-                            }
-                        } catch (Exception e) {
-                        }
-                    }
-                %>
-
-            </select>
-
-            <button type="submit">Lọc</button>
             <a href="${pageContext.request.contextPath}/StudentAttendanceReport"
-               style="padding: 6px 12px; background: #ccc; border: none; text-decoration: none; color: #000; border-radius: 4px;">
-                Bỏ lọc
+               style="padding: 8px 16px; background: #6c757d; border: none; text-decoration: none; color: white; border-radius: 4px; font-weight: 500;">
+                <i class="fas fa-undo"></i> Bỏ lọc
             </a>
         </form>
-<br>
+
         <div class="attendance-grid">
             <%
                 if (attendanceReports.isEmpty()) {
@@ -530,13 +239,11 @@
 <jsp:include page="footer.jsp" />
 
 <script>
-    // Toggle view options
     document.querySelectorAll('.view-option').forEach(option => {
         option.addEventListener('click', function() {
             document.querySelectorAll('.view-option').forEach(opt => opt.classroomList.remove('active'));
             this.classroomList.add('active');
 
-            // Toggle between grid and list view
             const grid = document.querySelector('.attendance-grid');
             if (this.querySelector('i').classroomList.contains('fa-list')) {
                 grid.style.gridTemplateColumns = '1fr';

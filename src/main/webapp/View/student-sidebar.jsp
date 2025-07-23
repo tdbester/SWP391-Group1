@@ -24,11 +24,6 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8" %>
 <div class="sidebar">
-
-    <div class="logo">
-        <i class="fas fa-users-cog"></i>
-        <h2>Trung Tâm Năng Khiếu</h2>
-    </div>
     <nav>
         <div class="nav-section">
             <a href="${pageContext.request.contextPath}/View/student-dashboard.jsp"
@@ -44,7 +39,7 @@
                class="nav-item ${pageContext.request.requestURI.contains('student-schedule.jsp') ? 'active' : ''}"
                role="link"
                aria-current="${pageContext.request.requestURI.contains('student-schedule.jsp') ? 'page' : 'false'}">
-                <i class="fa-solid fa-building" aria-hidden="true"></i>
+                <i class="fas fa-calendar-alt" aria-hidden="true"></i>
                 <span>Thời khoá biểu</span>
             </a>
         </div>
@@ -53,7 +48,7 @@
                class="nav-item ${pageContext.request.requestURI.contains('student-attendance-report.jsp') ? 'active' : ''}"
                role="link"
                aria-current="${pageContext.request.requestURI.contains('student-attendance-report.jsp') ? 'page' : 'false'}">
-                <i class="fas fa-search" aria-hidden="true"></i>
+                <i class="fas fa-clipboard-check" aria-hidden="true"></i>
                 <span>Báo cáo điểm danh</span>
             </a>
         </div>
@@ -62,7 +57,7 @@
                class="nav-item ${pageContext.request.requestURI.contains('student-request.jsp') ? 'active' : ''}"
                role="link"
                aria-current="${pageContext.request.requestURI.contains('student-request.jsp') ? 'page' : 'false'}">
-                <i class="fas fa-briefcase" aria-hidden="true"></i>
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
                 <span>Gửi đơn</span>
             </a>
         </div>
@@ -71,8 +66,14 @@
                class="nav-item ${pageContext.request.requestURI.contains('student-request-list.jsp') ? 'active' : ''}"
                role="link"
                aria-current="${pageContext.request.requestURI.contains('Student-application-list.jsp') ? 'page' : 'false'}">
-                <i class="fas fa-user" aria-hidden="true"></i>
+                <i class="fas fa-file-alt" aria-hidden="true"></i>
                 <span>Xem đơn</span>
+            </a>
+        </div>
+        <div class="nav-section">
+            <a href="${pageContext.request.contextPath}/StudentDashboard?action=notifications" class="nav-item ${pageContext.request.requestURI.contains('notifications') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('notifications') ? 'page' : 'false'}">
+                <i class="fas fa-bell" aria-hidden="true"></i>
+                <span>Thông báo</span>
             </a>
         </div>
     </nav>

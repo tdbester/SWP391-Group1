@@ -34,7 +34,6 @@ import java.io.IOException;
 public class SaleDashboardServlet extends HttpServlet {
     private static final NotificationDAO notificationDAO = new NotificationDAO();
     private static final CourseDAO courseDAO = new CourseDAO();
-    private static final ClassroomDAO classroomDAO = new ClassroomDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -51,18 +50,39 @@ public class SaleDashboardServlet extends HttpServlet {
         if ("notifications".equals(action)) {
             String keyword = request.getParameter("keyword");
             ArrayList<Notification> allNotifications;
-
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                allNotifications = notificationDAO.searchNotificationsForSale(keyword.trim());
-                request.setAttribute("keyword", keyword);
-            } else {
-                allNotifications = notificationDAO.getLatestNotificationsForSale(50);
+            int page = 1;
+            int recordsPerPage = 10;
+            try {
+                String pageParam = request.getParameter("page");
+                if (pageParam != null) page = Integer.parseInt(pageParam);
+            } catch (NumberFormatException ignored) {
             }
 
+            int offset = (page - 1) * recordsPerPage;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                allNotifications = notificationDAO.searchNotificationsForSaleWithPaging(keyword.trim(), offset, recordsPerPage);
+                request.setAttribute("keyword", keyword);
+            } else {
+                allNotifications = notificationDAO.getAllNotificationsForSaleWithPaging(offset, recordsPerPage);
+            }
+            int totalRecords = notificationDAO.getTotalNotificationsCountForSale();
+            int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+
             request.setAttribute("allNotifications", allNotifications);
-            request.getRequestDispatcher("View/sale-notification-list.jsp").forward(request, response); } else if ("course".equals(action)) {
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
+            request.getRequestDispatcher("View/sale-notification-list.jsp").forward(request, response);
+        } else if ("courseList".equals(action)) {
+            ArrayList<Course> allCourses = courseDAO.getAllCourses();
+            if (allCourses == null) {
+                response.sendRedirect("SaleDashboard");
+                return;
+            }
+            request.setAttribute("allCourses", allCourses);
+            request.getRequestDispatcher("View/sale-course-list.jsp").forward(request, response);
+        } else if ("course".equals(action)) {
             int courseId = request.getParameter("courseId") == null ? 0 : Integer.parseInt(request.getParameter("courseId"));
-            Course course = courseDAO.getById(courseId);
+            Course course = courseDAO.getCourseById(courseId);
             if (course == null) {
                 response.sendRedirect("SaleDashboard");
                 return;
@@ -82,17 +102,27 @@ public class SaleDashboardServlet extends HttpServlet {
             ArrayList<Notification> latestNotifications = notificationDAO.getLatestNotificationsForSale(3);
             int unreadCount = notificationDAO.getUnreadCountForSale();
             ArrayList<Course> latestCourse = courseDAO.getLatestCourses(2);
+            ArrayList<Course> allCourse = courseDAO.getAllCourses();
             request.setAttribute("latestCoursesWithClass", latestCourse);
             request.setAttribute("latestNotifications", latestNotifications);
             request.setAttribute("unreadCount", unreadCount);
+            request.setAttribute("allCourse", allCourse);
+            request.setAttribute("currentDate", new java.util.Date());
             request.getRequestDispatcher("View/sale-dashboard.jsp").forward(request, response);
         }
     }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         String action = request.getParameter("action");
+        HttpSession session = request.getSession(false);
+        Account account = (Account) session.getAttribute("account");
+
+        if (account == null) {
+            response.sendRedirect("login");
+            return;
+        }
 
         if ("deleteNotification".equals(action)) {
             String notificationId = request.getParameter("notificationId");
@@ -102,10 +132,27 @@ public class SaleDashboardServlet extends HttpServlet {
             response.sendRedirect("SaleDashboard?action=notifications");
 
 
-        } else if ("markReadId".equals(action)) {
-            String notificationId = request.getParameter("markReadId");
-            if (notificationId != null) {
-                notificationDAO.markAsRead(Integer.parseInt(notificationId));
+        } else if ("markAsRead".equals(action)) {
+            String notificationIdParam = request.getParameter("notificationId");
+            try {
+                int notificationId = Integer.parseInt(notificationIdParam);
+                notificationDAO.markAsRead(notificationId);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+            response.sendRedirect("SaleDashboard?action=notifications");
+
+        } else if ("markAllAsRead".equals(action)) {
+            try {
+                boolean success = notificationDAO.markAllAsReadForSale();
+                if (success) {
+                    session.setAttribute("message", "Đã đánh dấu tất cả thông báo đã đọc");
+                } else {
+                    session.setAttribute("error", "Không thể đánh dấu thông báo");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("error", "Có lỗi xảy ra khi đánh dấu thông báo");
             }
             response.sendRedirect("SaleDashboard?action=notifications");
         }

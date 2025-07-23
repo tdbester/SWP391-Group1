@@ -14,14 +14,15 @@
  *  ------------|----------------------|--------------------------------
  *  2025-06-09  | Cù Thị Huyền Trang   | Initial creation
  */
-
 package org.example.talentcenter.controller;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
+import java.time.LocalDateTime;
 import java.util.Properties;
+import java.util.UUID;
 
 public class SendAccountService {
     private final String from = "talentcenter0001@gmail.com";

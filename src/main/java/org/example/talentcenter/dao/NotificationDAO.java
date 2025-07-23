@@ -155,6 +155,60 @@ public class NotificationDAO {
     }
 
     /**
+     * Lấy danh sách thông báo với phân trang cho một vai trò cụ thể và tài khoản.
+     * Trả về các thông báo được gửi đến:
+     * - Tất cả người dùng ("ALL"),
+     * - Người dùng thuộc vai trò {@code role} và không chỉ định người nhận cụ thể,
+     * - Người dùng thuộc vai trò {@code role} và có {@code accountId} trùng khớp.
+     *
+     * Kết quả sắp xếp theo thời gian tạo mới nhất, hỗ trợ lấy từng trang theo offset và limit.
+     *
+     * @param role vai trò người nhận (ví dụ: "Student", "Teacher", ...)
+     * @param accountId ID tài khoản người nhận cụ thể (có thể null)
+     * @param offset số dòng bỏ qua (dùng cho phân trang)
+     * @param limit số lượng thông báo muốn lấy ở mỗi trang
+     * @return danh sách {@link Notification} theo phân trang và điều kiện lọc
+     * @author Huyen Trang
+     */
+      public ArrayList<Notification> getAllNotificationsForRoleWithPaging(
+            String role, Integer accountId, int offset, int limit) {
+        ArrayList<Notification> notifications = new ArrayList<>();
+        String sql = """
+        SELECT * FROM Notification 
+        WHERE (RecipientRole = ? AND RecipientAccountId IS NULL) 
+           OR (RecipientRole = ? AND RecipientAccountId = ?)
+           OR (RecipientRole = 'ALL')
+        ORDER BY CreatedAt DESC
+        OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+    """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, role);
+            stmt.setString(2, role);
+
+            if (accountId != null) {
+                stmt.setInt(3, accountId);
+            } else {
+                stmt.setNull(3, java.sql.Types.INTEGER);
+            }
+
+            stmt.setInt(4, offset);
+            stmt.setInt(5, limit);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Notification notification = mapResultSetToNotification(rs);
+                notifications.add(notification);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return notifications;
+    }
+
+    /**
      * Đánh dấu một thông báo là đã đọc dựa trên ID.
      *
      * @param notificationId ID của thông báo cần đánh dấu
@@ -213,24 +267,28 @@ public class NotificationDAO {
     }
 
     /**
-     * Tìm kiếm thông báo theo từ khóa trong tiêu đề, nội dung hoặc tên người gửi,
-     * áp dụng cho vai trò và (tùy chọn) tài khoản cụ thể.
+     * Tìm kiếm thông báo theo từ khoá với phân trang cho từng vai trò và tài khoản cụ thể.
      *
-     * @param keyword   Từ khóa tìm kiếm
-     * @param role      Vai trò người nhận
-     * @param accountId ID tài khoản người nhận
-     * @return Danh sách thông báo phù hợp với từ khóa
+     * @param keyword   Từ khoá tìm kiếm (áp dụng cho Title, Content, SenderName)
+     * @param role      Vai trò người nhận (ví dụ: "Student", "Teacher", ...)
+     * @param accountId ID tài khoản người nhận (có thể null)
+     * @param offset    Số dòng bỏ qua (dùng cho phân trang)
+     * @param limit     Số lượng thông báo cần lấy cho mỗi trang
+     * @return Danh sách {@link Notification} tìm thấy theo điều kiện, có phân trang
      */
-    public ArrayList<Notification> searchNotificationsByKeyword(String keyword, String role, Integer accountId) {
+    public ArrayList<Notification> searchNotificationsByKeywordWithPaging(
+            String keyword, String role, Integer accountId, int offset, int limit) {
+
         ArrayList<Notification> notifications = new ArrayList<>();
         String sql = """
-                SELECT * FROM Notification 
-                WHERE ((RecipientRole = ? AND RecipientAccountId IS NULL) 
-                   OR (RecipientRole = ? AND RecipientAccountId = ?)
-                   OR (RecipientRole = 'ALL'))
-                AND (Title LIKE ? OR Content LIKE ? OR SenderName LIKE ?)
-                ORDER BY CreatedAt DESC
-            """;
+            SELECT * FROM Notification 
+            WHERE ((RecipientRole = ? AND RecipientAccountId IS NULL) 
+               OR (RecipientRole = ? AND RecipientAccountId = ?)
+               OR (RecipientRole = 'ALL'))
+            AND (Title LIKE ? OR Content LIKE ? OR SenderName LIKE ?)
+            ORDER BY CreatedAt DESC
+            OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+        """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -248,6 +306,8 @@ public class NotificationDAO {
             stmt.setString(4, searchPattern);
             stmt.setString(5, searchPattern);
             stmt.setString(6, searchPattern);
+            stmt.setInt(7, offset);
+            stmt.setInt(8, limit);
 
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -276,6 +336,73 @@ public class NotificationDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * Đếm tổng số thông báo cho một vai trò cụ thể và tài khoản (nếu có).
+     *
+     * @param role vai trò người nhận (ví dụ: "Student", "Sale", "TrainingManager")
+     * @param accountId ID người nhận cụ thể, có thể null nếu lấy cho tất cả của role
+     * @return tổng số bản ghi thỏa mãn trong bảng Notification
+     * @author Huyen Trang
+     */
+    public int getTotalNotificationsCountForRole(String role, Integer accountId) {
+        String sql = """
+        SELECT COUNT(*) FROM Notification
+        WHERE (RecipientRole = ? AND RecipientAccountId IS NULL)
+           OR (RecipientRole = ? AND RecipientAccountId = ?)
+           OR (RecipientRole = 'ALL')
+    """;
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, role);
+            ps.setString(2, role);
+            if (accountId != null) {
+                ps.setInt(3, accountId);
+            } else {
+                ps.setNull(3, java.sql.Types.INTEGER);
+            }
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+
+    /**
+     * Lấy danh sách thông báo với phân trang dành cho role "Sale".
+     *
+     * @param offset Số dòng bỏ qua (dùng cho phân trang)
+     * @param limit  Số lượng thông báo cần lấy
+     * @return Danh sách thông báo (có phân trang)
+     */
+    public ArrayList<Notification> getAllNotificationsForSaleWithPaging(int offset, int limit) {
+        return getAllNotificationsForRoleWithPaging("Sale", null, offset, limit);
+    }
+
+    /**
+     * Lấy danh sách thông báo với phân trang dành cho một học sinh cụ thể.
+     *
+     * @param accountId ID học sinh
+     * @param offset    Số dòng bỏ qua (dùng cho phân trang)
+     * @param limit     Số lượng thông báo cần lấy
+     * @return Danh sách thông báo mới nhất (có phân trang)
+     */
+    public ArrayList<Notification> getAllNotificationsForStudentWithPaging(int accountId, int offset, int limit) {
+        return getAllNotificationsForRoleWithPaging("Student", accountId, offset, limit);
+    }
+
+    /**
+     * Lấy danh sách thông báo với phân trang dành cho quản lý đào tạo.
+     *
+     * @param offset Số dòng bỏ qua (dùng cho phân trang)
+     * @param limit  Số lượng thông báo cần lấy
+     * @return Danh sách thông báo (có phân trang)
+     */
+    public ArrayList<Notification> getAllNotificationsForTrainingManagerWithPaging(int offset, int limit) {
+        return getAllNotificationsForRoleWithPaging("TrainingManager", null, offset, limit);
     }
 
     /**
@@ -356,28 +483,42 @@ public class NotificationDAO {
     }
 
     /**
-     * Tìm kiếm thông báo dành cho nhân viên Sale theo từ khóa.
-     */
-    public ArrayList<Notification> searchNotificationsForSale(String keyword) {
-        return searchNotificationsByKeyword(keyword, "Sale", null);
-    }
-
-    /**
-     * Tìm kiếm thông báo dành cho học viên theo từ khóa.
+     * Tìm kiếm thông báo dành cho nhân viên Sale theo từ khóa, hỗ trợ phân trang.
      *
      * @param keyword Từ khóa tìm kiếm
-     * @param accountId ID tài khoản học viên
+     * @param offset  Số dòng bỏ qua (phân trang)
+     * @param limit   Số lượng thông báo cần lấy
+     * @return Danh sách thông báo tìm thấy (theo phân trang)
      */
-    public ArrayList<Notification> searchNotificationsForStudent(String keyword, int accountId) {
-        return searchNotificationsByKeyword(keyword, "Student", accountId);
+    public ArrayList<Notification> searchNotificationsForSaleWithPaging(String keyword, int offset, int limit) {
+        return searchNotificationsByKeywordWithPaging(keyword, "Sale", null, offset, limit);
     }
 
     /**
-     * Tìm kiếm thông báo dành cho quản lý đào tạo theo từ khóa.
+     * Tìm kiếm thông báo dành cho học viên theo từ khóa, hỗ trợ phân trang.
+     *
+     * @param keyword   Từ khóa tìm kiếm
+     * @param accountId ID tài khoản học viên
+     * @param offset    Số dòng bỏ qua (phân trang)
+     * @param limit     Số lượng thông báo cần lấy
+     * @return Danh sách thông báo tìm thấy dành cho học viên (theo phân trang)
      */
-    public ArrayList<Notification> searchNotificationsForTrainingManager(String keyword) {
-        return searchNotificationsByKeyword(keyword, "TrainingManager", null);
+    public ArrayList<Notification> searchNotificationsForStudentWithPaging(String keyword, int accountId, int offset, int limit) {
+        return searchNotificationsByKeywordWithPaging(keyword, "Student", accountId, offset, limit);
     }
+
+    /**
+     * Tìm kiếm thông báo dành cho quản lý đào tạo theo từ khóa, hỗ trợ phân trang.
+     *
+     * @param keyword Từ khóa tìm kiếm
+     * @param offset  Số dòng bỏ qua (phân trang)
+     * @param limit   Số lượng thông báo cần lấy
+     * @return Danh sách thông báo tìm thấy dành cho Training Manager (theo phân trang)
+     */
+    public ArrayList<Notification> searchNotificationsForTrainingManagerWithPaging(String keyword, int offset, int limit) {
+        return searchNotificationsByKeywordWithPaging(keyword, "TrainingManager", null, offset, limit);
+    }
+
 
     /**
      * Mapping dữ liệu từ ResultSet thành đối tượng Notification.
@@ -402,6 +543,34 @@ public class NotificationDAO {
         notification.setRead(rs.getBoolean("IsRead"));
 
         return notification;
+    }
+
+    /**
+     * Đếm tổng số thông báo dành cho Sale.
+     *
+     * @return tổng số dòng thông báo dành cho Sale
+     */
+    public int getTotalNotificationsCountForSale() {
+        return getTotalNotificationsCountForRole("Sale", null);
+    }
+
+    /**
+     * Đếm tổng số thông báo dành cho một học viên cụ thể.
+     *
+     * @param accountId ID của học viên
+     * @return tổng số dòng thông báo cho học viên này
+     */
+    public int getTotalNotificationsCountForStudent(int accountId) {
+        return getTotalNotificationsCountForRole("Student", accountId);
+    }
+
+    /**
+     * Đếm tổng số thông báo dành cho Training Manager.
+     *
+     * @return tổng số dòng thông báo dành cho Training Manager
+     */
+    public int getTotalNotificationsCountForTrainingManager() {
+        return getTotalNotificationsCountForRole("TrainingManager", null);
     }
 
 }

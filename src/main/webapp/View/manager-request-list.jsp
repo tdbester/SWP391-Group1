@@ -609,11 +609,23 @@
             <div class="pagination-wrapper">
                 <nav>
                     <ul class="pagination">
+                        <c:if test="${currentPage > 1}">
+                            <li class="page-item">
+                                <a class="page-link" href="ProcessRequest?action=list&page=${currentPage - 1}&keyword=${param.keyword}&typeFilter=${param.typeFilter}&statusFilter=${param.statusFilter}">&laquo;</a>
+                            </li>
+                        </c:if>
+
                         <c:forEach begin="1" end="${totalPages}" var="i">
                             <li class="page-item ${i == currentPage ? 'active' : ''}">
-                                <a class="page-link" href="ProcessRequest?action=list&page=${i}">${i}</a>
+                                <a class="page-link" href="ProcessRequest?action=list&page=${i}&keyword=${param.keyword}&typeFilter=${param.typeFilter}&statusFilter=${param.statusFilter}">${i}</a>
                             </li>
                         </c:forEach>
+                        
+                        <c:if test="${currentPage < totalPages}">
+                            <li class="page-item">
+                                <a class="page-link" href="ProcessRequest?action=list&page=${currentPage + 1}&keyword=${param.keyword}&typeFilter=${param.typeFilter}&statusFilter=${param.statusFilter}">&raquo;</a>
+                            </li>
+                        </c:if>
                     </ul>
                 </nav>
             </div>
@@ -628,46 +640,37 @@
         const statusFilter = document.getElementById('statusFilter');
         const clearFiltersBtn = document.getElementById('clearFiltersBtn');
 
-        let searchTimer;
-
-        // Tìm kiếm với delay
-        function searchWithDelay() {
-            clearTimeout(searchTimer);
-            searchTimer = setTimeout(function () {
-                const keyword = searchInput.value.trim();
-                if (keyword) {
-                    window.location.href = 'ProcessRequest?action=search&keyword=' + encodeURIComponent(keyword);
-                } else {
-                    window.location.href = 'ProcessRequest?action=list';
-                }
-            }, 800);
-        }
-
-        function filterByType() {
+        function applyFilters() {
+            const keyword = searchInput.value.trim();
             const typeValue = typeFilter.value;
-            if (typeValue) {
-                window.location.href = 'ProcessRequest?action=filterByType&typeFilter=' + encodeURIComponent(typeValue);
-            } else {
-                window.location.href = 'ProcessRequest?action=list';
-            }
-        }
-
-        function filterByStatus() {
             const statusValue = statusFilter.value;
-            if (statusValue) {
-                window.location.href = 'ProcessRequest?action=filterByStatus&statusFilter=' + encodeURIComponent(statusValue);
-            } else {
-                window.location.href = 'ProcessRequest?action=list';
+
+            let url = 'ProcessRequest?action=list';
+            if (keyword) {
+                url += '&keyword=' + encodeURIComponent(keyword);
             }
+            if (typeValue) {
+                url += '&typeFilter=' + encodeURIComponent(typeValue);
+            }
+            if (statusValue) {
+                url += '&statusFilter=' + encodeURIComponent(statusValue);
+            }
+            
+            window.location.href = url;
         }
 
         function clearAllFilters() {
             window.location.href = 'ProcessRequest?action=list';
         }
-
-        searchInput.addEventListener('input', searchWithDelay);
-        typeFilter.addEventListener('change', filterByType);
-        statusFilter.addEventListener('change', filterByStatus);
+        
+        // Use a single function for all filter changes
+        searchInput.addEventListener('input', () => {
+             // Basic debouncing
+            clearTimeout(searchInput.timer);
+            searchInput.timer = setTimeout(applyFilters, 500);
+        });
+        typeFilter.addEventListener('change', applyFilters);
+        statusFilter.addEventListener('change', applyFilters);
         clearFiltersBtn.addEventListener('click', clearAllFilters);
     });
 </script>

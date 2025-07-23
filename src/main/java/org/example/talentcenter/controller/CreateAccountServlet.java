@@ -22,9 +22,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.talentcenter.dao.CourseDAO;
 import org.example.talentcenter.dao.RequestDAO;
 import org.example.talentcenter.dao.AccountDAO;
 import org.example.talentcenter.model.Request;
+import org.example.talentcenter.service.NotificationService;
 
 import java.io.IOException;
 
@@ -33,6 +35,7 @@ public class CreateAccountServlet extends HttpServlet {
     private final RequestDAO dao = new RequestDAO();
     private final AccountDAO accountDAO = new AccountDAO();
     private final SendAccountService service = new SendAccountService();
+    private final CourseDAO courseDAO = new CourseDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -62,7 +65,21 @@ public class CreateAccountServlet extends HttpServlet {
             String studentName = parts[0];
             String studentEmail = parts[1];
             String studentPhone = parts.length > 2 ? parts[2] : "";
+            int courseId = 0;
+            if (parts.length > 3) {
+                try {
+                    courseId = Integer.parseInt(parts[3].trim());
+                } catch (NumberFormatException e) {
+                    System.out.println("Lỗi parse courseId: " + parts[3]);
+                }
+            }
 
+            if (studentName == null || studentEmail == null || studentPhone == null) {
+                response.sendRedirect("CreateAccount?error=invalid_data");
+                return;
+            }
+
+            String tuitionAmount = courseDAO.getTuitionByCourseId(courseId);
             if (accountDAO.isUsernameExists(studentEmail)) {
                 System.out.println("Email đã tồn tại");
                 response.sendRedirect("CreateAccount?error=email_exists");
@@ -70,7 +87,6 @@ public class CreateAccountServlet extends HttpServlet {
             }
 
             String randomPassword = service.generateRandomPassword();
-
             boolean accountCreated = accountDAO.createStudentAccount(
                     randomPassword,
                     studentName,
@@ -78,7 +94,18 @@ public class CreateAccountServlet extends HttpServlet {
                     studentPhone
             );
 
+
             if (accountCreated) {
+                int studentAccountId = accountDAO.getAccountIdByEmail(studentEmail);
+
+                if (studentAccountId > 0 && tuitionAmount != null && !tuitionAmount.isEmpty()) {
+                    NotificationService.notifyStudentTuitionFee(
+                            studentAccountId,
+                            studentName,
+                            tuitionAmount
+                    );
+                }
+
                 boolean emailSent = service.sendNewAccountEmail(
                         studentEmail,
                         studentEmail,

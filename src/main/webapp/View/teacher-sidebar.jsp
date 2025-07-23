@@ -33,6 +33,12 @@
         <span>Xem đơn</span>
       </a>
     </div>
+    <div class="nav-section">
+      <a href="${pageContext.request.contextPath}/TeacherAbsenceRequest" class="nav-item">
+        <i class="fas fa-user-times"></i>
+        <span>Đơn xin nghỉ học</span>
+      </a>
+    </div>
   </nav>
 </div>
 

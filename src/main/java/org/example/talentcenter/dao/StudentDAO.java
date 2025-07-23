@@ -114,7 +114,6 @@ public class StudentDAO {
         }
         return students;
     }
-
     /**
      * Lấy danh sách học sinh có thể được thêm vào lớp học cụ thể.
      * Điều kiện: Student.ConsultationId -> Consultation.courseId = ClassRooms.courseId
@@ -167,7 +166,7 @@ public class StudentDAO {
                 student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
                 student.setEnrollmentDate(rs.getDate("EnrollmentDate") != null ?
-                    rs.getDate("EnrollmentDate").toLocalDate() : null);
+                        rs.getDate("EnrollmentDate").toLocalDate() : null);
                 student.setConsultationId(rs.getInt("ConsultationId"));
                 student.setPhoneNumber(rs.getString("PhoneNumber"));
                 student.setConsultationNote(rs.getString("ConsultationNote"));
@@ -180,5 +179,4 @@ public class StudentDAO {
         }
         return students;
     }
-
 }

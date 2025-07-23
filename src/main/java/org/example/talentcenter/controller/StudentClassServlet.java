@@ -15,7 +15,6 @@
  *  2025-07-03  | Cù Thị Huyền Trang   | Initial creation
  */
 
-
 package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.*;

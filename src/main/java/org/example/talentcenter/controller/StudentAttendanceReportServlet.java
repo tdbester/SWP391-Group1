@@ -27,17 +27,15 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.WeekFields;
 import java.util.List;
-import java.util.Locale;
 
 @WebServlet(name = "StudentAttendanceReportServlet", value = "/StudentAttendanceReport")
 public class StudentAttendanceReportServlet extends HttpServlet {
     public static StudentDAO studentDAO = new StudentDAO();
     public static StudentAttendanceReportDAO studentAttendanceReportDAO = new StudentAttendanceReportDAO();
     public static ClassroomDAO classroomDAO = new ClassroomDAO();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -48,59 +46,40 @@ public class StudentAttendanceReportServlet extends HttpServlet {
             response.sendRedirect("View/login.jsp");
             return;
         }
+
         try {
             int studentId = studentDAO.getStudentById(account.getId()).getId();
 
             String selectedClass = request.getParameter("class");
             String yearParam = request.getParameter("year");
-            String weekParam = request.getParameter("week");
 
-            LocalDate selectedWeek;
             int selectedYear;
-            int selectedWeekNumber;
-
-            if (yearParam != null && weekParam != null) {
+            if (yearParam != null) {
                 selectedYear = Integer.parseInt(yearParam);
-                selectedWeekNumber = Integer.parseInt(weekParam);
-
-                WeekFields weekFields = WeekFields.of(Locale.getDefault());
-                selectedWeek = LocalDate.of(selectedYear, 1, 1)
-                        .with(weekFields.weekOfYear(), selectedWeekNumber)
-                        .with(DayOfWeek.MONDAY);
             } else {
-                selectedWeek = LocalDate.now().with(DayOfWeek.MONDAY);
-                selectedYear = selectedWeek.getYear();
-                WeekFields weekFields = WeekFields.of(Locale.getDefault());
-                selectedWeekNumber = selectedWeek.get(weekFields.weekOfYear());
+                selectedYear = LocalDate.now().getYear();
             }
 
-            LocalDate endOfWeek = selectedWeek.plusDays(6);
-
+            // Lấy tất cả báo cáo điểm danh của sinh viên trong năm được chọn
             List<StudentAttendanceReport> attendanceReports = studentAttendanceReportDAO.getAttendanceByStudentId(studentId);
+
+            // Lọc theo lớp nếu có
             if (selectedClass != null && !selectedClass.isEmpty()) {
                 attendanceReports.removeIf(r -> !r.getClassName().equalsIgnoreCase(selectedClass));
             }
 
-            attendanceReports.removeIf(r -> r.getDate().isBefore(selectedWeek) || r.getDate().isAfter(endOfWeek));
-
-            WeekFields weekFields = WeekFields.of(Locale.getDefault());
-            LocalDate lastDayOfYear = LocalDate.of(selectedYear, 12, 31);
-            int totalWeeksInYear = lastDayOfYear.get(weekFields.weekOfYear());
-            if (totalWeeksInYear < 10) totalWeeksInYear = 52;
+            // Lọc theo năm
+            attendanceReports.removeIf(r -> r.getDate().getYear() != selectedYear);
 
             List<String> classNames = classroomDAO.getClassNamesByStudentId(studentId);
             request.setAttribute("classNames", classNames);
             request.setAttribute("selectedClass", selectedClass);
             request.setAttribute("attendanceReports", attendanceReports);
-            request.setAttribute("selectedWeek", selectedWeek);
             request.setAttribute("selectedYear", selectedYear);
-            request.setAttribute("selectedWeekNumber", selectedWeekNumber);
-            request.setAttribute("totalWeeksInYear", totalWeeksInYear);
 
             request.getRequestDispatcher("View/student-attendance-report.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }

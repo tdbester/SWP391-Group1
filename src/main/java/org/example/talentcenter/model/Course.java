@@ -16,7 +16,6 @@ public class Course {
     private int classCount;
     private int status; // 0 = not public (hidden), 1 = public (visible)
 
-
     public Course() {
     }
 
@@ -53,6 +52,14 @@ public class Course {
         this.information = information;
         this.createdBy = createdBy;
         this.classCount = classCount;
+    }
+
+    public Course(int id, String title, double price, String information, int createdBy) {
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.information = information;
+        this.createdBy = createdBy;
     }
 
     public int getId() {

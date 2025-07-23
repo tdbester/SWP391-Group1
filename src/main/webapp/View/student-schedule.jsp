@@ -93,20 +93,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thời Khóa Biểu Tuần - TALENT01</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/schedule.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/schedule.css">
+
 </head>
 <body>
 <jsp:include page="header.jsp"/>
-<jsp:include page="student-sidebar.jsp"/>
-<div class="main-content">
-    <div class="container">
+<div class="container">
+    <jsp:include page="student-sidebar.jsp"/>
+    <div class="main-content">
+        <a href="StudentDashboard" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại Dashboard
+        </a>
         <div class="filter-container">
             <form method="GET" action="${pageContext.request.contextPath}/StudentSchedule"
-                  style="display: flex; align-items: center; gap: 15px;">
+                  class="filter-form">
                 <div class="filter-group">
                     <label for="year">YEAR:</label>
-                    <select name="year" id="year">
+                    <select name="year" id="year" class="dropdown-filter">
                         <%
                             int currentYear = LocalDate.now().getYear();
                             for (int year = currentYear - 2; year <= currentYear + 2; year++) {
@@ -121,7 +127,7 @@
 
                 <div class="filter-group">
                     <label for="week">WEEK:</label>
-                    <select name="week" id="week">
+                    <select name="week" id="week" class="dropdown-filter">
                         <%
                             WeekFields weekFields = WeekFields.of(Locale.getDefault());
                             LocalDate firstDayOfYear = LocalDate.of(selectedYear, 1, 1);
@@ -149,7 +155,7 @@
                     </select>
                 </div>
 
-                <button type="submit" class="filter-button">
+                <button type="submit" class="btn-filter">
                     <i class="fas fa-search"></i> Lọc
                 </button>
             </form>
@@ -208,16 +214,16 @@
                             <div class="class-code"><%=schedule.getCourseTitle()%>
                             </div>
                             <div class="class-info">
-                                Lớp: <a
-                                    href="StudentClass?slotId=<%=schedule.getSlotId()%>&date=<%=schedule.getDate()%>">
-                                <%=schedule.getClassName()%>
-                            </a><br>
-                                Phòng: <%=schedule.getRoomCode()%><br>
-                                Giảng viên: <%=schedule.getTeacherName()%><br>
+    <span>Lớp: <a href="StudentClass?slotId=<%=schedule.getSlotId()%>&date=<%=schedule.getDate()%>">
+        <%=schedule.getClassName()%>
+    </a></span>
+                                <span>Phòng: <%=schedule.getRoomCode()%></span>
+                                <span>Giảng viên: <%=schedule.getTeacherName()%></span>
                                 <span class="time-slot">Slot <%= schedule.getSlotId() %>
-                                    (<%= schedule.getSlotStartTime().format(timeFormatter) %>-<%= schedule.getSlotEndTime().format(timeFormatter) %>)
-                                </span>
+        (<%= schedule.getSlotStartTime().format(timeFormatter) %>-<%= schedule.getSlotEndTime().format(timeFormatter) %>)
+    </span>
                             </div>
+
                         </div>
                         <%
                                 }

@@ -1,20 +1,3 @@
-/*--%>
-<%--*  Copyright (C) 2025 <Group 1>--%>
-<%--    *  All rights reserved.--%>
-<%--    *--%>
-<%--    *  This file is part of the <Talent Center Management> project.--%>
-<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
-<%--    *  Proprietary and confidential.--%>
-<%--    *--%>
-<%--    *  Created on:        2025-06-13--%>
-<%--    *  Author:            Cù Thị Huyền Trang--%>
-<%--    *--%>
-<%--    *  ========================== Change History ==========================--%>
-<%--    *  Date        | Author               | Description--%>
-<%--    *  ------------|----------------------|----------------------------------%>
-<%--    *  2025-06-13  | Cù Thị Huyền Trang   | Initial creation--%>
-<%--    */
-
 package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.*;
@@ -32,6 +15,7 @@ import org.example.talentcenter.service.NotificationService;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -51,26 +35,48 @@ public class StudentRequestServlet extends HttpServlet {
 
         int accountId = account.getId();
         String action = request.getParameter("action");
+        // lấy danh sách loa đơn của hs
         ArrayList<Request> requestTypeList = requestDAO.getStudentRequestType();
         request.setAttribute("requestTypeList", requestTypeList);
 
         if ("list".equals(action)) {
-            String filterTypeIdParam = request.getParameter("filterTypeId");
-            ArrayList<Request> requestList;
-            if (filterTypeIdParam != null && !filterTypeIdParam.isEmpty()) {
-                int filterTypeId = Integer.parseInt(filterTypeIdParam);
-                requestList = requestDAO.getRequestBySenderIdAndType(accountId, filterTypeId);
-            } else {
-                requestList = requestDAO.getRequestBySenderId(accountId);
+            int page = 1;
+            int recordsPerPage = 10;
+            if (request.getParameter("page") != null) {
+                page = Integer.parseInt(request.getParameter("page"));
             }
+
+            String keyword = request.getParameter("keyword");
+            String statusFilter = request.getParameter("statusFilter");
+            String filterTypeIdParam = request.getParameter("filterTypeId");
+            Integer typeId = null;
+            if (filterTypeIdParam != null && !filterTypeIdParam.isEmpty()) {
+                try {
+                    typeId = Integer.parseInt(filterTypeIdParam);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // đếm tổng số bản ghi
+            int totalRecords = requestDAO.countStudentRequestsFiltered(accountId, keyword, typeId, statusFilter);
+
+            ArrayList<Request> requestList = requestDAO.getStudentRequestsFiltered(accountId, keyword, typeId, statusFilter, (page - 1) * recordsPerPage, recordsPerPage);
+            
+            int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+            
             request.setAttribute("requestList", requestList);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("currentPage", page);
             request.getRequestDispatcher("/View/student-request-list.jsp").forward(request, response);
         } else {
             ClassroomDAO classroomDAO = new ClassroomDAO();
             StudentDAO studentDAO = new StudentDAO();
             Student student = studentDAO.getStudentById(accountId);
             int studentId = student.getId();
+            // lấy ra danh sách các lớp của hs
             ArrayList<Classroom> classroomList = classroomDAO.getAllStudentClassByStudentId(studentId);
+            // lấy ra loại đơn dc chọn
             String selectedRequestType = request.getParameter("requestType");
             request.setAttribute("requestTypeId", selectedRequestType);
 
@@ -79,11 +85,11 @@ public class StudentRequestServlet extends HttpServlet {
                 request.setAttribute("isTransferRequest", true);
                 request.setAttribute("selectedRequestType", selectedRequestType);
 
-                // Load danh sách lớp hiện có
+                // load danh sách lớp hiện có
                 ArrayList<Classroom> availableClasses = classroomDAO.getAvailableClassrooms();
                 request.setAttribute("availableClasses", availableClasses);
 
-                // Load lịch sau khi chọn lớp
+                // load lịch sau khi chọn lớp
                 String selectedClassId = request.getParameter("selectedClass");
                 if (selectedClassId != null && !selectedClassId.trim().isEmpty()) {
                     try {
@@ -97,7 +103,6 @@ public class StudentRequestServlet extends HttpServlet {
                             request.setAttribute("selectedClassInfo", selectedClass);
                         }
                     } catch (NumberFormatException e) {
-                        // Ignore invalid class ID
                     }
                 }
             }
@@ -122,7 +127,7 @@ public class StudentRequestServlet extends HttpServlet {
                 response.sendRedirect("login.jsp");
                 return;
             }
-
+            // lấy dữ liệu từ form
             Integer senderId = account.getId();
             String phoneNumber = request.getParameter("phoneNumber");
             String currentClass = request.getParameter("currentClass");
@@ -130,14 +135,14 @@ public class StudentRequestServlet extends HttpServlet {
             String detailedReason = request.getParameter("detailedReason");
             String requestTypeIdStr = request.getParameter("requestType");
 
-            // Thêm hidden inputs để preserve data khi POST
+            //lưu lại giữ liệu để trả về phòng lỗi
             request.setAttribute("preservePhoneNumber", request.getParameter("phoneNumber"));
             request.setAttribute("preserveCurrentClass", request.getParameter("currentClass"));
             request.setAttribute("preserveParentPhone", request.getParameter("parentPhone"));
             request.setAttribute("preserveDetailedReason", request.getParameter("detailedReason"));
             request.setAttribute("preserveSelectedClass", request.getParameter("selectedClass"));
 
-            // Validate form data
+            //validate thông tin
             if (requestTypeIdStr == null || requestTypeIdStr.trim().isEmpty()) {
                 session.setAttribute("error", "Vui lòng chọn loại đơn!");
                 redirectWithFormData(request, response);
@@ -170,7 +175,6 @@ public class StudentRequestServlet extends HttpServlet {
 
             int requestTypeId = Integer.parseInt(requestTypeIdStr);
 
-            // Validate cho đơn chuyển lớp
             if (requestTypeId == 1) {
                 String selectedClass = request.getParameter("selectedClass");
                 if (selectedClass == null || selectedClass.trim().isEmpty()) {
@@ -183,9 +187,10 @@ public class StudentRequestServlet extends HttpServlet {
             // Tạo ngày hiện tại
             Date utilDate = new Date();
 
-            // Tạo combined reason
+            // lưu tất cả thông tin vào reason
             String combinedReason = currentClass + "|" + parentPhone + "|" + phoneNumber + "|" + detailedReason;
 
+            // thêm lớp mốn chuyển đến nếu là đơn xin chuyển lớp
             if (requestTypeId == 1) {
                 String selectedClass = request.getParameter("selectedClass");
                 if (selectedClass != null && !selectedClass.trim().isEmpty()) {
@@ -193,7 +198,7 @@ public class StudentRequestServlet extends HttpServlet {
                 }
             }
 
-            // Tạo request object
+            // lưu dữ liệu
             Request studentRequest = new Request();
             studentRequest.setSenderID(senderId);
             studentRequest.setPhoneNumber(phoneNumber);
@@ -203,19 +208,17 @@ public class StudentRequestServlet extends HttpServlet {
             studentRequest.setCreatedAt(utilDate);
             studentRequest.setTypeId(requestTypeId);
 
-            // Lưu vào database
             RequestDAO dao = new RequestDAO();
             boolean success = dao.insert(studentRequest);
 
             if (success) {
-                String requestTypeName = getRequestTypeName(requestTypeId); // Tạo method helper này
+                String requestTypeName = getRequestTypeName(requestTypeId);
                 NotificationService.notifyStudentRequestSubmitted(
                         account.getFullName(),
                         requestTypeName,
-                        studentRequest.getId(), // Cần get ID sau khi insert
+                        studentRequest.getId(),
                         account.getId()
                 );
-
                 session.setAttribute("message", "Đơn đã được gửi thành công!");
                 response.sendRedirect("StudentApplication");
             } else {
@@ -225,6 +228,15 @@ public class StudentRequestServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Tìm và trả về đối tượng Classroom có ID trùng với classId trong danh sách classrooms.
+     *
+     * @param classId     ID của lớp cần tìm.
+     * @param classrooms  Danh sách các Classroom để tìm kiếm.
+     * @return            Đối tượng Classroom có ID trùng với classId, hoặc null nếu không tìm thấy.
+     *
+     * @author Huyen Trang
+     */
     private Classroom getClassroomById(int classId, ArrayList<Classroom> classrooms) {
         for (Classroom classroom : classrooms) {
             if (classroom.getClassroomID() == classId) {
@@ -234,6 +246,17 @@ public class StudentRequestServlet extends HttpServlet {
         return null;
     }
 
+    /**
+     * Chuyển hướng (redirect) về trang StudentApplication đồng thời giữ lại dữ liệu đã nhập trên form
+     * bằng cách thêm các tham số không rỗng từ request vào URL dưới dạng query string.
+     * Thường dùng khi form có lỗi, cần giữ dữ liệu để người dùng không phải nhập lại.
+     *
+     * @param request  Đối tượng HttpServletRequest chứa dữ liệu form
+     * @param response Đối tượng HttpServletResponse để gửi lệnh chuyển hướng
+     * @throws IOException Nếu có lỗi xảy ra trong quá trình chuyển hướng
+     *
+     * @author Huyen Trang
+     */
     private void redirectWithFormData(HttpServletRequest request, HttpServletResponse response) throws IOException {
         StringBuilder redirectUrl = new StringBuilder("StudentApplication?");
 
@@ -262,7 +285,6 @@ public class StudentRequestServlet extends HttpServlet {
             redirectUrl.append("detailedReason=").append(URLEncoder.encode(detailedReason, "UTF-8")).append("&");
         }
 
-        // Sửa từ targetClass thành selectedClass
         String selectedClass = request.getParameter("selectedClass");
         if (selectedClass != null && !selectedClass.trim().isEmpty()) {
             redirectUrl.append("selectedClass=").append(URLEncoder.encode(selectedClass, "UTF-8")).append("&");
@@ -270,6 +292,14 @@ public class StudentRequestServlet extends HttpServlet {
 
         response.sendRedirect(redirectUrl.toString());
     }
+
+    /**
+     * Lấy tên đơn theo id
+     *
+     * @param typeId ID của đơn
+     * @return tên của đơn
+     * @author Huyen Trang
+     */
     private String getRequestTypeName(int typeId) {
         switch (typeId) {
             case 1:

@@ -31,252 +31,27 @@
     <title>Đơn Xin Chuyển Lớp - TALENT01</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
-    <style>
-        /* CSS giữ nguyên như cũ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/student-request.css">
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        .main-content {
-            margin-left: 320px;
-            padding: 20px;
-            background-color: #f5f5f5;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        .header-title {
-            color: #2c3e50;
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0;
-        }
-
-        .course-info {
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        .card {
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 20px;
-            border-bottom: 1px solid #e9ecef;
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .form-col {
-            flex: 1;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #495057;
-        }
-
-        .required {
-            color: #dc3545;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-        }
-
-        .form-control:disabled {
-            background-color: #f8f9fa;
-            color: #6c757d;
-        }
-
-        .textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background: #007bff;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0056b3;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-
-        .btn-info:hover {
-            background: #138496;
-        }
-
-        .alert {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #28a745;
-            color: #155724;
-        }
-
-        .alert-warning {
-            background-color: #fff3cd;
-            border-color: #ffc107;
-            color: #856404;
-        }
-
-        .alert-danger {
-            background-color: #f8d7da;
-            border-color: #dc3545;
-            color: #721c24;
-        }
-
-        .info-box {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
-        }
-
-        .info-box p {
-            margin-bottom: 15px;
-        }
-
-        .info-box p:last-child {
-            margin-bottom: 0;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-                padding: 10px;
-            }
-
-            .header-section {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .form-row {
-                flex-direction: column;
-                gap: 0;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-        }
-    </style>
 </head>
 <body>
 <jsp:include page="header.jsp"/>
-<jsp:include page="student-sidebar.jsp"/>
 
-<div class="main-content">
-    <div class="container">
+<div class="container">
+<jsp:include page="student-sidebar.jsp"/>
+    <div class="main-content">
+        <a href="StudentDashboard" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại Dashboard
+        </a>
         <div class="header-section">
             <div>
-                <h1 class="header-title"><i class="fas fa-file-alt"></i>Gửi đơn</h1>
+                <h1 class="header-title"><i class="fas fa-file-alt"></i> Gửi đơn</h1>
                 <div class="course-info">Hệ thống quản lý đơn - Trung Tâm Năng Khiếu</div>
             </div>
         </div>
-        <%--in ra thông báo--%>
+
         <c:if test="${not empty sessionScope.message}">
             <div class="alert alert-success">
                 <i class="fas fa-check-circle"></i> ${sessionScope.message}
@@ -296,7 +71,7 @@
                 <i class="fas fa-edit"></i> Nhập thông tin đơn
             </div>
             <div class="card-body">
-                <!-- form nhập tất cả thông tin -->
+                <!-- Form duy nhất cho tất cả thông tin -->
                 <form action="StudentApplication" method="get">
                     <div class="form-row">
                         <div class="form-col">
@@ -347,8 +122,7 @@
 
                     <!-- Phần chuyển lớp -->
                     <c:if test="${isTransferRequest || param.requestType == '1'}">
-                        <div class="form-row"
-                             style="background: #f8f9ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <div class="form-row" style="background: #f8f9ff; padding: 15px; border-radius: 8px; margin: 20px 0;">
                             <div class="form-col">
                                 <label class="form-label">
                                     <i class="fas fa-exchange-alt" style="color: #4c63d2;"></i>
@@ -376,14 +150,12 @@
                                         Thông tin lớp
                                     </label>
                                     <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
-                                        <p style="margin: 0 0 10px 0;"><strong>Giáo
-                                            viên:</strong> ${selectedClassInfo.teacherName}</p>
+                                        <p style="margin: 0 0 10px 0;"><strong>Giáo viên:</strong> ${selectedClassInfo.teacherName}</p>
                                         <p style="margin: 0; font-weight: 600; color: #2c3e50;">Lịch học:</p>
                                         <ul style="margin: 5px 0 0 0; padding-left: 20px;">
                                             <c:forEach var="schedule" items="${classSchedules}">
                                                 <li style="margin-bottom: 3px;">
-                                                    <c:set var="dayOfWeek"
-                                                           value="${schedule.date.dayOfWeek.toString()}"/>
+                                                    <c:set var="dayOfWeek" value="${schedule.date.dayOfWeek.toString()}"/>
                                                     <c:choose>
                                                         <c:when test="${dayOfWeek == 'MONDAY'}">Thứ 2</c:when>
                                                         <c:when test="${dayOfWeek == 'TUESDAY'}">Thứ 3</c:when>
@@ -393,8 +165,7 @@
                                                         <c:when test="${dayOfWeek == 'SATURDAY'}">Thứ 7</c:when>
                                                         <c:when test="${dayOfWeek == 'SUNDAY'}">CN</c:when>
                                                     </c:choose>
-                                                        ${schedule.slotStartTime}-${schedule.slotEndTime}
-                                                    (${schedule.roomCode})
+                                                        ${schedule.slotStartTime}-${schedule.slotEndTime} (${schedule.roomCode})
                                                 </li>
                                             </c:forEach>
                                         </ul>
@@ -408,16 +179,14 @@
                         <label class="form-label">Mô tả chi tiết lý do <span class="required">*</span></label>
                         <textarea class="form-control textarea" name="detailedReason"
                                   placeholder="Vui lòng mô tả chi tiết lý do chuyển lớp, tình huống cụ thể..."
-                        >${param.detailedReason}</textarea>
+                                  >${param.detailedReason}</textarea>
                         <small style="color: #6c757d; font-size: 0.875rem; margin-top: 5px; display: block;">
-                            <i class="fas fa-info-circle"></i> Tối thiểu 20 ký tự. Mô tả càng chi tiết càng giúp việc
-                            xét duyệt nhanh chóng.
+                            <i class="fas fa-info-circle"></i> Tối thiểu 20 ký tự. Mô tả càng chi tiết càng giúp việc xét duyệt nhanh chóng.
                         </small>
                     </div>
 
                     <div class="button-group">
-                        <button type="submit" class="btn btn-primary" formaction="StudentApplication" formmethod="post"
-                                name="action" value="create">
+                        <button type="submit" class="btn btn-primary" formaction="StudentApplication" formmethod="post" name="action" value="create">
                             <i class="fas fa-paper-plane"></i> Gửi đơn
                         </button>
                         <a href="StudentApplication" class="btn btn-secondary">
@@ -437,9 +206,7 @@
                 <div class="alert alert-warning">
                     <strong><i class="fas fa-info-circle"></i> Chú ý:</strong>
                     <ul style="margin: 10px 0 0 20px;">
-                        <li>Đơn chỉ được nộp trong thời gian quy định</li>
-                        <li>Cần có sự đồng ý của phụ huynh</li>
-                        <li>Thời gian xử lý: 5-7 ngày làm việc</li>
+                        <li>Thời gian xử lý: 1-7 ngày làm việc</li>
                         <li>Liên hệ qua email talencenter@gmail.com nếu cần hỗ trợ</li>
                     </ul>
                 </div>
@@ -447,6 +214,7 @@
         </div>
     </div>
 </div>
+
 <jsp:include page="footer.jsp"/>
 </body>
 </html>

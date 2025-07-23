@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet(name="home", value="/home")
 public class HomeServlet extends HttpServlet {
@@ -23,7 +22,7 @@ public class HomeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Course> subjects = courseDAO.getAllForGuest();
+        ArrayList<Course> subjects = courseDAO.getAllCourses();
         request.setAttribute("subjects", subjects);
         if ("true".equals(request.getParameter("success"))) {
             request.setAttribute("message0", "Gửi tư vấn thành công!");
@@ -52,7 +51,7 @@ public class HomeServlet extends HttpServlet {
             }
             boolean success = consultationDAO.addConsultation(consult);
             if (success) {
-                Course course = courseDAO.getById(consult.getCourseId());
+                Course course = courseDAO.getCourseById(consult.getCourseId());
                 String courseName = (course != null) ? course.getTitle() : "Không xác định";
                 NotificationService.notifyNewConsultation(
                         name, email, phone, courseName, consult.getId()

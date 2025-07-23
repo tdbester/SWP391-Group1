@@ -26,11 +26,6 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <!-- SIDEBAR -->
     <div class="sidebar">
-
-        <div class="logo">
-            <i class="fas fa-users-cog"></i>
-            <h2>Trung Tâm Năng Khiếu</h2>
-        </div>
         <nav>
             <div class="nav-section">
                 <a href="${pageContext.request.contextPath}/SaleDashboard" class="nav-item">
@@ -43,7 +38,7 @@
                    class="nav-item ${pageContext.request.requestURI.contains('consultation-list.jsp') ? 'active' : ''}"
                    role="link"
                    aria-current="${pageContext.request.requestURI.contains('consultation-list.jsp') ? 'page' : 'false'}">
-                    <i class="fa-solid fa-building" aria-hidden="true"></i>
+                    <i class="fas fa-comments" aria-hidden="true"></i>
                     <span>Danh sách đăng kí tư vấn</span>
                 </a>
             </div>
@@ -52,7 +47,7 @@
                    class="nav-item ${pageContext.request.requestURI.contains('blog.jsp') ? 'active' : ''}"
                    role="link"
                    aria-current="${pageContext.request.requestURI.contains('blog.jsp') ? 'page' : 'false'}">
-                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <i class="fas fa-pen-nib" aria-hidden="true"></i>
                     <span>Quản lý Blog</span>
                 </a>
             </div>
@@ -61,17 +56,30 @@
                    class="nav-item ${pageContext.request.requestURI.contains('student-account-request.jsp') ? 'active' : ''}"
                    role="link"
                    aria-current="${pageContext.request.requestURI.contains('student-account-request.jsp') ? 'page' : 'false'}">
-                    <i class="fas fa-briefcase" aria-hidden="true"></i>
+                    <i class="fas fa-user-check" aria-hidden="true"></i>
                     <span>Yêu cầu cấp tài khoản học viên</span>
                 </a>
             </div>
             <div class="nav-section">
-                <a href="CandidateDetails.jsp" class="nav-item ${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('CandidateDetails.jsp') ? 'page' : 'false'}">
-                    <i class="fas fa-user" aria-hidden="true"></i>
-                    <span>Danh sách lớp</span>
+                <a href="${pageContext.request.contextPath}/SaleDashboard?action=courseList"
+                   class="nav-item ${pageContext.request.requestURI.contains('courseList') ? 'active' : ''}"
+                   role="link"
+                   aria-current="${pageContext.request.requestURI.contains('courseList') ? 'page' : 'false'}">
+                    <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                    <span>Danh sách khoá học</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <a href="${pageContext.request.contextPath}/SaleDashboard?action=notifications"
+                   class="nav-item ${pageContext.request.requestURI.contains('notifications') ? 'active' : ''}"
+                   role="link"
+                   aria-current="${pageContext.request.requestURI.contains('notifications') ? 'page' : 'false'}">
+                    <i class="fas fa-bell" aria-hidden="true"></i>
+                    <span>Thông báo</span>
                 </a>
             </div>
         </nav>
+
     </div>
 <script>
     document.querySelectorAll('.nav-item').forEach(item => {
