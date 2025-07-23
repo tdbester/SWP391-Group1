@@ -165,7 +165,7 @@
                         <h4>Khóa học</h4>
                         <p>Khám phá các lớp học nhạc chuyên sâu – từ cơ bản đến nâng cao, phù hợp mọi lứa tuổi.</p>
                         <div class="main-button">
-                            <a href="#">Read More</a>
+                            <a href="${pageContext.request.contextPath}/guest-courses">Read More</a>
                         </div>
                     </div>
                 </div>

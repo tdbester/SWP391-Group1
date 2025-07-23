@@ -248,7 +248,7 @@ public class CourseDAO {
         }
     }
 
-    public void delete(int id) {
+    public void delete(int id) throws SQLException {
         String sql = "DELETE FROM Course WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -256,18 +256,44 @@ public class CourseDAO {
             stmt.setInt(1, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new SQLException("No course was deleted.");
         }
     }
 
-    public int getTotalCourse() {
-        String sql = "SELECT COUNT(*) FROM Course";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+    public int getTotalCourseWithFilters(String search, Integer categoryId, String level) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Course c WHERE 1=1");
+        List<Object> parameters = new ArrayList<>();
 
-            if (rs.next()) {
-                return rs.getInt(1);
+        // Add search filter
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND c.Title LIKE ?");
+            parameters.add("%" + search.trim() + "%");
+        }
+
+        // Add category filter
+        if (categoryId != null) {
+            sql.append(" AND c.CategoryID = ?");
+            parameters.add(categoryId);
+        }
+
+        // Add level filter
+        if (level != null && !level.trim().isEmpty()) {
+            sql.append(" AND c.Level = ?");
+            parameters.add(level.trim());
+        }
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -275,9 +301,9 @@ public class CourseDAO {
         return 0;
     }
 
-    public List<CourseDto> pagingCourse(int index) {
+    public List<CourseDto> pagingCourseWithFilters(int index, String search, Integer categoryId, String level) {
         List<CourseDto> list = new ArrayList<>();
-        String sql = """
+        StringBuilder sql = new StringBuilder("""
             SELECT
                 c.Id, c.Title, c.Price, c.Information,
                 c.CreatedBy, a.FullName, c.Image,
@@ -286,14 +312,40 @@ public class CourseDAO {
             FROM Course c
             JOIN Account a    ON c.CreatedBy  = a.Id
             JOIN Category cat ON c.CategoryID = cat.Id
-            ORDER BY c.Id DESC
-            OFFSET ? ROWS FETCH NEXT 10 ROWS ONLY
-            """;
+            WHERE 1=1
+            """);
+
+        List<Object> parameters = new ArrayList<>();
+
+        // Add search filter
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND c.Title LIKE ?");
+            parameters.add("%" + search.trim() + "%");
+        }
+
+        // Add category filter
+        if (categoryId != null) {
+            sql.append(" AND c.CategoryID = ?");
+            parameters.add(categoryId);
+        }
+
+        // Add level filter
+        if (level != null && !level.trim().isEmpty()) {
+            sql.append(" AND c.Level = ?");
+            parameters.add(level.trim());
+        }
+
+        sql.append(" ORDER BY c.Id DESC OFFSET ? ROWS FETCH NEXT 10 ROWS ONLY");
+        parameters.add((index - 1) * 10);
 
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
-            stmt.setInt(1, (index - 1) * 10);
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Category category = new Category(
@@ -303,11 +355,11 @@ public class CourseDAO {
                     );
 
                     // Convert string to enum values
-                    Level level = null;
+                    Level levelEnum = null;
                     String levelStr = rs.getString("Level");
                     if (levelStr != null) {
                         try {
-                            level = Level.valueOf(levelStr);
+                            levelEnum = Level.valueOf(levelStr);
                         } catch (IllegalArgumentException e) {
                             // Handle invalid enum value
                         }
@@ -332,7 +384,7 @@ public class CourseDAO {
                             rs.getString("FullName"),
                             rs.getString("Image"),
                             category,
-                            level,
+                            levelEnum,
                             type,
                             rs.getInt("Status")
                     ));

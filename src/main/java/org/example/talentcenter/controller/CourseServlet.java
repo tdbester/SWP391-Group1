@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.text.DecimalFormat;
@@ -123,48 +124,82 @@ public class CourseServlet extends HttpServlet {
 
     private void listCourses(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        String search    = req.getParameter("search");
-        String catParam  = req.getParameter("category");
+        String search = req.getParameter("search");
+        String catParam = req.getParameter("category");
         String levelParam = req.getParameter("level");
-        Category filterCat;
 
+        // Parse category parameter
+        Integer categoryId = null;
         if (catParam != null && !catParam.isBlank()) {
-            filterCat = categoryDAO.getById(Integer.parseInt(catParam));
-        } else {
-            filterCat= null;
+            try {
+                categoryId = Integer.parseInt(catParam);
+            } catch (NumberFormatException e) {
+                req.setAttribute("errorMessage", "Invalid category parameter.");
+            }
         }
 
+        // Parse page index
         int index = 1;
-        try { index = Integer.parseInt(req.getParameter("index")); }
-        catch (Exception ignored) { }
+        try {
+            String indexParam = req.getParameter("index");
+            if (indexParam != null) {
+                index = Integer.parseInt(indexParam);
+            }
+        } catch (NumberFormatException e) {
+            req.setAttribute("errorMessage", "Invalid page number.");
+        }
 
-        List<CourseDto> all = courseDAO.pagingCourse(index);
-        var filtered = all.stream()
-                .filter(c -> search == null
-                        || c.getTitle().toLowerCase().contains(search.toLowerCase()))
-                .toList();
+        try {
+            List<CourseDto> courseList = courseDAO.pagingCourseWithFilters(index, search, categoryId, levelParam);
+            int total = courseDAO.getTotalCourseWithFilters(search, categoryId, levelParam);
+            int endPage = (int) Math.ceil((double) total / 10);
 
-        var categoryFiltered = filterCat != null
-                ? filtered.stream()
-                .filter(c -> c.getCategory().getId() == filterCat.getId())
-                .toList()
-                : filtered;
+            req.setAttribute("courseList", courseList);
+            req.setAttribute("endP", endPage);
+            req.setAttribute("currentIndex", index);
+            req.setAttribute("categories", categoryDAO.getByType(TYPE_COURSE));
+            req.setAttribute("selectedCategory", categoryId);
+            req.setAttribute("selectedLevel", levelParam);
 
-        var levelFiltered = levelParam != null && !levelParam.isBlank()
-                ? categoryFiltered.stream()
-                .filter(c -> c.getLevel() != null && c.getLevel().toString().equals(levelParam))
-                .toList()
-                : categoryFiltered;
+            // Check for success/error messages from previous operations
+            String successMessage = req.getParameter("success");
+            String errorMessage = req.getParameter("error");
 
-        int total   = courseDAO.getTotalCourse();
-        int endPage = (int)Math.ceil((double) total / 10);
+            if (successMessage != null) {
+                switch (successMessage) {
+                    case "created":
+                        req.setAttribute("successMessage", "Khóa học đã được tạo thành công!");
+                        break;
+                    case "updated":
+                        req.setAttribute("successMessage", "Khóa học đã được cập nhật thành công!");
+                        break;
+                    case "deleted":
+                        req.setAttribute("successMessage", "Khóa học đã được xóa thành công!");
+                        break;
+                }
+            }
 
-        req.setAttribute("courseList", levelFiltered);
-        req.setAttribute("endP",        endPage);
-        req.setAttribute("currentIndex", index);
-        req.setAttribute("categories",  categoryDAO.getByType(TYPE_COURSE));
-        req.setAttribute("selectedCategory", filterCat != null ? filterCat.getId() : null);
-        req.setAttribute("selectedLevel", levelParam);
+            if (errorMessage != null) {
+                switch (errorMessage) {
+                    case "CourseNotFound":
+                        req.setAttribute("errorMessage", "Không tìm thấy khóa học!");
+                        break;
+                    case "InvalidID":
+                        req.setAttribute("errorMessage", "ID khóa học không hợp lệ!");
+                        break;
+                    case "DeleteFailed":
+                        req.setAttribute("errorMessage", "Không thể xóa khóa học!");
+                        break;
+                }
+            }
+
+        } catch (Exception e) {
+            req.setAttribute("errorMessage", "Có lỗi xảy ra khi tải danh sách khóa học: " + e.getMessage());
+            // Set empty list to prevent JSP errors
+            req.setAttribute("courseList", new ArrayList<CourseDto>());
+            req.setAttribute("endP", 0);
+            req.setAttribute("currentIndex", 1);
+        }
 
         req.getRequestDispatcher("/View/course.jsp").forward(req, resp);
     }
@@ -181,8 +216,8 @@ public class CourseServlet extends HttpServlet {
             int id = Integer.parseInt(req.getParameter("id"));
             Course c = courseDAO.getById(id);
             if (c != null) {
-                req.setAttribute("course",      c);
-                req.setAttribute("categories",  categoryDAO.getByType (TYPE_COURSE));
+                req.setAttribute("course", c);
+                req.setAttribute("categories", categoryDAO.getByType (TYPE_COURSE));
                 req.getRequestDispatcher("/View/course-form.jsp").forward(req, resp);
             } else {
                 resp.sendRedirect("courses?error=CourseNotFound");
@@ -292,8 +327,13 @@ public class CourseServlet extends HttpServlet {
         c.setType(type);
         c.setStatus(status);
 
-        courseDAO.insert(c);
-        resp.sendRedirect("courses");
+        try {
+            courseDAO.insert(c);
+            resp.sendRedirect("courses?success=created");
+        } catch (Exception e) {
+            req.setAttribute("errorMessage", "Có lỗi xảy ra khi tạo khóa học: " + e.getMessage());
+            showNewCourseForm(req, resp);
+        }
     }
 
     private void updateCourse(HttpServletRequest req, HttpServletResponse resp)
@@ -379,16 +419,25 @@ public class CourseServlet extends HttpServlet {
         c.setType(type);
         c.setStatus(status);
 
-        courseDAO.update(c);
-        resp.sendRedirect("courses");
+        try {
+            courseDAO.update(c);
+            resp.sendRedirect("courses?success=updated");
+        } catch (Exception e) {
+            req.setAttribute("errorMessage", "Có lỗi xảy ra khi cập nhật khóa học: " + e.getMessage());
+            showEditCourseForm(req, resp);
+        }
     }
 
     private void deleteCourse(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             int id = Integer.parseInt(req.getParameter("id"));
             courseDAO.delete(id);
-        } catch (NumberFormatException ignored) { }
-        resp.sendRedirect("courses");
+            resp.sendRedirect("courses?success=deleted");
+        } catch (NumberFormatException e) {
+            resp.sendRedirect("courses?error=InvalidID");
+        } catch (Exception e) {
+            resp.sendRedirect("courses?error=DeleteFailed");
+        }
     }
 
     private boolean hasRequiredRole(String userRole, String requiredRole) {

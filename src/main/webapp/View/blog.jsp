@@ -52,6 +52,22 @@
 
     <h2 class="mb-4">Danh sách bài viết</h2>
 
+    <!-- Success Message -->
+    <c:if test="${not empty successMessage}">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            ${successMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </c:if>
+
+    <!-- Error Message -->
+    <c:if test="${not empty errorMessage}">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            ${errorMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </c:if>
+
     <form action="blogs" method="get" class="row g-2 mb-3">
         <div class="col-auto">
             <input type="search" name="search" class="form-control" placeholder="Tìm kiếm">
@@ -90,7 +106,7 @@
         <tbody>
         <c:forEach var="blog" items="${blogList}" varStatus="status">
             <tr>
-                <td>${status.index + 1}</td>
+                <td>${(currentIndex-1)*10 + status.index + 1}</td>
                 <td>${blog.title}</td>
                 <td>${blog.description}</td>
                 <td>
@@ -131,11 +147,20 @@
         </tbody>
     </table>
 
+    <!-- Empty results message -->
+    <c:if test="${empty blogList}">
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle"></i>
+            <strong>Không tìm thấy bài viết nào</strong>
+            <p class="mb-0">Vui lòng thử lại với các tiêu chí tìm kiếm khác.</p>
+        </div>
+    </c:if>
+
     <nav>
         <ul class="pagination">
             <c:forEach begin="1" end="${endP}" var="i">
-                <li class="page-item ${i == param.index ? 'active' : ''}">
-                    <a class="page-link" href="blogs?index=${i}">${i}</a>
+                <li class="page-item ${i == currentIndex ? 'active' : ''}">
+                    <a class="page-link" href="blogs?index=${i}&category=${param.category}&search=${param.search}">${i}</a>
                 </li>
             </c:forEach>
         </ul>
