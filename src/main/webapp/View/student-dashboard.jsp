@@ -47,11 +47,10 @@
         <div class="welcome-section">
             <div class="welcome-card">
                 <div class="welcome-text">
-                    <h1>Xin chào học sinh Nguyen Van A</h1>
-                    <p>Hôm nay là ngày tuyệt vời để học</p>
+                    <h1>Xin chào học sinh ${account.getFullName()}</h1>
                     <div class="current-time">
                         <i class="fas fa-calendar-alt"></i>
-                        <span id="currentDate"></span>
+                        <fmt:formatDate value="${currentDate}" pattern="EEEE, dd MMMM yyyy" />
                     </div>
                 </div>
                 <div class="welcome-avatar">
@@ -71,16 +70,21 @@
                     </a>
                     <a href="${pageContext.request.contextPath}/View/student-attendance-report.jsp"
                        class="sale-nav-btn">
-                        <i class="fas fa-user-check"></i>
+                        <i class="fas fa-clipboard-check"></i>
                         Báo cáo điểm danh
                     </a>
                     <a href="${pageContext.request.contextPath}/View/student-request.jsp" class="sale-nav-btn">
-                        <i class="fas fa-paper-plane"></i>
+                        <i class="fas fa-file-signature"></i>
                         Gửi đơn
                     </a>
                     <a href="${pageContext.request.contextPath}/View/student-request-list.jsp" class="sale-nav-btn">
-                        <i class="fas fa-paper-plane"></i>
+                        <i class="fas fa-folder-open"></i>
                         Xem đơn
+                    </a>
+                    <a href="${pageContext.request.contextPath}/View/student-notification-list.jsp"
+                       class="sale-nav-btn">
+                        <i class="fas fa-bell"></i>
+                        Thông báo
                     </a>
                 </div>
             </div>
@@ -176,7 +180,8 @@
                                                 <c:if test="${!notification.read}">
                                                     <form method="post" action="StudentDashboard" style="margin: 0;">
                                                         <input type="hidden" name="action" value="markAsRead">
-                                                        <input type="hidden" name="notificationId" value="${notification.id}">
+                                                        <input type="hidden" name="notificationId"
+                                                               value="${notification.id}">
 
                                                     </form>
                                                 </c:if>

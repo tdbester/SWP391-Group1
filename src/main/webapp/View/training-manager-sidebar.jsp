@@ -13,41 +13,44 @@
 <title>Sidebar and Header Demo</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-<!-- SIDEBAR -->
   <div class="sidebar">
-
-    <div class="logo">
-      <i class="fas fa-users-cog"></i>
-      <h2>Trung Tâm Năng Khiếu</h2>
-    </div>
     <nav>
       <div class="nav-section">
-        <a href="${pageContext.request.contextPath}/TrainingManagerDashboard" class="nav-item ${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'page' : 'false'}">
+        <a href="${pageContext.request.contextPath}/TrainingManagerDashboard"
+           class="nav-item ${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'active' : ''}"
+           role="link"
+           aria-current="${pageContext.request.requestURI.contains('DashBoardTeacher.jsp') ? 'page' : 'false'}">
           <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
           <span>Dashboard</span>
         </a>
       </div>
+
       <div class="nav-section">
         <a href="${pageContext.request.contextPath}/CreateAccount"
            class="nav-item ${pageContext.request.requestURI.contains('account-request-list.jsp') ? 'active' : ''}"
            role="link"
            aria-current="${pageContext.request.requestURI.contains('account-request-list.jsp') ? 'page' : 'false'}">
-          <i class="fa-solid fa-building" aria-hidden="true"></i>
+          <i class="fas fa-user-check" aria-hidden="true"></i>
           <span>Danh sách yêu cầu cấp tài khoản</span>
         </a>
       </div>
+
       <div class="nav-section">
         <a href="${pageContext.request.contextPath}/ProcessRequest?action=list"
            class="nav-item ${pageContext.request.requestURI.contains('manager-request-list.jsp') ? 'active' : ''}"
            role="link"
            aria-current="${pageContext.request.requestURI.contains('manager-request-list.jsp') ? 'page' : 'false'}">
-          <i class="fa-solid fa-building" aria-hidden="true"></i>
+          <i class="fas fa-tasks" aria-hidden="true"></i>
           <span>Danh sách đơn cần xử lý</span>
         </a>
       </div>
+
       <div class="nav-section">
-        <a href="${pageContext.request.contextPath}/TrainingManagerDashboard?action=notifications" class="nav-item ${pageContext.request.requestURI.contains('notifications') ? 'active' : ''}" role="link" aria-current="${pageContext.request.requestURI.contains('notifications') ? 'page' : 'false'}">
-          <i class="fas fa-user" aria-hidden="true"></i>
+        <a href="${pageContext.request.contextPath}/TrainingManagerDashboard?action=notifications"
+           class="nav-item ${pageContext.request.requestURI.contains('notifications') ? 'active' : ''}"
+           role="link"
+           aria-current="${pageContext.request.requestURI.contains('notifications') ? 'page' : 'false'}">
+          <i class="fas fa-bell" aria-hidden="true"></i>
           <span>Thông báo</span>
         </a>
       </div>

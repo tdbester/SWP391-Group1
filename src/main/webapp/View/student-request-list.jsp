@@ -49,7 +49,11 @@
 <div class="container">
 <jsp:include page="student-sidebar.jsp"/>
     <div class="main-content">
-        <h2>Danh sách đơn đã gửi</h2>
+        <a href="StudentDashboard" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại Dashboard
+        </a>
+        <h2>Danh sách đơn đã gửi</h2><br>
         <div class="search-filter-section">
             <div class="filter-row">
                 <div class="filter-group">

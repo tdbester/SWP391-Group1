@@ -18,36 +18,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/student-notification-list.css">
-
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/notification-list.css">
 
 </head>
 <body>
 <jsp:include page="header.jsp"/>
 <div class="container">
     <jsp:include page="student-sidebar.jsp"/>
-    <div class="main-content">
-        <div class="notification-container">
+    <div  class="main-content notification-page">
+        <a href="StudentDashboard" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Quay lại Dashboard
+        </a>
+        <div class="notification-container notification-container-with-spacing">
             <h1>📋 Lịch sử thông báo</h1><br>
-            <a href="${pageContext.request.contextPath}/StudentDashboard" class="back-link">
-                <i class="fas fa-arrow-left"></i> Quay lại Dashboard
-            </a>
         </div>
-        <div class="search-section">
+        <div class="search-section search-section-spaced">
             <form action="StudentDashboard" method="get" class="search-form">
                 <input type="hidden" name="action" value="notifications">
-                <div class="search-group">
+                <div class="search-group search-group-spaced">
                     <label for="searchInput">
                         <i class="fas fa-search"></i> Tìm kiếm thông báo
                     </label>
-                    <div class="search-input-group">
+                    <div class="search-input-group search-input-spaced">
                         <input type="text" name="keyword" id="searchInput"
                                placeholder="Nhập từ khóa..." value="${keyword}">
                         <button type="submit" class="btn-search">
                             <i class="fas fa-search"></i> Tìm
                         </button>
                         <a href="StudentDashboard?action=notifications" class="btn-clear">
-                            <i class="fas fa-times"></i> Xóa
+                            <i class="fas fa-times"></i> Huỷ
                         </a>
                     </div>
                 </div>
@@ -92,7 +92,7 @@
                 </div>
             </div>
 
-            <ul class="notification-list">
+            <ul class="notification-list notification-list-spaced">
                 <c:choose>
                     <c:when test="${empty allNotifications}">
                         <li class="empty-state">
@@ -128,7 +128,8 @@
                                     <div class="notification-meta">
                                         <div class="notification-time">
                                             <i class="fas fa-clock"></i>
-                                            <fmt:formatDate value="${notification.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
+                                            <fmt:formatDate value="${notification.createdAt}"
+                                                            pattern="dd/MM/yyyy HH:mm"/>
                                         </div>
 
                                         <div class="notification-status">
@@ -151,13 +152,15 @@
                                 <!-- Actions -->
                                 <div class="notification-actions">
                                     <c:if test="${not empty notification.relatedEntityId}">
-                                        <a href="StudentApplication?action=list&id=${notification.relatedEntityId}" class="btn-view">
+                                        <a href="StudentApplication?action=list&id=${notification.relatedEntityId}"
+                                           class="btn-view">
                                             <i class="fas fa-eye"></i> Xem
                                         </a>
                                     </c:if>
 
                                     <c:if test="${!notification.read}">
-                                        <form method="post" action="StudentDashboard" style="margin: 0; display: inline;">
+                                        <form method="post" action="StudentDashboard"
+                                              style="margin: 0; display: inline;">
                                             <input type="hidden" name="action" value="markAsRead">
                                             <input type="hidden" name="notificationId" value="${notification.id}">
                                             <button type="submit" class="btn-mark-read">
@@ -181,14 +184,17 @@
                 </c:choose>
             </ul>
 
-            <!-- Load more button -->
-            <c:if test="${not empty allNotifications && allNotifications.size() >= 20}">
-                <div class="load-more-container">
-                    <button class="btn-load-more">
-                        <i class="fas fa-plus"></i> Tải thêm thông báo
-                    </button>
-                </div>
-            </c:if>
+            <div class="d-flex justify-content-center mt-4">
+                <nav>
+                    <ul class="pagination">
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <li class="page-item ${i == currentPage ? 'active' : ''}">
+                                <a class="page-link" href="SaleDashboard?action=notifications&page=${i}">${i}</a>
+                            </li>
+                        </c:forEach>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 </div>

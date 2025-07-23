@@ -90,18 +90,19 @@ body {
     font-weight: bold;
 }
 
-/*.header-left {*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    gap: 15px;*/
-/*}*/
 
-/*.header-left h1 {*/
-/*    margin: 0;*/
-/*    color: #333;*/
-/*    font-size: 2rem;*/
-/*    font-weight: 600;*/
-/*}*/
+.back-link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.back-link:hover {
+    color: #0056b3;
+    text-decoration: none;
+}
 
 .sidebar-toggle-main {
     background: #8d78e4;

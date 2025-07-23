@@ -45,11 +45,10 @@
         <div class="welcome-section">
             <div class="welcome-card">
                 <div class="welcome-text">
-                    <h1>Xin chào nhân viên Sale Nguyen Van A!</h1>
-                    <p>Hôm nay là ngày tuyệt vời để làm việc</p>
+                    <h1>Xin chào Sale ${account.getFullName()}</h1>
                     <div class="current-time">
                         <i class="fas fa-calendar-alt"></i>
-                        <span id="currentDate"></span>
+                        <fmt:formatDate value="${currentDate}" pattern="EEEE, dd MMMM yyyy" />
                     </div>
                 </div>
                 <div class="welcome-avatar">
@@ -63,13 +62,23 @@
             <div class="sale-quick-nav">
                 <h2>Điều hướng nhanh</h2>
                 <div class="sale-nav-buttons">
-                    <a href="consultation-list.jsp" class="sale-nav-btn"><i class="fas fa-users"></i>Xem danh sách tư
-                        vấn</a>
-                    <a href="blog.jsp" class="sale-nav-btn"><i class="fas fa-user-plus"></i>Viết blog</a>
-                    <a href="student-account-request.jsp" class="sale-nav-btn"><i class="fas fa-book-open"></i>Yêu cầu
-                        cấp tài khoản học viên</a>
-                    <a href="" class="sale-nav-btn"><i class="fas fa-book-open"></i>Xem danh sách khoá học</a>
+                    <a href="consultation-list.jsp" class="sale-nav-btn">
+                        <i class="fas fa-comments"></i> Xem danh sách tư vấn
+                    </a>
+                    <a href="blog.jsp" class="sale-nav-btn">
+                        <i class="fas fa-blog"></i> Quản lý blog
+                    </a>
+                    <a href="student-account-request.jsp" class="sale-nav-btn">
+                        <i class="fas fa-user-check"></i> Yêu cầu cấp tài khoản học viên
+                    </a>
+                    <a href="sale-course-list.jsp" class="sale-nav-btn">
+                        <i class="fas fa-graduation-cap"></i> Danh sách khoá học
+                    </a>
+                    <a href="sale-notification-list.jsp" class="sale-nav-btn">
+                        <i class="fas fa-bell"></i> Thông báo
+                    </a>
                 </div>
+
             </div>
             <div class="sale-notifications">
                 <h2>🔔 Thông báo mới
@@ -198,7 +207,6 @@
                 </table>
             </div>
         </div>
-
     </div>
 </div>
 <jsp:include page="footer.jsp"/>

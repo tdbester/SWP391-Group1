@@ -50,22 +50,33 @@ public class TrainingManagerDashboardServlet extends HttpServlet {
         if ("notifications".equals(action)) {
             String keyword = request.getParameter("keyword");
             ArrayList<Notification> allNotifications;
-
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                allNotifications = notificationDAO.searchNotificationsForTrainingManager(keyword.trim());
-                request.setAttribute("keyword", keyword);
-            } else {
-                allNotifications = notificationDAO.getLatestNotificationsForTrainingManager(50);
+            int page = 1;
+            int recordsPerPage = 10;
+            try {
+                String pageParam = request.getParameter("page");
+                if (pageParam != null) page = Integer.parseInt(pageParam);
+            } catch (NumberFormatException ignored) {
             }
 
+            int offset = (page - 1) * recordsPerPage;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                allNotifications = notificationDAO.searchNotificationsForTrainingManagerWithPaging(keyword.trim(), offset, recordsPerPage);
+                request.setAttribute("keyword", keyword);
+            } else {
+                allNotifications = notificationDAO.getAllNotificationsForTrainingManagerWithPaging(offset, recordsPerPage);
+            }
+            int totalRecords = notificationDAO.getTotalNotificationsCountForTrainingManager();
+            int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+
             request.setAttribute("allNotifications", allNotifications);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
             request.getRequestDispatcher("/View/training-manager-notification-list.jsp").forward(request, response);
         } else if ("markAllRead".equals(action)) {
             // Đánh dấu tất cả đã đọc
             notificationDAO.markAllAsReadForTrainingManager();
             response.sendRedirect("TrainingManagerDashboard");
         } else {
-            // Dashboard chính
             ArrayList<Notification> latestNotifications = notificationDAO.getLatestNotificationsForTrainingManager(5);
             int unreadCount = notificationDAO.getUnreadCountForTrainingManager();
             int processedRequestsThisWeek = requestDAO.getProcessedRequestsThisWeek();
@@ -77,6 +88,7 @@ public class TrainingManagerDashboardServlet extends HttpServlet {
             request.setAttribute("processedRequestsThisWeek", processedRequestsThisWeek);
             request.setAttribute("pendingRequests", pendingRequests);
             request.setAttribute("studentsWithoutAccount", studentsWithoutAccount);
+            request.setAttribute("currentDate", new java.util.Date());
 
             request.getRequestDispatcher("/View/training-manager-dashboard.jsp").forward(request, response);
         }
@@ -84,10 +96,16 @@ public class TrainingManagerDashboardServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String action = request.getParameter("action");
 
+        String action = request.getParameter("action");
+        HttpSession session = request.getSession(false);
+        Account account = (Account) session.getAttribute("account");
+
+        if (account == null) {
+            response.sendRedirect("login");
+            return;
+        }
         if ("deleteNotification".equals(action)) {
-            // ✅ THÊM XỬ LÝ XÓA
             String notificationId = request.getParameter("notificationId");
             if (notificationId != null) {
                 notificationDAO.deleteNotification(Integer.parseInt(notificationId));
@@ -98,6 +116,19 @@ public class TrainingManagerDashboardServlet extends HttpServlet {
             String notificationId = request.getParameter("notificationId");
             if (notificationId != null) {
                 notificationDAO.markAsRead(Integer.parseInt(notificationId));
+            }
+            response.sendRedirect("TrainingManagerDashboard?action=notifications");
+        } else if ("markAllAsRead".equals(action)) {
+            try {
+                boolean success = notificationDAO.markAllAsReadForTrainingManager();
+                if (success) {
+                    session.setAttribute("message", "Đã đánh dấu tất cả thông báo đã đọc");
+                } else {
+                    session.setAttribute("error", "Không thể đánh dấu thông báo");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("error", "Có lỗi xảy ra khi đánh dấu thông báo");
             }
             response.sendRedirect("TrainingManagerDashboard?action=notifications");
         }

@@ -35,7 +35,14 @@ public class CourseDAO {
      */
     public ArrayList<Course> getAllCourses() {
         ArrayList<Course> subjects = new ArrayList<>();
-        String query = "SELECT Id, Title, Price, Information, CreatedBy FROM Course";
+        String query = """
+                SELECT c.Id, c.Title, c.Price, c.Information, c.CreatedBy,
+                COUNT(cr.Id) as ClassCount
+                                    FROM Course c
+                                    LEFT JOIN ClassRooms cr ON c.Id = cr.CourseId
+                                    GROUP BY c.Id, c.Title, c.Price, c.Information, c.CreatedBy
+                                    ORDER BY c.Id DESC
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
@@ -47,7 +54,8 @@ public class CourseDAO {
                         rs.getString("Title"),
                         rs.getDouble("Price"),
                         rs.getString("Information"),
-                        rs.getInt("CreatedBy")
+                        rs.getInt("CreatedBy"),
+                        rs.getInt("ClassCount")
                 );
                 subjects.add(subject);
             }

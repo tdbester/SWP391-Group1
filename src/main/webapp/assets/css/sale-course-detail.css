@@ -1,12 +1,32 @@
-    /* Course Detail Styles */
+/* Course Detail Styles */
 .course-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 30px;
     border-radius: 12px;
     margin-bottom: 30px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
+
+/* Button Quay lại: Trắng nền, chữ tím */
+.btn-back-custom {
+    background-color: #fff;
+    color: #7a6ad8;
+    border: 1px solid #7a6ad8;
+    border-radius: 20px;
+    padding: 0px 25px;
+    height: 40px;
+    line-height: 40px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    transition: all .3s;
+}
+
+.btn-back-custom:hover {
+    background-color: #7a6ad8;
+    color: #fff;
+}
+
 
 .back-link {
     display: inline-flex;
@@ -18,11 +38,11 @@
     padding: 8px 16px;
     border-radius: 6px;
     transition: all 0.3s ease;
-    background: rgba(0,123,255,0.1);
+    background: rgba(0, 123, 255, 0.1);
 }
 
 .back-link:hover {
-    background: rgba(0,123,255,0.2);
+    background: rgba(0, 123, 255, 0.2);
     transform: translateX(-5px);
     text-decoration: none;
     color: #0056b3;
@@ -36,13 +56,13 @@
     font-size: 2.5rem;
     font-weight: 700;
     margin: 0 0 15px 0;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .course-price {
     font-size: 1.5rem;
     font-weight: 600;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     padding: 8px 16px;
     border-radius: 25px;
     display: inline-block;
@@ -68,7 +88,7 @@
     border-radius: 12px;
     padding: 25px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -86,7 +106,7 @@
 
 .class-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .class-name {
@@ -148,9 +168,15 @@
 }
 
 @keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.6; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 .schedule-section {
@@ -184,7 +210,7 @@
 
 .schedule-list li:hover {
     transform: translateX(5px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .schedule-item {
@@ -201,7 +227,7 @@
 
 .schedule-item:hover {
     transform: translateX(5px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .schedule-date {
@@ -212,7 +238,7 @@
 .schedule-time {
     color: #007bff;
     font-weight: 500;
-    background: rgba(0,123,255,0.1);
+    background: rgba(0, 123, 255, 0.1);
     padding: 4px 8px;
     border-radius: 4px;
 }
@@ -246,13 +272,13 @@
     display: inline-flex;
     align-items: center;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
     margin-top: 15px;
 }
 
 .btn-consult:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
     text-decoration: none;
     color: white;
 }

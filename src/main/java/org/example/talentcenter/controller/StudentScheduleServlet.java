@@ -79,7 +79,6 @@ public class StudentScheduleServlet extends HttpServlet {
                     studentId, selectedWeek, endOfWeek);
 
             WeekFields weekFields = WeekFields.of(Locale.getDefault());
-            LocalDate firstDayOfYear = LocalDate.of(selectedYear, 1, 1);
 
             LocalDate lastDayOfYear = LocalDate.of(selectedYear, 12, 31);
             int totalWeeksInYear = lastDayOfYear.get(weekFields.weekOfYear());

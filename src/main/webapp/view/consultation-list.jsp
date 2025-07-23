@@ -35,12 +35,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/consultation-list.css">
-
 </head>
 <body>
 <jsp:include page="header.jsp"/>
 <div class="dashboard">
 <jsp:include page="sale-sidebar.jsp"/>
+
     <div class="main-content">
         <div class="container mt-4">
             <c:if test="${not empty sessionScope.message}">
@@ -49,7 +49,7 @@
             </c:if>
 
             <h1 class="mb-4">
-                <i class="fas fa-users text-primary me-2"></i>
+                <i class="fas fa-comments text-primary me-2"></i>
                 Danh sách học sinh đăng ký tư vấn
             </h1>
 

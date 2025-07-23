@@ -383,7 +383,7 @@ public class RequestDAO {
      */
     public ArrayList<Request> getStudentRequestType() {
         ArrayList<Request> list = new ArrayList<>();
-        String sql = "SELECT TypeID, TypeName FROM RequestType WHERE TypeID IN (1, 2,3,4,5)";
+        String sql = "SELECT TypeID, TypeName FROM RequestType WHERE TypeID IN (1,3,4,5)";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);

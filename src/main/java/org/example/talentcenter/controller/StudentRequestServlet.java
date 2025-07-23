@@ -54,14 +54,13 @@ public class StudentRequestServlet extends HttpServlet {
                 try {
                     typeId = Integer.parseInt(filterTypeIdParam);
                 } catch (NumberFormatException e) {
-                    // Handle error or ignore
+                    e.printStackTrace();
                 }
             }
 
-            // Count total records with filters
+            // đếm tổng số bản ghi
             int totalRecords = requestDAO.countStudentRequestsFiltered(accountId, keyword, typeId, statusFilter);
-            
-            // Get data for the current page with filters
+
             ArrayList<Request> requestList = requestDAO.getStudentRequestsFiltered(accountId, keyword, typeId, statusFilter, (page - 1) * recordsPerPage, recordsPerPage);
             
             int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
@@ -220,7 +219,6 @@ public class StudentRequestServlet extends HttpServlet {
                         studentRequest.getId(),
                         account.getId()
                 );
-
                 session.setAttribute("message", "Đơn đã được gửi thành công!");
                 response.sendRedirect("StudentApplication");
             } else {

@@ -19,336 +19,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/notification-list.css">
 
-    <style>
-        /* Notification Styles */
-        /* Search section */
-        .search-section {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .search-form {
-            margin: 0;
-        }
-
-        .search-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .search-input-group {
-            display: flex;
-            gap: 10px;
-            max-width: 500px;
-        }
-
-        .search-input-group input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .btn-search, .btn-clear {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-search {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-search:hover {
-            background: #1e7e34;
-        }
-
-        .btn-clear {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-clear:hover {
-            background: #545b62;
-            text-decoration: none;
-            color: white;
-        }
-
-        .btn-delete {
-            background: #dc3545;
-            color: white;
-            padding: 8px 10px;
-            border: none;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            margin-left: 5px;
-        }
-
-        .btn-delete:hover {
-            background: #c82333;
-        }
-
-        .btn-mark-all-read {
-            background: #6c757d;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .btn-mark-all-read:hover {
-            background: #545b62;
-        }
-
-        .notification-container {
-            margin-bottom: 20px;
-        }
-
-        .notification-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .notification-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin: 0;
-        }
-
-        .notification-badge {
-            background: #28a745;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-
-        .notification-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .notification-item {
-            display: flex;
-            padding: 15px;
-            background: white;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            border: 1px solid #eee;
-            transition: box-shadow 0.2s ease;
-        }
-
-        .notification-item:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .notification-item.unread {
-            border-left: 4px solid #28a745;
-            background: #f0fff0;
-        }
-
-        .notification-icon {
-            margin-right: 15px;
-            font-size: 24px;
-        }
-
-        .notification-icon.unread {
-            color: #28a745;
-        }
-
-        .notification-icon.read {
-            color: #6c757d;
-        }
-
-        .notification-content {
-            flex: 1;
-        }
-
-        .notification-content-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 5px;
-        }
-
-        .notification-content-title {
-            font-weight: bold;
-            color: #333;
-            margin: 0;
-        }
-
-        .notification-number {
-            font-size: 10px;
-            color: #999;
-            margin-left: 10px;
-        }
-
-        .notification-content-text {
-            color: #666;
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-
-        .notification-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .notification-time {
-            font-size: 11px;
-            color: #aaa;
-        }
-
-        .notification-status {
-            font-size: 11px;
-        }
-
-        .status-read {
-            color: #28a745;
-            background: #d4edda;
-            padding: 2px 6px;
-            border-radius: 3px;
-        }
-
-        .status-unread {
-            color: #dc3545;
-            background: #f8d7da;
-            padding: 2px 6px;
-            border-radius: 3px;
-        }
-
-        .notification-actions {
-            display: flex;
-            align-items: center;
-            margin-left: 15px;
-        }
-
-        .btn-view {
-            background: #28a745;
-            color: white;
-            padding: 8px 15px;
-            text-decoration: none;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-right: 5px;
-            transition: background-color 0.2s ease;
-        }
-
-        .btn-view:hover {
-            background: #1e7e34;
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-view.account-request {
-            background: #007bff;
-        }
-
-        .btn-view.account-request:hover {
-            background: #0056b3;
-        }
-
-        .btn-mark-read {
-            background: #28a745;
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .btn-mark-read:hover {
-            background: #1e7e34;
-        }
-
-        .empty-state {
-            padding: 40px 15px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            text-align: center;
-            color: #666;
-        }
-
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-            color: #ccc;
-        }
-
-        .back-link {
-            color: #28a745;
-            text-decoration: none;
-            font-weight: bold;
-            margin-bottom: 20px;
-            display: inline-block;
-        }
-
-        .back-link:hover {
-            color: #1e7e34;
-            text-decoration: none;
-        }
-
-        .load-more-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .btn-load-more {
-            background: #6c757d;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .btn-load-more:hover {
-            background: #545b62;
-        }
-
-        .notification-type {
-            font-size: 10px;
-            color: #666;
-            background: #f8f9fa;
-            padding: 2px 6px;
-            border-radius: 3px;
-            margin-left: 10px;
-        }
-
-        .notification-type.student-request {
-            background: #e7f3ff;
-            color: #0066cc;
-        }
-
-        .notification-type.account-creation {
-            background: #fff3cd;
-            color: #856404;
-        }
-    </style>
 </head>
 <body>
 <jsp:include page="header.jsp"/>
@@ -384,13 +56,43 @@
 
         <div class="training-manager-notifications">
             <div class="notification-header">
-                <h2 class="notification-title">🔔 Tất cả thông báo</h2>
-                <c:if test="${not empty allNotifications}">
-                    <span class="notification-badge">
-                        ${allNotifications.size()} thông báo
-                    </span>
-                </c:if>
+                <div class="notification-header-left">
+                    <h2 class="notification-title">🔔 Tất cả thông báo</h2>
+                    <c:if test="${not empty allNotifications}">
+                <span class="notification-badge">
+                    ${allNotifications.size()} thông báo
+                </span>
+                    </c:if>
+                </div>
+
+                <!-- button đánh dấu tất cả đã đọc -->
+                <div class="notification-header-right">
+                    <c:set var="unreadCount" value="0"/>
+                    <c:forEach var="notification" items="${allNotifications}">
+                        <c:if test="${!notification.read}">
+                            <c:set var="unreadCount" value="${unreadCount + 1}"/>
+                        </c:if>
+                    </c:forEach>
+
+                    <c:if test="${unreadCount > 0}">
+                        <form method="post" action="TrainingManagerDashboard" style="margin: 0;">
+                            <input type="hidden" name="action" value="markAllAsRead">
+                            <button type="submit" class="btn-mark-all-read"
+                                    onclick="return confirm('Đánh dấu tất cả ${unreadCount} thông báo là đã đọc?')">
+                                <i class="fas fa-check-double"></i>
+                                Đánh dấu tất cả đã đọc (${unreadCount})
+                            </button>
+                        </form>
+                    </c:if>
+
+                    <c:if test="${unreadCount == 0 && not empty allNotifications}">
+                <span style="color: #28a745; font-weight: 600;">
+                    <i class="fas fa-check-circle"></i> Tất cả đã đọc
+                </span>
+                    </c:if>
+                </div>
             </div>
+
 
             <ul class="notification-list">
                 <c:choose>
@@ -510,44 +212,23 @@
                                         </button>
                                     </form>
                                 </div>
-
-                                <!-- Sửa mark all as read - dùng form -->
-                                <c:if test="${not empty allNotifications}">
-                                    <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
-                                        <form action="TrainingManagerDashboard" method="get" style="display: inline;">
-                                            <input type="hidden" name="action" value="markAllRead">
-                                            <button type="submit" class="btn-mark-all-read"
-                                                    onclick="return confirm('Đánh dấu tất cả thông báo là đã đọc?')">
-                                                <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
-                                            </button>
-                                        </form>
-                                    </div>
-                                </c:if>
                             </li>
                         </c:forEach>
                     </c:otherwise>
                 </c:choose>
             </ul>
+            <div class="d-flex justify-content-center mt-4">
+                <nav>
+                    <ul class="pagination">
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <li class="page-item ${i == currentPage ? 'active' : ''}">
+                                <a class="page-link" href="SaleDashboard?action=notifications&page=${i}">${i}</a>
+                            </li>
+                        </c:forEach>
+                    </ul>
+                </nav>
+            </div>
 
-            <!-- Load more button -->
-            <c:if test="${not empty allNotifications && allNotifications.size() >= 20}">
-                <div class="load-more-container">
-                    <button class="btn-load-more">
-                        <i class="fas fa-plus"></i> Tải thêm thông báo
-                    </button>
-                </div>
-            </c:if>
-
-            <!-- Mark all as read button -->
-            <c:if test="${not empty allNotifications}">
-                <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
-                    <a href="${pageContext.request.contextPath}/TrainingManagerDashboard?action=markAllRead"
-                       style="background: #6c757d; color: white; padding: 10px 20px; text-decoration: none;
-                              border-radius: 4px; font-size: 14px; font-weight: bold;">
-                        <i class="fas fa-check-double"></i> Đánh dấu tất cả đã đọc
-                    </a>
-                </div>
-            </c:if>
         </div>
     </div>
 </div>

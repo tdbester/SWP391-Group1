@@ -55,18 +55,29 @@ public class StudentDashboardServlet extends HttpServlet {
             return;
         }
         if ("notifications".equals(action)) {
-            // lấy 20 thông báo mơi nhất
             String keyword = request.getParameter("keyword");
             ArrayList<Notification> allNotifications;
-
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                allNotifications = notificationDAO.searchNotificationsForStudent(keyword.trim(), account.getId());
-                request.setAttribute("keyword", keyword);
-            } else {
-                allNotifications = notificationDAO.getLatestNotificationsForStudent(account.getId(), 50);
+            int page = 1;
+            int recordsPerPage = 10;
+            try {
+                String pageParam = request.getParameter("page");
+                if (pageParam != null) page = Integer.parseInt(pageParam);
+            } catch (NumberFormatException ignored) {
             }
 
+            int offset = (page - 1) * recordsPerPage;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                allNotifications = notificationDAO.searchNotificationsForStudentWithPaging(keyword.trim(), account.getId(), offset, recordsPerPage);
+                request.setAttribute("keyword", keyword);
+            } else {
+                allNotifications = notificationDAO.getAllNotificationsForStudentWithPaging(account.getId(), offset, recordsPerPage);
+            }
+            int totalRecords = notificationDAO.getTotalNotificationsCountForStudent(account.getId());
+            int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+
             request.setAttribute("allNotifications", allNotifications);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
             request.getRequestDispatcher("View/student-notification-list.jsp").forward(request, response);
         } else {
             // lấy lịch hojc hôm nay
@@ -81,6 +92,7 @@ public class StudentDashboardServlet extends HttpServlet {
             request.setAttribute("todaySchedules", todaySchedules);
             request.setAttribute("latestNotifications", latestNotifications);
             request.setAttribute("unreadCount", unreadCount);
+            request.setAttribute("currentDate", new java.util.Date());
             request.getRequestDispatcher("View/student-dashboard.jsp").forward(request, response);
         }
     }

@@ -33,12 +33,13 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/schedule.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
 </head>
 <body>
 <jsp:include page="header.jsp"/>
+<div class="cointainer">
 <jsp:include page="student-sidebar.jsp"/>
-<div class="main-content">
-    <div class="container">
+    <div class="main-content">
         <a href="StudentSchedule">← Quay lại lịch học</a>
 
         <h1>Chi tiết buổi học</h1>

@@ -1,4 +1,28 @@
-/* CSS for Filter Section from manager-request-list.jsp */
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 20px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    background: rgba(0, 123, 255, 0.1);
+}
+
+.back-link:hover {
+    background: rgba(0, 123, 255, 0.2);
+    transform: translateX(-5px);
+    text-decoration: none;
+    color: #0056b3;
+}
+
+.back-link i {
+    margin-right: 8px;
+}
+
 .search-filter-section {
     background: linear-gradient(135deg, #f8f9ff 0%, #e8eaff 100%);
     border: 1px solid #e0e6ff;
