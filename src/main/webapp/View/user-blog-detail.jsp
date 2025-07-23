@@ -106,7 +106,7 @@
         </article>
 
         <div class="text-center mb-5">
-          <a href="${pageContext.request.contextPath}/guest-blogs" class="btn btn-back">&larr; Quay lại danh sách bài viết</a>
+          <button onclick="window.history.back()" class="btn btn-back">&larr; Quay lại danh sách khóa học</button>
         </div>
       </c:if>
 
@@ -115,7 +115,7 @@
           Không tìm thấy bài viết này hoặc đã bị xóa.
         </div>
         <div class="text-center mb-5">
-          <a href="${pageContext.request.contextPath}/guest-blogs" class="btn btn-secondary">&larr; Quay lại danh sách</a>
+          <button onclick="window.history.back()" class="btn btn-back">&larr; Quay lại danh sách khóa học</button>
         </div>
       </c:if>
 

@@ -45,42 +45,50 @@ public class BlogServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        // check user login. If user don't login -> redirect to login page
         HttpSession session = request.getSession(false);
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
-        if (session == null || session.getAttribute("accountId") == null) {
-            if(!action.equals("view")){
+        // For public actions like "view", skip session check
+        if (!"view".equals(action)) {
+            if (session == null || session.getAttribute("accountId") == null) {
                 response.sendRedirect("login");
                 return;
             }
         }
-        String role = (String) session.getAttribute("userRole");
 
+        String role = session != null ? (String) session.getAttribute("userRole") : null;
 
         switch (action) {
             case "new":
-                if(role!= null &&!role.equalsIgnoreCase("sale"))
-                    break;
+                if (!hasRequiredRole(role, "sale")) {
+                    response.sendRedirect("login");
+                    return;
+                }
                 showNewBlogForm(request, response);
                 break;
             case "edit":
-                if(role!= null &&!role.equalsIgnoreCase("sale"))
-                    break;
+                if (!hasRequiredRole(role, "sale")) {
+                    response.sendRedirect("login");
+                    return;
+                }
                 showEditBlogForm(request, response);
                 break;
             case "delete":
-                if(role!= null &&!role.equalsIgnoreCase("sale"))
-                    break;
+                if (!hasRequiredRole(role, "sale")) {
+                    response.sendRedirect("login");
+                    return;
+                }
                 deleteBlog(request, response);
                 break;
             case "view":
-                showBlogDetail(request, response,role!= null && role.equalsIgnoreCase("sale"));
+                showBlogDetail(request, response, role != null && role.equalsIgnoreCase("sale"));
                 break;
             default:
-                if(role!= null &&!role.equalsIgnoreCase("sale"))
-                    break;
+                if (!hasRequiredRole(role, "sale")) {
+                    response.sendRedirect("login");
+                    return;
+                }
                 listBlogs(request, response);
                 break;
         }
@@ -89,6 +97,19 @@ public class BlogServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        // Always require authentication for POST operations
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("accountId") == null) {
+            response.sendRedirect("login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (!hasRequiredRole(role, "sale")) {
+            response.sendRedirect("login");
+            return;
+        }
+
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
@@ -290,6 +311,10 @@ public class BlogServlet extends HttpServlet {
 
         // chuển đến trang list
         response.sendRedirect("blogs");
+    }
+
+    private boolean hasRequiredRole(String userRole, String requiredRole) {
+        return userRole != null && userRole.equalsIgnoreCase(requiredRole);
     }
 
     private String uploadToCloudinary(Part filePart) throws IOException, ServletException {

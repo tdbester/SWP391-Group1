@@ -454,4 +454,74 @@ public class CourseDAO {
         }
         return list;
     }
+
+    /**
+     * Get all public courses as CourseDto for guest access (status = 1)
+     */
+    public List<CourseDto> getPublicCoursesDto() {
+        List<CourseDto> list = new ArrayList<>();
+        String sql = """
+            SELECT
+                c.Id, c.Title, c.Price, c.Information,
+                c.CreatedBy, a.FullName, c.Image,
+                c.CategoryID, c.Level, c.Type, c.Status,
+                cat.Name AS CategoryName, cat.Type AS CategoryType
+            FROM Course c
+            JOIN Account a    ON c.CreatedBy  = a.Id
+            JOIN Category cat ON c.CategoryID = cat.Id
+            WHERE c.Status = 1
+            ORDER BY c.Id DESC
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Category category = new Category(
+                        rs.getInt("CategoryID"),
+                        rs.getString("CategoryName"),
+                        rs.getInt("CategoryType")
+                );
+
+                // Convert string to enum values
+                Level level = null;
+                String levelStr = rs.getString("Level");
+                if (levelStr != null) {
+                    try {
+                        level = Level.valueOf(levelStr);
+                    } catch (IllegalArgumentException e) {
+                        // Handle invalid enum value
+                    }
+                }
+
+                Type type = null;
+                String typeStr = rs.getString("Type");
+                if (typeStr != null) {
+                    try {
+                        type = Type.valueOf(typeStr);
+                    } catch (IllegalArgumentException e) {
+                        // Handle invalid enum value
+                    }
+                }
+
+                list.add(new CourseDto(
+                        rs.getInt("Id"),
+                        rs.getString("Title"),
+                        rs.getDouble("Price"),
+                        rs.getString("Information"),
+                        rs.getInt("CreatedBy"),
+                        rs.getString("FullName"),
+                        rs.getString("Image"),
+                        category,
+                        level,
+                        type,
+                        rs.getInt("Status")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }

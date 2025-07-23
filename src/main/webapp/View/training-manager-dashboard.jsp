@@ -50,7 +50,7 @@
         <div class="sale-nav-buttons">
           <a href="consultation-list.jsp" class="sale-nav-btn"><i class="fas fa-users"></i>Danh sách đơn cần xử lý</a>
           <a href="student-account-request.jsp" class="sale-nav-btn"><i class="fas fa-book-open"></i>Yêu cầu cấp tài khoản học viên</a>
-          <a href="/courses" class="sale-nav-btn"><i class="fas fa-book-open"></i>Xem danh sách khoá học</a>
+          <a href="${pageContext.request.contextPath}/courses" class="sale-nav-btn"><i class="fas fa-book-open"></i>Xem danh sách khoá học</a>
           <a href="${pageContext.request.contextPath}/TrainingManagerClassroom" class="sale-nav-btn"><i class="fas fa-chalkboard-teacher"></i>Quản lý lớp học</a>
         </div>
       </div>

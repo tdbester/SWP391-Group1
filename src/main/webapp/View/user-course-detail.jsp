@@ -129,7 +129,7 @@
 
                 <!-- Nút quay lại -->
                 <div class="text-center mb-5">
-                    <a href="courses" class="btn btn-back">&larr; Quay lại danh sách khóa học</a>
+                    <button onclick="window.history.back()" class="btn btn-back">&larr; Quay lại danh sách khóa học</button>
                 </div>
             </c:if>
 
@@ -139,7 +139,7 @@
                     Không tìm thấy khóa học này hoặc đã bị xóa.
                 </div>
                 <div class="text-center mb-5">
-                    <a href="courses" class="btn btn-secondary">&larr; Quay lại danh sách</a>
+                    <button onclick="window.history.back()" class="btn btn-back">&larr; Quay lại danh sách khóa học</button>
                 </div>
             </c:if>
 

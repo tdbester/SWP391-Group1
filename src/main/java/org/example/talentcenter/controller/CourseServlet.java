@@ -50,38 +50,46 @@ public class CourseServlet extends HttpServlet {
         String action = req.getParameter("action");
         if (action == null) action = "list";
 
-
-        if (session == null || session.getAttribute("accountId") == null) {
-            if(!action.equals("view")){
+        // For public actions like "view", skip session check
+        if (!"view".equals(action)) {
+            if (session == null || session.getAttribute("accountId") == null) {
                 resp.sendRedirect("login");
                 return;
             }
         }
-        String role = (String) session.getAttribute("userRole");
-        if (action == null) action = "list";
-        if (role == null) role = "";
 
+        String role = session != null ? (String) session.getAttribute("userRole") : null;
 
         switch (action) {
             case "new":
-                if(!role.equalsIgnoreCase("Training Manager"))
-                    break;
+                if (!hasRequiredRole(role, "Training Manager")) {
+                    resp.sendRedirect("login");
+                    return;
+                }
                 showNewCourseForm(req, resp);
                 break;
             case "edit":
-                if(!role.equalsIgnoreCase("Training Manager"))
-                  break;
+                if (!hasRequiredRole(role, "Training Manager")) {
+                    resp.sendRedirect("login");
+                    return;
+                }
                 showEditCourseForm(req, resp);
                 break;
             case "delete":
-                if(!role.equalsIgnoreCase("Training Manager"))
-                    break;
+                if (!hasRequiredRole(role, "Training Manager")) {
+                    resp.sendRedirect("login");
+                    return;
+                }
                 deleteCourse(req, resp);
                 break;
-            case "view":  showCourseDetail(req, resp);       break;
+            case "view":
+                showCourseDetail(req, resp);
+                break;
             default:
-                if(!role.equalsIgnoreCase("Training Manager"))
-                    break;
+                if (!hasRequiredRole(role, "Training Manager")) {
+                    resp.sendRedirect("login");
+                    return;
+                }
                 listCourses(req, resp);
                 break;
         }
@@ -90,6 +98,19 @@ public class CourseServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        // Always require authentication for POST operations
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("accountId") == null) {
+            resp.sendRedirect("login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (!hasRequiredRole(role, "Training Manager")) {
+            resp.sendRedirect("login");
+            return;
+        }
+
         String action = req.getParameter("action");
         if (action == null) action = "list";
 
@@ -368,6 +389,10 @@ public class CourseServlet extends HttpServlet {
             courseDAO.delete(id);
         } catch (NumberFormatException ignored) { }
         resp.sendRedirect("courses");
+    }
+
+    private boolean hasRequiredRole(String userRole, String requiredRole) {
+        return userRole != null && userRole.equalsIgnoreCase(requiredRole);
     }
 
     private String uploadToCloudinary(Part filePart) throws IOException, ServletException {
