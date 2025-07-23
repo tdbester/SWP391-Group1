@@ -121,52 +121,101 @@ public class BlogDAO {
     }
 
     public int getTotalBlog() {
-        String sql = "SELECT COUNT(*) FROM Blog";
-        try (Connection conn = DBConnect.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        return getTotalBlogWithFilters(null, null);
+    }
+
+    public int getTotalBlogWithFilters(String search, Integer categoryId) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Blog b WHERE 1=1");
+        List<Object> parameters = new ArrayList<>();
+
+        // Add search filter
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND b.Title LIKE ?");
+            parameters.add("%" + search.trim() + "%");
+        }
+
+        // Add category filter
+        if (categoryId != null) {
+            sql.append(" AND b.CategoryId = ?");
+            parameters.add(categoryId);
+        }
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1);
                 }
             }
         } catch (SQLException e) {
+            e.printStackTrace();
         }
         return 0;
     }
 
     public List<BlogDto> pagingBlog(int index) {
+        return pagingBlogWithFilters(index, null, null);
+    }
+
+    public List<BlogDto> pagingBlogWithFilters(int index, String search, Integer categoryId) {
         List<BlogDto> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+            SELECT b.Id, b.Title, b.Description, b.Content, b.image, b.CreatedAt,
+                   ac.FullName, b.CategoryId, b.Status
+            FROM Blog b
+            JOIN Account ac ON b.authorId = ac.Id
+            WHERE 1=1
+            """);
 
-        //tạo câu lệnh sql đ truy vấn
-        String sql = "select * from Blog b " +
-                "join Account ac on b.authorId = ac.Id\n" +
-                "order by b.Id DESC\n" +
-                "offset ? rows fetch next 10 rows only;";
-        try {
-            //tạo kết nối tới SQL
-            Connection conn = DBConnect.getConnection();
-            //tạo câu lệnh dựa vào sql
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            // truyền tham số vào câu lệnh query
-            stmt.setInt(1, (index - 1) * 10);
-            ResultSet rs = stmt.executeQuery();
+        List<Object> parameters = new ArrayList<>();
 
-            while (rs.next()) {
-                list.add(new BlogDto(
-                        rs.getInt("Id"),
-                        rs.getString("Title"),
-                        rs.getString("Description"),
-                        rs.getString("Content"),
-                        rs.getString("image"),
-                        new java.util.Date(rs.getDate("CreatedAt").getTime()),
-                        rs.getString("FullName"),
-                        rs.getInt("CategoryId"),
-                        rs.getInt("Status")
-                ));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        // Add search filter
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND b.Title LIKE ?");
+            parameters.add("%" + search.trim() + "%");
         }
 
+        // Add category filter
+        if (categoryId != null) {
+            sql.append(" AND b.CategoryId = ?");
+            parameters.add(categoryId);
+        }
+
+        sql.append(" ORDER BY b.Id DESC OFFSET ? ROWS FETCH NEXT 10 ROWS ONLY");
+        parameters.add((index - 1) * 10);
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new BlogDto(
+                            rs.getInt("Id"),
+                            rs.getString("Title"),
+                            rs.getString("Description"),
+                            rs.getString("Content"),
+                            rs.getString("image"),
+                            new java.util.Date(rs.getDate("CreatedAt").getTime()),
+                            rs.getString("FullName"),
+                            rs.getInt("CategoryId"),
+                            rs.getInt("Status")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error during blog paging: " + e.getMessage(), e);
+        }
 
         return list;
     }

@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -45,40 +46,50 @@ public class BlogServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        // check user login. If user don't login -> redirect to login page
         HttpSession session = request.getSession(false);
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
-        if (session == null || session.getAttribute("accountId") == null) {
-            if(!action.equals("view")){
+        // For public actions like "view", skip session check
+        if (!"view".equals(action)) {
+            if (session == null || session.getAttribute("accountId") == null) {
                 response.sendRedirect("login");
                 return;
             }
         }
-        String role = (String) session.getAttribute("userRole");
 
+        String role = session != null ? (String) session.getAttribute("userRole") : null;
 
         switch (action) {
             case "new":
-                if(role!= null &&!role.equalsIgnoreCase("sale"))
-                    break;
+                if (!hasRequiredRole(role, "sale")) {
+                    response.sendRedirect("login");
+                    return;
+                }
                 showNewBlogForm(request, response);
                 break;
             case "edit":
-                if(role!= null &&!role.equalsIgnoreCase("sale"))
-                    break;
+                if (!hasRequiredRole(role, "sale")) {
+                    response.sendRedirect("login");
+                    return;
+                }
                 showEditBlogForm(request, response);
                 break;
             case "delete":
-                if(role!= null &&!role.equalsIgnoreCase("sale"))
-                    break;
+                if (!hasRequiredRole(role, "sale")) {
+                    response.sendRedirect("login");
+                    return;
+                }
                 deleteBlog(request, response);
                 break;
             case "view":
-                showBlogDetail(request, response,role!= null && role.equalsIgnoreCase("sale"));
+                showBlogDetail(request, response, role != null && role.equalsIgnoreCase("sale"));
                 break;
             default:
+                if (!hasRequiredRole(role, "sale")) {
+                    response.sendRedirect("login");
+                    return;
+                }
                 listBlogs(request, response);
                 break;
         }
@@ -87,6 +98,19 @@ public class BlogServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+        // Always require authentication for POST operations
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("accountId") == null) {
+            response.sendRedirect("login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (!hasRequiredRole(role, "sale")) {
+            response.sendRedirect("login");
+            return;
+        }
+
         String action = request.getParameter("action");
         if (action == null) action = "list";
 
@@ -105,45 +129,82 @@ public class BlogServlet extends HttpServlet {
 
     private void listBlogs(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
-        // search value
         String search = request.getParameter("search");
-        String catParam  = request.getParameter("category");
+        String catParam = request.getParameter("category");
 
-        // number of page
-        int index = 1;
-        if (request.getParameter("index") != null) {
-            index = Integer.parseInt(request.getParameter("index"));
-        }
-        Category filterCat;
-
+        // Parse category parameter
+        Integer categoryId = null;
         if (catParam != null && !catParam.isBlank()) {
-            filterCat = categoryDAO.getById(Integer.parseInt(catParam));
-        } else {
-            filterCat= null;
+            try {
+                categoryId = Integer.parseInt(catParam);
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "Invalid category parameter.");
+            }
         }
 
-        // lấy danh sách blog từ database lên theo phân trang
-        List<BlogDto> blogs = blogDAO.pagingBlog(index);
-        List<BlogDto> filtered = blogs.stream()
-                .filter(blog -> search == null ||
-                        blog.getTitle().toLowerCase().contains(search.toLowerCase()))
-                .toList();
-        var categoryFiltered = filterCat != null
-                ? filtered.stream()
-                .filter(c -> c.getCategory() == filterCat.getId())
-                .toList()
-                : filtered;
+        // Parse page index
+        int index = 1;
+        try {
+            String indexParam = request.getParameter("index");
+            if (indexParam != null) {
+                index = Integer.parseInt(indexParam);
+            }
+        } catch (NumberFormatException e) {
+            request.setAttribute("errorMessage", "Invalid page number.");
+        }
 
-        // Lấy danh sách category để hiển thị tên
-        List<Category> categories = categoryDAO.getByType(TYPE_BLOG);
-        request.setAttribute("categories", categories);
+        try {
+            // Use database-level filtering for better performance
+            List<BlogDto> blogList = blogDAO.pagingBlogWithFilters(index, search, categoryId);
+            int total = blogDAO.getTotalBlogWithFilters(search, categoryId);
+            int endPage = (int) Math.ceil((double) total / 10);
 
-        request.setAttribute("blogList", categoryFiltered);
-        int count = blogDAO.getTotalBlog();
-        int endPage = count % 10 == 0 ? count / 10 : count / 10 + 1;
-        request.setAttribute("endP", endPage);
-        request.setAttribute("categories",  categoryDAO.getByType(TYPE_BLOG));
-        request.setAttribute("selectedCategory", filterCat != null ? filterCat.getId() : null);
+            request.setAttribute("blogList", blogList);
+            request.setAttribute("endP", endPage);
+            request.setAttribute("currentIndex", index);
+            request.setAttribute("categories", categoryDAO.getByType(TYPE_BLOG));
+            request.setAttribute("selectedCategory", categoryId);
+
+            // Check for success/error messages from previous operations
+            String successMessage = request.getParameter("success");
+            String errorMessage = request.getParameter("error");
+
+            if (successMessage != null) {
+                switch (successMessage) {
+                    case "created":
+                        request.setAttribute("successMessage", "Bài viết đã được tạo thành công!");
+                        break;
+                    case "updated":
+                        request.setAttribute("successMessage", "Bài viết đã được cập nhật thành công!");
+                        break;
+                    case "deleted":
+                        request.setAttribute("successMessage", "Bài viết đã được xóa thành công!");
+                        break;
+                }
+            }
+
+            if (errorMessage != null) {
+                switch (errorMessage) {
+                    case "BlogNotFound":
+                        request.setAttribute("errorMessage", "Không tìm thấy bài viết!");
+                        break;
+                    case "InvalidID":
+                        request.setAttribute("errorMessage", "ID bài viết không hợp lệ!");
+                        break;
+                    case "DeleteFailed":
+                        request.setAttribute("errorMessage", "Không thể xóa bài viết!");
+                        break;
+                }
+            }
+
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", "Có lỗi xảy ra khi tải danh sách bài viết: " + e.getMessage());
+            // Set empty list to prevent JSP errors
+            request.setAttribute("blogList", new ArrayList<BlogDto>());
+            request.setAttribute("endP", 0);
+            request.setAttribute("currentIndex", 1);
+        }
+
         request.getRequestDispatcher("/View/blog.jsp").forward(request, response);
     }
 
@@ -152,21 +213,29 @@ public class BlogServlet extends HttpServlet {
         // Đưa danh sách category cho form
         List<Category> categories = categoryDAO.getByType(TYPE_BLOG);
         request.setAttribute("categories", categories);
-
         request.getRequestDispatcher("/View/blog-form.jsp").forward(request, response);
     }
 
     private void showEditBlogForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
-        Blog existingBlog = blogDAO.getById(id);
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            Blog existingBlog = blogDAO.getById(id);
 
-        // Đưa blog và danh sách category cho form
-        request.setAttribute("blog", existingBlog);
-        List<Category> categories = categoryDAO.getByType(TYPE_BLOG);
-        request.setAttribute("categories", categories);
+            if (existingBlog != null) {
+                // Đưa blog và danh sách category cho form
+                request.setAttribute("blog", existingBlog);
+                List<Category> categories = categoryDAO.getByType(TYPE_BLOG);
+                request.setAttribute("categories", categories);
 
-        request.getRequestDispatcher("/View/blog-form.jsp").forward(request, response);
+
+                request.getRequestDispatcher("/View/blog-form.jsp").forward(request, response);
+            } else {
+                response.sendRedirect("blogs?error=BlogNotFound");
+            }
+        } catch (NumberFormatException ex) {
+            response.sendRedirect("blogs?error=InvalidID");
+        }
     }
 
     private void showBlogDetail(HttpServletRequest request, HttpServletResponse response, boolean isSale)
@@ -224,8 +293,13 @@ public class BlogServlet extends HttpServlet {
         newBlog.setStatus(status);
 
         //5. Dùng DAO để insert blog vào database
-        blogDAO.insert(newBlog);
-        response.sendRedirect("blogs");
+        try {
+            blogDAO.insert(newBlog);
+            response.sendRedirect("blogs?success=created");
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", "Có lỗi xảy ra khi tạo bài viết: " + e.getMessage());
+            showNewBlogForm(request, response);
+        }
     }
 
     private void updateBlog(HttpServletRequest request, HttpServletResponse response)
@@ -272,22 +346,33 @@ public class BlogServlet extends HttpServlet {
         blog.setStatus(status);
 
         //5. Gọi đến DAO để update blog
-        blogDAO.update(blog);
-
-        //6. Redirect sang trang list.
-        response.sendRedirect("blogs");
+        try {
+            blogDAO.update(blog);
+            response.sendRedirect("blogs?success=updated");
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", "Có lỗi xảy ra khi cập nhật bài viết: " + e.getMessage());
+            showEditBlogForm(request, response);
+        }
     }
 
     private void deleteBlog(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        // lấy Id blog cần delete
-        int id = Integer.parseInt(request.getParameter("id"));
+        try {
+            // lấy Id blog cần delete
+            int id = Integer.parseInt(request.getParameter("id"));
 
-        // gọi đến DAO để delete
-        blogDAO.delete(id);
+            // gọi đến DAO để delete
+            blogDAO.delete(id);
+            response.sendRedirect("blogs?success=deleted");
+        } catch (NumberFormatException e) {
+            response.sendRedirect("blogs?error=InvalidID");
+        } catch (Exception e) {
+            response.sendRedirect("blogs?error=DeleteFailed");
+        }
+    }
 
-        // chuển đến trang list
-        response.sendRedirect("blogs");
+    private boolean hasRequiredRole(String userRole, String requiredRole) {
+        return userRole != null && userRole.equalsIgnoreCase(requiredRole);
     }
 
     private String uploadToCloudinary(Part filePart) throws IOException, ServletException {

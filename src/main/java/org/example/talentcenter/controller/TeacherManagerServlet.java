@@ -24,12 +24,17 @@ public class TeacherManagerServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         String action = req.getParameter("action");
         if (action == null) action = "list";
-        String role = (String) session.getAttribute("userRole");
-        if (role == null) role = "";
 
-        if (session == null
-                || session.getAttribute("accountId") == null
-                || !role.equalsIgnoreCase("admin")) {
+        // Check session and authentication
+        if (session == null || session.getAttribute("accountId") == null) {
+            resp.sendRedirect("login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+
+        // Check role-based authorization for all actions
+        if (!hasRequiredRole(role, "admin")) {
             resp.sendRedirect("login");
             return;
         }
@@ -49,9 +54,18 @@ public class TeacherManagerServlet extends HttpServlet {
             return;
         }
 
+        String role = (String) session.getAttribute("userRole");
+        if (!hasRequiredRole(role, "admin")) {
+            resp.sendRedirect("login");
+            return;
+        }
+
         String action = req.getParameter("action");
-        if ("update".equals(action)) {
-            updateTeacher(req, resp);
+        if (action == null) action = "list";
+
+        switch (action) {
+            case "update": updateTeacher(req, resp); break;
+            default: resp.sendRedirect("teachers"); break;
         }
     }
 
@@ -135,5 +149,9 @@ public class TeacherManagerServlet extends HttpServlet {
             e.printStackTrace();
             resp.sendRedirect("teachers?error=InvalidData");
         }
+    }
+
+    private boolean hasRequiredRole(String userRole, String requiredRole) {
+        return userRole != null && userRole.equalsIgnoreCase(requiredRole);
     }
 }
