@@ -79,7 +79,11 @@ public class CourseServlet extends HttpServlet {
                 deleteCourse(req, resp);
                 break;
             case "view":  showCourseDetail(req, resp);       break;
-            default:      listCourses(req, resp);            break;
+            default:
+                if(!role.equalsIgnoreCase("Training Manager"))
+                    break;
+                listCourses(req, resp);
+                break;
         }
     }
 

@@ -79,6 +79,8 @@ public class BlogServlet extends HttpServlet {
                 showBlogDetail(request, response,role!= null && role.equalsIgnoreCase("sale"));
                 break;
             default:
+                if(role!= null &&!role.equalsIgnoreCase("sale"))
+                    break;
                 listBlogs(request, response);
                 break;
         }
