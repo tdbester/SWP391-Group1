@@ -167,24 +167,48 @@
                                     <td class="process-cell">
                                         <c:choose>
                                             <c:when test="${request.status == 'Pending'}">
-                                                <span class="process-text">Đơn của bạn đã được tiếp nhận. Hiện đang chờ xử lý...</span>
+                                                <span class="process-text pending-status">
+                                                <i class="fas fa-clock"></i>
+                                                Hiện đang chờ xử lý...
+                                                </span>
                                             </c:when>
                                             <c:when test="${request.status == 'Approved'}">
-                                                <span class="process-text">
-                                                    Đơn đã được phê duyệt.
+                                                <div class="process-text approved-status">
                                                     <c:if test="${not empty request.response}">
-                                                        ${request.response}
+                                                        <div class="response-content">
+                                                            <p class="response-text">${request.response}</p>
+                                                        </div>
                                                     </c:if>
-                                                </span>
+                                                    <c:if test="${empty request.response}">
+                                                        <div class="response-content">
+                                                            <small class="no-response">Không có phản hồi cụ thể</small>
+                                                        </div>
+                                                    </c:if>
+                                                </div>
                                             </c:when>
                                             <c:when test="${request.status == 'Rejected'}">
-                                                <span class="process-text">
-                                                    Đơn bị từ chối.
+                                                <div class="process-text rejected-status">
                                                     <c:if test="${not empty request.response}">
-                                                        Lý do: ${request.response}
+                                                        <div class="response-content">
+                                                            <p class="response-text">${request.response}</p>
+                                                        </div>
                                                     </c:if>
-                                                </span>
+                                                    <c:if test="${empty request.response}">
+                                                        <div class="response-content">
+                                                            <small class="no-response">Không có lý do cụ thể</small>
+                                                        </div>
+                                                    </c:if>
+                                                </div>
                                             </c:when>
+                                            <c:otherwise>
+                                                <span class="process-text unknown-status">
+                                                <i class="fas fa-question-circle"></i>
+                                                    Trạng thái không xác định
+                                                <c:if test="${not empty request.response}">
+                                                <br><small>${request.response}</small>
+                                                </c:if>
+                                                </span>
+                                            </c:otherwise>
                                         </c:choose>
                                     </td>
                                     <td>

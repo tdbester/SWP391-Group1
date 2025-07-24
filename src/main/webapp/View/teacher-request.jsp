@@ -63,8 +63,8 @@
                         <label class="form-label fw-bold">Loại đơn yêu cầu <span class="text-danger">*</span></label>
                         <select id="requestType" name="type" class="form-select" required>
                             <option value="">-- Chọn loại đơn --</option>
-                            <option value="leave" ${param.type == 'Xin nghỉ phép' ? 'selected' : ''}>Xin nghỉ phép</option>
-                            <option value="schedule_change" ${param.type == 'Thay đổi lịch dạy' ? 'selected' : ''}>Thay đổi lịch dạy</option>
+                            <option value="leave" ${param.type == 'leave' || param.type == 'Xin nghỉ phép' ? 'selected' : ''}>Xin nghỉ phép</option>
+                            <option value="schedule_change" ${param.type == 'schedule_change' || param.type == 'Thay đổi lịch dạy' ? 'selected' : ''}>Thay đổi lịch dạy</option>
                             <option value="other" ${param.type == 'other' ? 'selected' : ''}>Khác</option>
                         </select>
                     </div>
@@ -131,7 +131,8 @@
                                         <div class="form-check">
                                             <input class="form-check-input schedule-checkbox" type="checkbox"
                                                    name="selectedSchedules" value="${schedule.id}"
-                                                   id="schedule${status.index}">
+                                                   id="schedule${status.index}"
+                                                ${paramValues.selectedSchedules != null && paramValues.selectedSchedules[0] == schedule.id ? 'checked' : ''}>
                                             <label class="form-check-label" for="schedule${status.index}">
                                                 <div class="row">
                                                     <div class="col-md-8">
@@ -250,33 +251,121 @@
         document.getElementById('requestType').dispatchEvent(new Event('change'));
     }
 
-    // Kiểm tra lịch nghỉ phép
+    // Function để hiển thị loading state
+    function showLoading(button) {
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang tải...';
+        button.disabled = true;
+        return originalText;
+    }
+
+    function hideLoading(button, originalText) {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }
+
+    // Kiểm tra lịch nghỉ phép bằng AJAX
     document.getElementById('checkLeaveBtn').addEventListener('click', function() {
         const date = document.getElementById('leaveDate').value;
-        if (date) {
-            window.location.href = '${pageContext.request.contextPath}/teacherRequest?action=checkLeave&date=' + date;
+        if (!date) {
+            alert('Vui lòng chọn ngày nghỉ!');
+            return;
         }
+
+        const button = this;
+        const originalText = showLoading(button);
+
+        // Sử dụng AJAX để lấy dữ liệu mà không reload trang
+        fetch('${pageContext.request.contextPath}/teacherRequest?action=checkLeave&date=' + date, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.text())
+            .then(data => {
+                // Parse HTML response để lấy phần schedules
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data, 'text/html');
+                const schedulesSection = doc.querySelector('#leaveSchedules');
+
+                if (schedulesSection) {
+                    document.getElementById('leaveSchedules').innerHTML = schedulesSection.innerHTML;
+                } else {
+                    document.getElementById('leaveSchedules').innerHTML =
+                        '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Không có lịch học trong ngày này.</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('leaveSchedules').innerHTML =
+                    '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Có lỗi xảy ra khi tải lịch học.</div>';
+            })
+            .finally(() => {
+                hideLoading(button, originalText);
+            });
     });
 
-    // Kiểm tra lịch thay đổi
+    // Kiểm tra lịch thay đổi bằng AJAX
     document.getElementById('checkChangeBtn').addEventListener('click', function() {
         const date = document.getElementById('changeFromDate').value;
-        if (date) {
-            window.location.href = '${pageContext.request.contextPath}/teacherRequest?action=checkChange&date=' + date;
+        if (!date) {
+            alert('Vui lòng chọn ngày muốn thay đổi!');
+            return;
         }
+
+        const button = this;
+        const originalText = showLoading(button);
+
+        // Sử dụng AJAX để lấy dữ liệu mà không reload trang
+        fetch('${pageContext.request.contextPath}/teacherRequest?action=checkChange&date=' + date, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.text())
+            .then(data => {
+                // Parse HTML response để lấy phần schedules
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data, 'text/html');
+                const schedulesSection = doc.querySelector('#changeSchedules');
+
+                if (schedulesSection) {
+                    document.getElementById('changeSchedules').innerHTML = schedulesSection.innerHTML;
+                    // Re-attach event listeners cho các checkbox mới
+                    attachCheckboxListeners();
+                } else {
+                    document.getElementById('changeSchedules').innerHTML =
+                        '<div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Không có lịch học trong ngày này.</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('changeSchedules').innerHTML =
+                    '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Có lỗi xảy ra khi tải lịch học.</div>';
+            })
+            .finally(() => {
+                hideLoading(button, originalText);
+            });
     });
 
-    // Giới hạn chọn tối đa 1 checkbox cho thay đổi lịch
-    const scheduleCheckboxes = document.querySelectorAll('.schedule-checkbox');
-    scheduleCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const checkedBoxes = document.querySelectorAll('.schedule-checkbox:checked');
-            if (checkedBoxes.length > 1) {
-                this.checked = false;
-                alert('Bạn chỉ có thể chọn tối đa 1 lớp học!');
-            }
+    // Function để attach event listeners cho checkboxes
+    function attachCheckboxListeners() {
+        const scheduleCheckboxes = document.querySelectorAll('.schedule-checkbox');
+        scheduleCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const checkedBoxes = document.querySelectorAll('.schedule-checkbox:checked');
+                if (checkedBoxes.length > 1) {
+                    this.checked = false;
+                    alert('Bạn chỉ có thể chọn tối đa 1 lớp học!');
+                }
+            });
         });
-    });
+    }
+
+    // Attach listeners lần đầu
+    attachCheckboxListeners();
 
     // Validation form trước khi submit
     document.getElementById('requestForm').addEventListener('submit', function(e) {
@@ -290,7 +379,6 @@
         const requestType = document.getElementById('requestType').value;
         console.log('Request type:', requestType);
 
-        //validation để test
         if (!requestType) {
             e.preventDefault();
             alert('Vui lòng chọn loại đơn yêu cầu!');
@@ -304,8 +392,81 @@
             return;
         }
 
+        // Validation riêng cho từng loại đơn
+        if (requestType === 'leave') {
+            const leaveDate = document.getElementById('leaveDate').value;
+            if (!leaveDate) {
+                e.preventDefault();
+                alert('Vui lòng chọn ngày nghỉ!');
+                return;
+            }
+        }
+
+        if (requestType === 'schedule_change') {
+            const changeFromDate = document.getElementById('changeFromDate').value;
+            if (!changeFromDate) {
+                e.preventDefault();
+                alert('Vui lòng chọn ngày muốn thay đổi!');
+                return;
+            }
+
+            const selectedSchedules = document.querySelectorAll('.schedule-checkbox:checked');
+            if (selectedSchedules.length === 0) {
+                e.preventDefault();
+                alert('Vui lòng chọn lớp học muốn thay đổi!');
+                return;
+            }
+        }
+
         console.log('Form validation passed, submitting...');
     });
+
+    // Auto-save form data to prevent data loss
+    const formInputs = document.querySelectorAll('#requestForm input, #requestForm select, #requestForm textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // Save to sessionStorage to preserve data
+            const formData = new FormData(document.getElementById('requestForm'));
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            try {
+                sessionStorage.setItem('teacherRequestFormData', JSON.stringify(data));
+            } catch (e) {
+                console.log('SessionStorage not available');
+            }
+        });
+    });
+
+    // Restore form data on page load
+    try {
+        const savedData = sessionStorage.getItem('teacherRequestFormData');
+        if (savedData && !document.querySelector('.alert-success')) { // Don't restore if form was just submitted successfully
+            const data = JSON.parse(savedData);
+            Object.keys(data).forEach(key => {
+                const input = document.querySelector(`[name="${key}"]`);
+                if (input && !input.value) { // Only restore if current value is empty
+                    if (input.type === 'checkbox') {
+                        input.checked = true;
+                    } else {
+                        input.value = data[key];
+                    }
+                }
+            });
+        }
+    } catch (e) {
+        console.log('Error restoring form data:', e);
+    }
+
+    // Clear saved data when form is successfully submitted
+    if (document.querySelector('.alert-success')) {
+        try {
+            sessionStorage.removeItem('teacherRequestFormData');
+        } catch (e) {
+            console.log('SessionStorage not available');
+        }
+    }
 </script>
 </body>
 </html>
