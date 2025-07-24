@@ -88,9 +88,6 @@ public class TeacherSalaryDAO {
     /**
      * Tính lương cho giáo viên theo tháng - phù hợp với cấu trúc bảng hiện tại
      */
-    /**
-     * Tính lương cho giáo viên theo tháng - phù hợp với cấu trúc bảng hiện tại
-     */
     public void calculateSalaryForTeacher(int teacherId, int month, int year) throws SQLException {
         String checkExistsSql = "SELECT COUNT(*) FROM TeacherSalary WHERE TeacherId = ? AND Month = ? AND Year = ?";
 

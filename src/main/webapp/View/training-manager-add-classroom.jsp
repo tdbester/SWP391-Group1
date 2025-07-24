@@ -43,12 +43,13 @@
                     </div>
                 </c:if>
 
-                <form action="CreateClassRoomServlet" method="post" class="classroom-form">
+                <form action="CreateClassRoomServlet" method="post" class="classroom-form" id="classroomForm">
                     <!-- Form Row 1: Tên lớp học và Khóa học -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="className">Tên lớp học:</label>
-                            <input type="text" id="className" name="className" required>
+                            <input type="text" id="className" name="className"
+                                   value="${preservedClassName}" required>
                         </div>
 
                         <div class="form-group">
@@ -56,7 +57,10 @@
                             <select id="courseId" name="courseId" required>
                                 <option value="">-- Chọn khóa học --</option>
                                 <c:forEach var="course" items="${courses}">
-                                    <option value="${course.id}">${course.title}</option>
+                                    <option value="${course.id}"
+                                        ${preservedCourseId == course.id ? 'selected' : ''}>
+                                            ${course.title}
+                                    </option>
                                 </c:forEach>
                             </select>
                         </div>
@@ -69,7 +73,10 @@
                             <select id="teacherId" name="teacherId" required>
                                 <option value="">-- Chọn giáo viên --</option>
                                 <c:forEach var="teacher" items="${teachers}">
-                                    <option value="${teacher.id}">${teacher.fullName}</option>
+                                    <option value="${teacher.id}"
+                                        ${preservedTeacherId == teacher.id ? 'selected' : ''}>
+                                            ${teacher.fullName}
+                                    </option>
                                 </c:forEach>
                             </select>
                         </div>
@@ -79,7 +86,8 @@
                             <select id="slotId" name="slotId" required>
                                 <option value="">-- Chọn slot --</option>
                                 <c:forEach var="slot" items="${slots}">
-                                    <option value="${slot.id}">
+                                    <option value="${slot.id}"
+                                        ${preservedSlotId == slot.id ? 'selected' : ''}>
                                             ${slot.timeRange}
                                     </option>
                                 </c:forEach>
@@ -94,7 +102,10 @@
                             <select id="roomId" name="roomId" required>
                                 <option value="">-- Chọn phòng --</option>
                                 <c:forEach var="room" items="${rooms}">
-                                    <option value="${room.id}">${room.code}</option>
+                                    <option value="${room.id}"
+                                        ${preservedRoomId == room.id ? 'selected' : ''}>
+                                            ${room.code}
+                                    </option>
                                 </c:forEach>
                             </select>
                         </div>
@@ -104,12 +115,14 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="startDate">Ngày bắt đầu:</label>
-                            <input type="date" id="startDate" name="startDate" required>
+                            <input type="date" id="startDate" name="startDate"
+                                   value="${preservedStartDate}" required>
                         </div>
 
                         <div class="form-group">
                             <label for="endDate">Ngày kết thúc:</label>
-                            <input type="date" id="endDate" name="endDate" required>
+                            <input type="date" id="endDate" name="endDate"
+                                   value="${preservedEndDate}" required>
                         </div>
                     </div>
 
@@ -118,37 +131,51 @@
                         <label>Ngày học trong tuần:</label>
                         <div class="days-container">
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="1" id="monday">
+                                <input type="checkbox" name="daysOfWeek" value="1" id="monday"
+                                ${preservedDaysOfWeek != null &&
+                                        fn:contains(preservedDaysOfWeek, '1') ? 'checked' : ''}>
                                 <label for="monday">Thứ 2</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="2" id="tuesday">
+                                <input type="checkbox" name="daysOfWeek" value="2" id="tuesday"
+                                ${preservedDaysOfWeek != null &&
+                                        fn:contains(preservedDaysOfWeek, '2') ? 'checked' : ''}>
                                 <label for="tuesday">Thứ 3</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="3" id="wednesday">
+                                <input type="checkbox" name="daysOfWeek" value="3" id="wednesday"
+                                ${preservedDaysOfWeek != null &&
+                                        fn:contains(preservedDaysOfWeek, '3') ? 'checked' : ''}>
                                 <label for="wednesday">Thứ 4</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="4" id="thursday">
+                                <input type="checkbox" name="daysOfWeek" value="4" id="thursday"
+                                ${preservedDaysOfWeek != null &&
+                                        fn:contains(preservedDaysOfWeek, '4') ? 'checked' : ''}>
                                 <label for="thursday">Thứ 5</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="5" id="friday">
+                                <input type="checkbox" name="daysOfWeek" value="5" id="friday"
+                                ${preservedDaysOfWeek != null &&
+                                        fn:contains(preservedDaysOfWeek, '5') ? 'checked' : ''}>
                                 <label for="friday">Thứ 6</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="6" id="saturday">
+                                <input type="checkbox" name="daysOfWeek" value="6" id="saturday"
+                                ${preservedDaysOfWeek != null &&
+                                        fn:contains(preservedDaysOfWeek, '6') ? 'checked' : ''}>
                                 <label for="saturday">Thứ 7</label>
                             </div>
 
                             <div class="checkbox-item">
-                                <input type="checkbox" name="daysOfWeek" value="7" id="sunday">
+                                <input type="checkbox" name="daysOfWeek" value="7" id="sunday"
+                                ${preservedDaysOfWeek != null &&
+                                        fn:contains(preservedDaysOfWeek, '7') ? 'checked' : ''}>
                                 <label for="sunday">Chủ nhật</label>
                             </div>
                         </div>
@@ -159,7 +186,7 @@
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-plus"></i> Tạo lớp học
                         </button>
-                        <a href="${pageContext.request.contextPath}/View/training-manager-view-course.jsp" class="btn btn-secondary">
+                        <a href="${pageContext.request.contextPath}/training-manager-view-class" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Quay lại
                         </a>
                     </div>
@@ -174,13 +201,28 @@
 
 <script>
     // Validate form before submit
-    document.querySelector('form').addEventListener('submit', function(e) {
+    document.querySelector('#classroomForm').addEventListener('submit', function(e) {
+        const className = document.getElementById('className').value.trim();
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
         const daysChecked = document.querySelectorAll('input[name="daysOfWeek"]:checked').length;
 
+        // Basic validations
+        if (!className) {
+            alert('Vui lòng nhập tên lớp học!');
+            e.preventDefault();
+            return;
+        }
+
         if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
             alert('Ngày bắt đầu phải trước ngày kết thúc!');
+            e.preventDefault();
+            return;
+        }
+
+        // Check if start date is in the past
+        if (startDate && new Date(startDate) < new Date()) {
+            alert('Ngày bắt đầu không thể là ngày trong quá khứ!');
             e.preventDefault();
             return;
         }
@@ -190,6 +232,11 @@
             e.preventDefault();
             return;
         }
+
+        // Show loading indicator
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo...';
     });
 
     // Add animation to form groups
@@ -199,7 +246,29 @@
             group.style.animationDelay = `${index * 0.1}s`;
             group.classList.add('fade-in');
         });
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDate').setAttribute('min', today);
+
+        // Update end date minimum when start date changes
+        document.getElementById('startDate').addEventListener('change', function() {
+            const startDate = this.value;
+            document.getElementById('endDate').setAttribute('min', startDate);
+        });
+    });
+
+    // Real-time validation feedback
+    document.getElementById('className').addEventListener('blur', function() {
+        const className = this.value.trim();
+        if (className.length < 3) {
+            this.style.borderColor = '#dc3545';
+        } else {
+            this.style.borderColor = '#28a745';
+        }
     });
 </script>
+
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 </body>
 </html>

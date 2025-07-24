@@ -97,6 +97,66 @@ public class TeacherScheduleDAO {
         return schedules;
     }
 
+    /**
+     * Kiểm tra xung đột phòng học với lịch
+     */
+    public boolean hasRoomConflict(int roomId, int slotId, List<Integer> daysOfWeek,
+                                   LocalDate startDate, LocalDate endDate) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(*) FROM Schedule s ")
+                .append("INNER JOIN ClassSchedulePattern csp ON s.ClassRoomId = csp.ClassRoomId ")
+                .append("WHERE s.RoomId = ? ")
+                .append("AND s.SlotId = ? ")
+                .append("AND csp.DayOfWeek IN (");
+
+        // Add placeholders for days of week
+        for (int i = 0; i < daysOfWeek.size(); i++) {
+            sql.append("?");
+            if (i < daysOfWeek.size() - 1) {
+                sql.append(",");
+            }
+        }
+
+        sql.append(") ")
+                .append("AND (")
+                .append("(csp.StartDate <= ? AND csp.EndDate >= ?) OR ") // New period starts during existing
+                .append("(csp.StartDate <= ? AND csp.EndDate >= ?) OR ") // New period ends during existing
+                .append("(csp.StartDate >= ? AND csp.EndDate <= ?)")     // Existing period within new period
+                .append(")");
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            stmt.setInt(paramIndex++, roomId);
+            stmt.setInt(paramIndex++, slotId);
+
+            // Set days of week parameters
+            for (Integer day : daysOfWeek) {
+                stmt.setInt(paramIndex++, day);
+            }
+
+            // Set date parameters for overlap check
+            stmt.setDate(paramIndex++, java.sql.Date.valueOf(startDate));
+            stmt.setDate(paramIndex++, java.sql.Date.valueOf(startDate));
+            stmt.setDate(paramIndex++, java.sql.Date.valueOf(endDate));
+            stmt.setDate(paramIndex++, java.sql.Date.valueOf(endDate));
+            stmt.setDate(paramIndex++, java.sql.Date.valueOf(startDate));
+            stmt.setDate(paramIndex, java.sql.Date.valueOf(endDate));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0; // True if conflict exists
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking room conflict: " + e.getMessage());
+            e.printStackTrace();
+            return true; // Assume conflict on error to be safe
+        }
+        return false;
+    }
+
     // Duyệt các pattern, lặp từ startDate đến endDate, đúng dayOfWeek thì insert
     public void generateSchedulesFromPattern(List<ClassSchedulePattern> patterns, int classRoomId, int roomId) throws SQLException {
         if (patterns == null || patterns.isEmpty()) {

@@ -131,14 +131,6 @@
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">Tìm kiếm</button>
                 </div>
-
-                <div class="form-group">
-                    <a href="teacher-salary?action=calculate&month=<%= selectedMonth %>&year=<%= selectedYear %>"
-                       class="btn btn-success"
-                       onclick="return confirm('Bạn có chắc muốn tính lại lương cho tất cả giáo viên?')">
-                        Tính lương
-                    </a>
-                </div>
             </div>
         </form>
     </div>

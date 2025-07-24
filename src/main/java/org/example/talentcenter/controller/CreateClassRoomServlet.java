@@ -47,6 +47,11 @@ public class CreateClassRoomServlet extends HttpServlet {
                 throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
             }
 
+            // Validate start date is not in the past
+            if (startDate.isBefore(LocalDate.now())) {
+                throw new IllegalArgumentException("Ngày bắt đầu không thể là ngày trong quá khứ");
+            }
+
             // Validate days of week
             String[] days = request.getParameterValues("daysOfWeek");
             if (days == null || days.length == 0) {
@@ -71,6 +76,23 @@ public class CreateClassRoomServlet extends HttpServlet {
             ClassRoomsDAO classRoomsDAO = new ClassRoomsDAO();
             ClassSchedulePatternDAO classSchedulePatternDAO = new ClassSchedulePatternDAO();
             TeacherScheduleDAO teacherScheduleDAO = new TeacherScheduleDAO();
+
+            // ===== VALIDATION CHECKS =====
+
+            // 1. Check if class name already exists
+            if (classRoomsDAO.isClassNameExists(className.trim())) {
+                throw new IllegalArgumentException("Tên lớp '" + className.trim() + "' đã tồn tại. Vui lòng chọn tên khác.");
+            }
+
+            // 2. Check if teacher is available in the selected slot
+            if (!classRoomsDAO.isTeacherAvailableInSlotAndDays(teacherId, slotId, daysOfWeek, startDate, endDate)) {
+                throw new IllegalArgumentException("Giáo viên đã có lớp học trong slot và ngày đã chọn. Vui lòng chọn giáo viên khác, slot khác hoặc ngày khác.");
+            }
+
+            // 3. Check for room conflicts (need to add this method to DAO)
+            if (hasRoomConflict(roomId, slotId, daysOfWeek, startDate, endDate)) {
+                throw new IllegalArgumentException("Phòng học đã được sử dụng trong slot và ngày đã chọn. Vui lòng chọn phòng khác.");
+            }
 
             // Create classroom
             ClassRooms classRoom = new ClassRooms();
@@ -102,13 +124,16 @@ public class CreateClassRoomServlet extends HttpServlet {
             teacherScheduleDAO.generateSchedulesFromPattern(patterns, classRoomId, roomId);
 
             // Success response
-            request.setAttribute("success", "Tạo lớp học và thành công!");
+            request.setAttribute("success", "Tạo lớp học thành công!");
+            loadFormData(request);
             request.getRequestDispatcher("/View/training-manager-add-classroom.jsp").forward(request, response);
 
         } catch (IllegalArgumentException e) {
             // Validation errors
             request.setAttribute("error", e.getMessage());
             loadFormData(request);
+            // Preserve form data
+            preserveFormData(request);
             request.getRequestDispatcher("/View/training-manager-add-classroom.jsp").forward(request, response);
 
         } catch (Exception e) {
@@ -116,8 +141,37 @@ public class CreateClassRoomServlet extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("error", "Đã xảy ra lỗi hệ thống. Vui lòng thử lại!");
             loadFormData(request);
+            preserveFormData(request);
             request.getRequestDispatcher("/View/training-manager-add-classroom.jsp").forward(request, response);
         }
+    }
+
+    /**
+     * Check if room has conflict with existing schedules
+     */
+    private boolean hasRoomConflict(int roomId, int slotId, List<Integer> daysOfWeek,
+                                    LocalDate startDate, LocalDate endDate) {
+        try {
+            TeacherScheduleDAO scheduleDAO = new TeacherScheduleDAO();
+            return scheduleDAO.hasRoomConflict(roomId, slotId, daysOfWeek, startDate, endDate);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return true; // Assume conflict on error to be safe
+        }
+    }
+
+    /**
+     * Preserve form data after validation error
+     */
+    private void preserveFormData(HttpServletRequest request) {
+        request.setAttribute("preservedClassName", request.getParameter("className"));
+        request.setAttribute("preservedCourseId", request.getParameter("courseId"));
+        request.setAttribute("preservedTeacherId", request.getParameter("teacherId"));
+        request.setAttribute("preservedSlotId", request.getParameter("slotId"));
+        request.setAttribute("preservedRoomId", request.getParameter("roomId"));
+        request.setAttribute("preservedStartDate", request.getParameter("startDate"));
+        request.setAttribute("preservedEndDate", request.getParameter("endDate"));
+        request.setAttribute("preservedDaysOfWeek", request.getParameterValues("daysOfWeek"));
     }
 
     private int parseIntParameter(HttpServletRequest request, String paramName, String errorMessage) {
@@ -158,7 +212,7 @@ public class CreateClassRoomServlet extends HttpServlet {
 
             // Load rooms
             RoomDAO roomDAO = new RoomDAO();
-            ArrayList<Room> rooms = roomDAO.getAllRooms();
+            ArrayList<Room> rooms = (ArrayList<Room>) roomDAO.getAllRooms();
             request.setAttribute("rooms", rooms);
 
             // Load courses

@@ -30,19 +30,12 @@
                 <i class="fa-solid fa-building" aria-hidden="true"></i>
                 <span>Danh sách yêu cầu cấp tài khoản</span>
             </a>
-            <a href="${pageContext.request.contextPath}//CreateClassRoomServlet?action=list"
-               class="nav-item ${pageContext.request.requestURI.contains('manager-request-list.jsp') ? 'active' : ''}"
+            <a href="${pageContext.request.contextPath}/training-manager-view-class"
+               class="nav-item ${pageContext.request.requestURI.contains('training-manager-view-class.jsp') ? 'active' : ''}"
                role="link"
-               aria-current="${pageContext.request.requestURI.contains('manager-request-list.jsp') ? 'page' : 'false'}">
-                <i class="fa-solid fa-building" aria-hidden="true"></i>
-                <span>Danh sách đơn cần xử lý</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/CreateClassRoomServlet"
-               class="nav-item ${pageContext.request.requestURI.contains('training-manager-add-classroom.jsp') ? 'active' : ''}"
-               role="link"
-               aria-current="${pageContext.request.requestURI.contains('training-manager-add-classroom.jsp') ? 'page' : 'false'}">
-                <i class="fa-solid fa-building" aria-hidden="true"></i>
-                <span>Tạo lớp học</span>
+               aria-current="${pageContext.request.requestURI.contains('training-manager-view-class.jsp') ? 'page' : 'false'}">
+                <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
+                <span>Quản lý lớp học</span>
             </a>
         </div>
     </nav>

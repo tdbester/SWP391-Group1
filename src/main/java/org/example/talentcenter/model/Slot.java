@@ -2,11 +2,14 @@ package org.example.talentcenter.model;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public class Slot {
     private int id;
     private LocalTime startTime;
     private LocalTime endTime;
+    private Date startTimeAsDate;
+    private Date endTimeAsDate;
 
     // Constructors (giữ nguyên)
     public Slot() {}
@@ -34,6 +37,18 @@ public class Slot {
 
     public String getFormattedEndTime() {
         return endTime != null ? endTime.format(DateTimeFormatter.ofPattern("HH:mm")) : "";
+    }
+    public Date getStartTimeAsDate() {
+        return startTimeAsDate;
+    }
+    public void setStartTimeAsDate(Date startTimeAsDate) {
+        this.startTimeAsDate = startTimeAsDate;
+    }
+    public Date getEndTimeAsDate() {
+        return endTimeAsDate;
+    }
+    public void setEndTimeAsDate(Date endTimeAsDate) {
+        this.endTimeAsDate = endTimeAsDate;
     }
 
     public String getTimeRange() {
