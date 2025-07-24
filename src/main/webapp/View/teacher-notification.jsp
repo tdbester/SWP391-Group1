@@ -28,28 +28,14 @@
                         <i class="fas fa-bell"></i>
                         Thông báo
                     </h1>
-                    <p class="page-subtitle">Danh sách các yêu cầu đã được xử lý và phê duyệt</p>
                 </div>
 
                 <!-- Filter Section -->
-                <div class="filter-container ${(currentFilter.typeName != 'all' || currentFilter.dateFrom != '' || currentFilter.dateTo != '' || currentFilter.searchKeyword != '') ? 'filter-active' : ''}">
-                    <input type="checkbox" id="filterToggle" class="filter-toggle" ${(currentFilter.typeName != 'all' || currentFilter.dateFrom != '' || currentFilter.dateTo != '' || currentFilter.searchKeyword != '') ? 'checked' : ''}>
+                <div class="filter-container ${(currentFilter.dateFrom != '' || currentFilter.dateTo != '' || currentFilter.searchKeyword != '') ? 'filter-active' : ''}">
+                    <input type="checkbox" id="filterToggle" class="filter-toggle" ${(currentFilter.dateFrom != '' || currentFilter.dateTo != '' || currentFilter.searchKeyword != '') ? 'checked' : ''}>
                     <div class="filter-content">
                         <form method="GET" action="teacher-notification">
                             <div class="filter-row">
-                                <div class="filter-group">
-                                    <label for="typeName">Loại yêu cầu:</label>
-                                    <select name="typeName" id="typeName">
-                                        <option value="all">Tất cả loại</option>
-                                        <c:forEach items="${requestTypes}" var="type">
-                                            <option value="${type.typeName}"
-                                                ${currentFilter.typeName == type.typeName ? 'selected' : ''}>
-                                                    ${type.typeName}
-                                            </option>
-                                        </c:forEach>
-                                    </select>
-                                </div>
-
                                 <div class="filter-group">
                                     <label for="dateFrom">Từ ngày:</label>
                                     <input type="date" name="dateFrom" id="dateFrom"
@@ -68,7 +54,7 @@
                                     <label for="searchKeyword">Tìm kiếm:</label>
                                     <input type="text" name="searchKeyword" id="searchKeyword"
                                            value="${currentFilter.searchKeyword}"
-                                           placeholder="Tìm trong nội dung, phản hồi...">
+                                           placeholder="Tìm trong nội dung, thông báo...">
                                 </div>
                             </div>
 
@@ -86,40 +72,72 @@
                     </div>
                 </div>
 
-                <!-- Request List -->
+                <!-- Notification List -->
                 <div class="table-container">
                     <c:choose>
-                        <c:when test="${not empty approvedRequests}">
+                        <c:when test="${not empty allNotifications}">
                             <table class="requests-table">
                                 <thead>
                                 <tr>
-                                    <th>Loại yêu cầu</th>
-                                    <th>Người gửi</th>
-                                    <th>Nội dung</th>
+                                    <th>Loại</th>
+                                    <th>Nội Dung</th>
+                                    <th>Thông báo</th>
                                     <th>Người xử lý</th>
                                     <th>Ngày phản hồi</th>
-                                    <th>Trạng thái</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <c:forEach items="${approvedRequests}" var="request">
+                                <c:forEach items="${allNotifications}" var="notification">
                                     <tr>
                                         <td>
-                                            <span class="type-badge">${request.typeName}</span>
+                                            <c:choose>
+                                                <c:when test="${notification.type == 'SALARY'}">
+                                                    <span class="type-badge salary-badge">
+                                                        <i class="fas fa-money-bill-wave"></i>
+                                                        Lương
+                                                    </span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="type-badge request-badge">
+                                                        <i class="fas fa-file-alt"></i>
+                                                        Yêu cầu
+                                                    </span>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </td>
-                                        <td>${request.senderName}</td>
                                         <td>
-                                            <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
-                                                    ${fn:substring(request.reason, 0, 50)}
-                                                <c:if test="${fn:length(request.reason) > 50}">...</c:if>
+                                            <div class="content-cell">
+                                                <c:choose>
+                                                    <c:when test="${fn:length(notification.content) > 80}">
+                                                        ${fn:substring(notification.content, 0, 80)}...
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        ${notification.content}
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </div>
                                         </td>
-                                        <td>${request.processedByName}</td>
                                         <td>
-                                            <fmt:formatDate value="${request.responseAt}" pattern="dd/MM/yyyy HH:mm"/>
+                                            <div class="notification-cell">
+                                                <c:choose>
+                                                    <c:when test="${fn:length(notification.notification) > 50}">
+                                                        ${fn:substring(notification.notification, 0, 50)}...
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        ${notification.notification}
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
                                         </td>
                                         <td>
-                                            <span class="status-badge status-approved">Đã Duyệt</span>
+                                            <span class="processed-by">
+                                                    ${notification.processedBy}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="response-date">
+                                                <fmt:formatDate value="${notification.responseDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                            </span>
                                         </td>
                                     </tr>
                                 </c:forEach>
@@ -129,57 +147,20 @@
                         <c:otherwise>
                             <div class="empty-state">
                                 <i class="fas fa-inbox"></i>
-                                <h3>Không tìm thấy yêu cầu nào</h3>
+                                <h3>Không tìm thấy thông báo nào</h3>
                                 <p>Hãy thử điều chỉnh bộ lọc hoặc <a href="teacher-notification">xóa bộ lọc</a> để xem tất cả.</p>
                             </div>
                         </c:otherwise>
                     </c:choose>
                 </div>
 
-                <!-- Pagination -->
-                <c:if test="${totalPages > 1}">
-                    <div class="pagination">
-                        <c:url value="teacher-notification" var="baseUrl">
-                            <c:param name="typeName" value="${currentFilter.typeName}"/>
-                            <c:param name="dateFrom" value="${currentFilter.dateFrom}"/>
-                            <c:param name="dateTo" value="${currentFilter.dateTo}"/>
-                            <c:param name="searchKeyword" value="${currentFilter.searchKeyword}"/>
-                        </c:url>
-
-                        <c:if test="${currentPage > 1}">
-                            <a href="${baseUrl}&page=1" class="btn btn-outline btn-sm">
-                                <i class="fas fa-angle-double-left"></i>
-                                Đầu
-                            </a>
-                            <a href="${baseUrl}&page=${currentPage - 1}" class="btn btn-outline btn-sm">
-                                <i class="fas fa-angle-left"></i>
-                                Trước
-                            </a>
-                        </c:if>
-
-                        <c:forEach begin="${currentPage - 2 > 1 ? currentPage - 2 : 1}"
-                                   end="${currentPage + 2 < totalPages ? currentPage + 2 : totalPages}"
-                                   var="i">
-                            <c:choose>
-                                <c:when test="${i == currentPage}">
-                                    <span class="btn btn-primary btn-sm">${i}</span>
-                                </c:when>
-                                <c:otherwise>
-                                    <a href="${baseUrl}&page=${i}" class="btn btn-outline btn-sm">${i}</a>
-                                </c:otherwise>
-                            </c:choose>
-                        </c:forEach>
-
-                        <c:if test="${currentPage < totalPages}">
-                            <a href="${baseUrl}&page=${currentPage + 1}" class="btn btn-outline btn-sm">
-                                Tiếp
-                                <i class="fas fa-angle-right"></i>
-                            </a>
-                            <a href="${baseUrl}&page=${totalPages}" class="btn btn-outline btn-sm">
-                                Cuối
-                                <i class="fas fa-angle-double-right"></i>
-                            </a>
-                        </c:if>
+                <!-- Summary Info -->
+                <c:if test="${not empty allNotifications}">
+                    <div class="summary-info">
+                        <p>
+                            <i class="fas fa-info-circle"></i>
+                            Tổng cộng: <strong>${filteredCount}</strong> thông báo
+                        </p>
                     </div>
                 </c:if>
             </div>
@@ -189,5 +170,100 @@
         <jsp:include page="footer.jsp" />
     </div>
 </div>
+
+<style>
+    .salary-badge {
+        background-color: #28a745;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .request-badge {
+        background-color: #007bff;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .content-cell {
+        max-width: 300px;
+        word-wrap: break-word;
+        line-height: 1.4;
+    }
+
+    .notification-cell {
+        max-width: 250px;
+        word-wrap: break-word;
+        line-height: 1.4;
+    }
+
+    .processed-by {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .response-date {
+        color: #6c757d;
+        font-size: 14px;
+    }
+
+    .summary-info {
+        margin-top: 16px;
+        padding: 12px;
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        color: #495057;
+    }
+
+    .summary-info i {
+        color: #007bff;
+        margin-right: 8px;
+    }
+
+    .requests-table th:first-child {
+        width: 80px;
+    }
+
+    .requests-table th:nth-child(2) {
+        width: 30%;
+    }
+
+    .requests-table th:nth-child(3) {
+        width: 25%;
+    }
+
+    .requests-table th:nth-child(4) {
+        width: 15%;
+    }
+
+    .requests-table th:nth-child(5) {
+        width: 15%;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .content-cell, .notification-cell {
+            max-width: 200px;
+        }
+
+        .requests-table th:nth-child(2),
+        .requests-table th:nth-child(3) {
+            width: auto;
+            min-width: 150px;
+        }
+    }
+</style>
+
 </body>
 </html>

@@ -11,10 +11,10 @@ import java.util.List;
 public class ApprovedRequestDAO {
 
     /**
-     * Lấy danh sách request đã approved với filter và pagination
+     * Lấy danh sách request đã approved của teacher cụ thể với filter
      */
-    public List<Request> getApprovedRequestsWithFilter(String typeName, String dateFrom,
-                                                       String dateTo, String searchKeyword) {
+    public List<Request> getApprovedRequestsWithFilterByTeacher(int teacherId, String typeName,
+                                                                String dateFrom, String dateTo, String searchKeyword) {
         List<Request> requests = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
             SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
@@ -26,10 +26,11 @@ public class ApprovedRequestDAO {
             JOIN RequestType rt ON r.TypeID = rt.TypeID
             JOIN Account a ON r.SenderId = a.Id
             LEFT JOIN Account p ON r.ProcessedBy = p.Id
-            WHERE r.Status = 'Approved'
+            WHERE r.Status = 'Approved' AND r.SenderId = ?
             """);
 
         List<Object> params = new ArrayList<>();
+        params.add(teacherId);
 
         // Filter by type name
         if (typeName != null && !typeName.trim().isEmpty() && !typeName.equals("all")) {
@@ -37,7 +38,7 @@ public class ApprovedRequestDAO {
             params.add(typeName);
         }
 
-        // Filter by date range - SỬA LỖI SQL SERVER
+        // Filter by date range
         if (dateFrom != null && !dateFrom.trim().isEmpty()) {
             sql.append(" AND CAST(r.CreatedAt AS DATE) >= ?");
             params.add(dateFrom);
@@ -80,19 +81,20 @@ public class ApprovedRequestDAO {
     }
 
     /**
-     * Đếm tổng số request với filter
+     * Đếm tổng số request của teacher cụ thể với filter
      */
-    public int getFilteredRequestCount(String typeName, String dateFrom,
-                                       String dateTo, String searchKeyword) {
+    public int getFilteredRequestCountByTeacher(int teacherId, String typeName, String dateFrom,
+                                                String dateTo, String searchKeyword) {
         StringBuilder sql = new StringBuilder("""
             SELECT COUNT(*)
             FROM Request r
             JOIN RequestType rt ON r.TypeID = rt.TypeID
             JOIN Account a ON r.SenderId = a.Id
-            WHERE r.Status = 'Approved'
+            WHERE r.Status = 'Approved' AND r.SenderId = ?
             """);
 
         List<Object> params = new ArrayList<>();
+        params.add(teacherId);
 
         // Apply same filters as main query
         if (typeName != null && !typeName.trim().isEmpty() && !typeName.equals("all")) {
@@ -100,7 +102,6 @@ public class ApprovedRequestDAO {
             params.add(typeName);
         }
 
-        // SỬA LỖI SQL SERVER - thay DATE() bằng CAST
         if (dateFrom != null && !dateFrom.trim().isEmpty()) {
             sql.append(" AND CAST(r.CreatedAt AS DATE) >= ?");
             params.add(dateFrom);
@@ -139,6 +140,65 @@ public class ApprovedRequestDAO {
     }
 
     /**
+     * Lấy request theo ID và chỉ của teacher cụ thể
+     */
+    public Request getApprovedRequestByIdAndTeacher(int requestId, int teacherId) {
+        String sql = """
+            SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
+                   r.CreatedAt, r.ResponseAt, r.ProcessedBy, r.TypeID,
+                   rt.TypeName, rt.Description,
+                   a.FullName as SenderName,
+                   p.FullName as ProcessedByName
+            FROM Request r
+            JOIN RequestType rt ON r.TypeID = rt.TypeID
+            JOIN Account a ON r.SenderId = a.Id
+            LEFT JOIN Account p ON r.ProcessedBy = p.Id
+            WHERE r.Id = ? AND r.Status = 'Approved' AND r.SenderId = ?
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, requestId);
+            stmt.setInt(2, teacherId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return mapResultSetToRequest(rs);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Đếm tổng số request đã approved của teacher cụ thể
+     */
+    public int getTotalApprovedRequestsByTeacher(int teacherId) {
+        String sql = "SELECT COUNT(*) FROM Request WHERE Status = 'Approved' AND SenderId = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, teacherId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+
+    /**
      * Lấy danh sách tất cả request types
      */
     public List<RequestType> getAllRequestTypes() {
@@ -164,60 +224,6 @@ public class ApprovedRequestDAO {
         return types;
     }
 
-    /**
-     * Lấy request theo ID
-     */
-    public Request getApprovedRequestById(int requestId) {
-        String sql = """
-            SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
-                   r.CreatedAt, r.ResponseAt, r.ProcessedBy, r.TypeID,
-                   rt.TypeName, rt.Description,
-                   a.FullName as SenderName,
-                   p.FullName as ProcessedByName
-            FROM Request r
-            JOIN RequestType rt ON r.TypeID = rt.TypeID
-            JOIN Account a ON r.SenderId = a.Id
-            LEFT JOIN Account p ON r.ProcessedBy = p.Id
-            WHERE r.Id = ? AND r.Status = 'Approved'
-            """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, requestId);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return mapResultSetToRequest(rs);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    /**
-     * Đếm tổng số request đã approved
-     */
-    public int getTotalApprovedRequests() {
-        String sql = "SELECT COUNT(*) FROM Request WHERE Status = 'Approved'";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return 0;
-    }
 
     /**
      * Mapping từ ResultSet sang Request object

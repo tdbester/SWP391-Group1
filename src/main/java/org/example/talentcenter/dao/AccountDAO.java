@@ -239,4 +239,17 @@ public class AccountDAO {
             return false;
         }
     }
+
+    public int getTeacherIdByAccountId(int accountId) throws SQLException {
+        String sql = "SELECT Id FROM Teacher WHERE AccountId = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("Id");
+            }
+        }
+        return -1; // Không tìm thấy
+    }
 }

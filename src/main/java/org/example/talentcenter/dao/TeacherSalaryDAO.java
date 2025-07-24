@@ -12,7 +12,7 @@ public class TeacherSalaryDAO {
     private static final int RECORDS_PER_PAGE = 10;
 
     /**
-     * Lấy danh sách lương giáo viên với phân trang và filter
+     * Lấy danh sách lương giáo viên với phân trang và filter - FIXED
      */
     public List<TeacherSalary> getTeacherSalaries(int month, int year, String searchName, int page) throws SQLException {
         List<TeacherSalary> salaries = new ArrayList<>();
@@ -25,7 +25,13 @@ public class TeacherSalaryDAO {
                 .append("ISNULL(ts.BaseSalary, t.Salary) as BaseSalary, ")
                 .append("ISNULL(ts.TotalSalary, 0) as TotalSalary, ")
                 .append("ISNULL(ts.Adjustment, 0) as Adjustment, ")
-                .append("ISNULL(ts.FinalSalary, 0) as FinalSalary, ")
+                // FIX: Tính toán FinalSalary đúng cách
+                .append("CASE ")
+                .append("  WHEN ts.Id IS NULL THEN 0 ")
+                .append("  WHEN ts.FinalSalary IS NULL OR ts.FinalSalary = 0 THEN ")
+                .append("    ISNULL(ts.TotalSalary, 0) + ISNULL(ts.Adjustment, 0) ")  // Tính từ TotalSalary + Adjustment
+                .append("  ELSE ts.FinalSalary ")
+                .append("END as FinalSalary, ")
                 .append("ts.PaymentDate, ts.Note, ts.Id as SalaryId, ")
                 .append("pa.FullName as ProcessedByName ")
                 .append("FROM Teacher t ")
@@ -86,60 +92,34 @@ public class TeacherSalaryDAO {
     }
 
     /**
-     * Tính lương cho giáo viên theo tháng - phù hợp với cấu trúc bảng hiện tại
+     * Tính lương cho giáo viên theo tháng - FIXED
      */
     public void calculateSalaryForTeacher(int teacherId, int month, int year) throws SQLException {
         String checkExistsSql = "SELECT COUNT(*) FROM TeacherSalary WHERE TeacherId = ? AND Month = ? AND Year = ?";
 
         String insertSql = """
         INSERT INTO TeacherSalary (TeacherId, Month, Year, TotalSessions, BaseSalary, TotalSalary, FinalSalary, CreatedAt, UpdatedAt)
-        SELECT ?, ?, ?, 
-               COUNT(s.Id) as TotalSessions,
-               t.Salary as BaseSalary,
-               COUNT(s.Id) * t.Salary as TotalSalary,
-               COUNT(s.Id) * t.Salary as FinalSalary,
-               GETDATE(), GETDATE()
-        FROM Teacher t
-        LEFT JOIN ClassRooms cr ON t.Id = cr.TeacherId
-        LEFT JOIN Schedule s ON cr.Id = s.ClassRoomId 
-                           AND MONTH(s.Date) = ? AND YEAR(s.Date) = ?
-        WHERE t.Id = ?
-        GROUP BY t.Id, t.Salary
+        VALUES (?, ?, ?, 0, 0, 0, 0, GETDATE(), GETDATE())
     """;
 
-        String updateSql = """
-        UPDATE TeacherSalary 
-        SET TotalSessions = (
-                SELECT COUNT(s.Id)
-                FROM ClassRooms cr
-                LEFT JOIN Schedule s ON cr.Id = s.ClassRoomId 
-                                   AND MONTH(s.Date) = ? AND YEAR(s.Date) = ?
-                WHERE cr.TeacherId = ?
-            ),
-            BaseSalary = (SELECT Salary FROM Teacher WHERE Id = ?),
-            TotalSalary = (
-                SELECT COUNT(s.Id) * t.Salary
-                FROM Teacher t
-                LEFT JOIN ClassRooms cr ON t.Id = cr.TeacherId
-                LEFT JOIN Schedule s ON cr.Id = s.ClassRoomId 
-                                   AND MONTH(s.Date) = ? AND YEAR(s.Date) = ?
-                WHERE t.Id = ?
-                GROUP BY t.Id, t.Salary
-            ),
-            FinalSalary = CASE 
-                WHEN PaymentDate IS NULL THEN (
-                    SELECT COUNT(s.Id) * t.Salary
-                    FROM Teacher t
-                    LEFT JOIN ClassRooms cr ON t.Id = cr.TeacherId
-                    LEFT JOIN Schedule s ON cr.Id = s.ClassRoomId 
-                                       AND MONTH(s.Date) = ? AND YEAR(s.Date) = ?
-                    WHERE t.Id = ?
-                    GROUP BY t.Id, t.Salary
-                ) + ISNULL(Adjustment, 0)
-                ELSE FinalSalary 
-            END,
+        String updateSessionsSql = """
+        UPDATE ts
+        SET TotalSessions = ISNULL(sessionCount.TotalSessions, 0),
+            BaseSalary = t.Salary,
+            TotalSalary = ISNULL(sessionCount.TotalSessions, 0) * t.Salary,
+            FinalSalary = (ISNULL(sessionCount.TotalSessions, 0) * t.Salary) + ISNULL(ts.Adjustment, 0),
             UpdatedAt = GETDATE()
-        WHERE TeacherId = ? AND Month = ? AND Year = ?
+        FROM TeacherSalary ts
+        JOIN Teacher t ON ts.TeacherId = t.Id
+        LEFT JOIN (
+            SELECT cr.TeacherId, COUNT(s.Id) as TotalSessions
+            FROM ClassRooms cr
+            LEFT JOIN Schedule s ON cr.Id = s.ClassRoomId 
+                               AND MONTH(s.Date) = ? AND YEAR(s.Date) = ?
+            WHERE cr.TeacherId = ?
+            GROUP BY cr.TeacherId
+        ) sessionCount ON t.Id = sessionCount.TeacherId
+        WHERE ts.TeacherId = ? AND ts.Month = ? AND ts.Year = ?
     """;
 
         try (Connection conn = DBConnect.getConnection()) {
@@ -151,33 +131,34 @@ public class TeacherSalaryDAO {
                 ResultSet rs = checkPs.executeQuery();
 
                 if (rs.next() && rs.getInt(1) > 0) {
-                    // Update existing record
-                    try (PreparedStatement updatePs = conn.prepareStatement(updateSql)) {
+                    // Update existing record - 5 tham số
+                    try (PreparedStatement updatePs = conn.prepareStatement(updateSessionsSql)) {
+                        updatePs.setInt(1, month);    // MONTH(s.Date) = ?
+                        updatePs.setInt(2, year);     // YEAR(s.Date) = ?
+                        updatePs.setInt(3, teacherId); // WHERE cr.TeacherId = ?
+                        updatePs.setInt(4, teacherId); // WHERE ts.TeacherId = ?
+                        updatePs.setInt(5, month);    // ts.Month = ?
+                        updatePs.setInt(6, year);     // ts.Year = ?
+                        updatePs.executeUpdate();
+                    }
+                } else {
+                    // Insert new record - 3 tham số
+                    try (PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
+                        insertPs.setInt(1, teacherId);
+                        insertPs.setInt(2, month);
+                        insertPs.setInt(3, year);
+                        insertPs.executeUpdate();
+                    }
+
+                    // Sau khi insert, update lại sessions
+                    try (PreparedStatement updatePs = conn.prepareStatement(updateSessionsSql)) {
                         updatePs.setInt(1, month);
                         updatePs.setInt(2, year);
                         updatePs.setInt(3, teacherId);
                         updatePs.setInt(4, teacherId);
                         updatePs.setInt(5, month);
                         updatePs.setInt(6, year);
-                        updatePs.setInt(7, teacherId);
-                        updatePs.setInt(8, month);
-                        updatePs.setInt(9, year);
-                        updatePs.setInt(10, teacherId);
-                        updatePs.setInt(11, teacherId);
-                        updatePs.setInt(12, month);
-                        updatePs.setInt(13, year);
                         updatePs.executeUpdate();
-                    }
-                } else {
-                    // Insert new record
-                    try (PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
-                        insertPs.setInt(1, teacherId);
-                        insertPs.setInt(2, month);
-                        insertPs.setInt(3, year);
-                        insertPs.setInt(4, month);
-                        insertPs.setInt(5, year);
-                        insertPs.setInt(6, teacherId);
-                        insertPs.executeUpdate();
                     }
                 }
             }
@@ -185,10 +166,10 @@ public class TeacherSalaryDAO {
     }
 
     /**
-     * Tính lương cho tất cả giáo viên - bỏ điều kiện Status
+     * Tính lương cho tất cả giáo viên
      */
     public void calculateSalaryForAllTeachers(int month, int year) throws SQLException {
-        String getTeachersSql = "SELECT Id FROM Teacher"; // Bỏ WHERE Status = 1
+        String getTeachersSql = "SELECT Id FROM Teacher";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(getTeachersSql)) {
@@ -251,7 +232,7 @@ public class TeacherSalaryDAO {
     }
 
     /**
-     * Điều chỉnh lương (thưởng/phạt)
+     * Điều chỉnh lương (thưởng/phạt) - FIXED
      */
     public boolean adjustSalary(int teacherId, int month, int year, double adjustment, String note, int processedBy) throws SQLException {
         String sql = """
@@ -316,4 +297,48 @@ public class TeacherSalaryDAO {
 
         return null;
     }
+
+    public List<TeacherSalary> getPaidSalariesByTeacherId(int teacherId) throws SQLException {
+        List<TeacherSalary> list = new ArrayList<>();
+
+        String sql = """
+        SELECT ts.*, 
+               a.FullName AS ProcessedByName,
+               t.Salary AS SalaryPerSession,
+               ta.FullName AS TeacherName
+        FROM TeacherSalary ts 
+        LEFT JOIN Account a ON ts.ProcessedBy = a.Id 
+        JOIN Teacher t ON ts.TeacherId = t.Id
+        JOIN Account ta ON t.AccountId = ta.Id
+        WHERE ts.TeacherId = ? AND ts.PaymentDate IS NOT NULL 
+        ORDER BY ts.PaymentDate DESC
+    """;
+
+        try (Connection con = DBConnect.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, teacherId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                TeacherSalary ts = new TeacherSalary();
+                ts.setSalaryId(rs.getInt("Id"));
+                ts.setTeacherId(rs.getInt("TeacherId"));
+                ts.setTeacherName(rs.getString("TeacherName"));
+                ts.setSalaryPerSession(rs.getDouble("SalaryPerSession"));
+                ts.setMonth(rs.getInt("Month"));
+                ts.setYear(rs.getInt("Year"));
+                ts.setTotalSessions(rs.getInt("TotalSessions"));
+                ts.setBaseSalary(rs.getDouble("BaseSalary"));
+                ts.setTotalSalary(rs.getDouble("TotalSalary"));
+                ts.setAdjustment(rs.getDouble("Adjustment"));
+                ts.setFinalSalary(rs.getDouble("FinalSalary"));
+                ts.setNote(rs.getString("Note"));
+                ts.setPaymentDate(rs.getTimestamp("PaymentDate"));
+                ts.setProcessedByName(rs.getString("ProcessedByName"));
+                list.add(ts);
+            }
+        }
+        return list;
+    }
+
 }
