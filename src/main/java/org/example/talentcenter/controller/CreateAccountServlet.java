@@ -22,10 +22,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.example.talentcenter.dao.CourseDAO;
 import org.example.talentcenter.dao.RequestDAO;
 import org.example.talentcenter.dao.AccountDAO;
-import org.example.talentcenter.model.Request;
+import org.example.talentcenter.model.*;
 import org.example.talentcenter.service.NotificationService;
 
 import java.io.IOException;
@@ -40,6 +41,25 @@ public class CreateAccountServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"admin".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         request.setAttribute("requests", dao.getAllAccountRequests());
         request.getRequestDispatcher("/View/account-request-list.jsp").forward(request, response);
     }
@@ -47,6 +67,25 @@ public class CreateAccountServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"admin".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         try {
             int requestId = Integer.parseInt(request.getParameter("id"));
 
@@ -70,7 +109,8 @@ public class CreateAccountServlet extends HttpServlet {
                 try {
                     courseId = Integer.parseInt(parts[3].trim());
                 } catch (NumberFormatException e) {
-                    System.out.println("Lỗi parse courseId: " + parts[3]);
+                    e.printStackTrace();
+                    response.sendRedirect("CreateAccount?error=invalid_id");
                 }
             }
 

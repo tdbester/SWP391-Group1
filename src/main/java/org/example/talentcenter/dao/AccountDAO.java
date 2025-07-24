@@ -243,7 +243,7 @@ public class AccountDAO {
 
     public boolean createStudentAccount(String password, String name, String email, String phone) {
         // Log giá trị truyền vào
-        System.out.println("DEBUG: createStudentAccount - name=" + name + ", email=" + email + ", phone=" + phone + ", password=" + password);
+        System.out.println("DAO INPUT: " + name + " | " + email + " | " + phone + " | " + password);
         if (password == null || password.trim().isEmpty() ||
             name == null || name.trim().isEmpty() ||
             email == null || email.trim().isEmpty() ||

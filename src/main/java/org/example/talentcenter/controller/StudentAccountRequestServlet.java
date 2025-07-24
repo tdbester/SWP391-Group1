@@ -40,42 +40,31 @@ public class StudentAccountRequestServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        if (action == null || action.equals("list")) {
+
+        if (action == null || action.equals("list") || action.equals("search") || action.equals("filterByStatus")) {
             int page = 1;
             int recordsPerPage = 10;
-            try {
-                String pageParam = request.getParameter("page");
-                if (pageParam != null) page = Integer.parseInt(pageParam);
-            } catch (NumberFormatException ignored) {
+            if (request.getParameter("page") != null) {
+                try {
+                    page = Integer.parseInt(request.getParameter("page"));
+                } catch (NumberFormatException ignored) {
+                }
             }
 
-            int offset = (page - 1) * recordsPerPage;
-            ArrayList<Consultation> agreedStudents = consultationDAO.getAgreedConsultationsWithPaging(offset, recordsPerPage);
-            int totalRecords = consultationDAO.getTotalAgreedConsultationCount();
-            int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+            String keyword = request.getParameter("keyword");
+            String statusFilter = request.getParameter("statusFilter");
+
+            // Đếm tổng số bản ghi
+            int totalRecords = consultationDAO.countAgreedConsultationsFiltered(keyword, statusFilter);
+
+            ArrayList<Consultation> agreedStudents = consultationDAO.getAgreedConsultationsFiltered(keyword, statusFilter, (page - 1) * recordsPerPage, recordsPerPage);
+
+            int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
 
             request.setAttribute("agreedStudents", agreedStudents);
             request.setAttribute("currentPage", page);
             request.setAttribute("totalPages", totalPages);
-            request.getRequestDispatcher("View/student-account-request.jsp").forward(request, response);
-        } else if (action.equals("search")) {
-            String keyword = request.getParameter("keyword");
-            if (keyword == null || keyword.trim().isEmpty()) {
-                response.sendRedirect("Consultation?action=list");
-                return;
-            }
-            ArrayList<Consultation> agreedStudents = consultationDAO.searchAgreedConsultations(keyword.trim());
-            request.setAttribute("agreedStudents", agreedStudents);
             request.setAttribute("keyword", keyword);
-            request.getRequestDispatcher("View/student-account-request.jsp").forward(request, response);
-        } else if (action.equals("filterByStatus")) {
-            String statusFilter = request.getParameter("statusFilter");
-            if (statusFilter == null || statusFilter.trim().isEmpty()) {
-                response.sendRedirect("StudentAccountRequest?action=list");
-                return;
-            }
-            ArrayList<Consultation> agreedStudents = consultationDAO.filterConsultationsByPaymentStatus(statusFilter.trim());
-            request.setAttribute("agreedStudents", agreedStudents);
             request.setAttribute("statusFilter", statusFilter);
             request.getRequestDispatcher("View/student-account-request.jsp").forward(request, response);
         } else {

@@ -44,10 +44,22 @@ public class StudentScheduleServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession();
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
-            response.sendRedirect("View/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"student".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         try {

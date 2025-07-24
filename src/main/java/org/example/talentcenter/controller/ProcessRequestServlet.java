@@ -43,17 +43,26 @@ public class ProcessRequestServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
-        HttpSession session = request.getSession();
-        Account account = (Account) session.getAttribute("account");
+        HttpSession session = request.getSession(false);
 
-        if (account == null) {
-            response.sendRedirect("View/login.jsp");
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"training manager".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         ArrayList<Request> requestTypes = requestDAO.getStudentRequestType();
         request.setAttribute("requestTypes", requestTypes);
 
@@ -165,14 +174,24 @@ public class ProcessRequestServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
-        HttpSession session = request.getSession();
-        Account account = (Account) session.getAttribute("account");
+        HttpSession session = request.getSession(false);
 
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        Account account = (Account) session.getAttribute("account");
         if (account == null) {
-            response.sendRedirect("View/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"training manager".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 

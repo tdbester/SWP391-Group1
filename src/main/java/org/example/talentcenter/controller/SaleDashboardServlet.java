@@ -40,11 +40,23 @@ public class SaleDashboardServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("account") == null) {
-            response.sendRedirect("login.jsp");
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"sale".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         String action = request.getParameter("action");
 
         if ("notifications".equals(action)) {
@@ -117,13 +129,23 @@ public class SaleDashboardServlet extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
         HttpSession session = request.getSession(false);
-        Account account = (Account) session.getAttribute("account");
 
-        if (account == null) {
-            response.sendRedirect("login");
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"sale".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         if ("deleteNotification".equals(action)) {
             String notificationId = request.getParameter("notificationId");
             if (notificationId != null) {

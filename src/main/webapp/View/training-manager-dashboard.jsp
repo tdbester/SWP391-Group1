@@ -44,9 +44,7 @@
             <div class="sale-quick-nav">
                 <h2>Quick Actions</h2>
                 <div class="sale-nav-buttons">
-                    <a href="${pageContext.request.contextPath}/CreateAccount" class="sale-nav-btn">
-                        <i class="fas fa-user-check"></i>Danh sách yêu cầu cấp tài khoản
-                    </a>
+
                     <a href="${pageContext.request.contextPath}/ProcessRequest?action=list" class="sale-nav-btn">
                         <i class="fas fa-tasks"></i>Danh sách đơn cần xử lý
                     </a>

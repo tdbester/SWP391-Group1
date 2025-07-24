@@ -94,9 +94,13 @@
                         </label>
                         <select id="statusFilter" name="statusFilter" class="form-select">
                             <option value="">Tất cả trạng thái</option>
-                            <option value="Đồng ý" <c:if test="${statusFilter == 'Đồng ý'}">selected</c:if>>Đồng ý</option>
-                            <option value="Đang xử lý" <c:if test="${statusFilter == 'Đang xử lý'}">selected</c:if>>Đang xử lý</option>
-                            <option value="Từ chối" <c:if test="${statusFilter == 'Từ chối'}">selected</c:if>>Từ chối</option>
+                            <option value="Đồng ý" <c:if test="${statusFilter == 'Đồng ý'}">selected</c:if>>Đồng ý
+                            </option>
+                            <option value="Đang xử lý" <c:if test="${statusFilter == 'Đang xử lý'}">selected</c:if>>Đang
+                                xử lý
+                            </option>
+                            <option value="Từ chối" <c:if test="${statusFilter == 'Từ chối'}">selected</c:if>>Từ chối
+                            </option>
                         </select>
                     </div>
 
@@ -165,11 +169,13 @@
                             </td>
                             <td>
                                 <div class="dropdown">
-                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
+                                            data-bs-toggle="dropdown">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item editBtn" href="#" data-id="${c.id}" data-note="${c.note}"
+                                        <li><a class="dropdown-item editBtn" href="#" data-id="${c.id}"
+                                               data-note="${c.note}"
                                                data-id="${c.id}"
                                                data-name="${c.fullName}"
                                                data-email="${c.email}"
@@ -178,13 +184,15 @@
                                                data-note="${c.note}"
                                                data-bs-toggle="modal" data-bs-target="#editModal">Sửa</a></li>
                                         <li>
-                                            <form method="post" action="Consultation" onsubmit="return confirm('Xác nhận xóa?')">
+                                            <form method="post" action="Consultation"
+                                                  onsubmit="return confirm('Xác nhận xóa?')">
                                                 <input type="hidden" name="id" value="${c.id}"/>
                                                 <button class="dropdown-item" name="action" value="delete">Xóa</button>
                                             </form>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="Consultation?action=viewDetail&id=${c.id}">Xem chi tiết</a>
+                                            <a class="dropdown-item" href="Consultation?action=viewDetail&id=${c.id}">Xem
+                                                chi tiết</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -199,11 +207,25 @@
                 <nav>
                     <ul class="pagination">
                         <c:forEach begin="1" end="${totalPages}" var="i">
+                            <c:url var="pageUrl" value="Consultation">
+                                <c:param name="action" value="list"/>
+                                <c:param name="page" value="${i}"/>
+                                <c:if test="${not empty keyword}">
+                                    <c:param name="keyword" value="${keyword}"/>
+                                </c:if>
+                                <c:if test="${not empty statusFilter}">
+                                    <c:param name="statusFilter" value="${statusFilter}"/>
+                                </c:if>
+                                <c:if test="${not empty course_filter}">
+                                    <c:param name="course_filter" value="${course_filter}"/>
+                                </c:if>
+                            </c:url>
                             <li class="page-item ${i == currentPage ? 'active' : ''}">
-                                <a class="page-link" href="Consultation?action=list&page=${i}">${i}</a>
+                                <a class="page-link" href="${pageUrl}">${i}</a>
                             </li>
                         </c:forEach>
                     </ul>
+
                 </nav>
             </div>
         </div>
@@ -216,79 +238,43 @@
         const courseFilter = document.getElementById('courseFilter');
         const statusFilter = document.getElementById('statusFilter');
         const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-
         let searchTimer;
 
+        function buildUrl(page) {
+            // Lấy giá trị hiện tại của tất cả filter
+            const keyword = searchInput.value.trim();
+            const course = courseFilter.value;
+            const status = statusFilter.value;
+            let url = 'Consultation?action=list';
+            if (page !== undefined) url += '&page=' + page;
+            if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
+            if (course) url += '&course_filter=' + encodeURIComponent(course);
+            if (status) url += '&statusFilter=' + encodeURIComponent(status);
+            return url;
+        }
+
         // Tìm kiếm với delay
-        function searchWithDelay() {
+        searchInput.addEventListener('input', function () {
             clearTimeout(searchTimer);
             searchTimer = setTimeout(function () {
-                const keyword = searchInput.value.trim();
-                const contextPath = '${pageContext.request.contextPath}';
-                const baseUrl = contextPath + '/Consultation';
-                if (keyword) {
-                    window.location.href = baseUrl + '?action=search&keyword=' + encodeURIComponent(keyword);
-                } else {
-                    window.location.href = baseUrl;
-                }
+                window.location.href = buildUrl(); // Khi search, về page 1
             }, 800);
-        }
+        });
 
-        function filterByCourse() {
-            const courseValue = courseFilter.value;
-            if (courseValue) {
-                window.location.href = 'Consultation?action=filterByCourse&course_filter=' + encodeURIComponent(courseValue);
-            } else {
-                window.location.href = 'Consultation';
-            }
-        }
+        courseFilter.addEventListener('change', function () {
+            window.location.href = buildUrl(); // Khi filter, về page 1
+        });
 
-        function filterByStatus() {
-            const statusValue = statusFilter.value;
-            if (statusValue) {
-                window.location.href = 'Consultation?action=filterByStatus&statusFilter=' + encodeURIComponent(statusValue);
-            } else {
-                window.location.href = 'Consultation';
-            }
-        }
+        statusFilter.addEventListener('change', function () {
+            window.location.href = buildUrl(); // Khi filter, về page 1
+        });
 
-        function clearAllFilters() {
-            window.location.href = 'Consultation';
-        }
-
-        searchInput.addEventListener('input', searchWithDelay);
-        courseFilter.addEventListener('change', filterByCourse);
-        statusFilter.addEventListener('change', filterByStatus);
-        clearFiltersBtn.addEventListener('click', clearAllFilters);
-
-        searchInput.addEventListener('input', function () {
-            if (this.value.length > 0) {
-                this.style.borderColor = '#7a6ad8';
-            } else {
-                this.style.borderColor = '#d0d7ff';
-            }
+        clearFiltersBtn.addEventListener('click', function () {
+            window.location.href = 'Consultation?action=list'; // Clear filter, về trang 1
         });
     });
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.editBtn').forEach(function (button) {
-            button.addEventListener('click', function () {
-                document.getElementById('editId').value = this.getAttribute('data-id');
-                document.getElementById('editName').value = this.getAttribute('data-name');
-                document.getElementById('editEmail').value = this.getAttribute('data-email');
-                document.getElementById('editPhone').value = this.getAttribute('data-phone');
-                document.getElementById('editNote').value = this.getAttribute('data-note');
 
-                const courseId = this.getAttribute('data-course-id');
-                const courseSelect = document.getElementById('editCourse');
-
-                Array.from(courseSelect.options).forEach(function(option) {
-                    option.selected = (option.value === courseId);
-                });
-            });
-        });
-    });
 </script>
-
 <jsp:include page="footer.jsp"/>
 </body>
 <!-- Edit Modal -->

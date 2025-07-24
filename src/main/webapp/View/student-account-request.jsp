@@ -23,6 +23,7 @@
 <%--    */--%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html>
@@ -101,7 +102,8 @@
                     <tbody>
                     <c:forEach var="s" items="${agreedStudents}">
                         <tr>
-                            <td><input type="checkbox" name="selectedStudentIds" value="${s.id}"/></td>
+                            <td><input type="checkbox" name="selectedStudentIds" value="${s.id}"
+                                       <c:if test="${s.accountRequestSent}">disabled</c:if>/></td>
                             <td>${s.id}</td>
                             <td>${s.fullName}</td>
                             <td>${s.email}</td>
@@ -153,7 +155,8 @@
             <ul class="pagination">
                 <c:forEach begin="1" end="${totalPages}" var="i">
                     <li class="page-item ${i == currentPage ? 'active' : ''}">
-                        <a class="page-link" href="StudentAccountRequest?action=list&page=${i}">${i}</a>
+                        <a class="page-link" href="StudentAccountRequest?action=list&page=${i
+    }&keyword=${fn:escapeXml(keyword)}&statusFilter=${fn:escapeXml(statusFilter)}">${i}</a>
                     </li>
                 </c:forEach>
             </ul>
