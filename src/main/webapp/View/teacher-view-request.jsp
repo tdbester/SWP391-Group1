@@ -202,10 +202,8 @@
                                             </c:when>
                                             <c:otherwise>
                                                 <span class="process-text unknown-status">
-                                                <i class="fas fa-question-circle"></i>
-                                                    Trạng thái không xác định
                                                 <c:if test="${not empty request.response}">
-                                                <br><small>${request.response}</small>
+                                                    <p>${request.response}</p>
                                                 </c:if>
                                                 </span>
                                             </c:otherwise>

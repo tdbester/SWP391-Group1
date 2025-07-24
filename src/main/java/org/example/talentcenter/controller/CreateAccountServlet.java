@@ -66,9 +66,11 @@ public class CreateAccountServlet extends HttpServlet {
             String studentEmail = parts[1];
             String studentPhone = parts.length > 2 ? parts[2] : "";
             int courseId = 0;
+            Integer consultationId = null;
             if (parts.length > 3) {
                 try {
                     courseId = Integer.parseInt(parts[3].trim());
+                    consultationId = Integer.parseInt(parts[4].trim());
                 } catch (NumberFormatException e) {
                     System.out.println("Lỗi parse courseId: " + parts[3]);
                 }
@@ -91,7 +93,8 @@ public class CreateAccountServlet extends HttpServlet {
                     randomPassword,
                     studentName,
                     studentEmail,
-                    studentPhone
+                    studentPhone,
+                    consultationId
             );
 
 

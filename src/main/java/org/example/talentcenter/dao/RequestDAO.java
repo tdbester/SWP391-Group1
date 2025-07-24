@@ -41,7 +41,7 @@ public class RequestDAO {
      * @param phone    Số điện thoại học viên
      * @return true nếu insert thành công, false nếu có lỗi xảy ra
      */
-    public boolean sendCreateAccountRequest(int senderId, String name, String email, String phone, int courseId) {
+    public boolean sendCreateAccountRequest(int senderId, String name, String email, String phone, int courseId, int consultationId) {
         String sql = """
                     INSERT INTO Request (TypeId, SenderId, Reason, Status, CreatedAt) 
                     VALUES (6, ?, ?, ?, GETDATE())
@@ -51,7 +51,7 @@ public class RequestDAO {
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, senderId);
-            stmt.setString(2, name + "|" + email + "|" + phone + "|" + courseId);
+            stmt.setString(2, name + "|" + email + "|" + phone + "|" + courseId+"|" + consultationId);
             stmt.setString(3, "Chờ xử lý");
 
             return stmt.executeUpdate() > 0;

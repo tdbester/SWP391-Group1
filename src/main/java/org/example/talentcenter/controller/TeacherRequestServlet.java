@@ -72,7 +72,7 @@ public class TeacherRequestServlet extends HttpServlet {
         response.setContentType("text/html; charset=UTF-8");
         String action = request.getParameter("action");
 
-        if ("create".equals(action)) {
+        if (action == null || "create".equals(action)) {
             HttpSession session = request.getSession(false);
             Account account = (Account) session.getAttribute("account");
             if (account == null) {
@@ -317,110 +317,4 @@ public class TeacherRequestServlet extends HttpServlet {
         request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
     }
 
-
-    private boolean handleLeaveRequest(HttpServletRequest request, int senderId, String reason) {
-        try {
-            String dateStr = request.getParameter("leaveDate");
-            if (dateStr == null || dateStr.trim().isEmpty()) {
-                return false;
-            }
-
-            LocalDate leaveDate = LocalDate.parse(dateStr);
-            LocalDate today = LocalDate.now();
-
-            // Kiểm tra ngày đã qua
-            if (leaveDate.isBefore(today)) {
-                return false;
-            }
-
-            // Tạo đơn yêu cầu
-            Request req = new Request();
-            req.setTypeName("Đơn xin nghỉ phép");
-            req.setReason("Ngày nghỉ: " + dateStr + "\nLý do: " + reason);
-            req.setSenderID(senderId);
-            req.setStatus("Chờ xử lý");
-
-            return requestDAO.insertRequest(req);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private boolean handleScheduleChangeRequest(HttpServletRequest request, int senderId, String reason) {
-        try {
-            String fromDateStr = request.getParameter("changeFromDate");
-            String toDateStr = request.getParameter("changeToDate");
-            String[] selectedSchedules = request.getParameterValues("selectedSchedules");
-
-            if (fromDateStr == null || fromDateStr.trim().isEmpty()) {
-                return false;
-            }
-
-            LocalDate fromDate = LocalDate.parse(fromDateStr);
-            LocalDate today = LocalDate.now();
-
-            // Kiểm tra ngày đã qua
-            if (fromDate.isBefore(today)) {
-                return false;
-            }
-
-            // Kiểm tra ngày chuyển sang
-            if (toDateStr != null && !toDateStr.trim().isEmpty()) {
-                LocalDate toDate = LocalDate.parse(toDateStr);
-                if (toDate.isBefore(today)) {
-                    return false;
-                }
-            }
-
-            // Kiểm tra số lớp được chọn
-            if (selectedSchedules == null || selectedSchedules.length == 0) {
-                return false;
-            }
-
-            if (selectedSchedules.length > 1) {
-                return false;
-            }
-
-            // Tạo lý do chi tiết
-            StringBuilder detailReason = new StringBuilder();
-            detailReason.append("Ngày muốn thay đổi: ").append(fromDateStr).append("\n");
-            if (toDateStr != null && !toDateStr.trim().isEmpty()) {
-                detailReason.append("Ngày muốn chuyển sang: ").append(toDateStr).append("\n");
-            }
-            detailReason.append("Các lớp được chọn: ").append(String.join(", ", selectedSchedules)).append("\n");
-            detailReason.append("Lý do: ").append(reason);
-
-            // Tạo đơn yêu cầu
-            Request req = new Request();
-            req.setTypeName("Đơn xin thay đổi lịch dạy");
-            req.setReason(detailReason.toString());
-            req.setSenderID(senderId);
-            req.setStatus("Chờ xử lý");
-
-            return requestDAO.insertRequest(req);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private boolean handleOtherRequest(HttpServletRequest request, int senderId, String reason, String type) {
-        try {
-            // Tạo đơn yêu cầu
-            Request req = new Request();
-            req.setTypeName("Khác");
-            req.setReason(reason);
-            req.setSenderID(senderId);
-            req.setStatus("Chờ xử lý");
-
-            return requestDAO.insertRequest(req);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 }
