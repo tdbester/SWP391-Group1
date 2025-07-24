@@ -62,31 +62,31 @@ public class BlogServlet extends HttpServlet {
 
         switch (action) {
             case "new":
-                if (!hasRequiredRole(role, "sale")) {
+                if (!hasRequiredRole(role, "Nhân viên Sale")) {
                     response.sendRedirect("login");
                     return;
                 }
                 showNewBlogForm(request, response);
                 break;
             case "edit":
-                if (!hasRequiredRole(role, "sale")) {
+                if (!hasRequiredRole(role, "Nhân viên Sale")) {
                     response.sendRedirect("login");
                     return;
                 }
                 showEditBlogForm(request, response);
                 break;
             case "delete":
-                if (!hasRequiredRole(role, "sale")) {
+                if (!hasRequiredRole(role, "Nhân viên Sale")) {
                     response.sendRedirect("login");
                     return;
                 }
                 deleteBlog(request, response);
                 break;
             case "view":
-                showBlogDetail(request, response, role != null && role.equalsIgnoreCase("sale"));
+                showBlogDetail(request, response, role != null && role.equalsIgnoreCase("Nhân viên Sale"));
                 break;
             default:
-                if (!hasRequiredRole(role, "sale")) {
+                if (!hasRequiredRole(role, "Nhân viên Sale")) {
                     response.sendRedirect("login");
                     return;
                 }
@@ -106,7 +106,7 @@ public class BlogServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("userRole");
-        if (!hasRequiredRole(role, "sale")) {
+        if (!hasRequiredRole(role, "Nhân viên Sale")) {
             response.sendRedirect("login");
             return;
         }
@@ -253,8 +253,8 @@ public class BlogServlet extends HttpServlet {
             throws IOException, ServletException {
         //1. lấy thông tin user đang đăng nhaapj để lưu vào AuthorId
         HttpSession session = request.getSession(false);
-        int userId= (int) session.getAttribute("accountId");
-
+        int accountId = (int) session.getAttribute("accountId");
+        int saleId = blogDAO.getSaleIdByAccountId(accountId);
         //2. lấy thông tin từ form JSP
         String title       = request.getParameter("title");
         String description = request.getParameter("description");
@@ -287,7 +287,7 @@ public class BlogServlet extends HttpServlet {
         newBlog.setDescription(description);
         newBlog.setContent(content);
         newBlog.setImage(imageUrl);
-        newBlog.setAuthorId(userId);
+        newBlog.setAuthorId(saleId);
         newBlog.setCategory(categoryId);
         newBlog.setCreatedAt(new Date());
         newBlog.setStatus(status);
@@ -306,7 +306,8 @@ public class BlogServlet extends HttpServlet {
             throws IOException, ServletException {
         //1. lấy thông tin người đang đăng nhập
         HttpSession session = request.getSession(false);
-        int userId= (int) session.getAttribute("accountId");
+        int accountId = (int) session.getAttribute("accountId");
+        int saleId = blogDAO.getSaleIdByAccountId(accountId);
 
         //2. lấy thông tin người dung nhập từ form
         int id          = Integer.parseInt(request.getParameter("id"));
@@ -340,7 +341,7 @@ public class BlogServlet extends HttpServlet {
         blog.setDescription(description);
         blog.setContent(content);
         blog.setImage(imageUrl);
-        blog.setAuthorId(userId);
+        blog.setAuthorId(saleId);
         blog.setCategory(categoryId);
         blog.setCreatedAt(new Date());
         blog.setStatus(status);

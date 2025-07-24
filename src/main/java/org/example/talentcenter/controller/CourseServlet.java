@@ -63,21 +63,21 @@ public class CourseServlet extends HttpServlet {
 
         switch (action) {
             case "new":
-                if (!hasRequiredRole(role, "Training Manager")) {
+                if (!hasRequiredRole(role, "Quản lý đào tạo")) {
                     resp.sendRedirect("login");
                     return;
                 }
                 showNewCourseForm(req, resp);
                 break;
             case "edit":
-                if (!hasRequiredRole(role, "Training Manager")) {
+                if (!hasRequiredRole(role, "Quản lý đào tạo")) {
                     resp.sendRedirect("login");
                     return;
                 }
                 showEditCourseForm(req, resp);
                 break;
             case "delete":
-                if (!hasRequiredRole(role, "Training Manager")) {
+                if (!hasRequiredRole(role, "Quản lý đào tạo")) {
                     resp.sendRedirect("login");
                     return;
                 }
@@ -87,7 +87,7 @@ public class CourseServlet extends HttpServlet {
                 showCourseDetail(req, resp);
                 break;
             default:
-                if (!hasRequiredRole(role, "Training Manager")) {
+                if (!hasRequiredRole(role, "Quản lý đào tạo")) {
                     resp.sendRedirect("login");
                     return;
                 }
@@ -107,7 +107,7 @@ public class CourseServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("userRole");
-        if (!hasRequiredRole(role, "Training Manager")) {
+        if (!hasRequiredRole(role, "Quản lý đào tạo")) {
             resp.sendRedirect("login");
             return;
         }

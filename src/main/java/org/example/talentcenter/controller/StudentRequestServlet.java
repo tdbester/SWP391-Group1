@@ -15,7 +15,6 @@ import org.example.talentcenter.service.NotificationService;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 

@@ -26,6 +26,16 @@
       </div>
 
       <div class="nav-section">
+        <a href="${pageContext.request.contextPath}/courses"
+           class="nav-item ${pageContext.request.requestURI.contains('courses') ? 'active' : ''}"
+           role="link"
+           aria-current="${pageContext.request.requestURI.contains('courses') ? 'page' : 'false'}">
+          <i class="fas fa-user-check" aria-hidden="true"></i>
+          <span>Quản lý khoá học</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
         <a href="${pageContext.request.contextPath}/CreateAccount"
            class="nav-item ${pageContext.request.requestURI.contains('account-request-list.jsp') ? 'active' : ''}"
            role="link"

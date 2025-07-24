@@ -64,7 +64,7 @@ public class StudentAccountRequestServlet extends HttpServlet {
                 response.sendRedirect("Consultation?action=list");
                 return;
             }
-            ArrayList<Consultation> agreedStudents = consultationDAO.searchConsultations(keyword.trim());
+            ArrayList<Consultation> agreedStudents = consultationDAO.searchAgreedConsultations(keyword.trim());
             request.setAttribute("agreedStudents", agreedStudents);
             request.setAttribute("keyword", keyword);
             request.getRequestDispatcher("View/student-account-request.jsp").forward(request, response);

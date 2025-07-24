@@ -286,5 +286,19 @@ public class BlogDAO {
         }
         return null;
     }
-
+    public int getSaleIdByAccountId(int accountId) {
+        int saleId = -1;
+        String sql = "SELECT Id FROM Sale WHERE AccountId = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                saleId = rs.getInt("Id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return saleId;
+    }
 }

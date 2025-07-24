@@ -43,10 +43,10 @@
                 </a>
             </div>
             <div class="nav-section">
-                <a href="${pageContext.request.contextPath}/blogs?action=list"
-                   class="nav-item ${pageContext.request.requestURI.contains('blog.jsp') ? 'active' : ''}"
+                <a href="${pageContext.request.contextPath}/blogs"
+                   class="nav-item ${pageContext.request.requestURI.contains('blogs') ? 'active' : ''}"
                    role="link"
-                   aria-current="${pageContext.request.requestURI.contains('blog.jsp') ? 'page' : 'false'}">
+                   aria-current="${pageContext.request.requestURI.contains('blogs') ? 'page' : 'false'}">
                     <i class="fas fa-pen-nib" aria-hidden="true"></i>
                     <span>Quản lý Blog</span>
                 </a>

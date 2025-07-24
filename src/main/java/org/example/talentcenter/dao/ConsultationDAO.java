@@ -248,7 +248,7 @@ public class ConsultationDAO {
      */
     public ArrayList<Consultation> filterConsultationsByPaymentStatus(String status) {
         ArrayList<Consultation> result = new ArrayList<>();
-        String sql = "SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.PaymentStatus " +
+        String sql = "SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.PaymentStatus, c.accountRequestSent " +
                 "FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id WHERE c.PaymentStatus = ? and c.Status = N'Đồng ý' ";
 
         try (Connection conn = DBConnect.getConnection();
@@ -265,6 +265,7 @@ public class ConsultationDAO {
                 c.setCourseId(rs.getInt("CourseId"));
                 c.setTitle(rs.getString("Title"));
                 c.setPaymentStatus(rs.getString("PaymentStatus"));
+                c.setAccountRequestSent(rs.getBoolean("accountRequestSent"));
                 result.add(c);
             }
         } catch (SQLException e) {
@@ -483,5 +484,6 @@ public class ConsultationDAO {
         }
         return result;
     }
+
 
 }
