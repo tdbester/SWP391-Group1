@@ -100,7 +100,7 @@ public class AttendanceDAO {
         List<Student> students = new ArrayList<>();
         String sql = """
             
-                SELECT s.Id, a.FullName, s.ParentPhone, s.MotherPhone,
+                SELECT s.Id, a.FullName, s.ParentPhone,
                                       s.AccountId, s.EnrollmentDate
                                FROM Student s
                                JOIN Account a ON s.AccountId = a.Id
@@ -120,7 +120,6 @@ public class AttendanceDAO {
                 student.setId(rs.getInt("Id"));
                 student.setFullName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("ParentPhone"));
-                student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
                 student.setEnrollmentDate(rs.getDate("EnrollmentDate").toLocalDate());
 
@@ -343,7 +342,7 @@ public class AttendanceDAO {
     public List<Student> getStudentsWithAttendanceStatus(int classId, int scheduleId) {
         List<Student> students = new ArrayList<>();
         String sql = """
-        SELECT s.Id, a.FullName, s.ParentPhone, s.MotherPhone, 
+        SELECT s.Id, a.FullName, s.ParentPhone,
                s.AccountId, s.EnrollmentDate,
                att.Id as AttendanceId, att.Status, att.Note
         FROM Student s
@@ -366,7 +365,6 @@ public class AttendanceDAO {
                 student.setId(rs.getInt("Id"));
                 student.setFullName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("ParentPhone"));
-                student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
                 student.setEnrollmentDate(rs.getDate("EnrollmentDate").toLocalDate());
 

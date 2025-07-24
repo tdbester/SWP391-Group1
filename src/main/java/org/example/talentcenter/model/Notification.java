@@ -19,7 +19,6 @@ public class Notification {
     public Notification() {
     }
 
-    // Getters và Setters
     public int getId() {
         return id;
     }

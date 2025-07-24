@@ -1,12 +1,14 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java"  pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>Blog List</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <style>
         .thumb-img {
             max-width: 80px;
@@ -14,55 +16,160 @@
             object-fit: cover;
             border-radius: 4px;
         }
+        .btn-primary, .btn-success, .btn-warning, .btn-add-custom {
+            background-color: #7a6ad8;
+            border-color: #7a6ad8;
+            color: #fff;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-family: 'Poppins', sans-serif;
+        }
+        header {
+            background: #7A5AF8;
+            color: white;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
-<div class="container mt-5">
-    <h2 class="mb-4">Blog List</h2>
-    <a href="blogs?action=new" class="btn btn-primary mb-3">Create New Blog</a>
+<jsp:include page="header.jsp"/>
+
+<div class="">
+    <jsp:include page="sale-sidebar.jsp"/>
+        <div class="main-content">
+
+
+    <h2 class="mb-4">Danh sách bài viết</h2>
+
+    <!-- Success Message -->
+    <c:if test="${not empty successMessage}">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            ${successMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </c:if>
+
+    <!-- Error Message -->
+    <c:if test="${not empty errorMessage}">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            ${errorMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </c:if>
+
+    <form action="blogs" method="get" class="row g-2 mb-3">
+        <div class="col-auto">
+            <input type="search" name="search" class="form-control" placeholder="Tìm kiếm">
+        </div>
+        <div class="col-auto">
+            <select name="category" class="form-select">
+                <option value="">Tất cả danh mục</option>
+                <c:forEach var="cat" items="${categories}">
+                    <option value="${cat.id}"
+                        ${param.category == cat.id.toString() ? 'selected' : ''}>
+                            ${cat.name}
+                    </option>
+                </c:forEach>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary">Lọc</button>
+        </div>
+        <div class="col-auto ms-auto">
+          <a href="blogs?action=new" class="btn btn-success">Tạo bài viết mới</a>
+        </div>
+    </form>
+
     <table class="table table-striped table-bordered align-middle">
         <thead class="table-dark">
         <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Content</th>
-            <th>Image</th>
-            <th>Created By</th>
-            <th style="width: 150px;">Actions</th>
+            <th>STT</th>
+            <th>Tiêu đề</th>
+            <th>Mô tả</th>
+            <th>Ảnh</th>
+            <th>Loại</th>
+            <th>Trạng thái</th>
+            <th style="width: 150px;">Hành động</th>
         </tr>
         </thead>
         <tbody>
-        <c:forEach var="blog" items="${blogList}">
+        <c:forEach var="blog" items="${blogList}" varStatus="status">
             <tr>
-                <td>${blog.id}</td>
+                <td>${(currentIndex-1)*10 + status.index + 1}</td>
                 <td>${blog.title}</td>
                 <td>${blog.description}</td>
-                <td>${blog.content}</td>
                 <td>
                     <c:if test="${not empty blog.image}">
-                        <img src="${blog.image}" alt="Image" class="thumb-img" />
+                        <img src="${blog.image}" class="thumb-img" alt="Image"/>
                     </c:if>
                     <c:if test="${empty blog.image}">
                         <span class="text-muted">No Image</span>
                     </c:if>
                 </td>
-                <td>${blog.fullname}</td>
                 <td>
-                    <a href="blogs?action=edit&id=${blog.id}" class="btn btn-sm btn-warning">Edit</a>
-                    <a href="blogs?action=delete&id=${blog.id}"
-                       class="btn btn-sm btn-danger"
-                       onclick="return confirm('Are you sure you want to delete this blog?');">
-                        Delete
+                    <c:forEach var="cat" items="${categories}">
+                        <c:if test="${cat.id == blog.category}">
+                            ${cat.name}
+                        </c:if>
+                    </c:forEach>
+                </td>
+                <td>
+                    <c:choose>
+                        <c:when test="${blog.status == 1}">
+                            <span class="badge bg-success">Công khai</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="badge bg-secondary">Ẩn</span>
+                        </c:otherwise>
+                    </c:choose>
+                </td>
+                <td>
+                    <a href="blogs?action=view&id=${blog.id}" class="btn btn-sm btn-primary">Chi tiết</a>
+                    <a href="blogs?action=edit&id=${blog.id}" class="btn btn-sm btn-warning">Sửa</a>
+                    <a href="blogs?action=delete&id=${blog.id}" class="btn btn-sm btn-danger"
+                       onclick="return confirm('Bạn có chắc muốn xóa bài này không?');">
+                        Xóa
                     </a>
                 </td>
             </tr>
         </c:forEach>
         </tbody>
     </table>
+
+    <!-- Empty results message -->
+    <c:if test="${empty blogList}">
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle"></i>
+            <strong>Không tìm thấy bài viết nào</strong>
+            <p class="mb-0">Vui lòng thử lại với các tiêu chí tìm kiếm khác.</p>
+        </div>
+    </c:if>
+
+    <nav>
+        <ul class="pagination">
+            <c:forEach begin="1" end="${endP}" var="i">
+                <li class="page-item ${i == currentIndex ? 'active' : ''}">
+                    <a class="page-link" href="blogs?index=${i}&category=${param.category}&search=${param.search}">${i}</a>
+                </li>
+            </c:forEach>
+        </ul>
+    </nav>
+    </div>
+
 </div>
 
-<!-- Bootstrap JS Bundle (includes Popper) -->
+<jsp:include page="footer.jsp"/>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -8,6 +8,7 @@ public class Teacher {
     private double salary;
     private String fullName;
 
+    private Account account;
     // Constructors
     public Teacher() {}
 
@@ -54,6 +55,13 @@ public class Teacher {
     }
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+    public void setAccount(Account account) {
+        this.account = account;
     }
 
     @Override

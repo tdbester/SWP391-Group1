@@ -5,108 +5,210 @@
   Time: 11:46 PM
   To change this template use File | Settings | File Templates.
 --%>
+<%--/*--%>
+<%--*  Copyright (C) 2025 <Group 1>--%>
+<%--    *  All rights reserved.--%>
+<%--    *--%>
+<%--    *  This file is part of the <Talent Center Management> project.--%>
+<%--    *  Unauthorized copying of this file, via any medium is strictly prohibited.--%>
+<%--    *  Proprietary and confidential.--%>
+<%--    *--%>
+<%--    *  Created on:        2025-05-31--%>
+<%--    *  Author:            Cù Thị Huyền Trang--%>
+<%--    *--%>
+<%--    *  ========================== Change History ==========================--%>
+<%--    *  Date        | Author               | Description--%>
+<%--    *  ------------|----------------------|----------------------------------%>
+<%--    *  2025-05-31  | Cù Thị Huyền Trang   | Initial creation--%>
+<%--    */--%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sale Dashboard - TALENT01</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
-    <!-- Kế thừa hoặc nhúng lại CSS từ trang chính -->
-
 </head>
 <body>
-<jsp:include page="sale-sidebar.jsp" />
-
-<!-- SIDEBAR -->
-<!-- Tách sidebar thành file riêng để tái sử dụng -->
-
-<!-- MAIN CONTENT WITH HEADER -->
-<div class="main-content">
-    <div class="header">
-        <div class="user-info">
-            <span>Xin chào, <strong>Nhân viên Sale</strong></span>
-            <div class="user-avatar">S</div>
-        </div>
-        <div class="user-actions">
-            <a href="${pageContext.request.contextPath}/View/profile.jsp" class="btn-link">Trang cá nhân</a>
-            <a href="${pageContext.request.contextPath}/logout" class="btn-link logout">Đăng xuất</a>
-        </div>
-    </div>
-    <div class="content-area">
-        <!-- Stats Cards cho Sale -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fa-solid fa-building-user"></i></div>
-                <div class="stat-number" style="color: #3498db;">12</div>
-                <div class="stat-label">Khách hàng mới</div>
-                <div class="stat-status status-info">Trong tuần này</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fa-solid fa-phone-volume"></i></div>
-                <div class="stat-number" style="color: #f39c12;">8</div>
-                <div class="stat-label">Cuộc gọi chưa xử lý</div>
-                <div class="stat-status status-warning">Cần gọi lại</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
-                <div class="stat-number" style="color: #2ecc71;">5</div>
-                <div class="stat-label">Hợp đồng thành công</div>
-                <div class="stat-status status-good">Trong tháng này</div>
+<jsp:include page="header.jsp"/>
+<!-- dashboard -->
+<div class="container">
+    <jsp:include page="sale-sidebar.jsp"/>
+    <div class="main-content">
+        <div class="welcome-section">
+            <div class="welcome-card">
+                <div class="welcome-text">
+                    <h1>Xin chào Sale ${account.getFullName()}</h1>
+                    <div class="current-time">
+                        <i class="fas fa-calendar-alt"></i>
+                        <fmt:formatDate value="${currentDate}" pattern="EEEE, dd MMMM yyyy" />
+                    </div>
+                </div>
+                <div class="welcome-avatar">
+                    <a href="<%=request.getContextPath()%>/profile">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
+                </div>
             </div>
         </div>
-
-        <!-- Content Grid (tùy chỉnh tùy ý) -->
-        <div class="content-grid">
-            <!-- Lịch gặp khách hôm nay -->
-            <div class="card">
-                <h2 class="card-title">Lịch hẹn khách hôm nay</h2>
-                <div class="schedule-item">
-                    <div class="schedule-time">09:00</div>
-                    <div class="schedule-info">
-                        <div class="schedule-title">Gặp khách hàng Công ty A</div>
-                        <div class="schedule-details">Tòa nhà Pearl Plaza, Quận Bình Thạnh</div>
-                    </div>
-                    <div class="schedule-actions">
-                        <button class="btn-success">Xác nhận</button>
-                        <button class="btn-warning">Hủy</button>
-                    </div>
+        <div class="content-area">
+            <div class="sale-quick-nav">
+                <h2>Điều hướng nhanh</h2>
+                <div class="sale-nav-buttons">
+                    <a href="consultation-list.jsp" class="sale-nav-btn">
+                        <i class="fas fa-comments"></i> Xem danh sách tư vấn
+                    </a>
+                    <a href="blog.jsp" class="sale-nav-btn">
+                        <i class="fas fa-blog"></i> Quản lý blog
+                    </a>
+                    <a href="student-account-request.jsp" class="sale-nav-btn">
+                        <i class="fas fa-user-check"></i> Yêu cầu cấp tài khoản học viên
+                    </a>
+                    <a href="sale-course-list.jsp" class="sale-nav-btn">
+                        <i class="fas fa-graduation-cap"></i> Danh sách khoá học
+                    </a>
+                    <a href="sale-notification-list.jsp" class="sale-nav-btn">
+                        <i class="fas fa-bell"></i> Thông báo
+                    </a>
                 </div>
-                <div class="schedule-item">
-                    <div class="schedule-time">14:00</div>
-                    <div class="schedule-info">
-                        <div class="schedule-title">Call tư vấn Công ty B</div>
-                        <div class="schedule-details">Qua Zoom, khách hàng Nhật</div>
-                    </div>
-                    <div class="schedule-actions">
-                        <button class="btn-primary">Tham gia</button>
-                        <button class="btn-warning">Trễ</button>
-                    </div>
+
+            </div>
+            <div class="sale-notifications">
+                <h2>🔔 Thông báo mới
+                    <c:if test="${unreadCount > 0}">
+            <span style="background: #dc3545; color: white; padding: 2px 8px;
+                         border-radius: 12px; font-size: 12px; margin-left: 10px;">
+                    ${unreadCount}
+            </span>
+                    </c:if>
+                </h2>
+
+                <ul class="sale-notification-list" style="list-style: none; padding: 0;">
+                    <c:choose>
+                        <c:when test="${empty latestNotifications}">
+                            <li style="padding: 15px; background: #f8f9fa; margin-bottom: 10px;
+                           border-radius: 6px; text-align: center; color: #666;">
+                                Chưa có thông báo mới
+                            </li>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach var="notification" items="${latestNotifications}">
+                                <li style="display: flex; padding: 15px; background: white;
+                                        margin-bottom: 10px; border-radius: 6px; border: 1px solid #eee;
+                                <c:if test='${!notification.read}'>
+                                        border-left: 4px solid #007bff; background: #f0f8ff;
+                                        </c:if>">
+                                    <div style="margin-right: 15px; font-size: 24px;">📋</div>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: bold; color: #333; margin-bottom: 5px;">
+                                                ${notification.title}
+                                        </div>
+                                        <div style="color: #666; margin-bottom: 8px; line-height: 1.4;">
+                                                ${notification.content}
+                                        </div>
+                                        <div style="font-size: 11px; color: #aaa;">
+                                            <i class="fas fa-clock"></i>
+                                            <fmt:formatDate value="${notification.createdAt}"
+                                                            pattern="dd/MM/yyyy HH:mm"/>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center;">
+                                        <c:if test="${not empty notification.relatedEntityId}">
+                                            <a href="Consultation?action=list&id=${notification.relatedEntityId}"
+                                               style="background: #007bff; color: white; padding: 8px 15px;
+                                          text-decoration: none; border-radius: 4px;
+                                          font-size: 12px; font-weight: bold;">
+                                                <i class="fas fa-eye"></i> Xem
+                                            </a>
+                                        </c:if>
+                                    </div>
+                                </li>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
+                </ul>
+
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="${pageContext.request.contextPath}/SaleDashboard?action=notifications"
+                       style="color: #007bff; text-decoration: none; font-weight: bold; font-size: 14px;">
+                        <i class="fas fa-list"></i> Xem tất cả thông báo
+                    </a>
                 </div>
             </div>
 
-            <!-- Yêu cầu báo giá -->
-            <div class="card">
-                <h2 class="card-title">Yêu cầu báo giá</h2>
-
-                <div class="request-item">
-                    <div class="request-title">Công ty C - Website giới thiệu</div>
-                    <div class="request-date">Gửi lúc: 30/05/2025</div>
-                    <div class="request-status pending">Đang xử lý</div>
-                </div>
-
-                <div class="request-item">
-                    <div class="request-title">Công ty D - Giải pháp CRM</div>
-                    <div class="request-date">Gửi lúc: 29/05/2025</div>
-                    <div class="request-status approved">Đã báo giá</div>
-                </div>
+            <div class="sale-new-courses">
+                <h2>📋 Khoá học mới cần tư vấn</h2>
+                <table class="sale-course-table">
+                    <thead>
+                    <tr>
+                        <th>Khoá học</th>
+                        <th>Giá</th>
+                        <th>Số lượng lớp</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:choose>
+                        <c:when test="${empty latestCoursesWithClass}">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #666;">
+                                    Chưa có khóa học nào
+                                </td>
+                            </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach var="course" items="${latestCoursesWithClass}">
+                                <tr>
+                                    <td>
+                                        <strong>${course.title}</strong>
+                                        <c:if test="${not empty course.information}">
+                                            <br><small style="color: #666;">${course.information}</small>
+                                        </c:if>
+                                    </td>
+                                    <td>
+                                <span style="font-weight: bold; color: #007bff;">
+                                    <fmt:formatNumber value="${course.price}" type="currency" currencySymbol="₫"/>
+                                </span>
+                                    </td>
+                                    <td>
+                                <span class="class-count-badge"
+                                      style="background: ${course.classCount > 0 ? '#28a745' : '#dc3545'};
+                                              color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
+                                    ${course.classCount} lớp
+                                </span>
+                                    </td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${course.classCount > 0}">
+                                                <a href="SaleDashboard?action=course&courseId=${course.id}"
+                                                   class="btn-consult"
+                                                   style="background: #007bff; color: white; padding: 6px 12px;
+                                                  text-decoration: none; border-radius: 4px; font-size: 12px;">
+                                                    <i class="fas fa-comments"></i> Chi tiết
+                                                </a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span style="color: #999; font-size: 12px;">Chưa có lớp</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
+<jsp:include page="footer.jsp"/>
 </body>
 </html>

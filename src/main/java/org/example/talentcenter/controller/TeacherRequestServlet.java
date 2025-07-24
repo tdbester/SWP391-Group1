@@ -6,6 +6,8 @@ import org.example.talentcenter.model.*;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
+import org.example.talentcenter.service.NotificationService;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,14 +29,21 @@ public class TeacherRequestServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
         HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("accountId") == null) {
+        Account account = (Account) session.getAttribute("account");
+        if (session == null || account == null) {
             response.sendRedirect(request.getContextPath() + "/View/login.jsp");
             return;
         }
+        ArrayList<Schedule> slotList = scheduleDAO.getAllSlots();
+        request.setAttribute("slotList", slotList);
 
         String action = request.getParameter("action");
+        ArrayList<Request> requestTypeList = requestDAO.getTeacherRequestType();
+        request.setAttribute("requestTypeList", requestTypeList);
 
         if (action != null) {
             switch (action) {
@@ -45,9 +54,12 @@ public class TeacherRequestServlet extends HttpServlet {
                     handleCheckChange(request, response, session);
                     break;
                 default:
-                    request.getRequestDispatcher("/iew/teacher-request.jsp").forward(request, response);
+                    request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
             }
         } else {
+            request.setAttribute("teacherName", account.getFullName());
+            request.setAttribute("phoneNumber", account.getPhoneNumber());
+
             request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
         }
     }
@@ -55,66 +67,141 @@ public class TeacherRequestServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
+        String action = request.getParameter("action");
 
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("accountId") == null) {
-            response.sendRedirect(request.getContextPath() + "/View/login.jsp");
-            return;
-        }
-
-        try {
-            String type = request.getParameter("type");
-            String reason = request.getParameter("reason");
-            int senderId = (int) session.getAttribute("accountId");
-
-            // Validate chung
-            if (type == null || type.trim().isEmpty()) {
-                request.setAttribute("error", "Vui lòng chọn loại đơn yêu cầu!");
-                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
+        if ("create".equals(action)) {
+            HttpSession session = request.getSession(false);
+            Account account = (Account) session.getAttribute("account");
+            if (account == null) {
+                response.sendRedirect("login.jsp");
                 return;
             }
 
-            if (reason == null || reason.trim().isEmpty()) {
-                request.setAttribute("error", "Vui lòng nhập lý do!");
-                request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
-                return;
-            }
+            try {
+                String type = request.getParameter("type");
+                String reason = request.getParameter("reason");
+                Integer senderId = account.getId();
 
-            // Xử lý theo từng loại đơn
-            boolean success = false;
-            String errorMessage = "";
-
-            switch (type) {
-                case "leave":
-                    success = handleLeaveRequest(request, senderId, reason);
-                    errorMessage = "Xin nghỉ phép thất bại!";
-                    break;
-                case "schedule_change":
-                    success = handleScheduleChangeRequest(request, senderId, reason);
-                    errorMessage = "Thay đổi lịch dạy thất bại!";
-                    break;
-                case "other":
-                    success = handleOtherRequest(request, senderId, reason, type);
-                    errorMessage = "Gửi đơn thất bại!";
-                    break;
-                default:
-                    request.setAttribute("error", "Loại đơn không hợp lệ!");
-                    request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
+                if (type == null || type.trim().isEmpty()) {
+                    session.setAttribute("error", "Vui lòng chọn loại đơn yêu cầu!");
+                    redirectWithFormData(request, response);
                     return;
-            }
+                }
 
-            if (success) {
-                request.setAttribute("success", "Gửi đơn thành công! Vui lòng chờ phản hồi từ quản trị viên.");
-            } else {
-                request.setAttribute("error", errorMessage);
-            }
+                if (reason == null || reason.trim().length() < 10) {
+                    session.setAttribute("error", "Lý do phải có ít nhất 10 ký tự!");
+                    redirectWithFormData(request, response);
+                    return;
+                }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "Có lỗi xảy ra, vui lòng thử lại!");
+                // Tạo combined reason
+                String combinedReason = createCombinedReason(request, type, reason);
+
+                // Lấy TypeID
+                int typeId = getTypeIdFromValue(type);
+                if (typeId == 0) {
+                    session.setAttribute("error", "Loại đơn không hợp lệ!");
+                    redirectWithFormData(request, response);
+                    return;
+                }
+
+                // Tạo request object
+                Request teacherRequest = new Request();
+                teacherRequest.setSenderID(senderId);
+                teacherRequest.setReason(combinedReason);
+                teacherRequest.setTypeId(typeId);
+                teacherRequest.setStatus("Chờ xử lý");
+
+                boolean success = requestDAO.insertRequest(teacherRequest);
+                if (success) {
+                    String requestTypeName = "";
+                    switch (type) {
+                        case "leave":
+                            requestTypeName = "Đơn xin nghỉ phép";
+                            break;
+                        case "schedule_change":
+                            requestTypeName = "Đơn xin đổi lịch dạy";
+                            break;
+                        case "other":
+                            requestTypeName = "Đơn khác";
+                            break;
+                        default:
+                            requestTypeName = "Đơn";
+                    }
+                    int newRequestId = teacherRequest.getId();
+                    NotificationService.notifyTeacherRequestSubmitted(
+                            account.getFullName(),
+                            requestTypeName,
+                            newRequestId
+                    );
+                    session.setAttribute("success", "Gửi đơn thành công!");
+                    response.sendRedirect("teacherRequest");
+                } else {
+                    session.setAttribute("error", "Gửi đơn thất bại!");
+                    redirectWithFormData(request, response);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                session.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+                redirectWithFormData(request, response);
+            }
+        } else {
+            doGet(request, response);
         }
+    }
 
-        request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
+    private String createCombinedReason(HttpServletRequest request, String type, String reason) {
+        switch (type) {
+            case "leave":
+                String leaveDate = request.getParameter("leaveDate");
+                return (leaveDate != null ? leaveDate : "") + "|" + reason;
+            case "schedule_change":
+                String fromDate = request.getParameter("changeFromDate");
+                String toDate = request.getParameter("changeToDate");
+                String toSlot = request.getParameter("changeToSlot");
+                String selectedScheduleId = request.getParameter("selectedSchedules");
+
+                return String.join("|",
+                        fromDate != null ? fromDate : "",
+                        toDate != null ? toDate : "",
+                        toSlot != null ? toSlot : "",
+                        selectedScheduleId != null ? selectedScheduleId : "",
+                        reason != null ? reason : ""
+                );
+
+            default:
+                return reason;
+        }
+    }
+
+    private int getTypeIdFromValue(String typeValue) {
+        switch (typeValue) {
+            case "leave":
+                return requestDAO.getRequestTypeId("Đơn xin nghỉ phép");
+            case "schedule_change":
+                return requestDAO.getRequestTypeId("Đơn xin đổi lịch dạy");
+            case "other":
+                return requestDAO.getRequestTypeId("Đơn khác");
+            default:
+                return 0;
+        }
+    }
+
+    private void redirectWithFormData(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        StringBuilder redirectUrl = new StringBuilder("teacherRequest?");
+
+        String type = request.getParameter("type");
+        if (type != null) redirectUrl.append("type=").append(type).append("&");
+
+        String reason = request.getParameter("reason");
+        if (reason != null)
+            redirectUrl.append("reason=").append(java.net.URLEncoder.encode(reason, "UTF-8")).append("&");
+
+        response.sendRedirect(redirectUrl.toString());
     }
 
     private void handleCheckLeave(HttpServletRequest request, HttpServletResponse response, HttpSession session)
@@ -139,8 +226,8 @@ public class TeacherRequestServlet extends HttpServlet {
             }
 
             // Lấy thông tin giáo viên
-            int accountId = (int) session.getAttribute("accountId");
-            Teacher teacher = teacherDAO.getTeacherByAccountId(accountId);
+            Account account = (Account) session.getAttribute("account");
+            Teacher teacher = teacherDAO.getTeacherByAccountId(account.getId());
 
             if (teacher == null) {
                 request.setAttribute("error", "Không tìm thấy thông tin giáo viên!");
@@ -158,10 +245,14 @@ public class TeacherRequestServlet extends HttpServlet {
                 request.setAttribute("leaveSchedules", schedules);
             }
 
-            // Giữ lại các thông tin đã nhập
+            ArrayList<Request> requestTypeList = requestDAO.getTeacherRequestType();
+            request.setAttribute("requestTypeList", requestTypeList);
+            request.setAttribute("teacherName", account.getFullName());
+            request.setAttribute("phoneNumber", account.getPhoneNumber());
+
             request.setAttribute("type", "leave");
             request.setAttribute("leaveDate", dateStr);
-
+            request.setAttribute("reason", request.getParameter("reason"));
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Ngày không hợp lệ!");
@@ -214,6 +305,9 @@ public class TeacherRequestServlet extends HttpServlet {
             // Giữ lại các thông tin đã nhập
             request.setAttribute("type", "schedule_change");
             request.setAttribute("changeFromDate", dateStr);
+            request.setAttribute("changeToDate", request.getParameter("changeToDate"));
+            request.setAttribute("reason", request.getParameter("reason"));
+
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -222,7 +316,6 @@ public class TeacherRequestServlet extends HttpServlet {
 
         request.getRequestDispatcher("/View/teacher-request.jsp").forward(request, response);
     }
-
 
 
     private boolean handleLeaveRequest(HttpServletRequest request, int senderId, String reason) {
@@ -242,10 +335,10 @@ public class TeacherRequestServlet extends HttpServlet {
 
             // Tạo đơn yêu cầu
             Request req = new Request();
-            req.setTypeName("Xin nghỉ phép");
+            req.setTypeName("Đơn xin nghỉ phép");
             req.setReason("Ngày nghỉ: " + dateStr + "\nLý do: " + reason);
             req.setSenderID(senderId);
-            req.setStatus("Pending");
+            req.setStatus("Chờ xử lý");
 
             return requestDAO.insertRequest(req);
 
@@ -296,15 +389,15 @@ public class TeacherRequestServlet extends HttpServlet {
             if (toDateStr != null && !toDateStr.trim().isEmpty()) {
                 detailReason.append("Ngày muốn chuyển sang: ").append(toDateStr).append("\n");
             }
-            detailReason.append("Lịch trình đã chọn: ").append(String.join(", ", selectedSchedules)).append("\n");
+            detailReason.append("Các lớp được chọn: ").append(String.join(", ", selectedSchedules)).append("\n");
             detailReason.append("Lý do: ").append(reason);
 
             // Tạo đơn yêu cầu
             Request req = new Request();
-            req.setTypeName("Thay đổi lịch dạy");
+            req.setTypeName("Đơn xin thay đổi lịch dạy");
             req.setReason(detailReason.toString());
             req.setSenderID(senderId);
-            req.setStatus("Pending");
+            req.setStatus("Chờ xử lý");
 
             return requestDAO.insertRequest(req);
 
@@ -314,7 +407,6 @@ public class TeacherRequestServlet extends HttpServlet {
         }
     }
 
-
     private boolean handleOtherRequest(HttpServletRequest request, int senderId, String reason, String type) {
         try {
             // Tạo đơn yêu cầu
@@ -322,7 +414,7 @@ public class TeacherRequestServlet extends HttpServlet {
             req.setTypeName("Khác");
             req.setReason(reason);
             req.setSenderID(senderId);
-            req.setStatus("Pending");
+            req.setStatus("Chờ xử lý");
 
             return requestDAO.insertRequest(req);
 

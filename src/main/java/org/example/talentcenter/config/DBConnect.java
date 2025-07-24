@@ -13,7 +13,7 @@ public class DBConnect {
     }
 
     private static final String URL = "jdbc:sqlserver://localhost:1433;"
-            + "databaseName=SchoolManagement1;"
+            + "databaseName=Final;"
             + "encrypt=true;"
             + "trustServerCertificate=true";
     private static final String USER = "sa";

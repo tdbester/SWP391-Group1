@@ -9,10 +9,13 @@ public class Blog {
     private String content;
     private String image;
     private Integer authorId;
+    private Integer category;
     private Date createdAt;
+    private int status; // 0 = not public (hidden), 1 = public (visible)
 
 
-    public Blog(Integer id, String title, String content, String image, Integer authorId, Date createdAt, String description) {
+
+    public Blog(Integer id, String title, String content, String image, Integer authorId, Date createdAt, String description, Integer category) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -20,6 +23,20 @@ public class Blog {
         this.authorId = authorId;
         this.createdAt = createdAt;
         this.description = description;
+        this.category = category;
+        this.status = 1; // Default to public
+    }
+
+    public Blog(Integer id, String title, String content, String image, Integer authorId, Date createdAt, String description, Integer category, int status) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.image = image;
+        this.authorId = authorId;
+        this.createdAt = createdAt;
+        this.description = description;
+        this.category = category;
+        this.status = status;
     }
 
     public Blog() {
@@ -86,5 +103,34 @@ public class Blog {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+    public void setCategory(Integer category) {
+        this.category = category;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Blog{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", content='" + content + '\'' +
+                ", image='" + image + '\'' +
+                ", authorId=" + authorId +
+                ", createdAt=" + createdAt +
+                ", status=" + status +
+                '}';
     }
 }

@@ -1,0 +1,339 @@
+
+h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Search filter section - giống student-request-list */
+.search-filter-section {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 35px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filter-row {
+    display: flex;
+    gap: 20px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    flex: 1;
+}
+
+.filter-group:last-child {
+    min-width: auto;
+    flex: 0;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.input-group {
+    display: flex;
+    width: 100%;
+}
+
+.input-group-text {
+    background-color: #7a6ad8;
+    border: 1px solid #7a6ad8;
+    color: white;
+    padding: 12px 15px;
+    border-radius: 8px 0 0 8px;
+    border-right: none;
+}
+
+.input-group .form-control {
+    border-radius: 0 8px 8px 0;
+    border-left: none;
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+}
+
+.form-control, .form-select {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    width: 100%;
+    background: white;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #7a6ad8;
+    box-shadow: 0 0 0 0.2rem rgba(122, 106, 216, 0.25);
+    outline: none;
+}
+
+.clear-filters-btn {
+    background-color: #6c757d;
+    border: 1px solid #6c757d;
+    color: white;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    height: 47px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.clear-filters-btn:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    transform: translateY(-1px);
+}
+
+/* Table container - giống student-request-list */
+.table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+    border: 1px solid #eee;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+thead {
+    background: #7a6ad8;
+    color: white;
+}
+
+th {
+    padding: 20px 15px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+tbody tr {
+    border-bottom: 1px solid #eee;
+    transition: all 0.3s ease;
+}
+
+tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+td {
+    padding: 15px;
+    vertical-align: middle;
+    border-right: 1px solid #f0f0f0;
+}
+
+td:last-child {
+    border-right: none;
+}
+
+/* Checkbox styling */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #7a6ad8;
+}
+
+/* Form select in table */
+.form-select-sm {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+}
+
+.form-select-sm:focus {
+    border-color: #7a6ad8;
+    box-shadow: 0 0 0 0.15rem rgba(122, 106, 216, 0.25);
+}
+
+/* Status text styling */
+.text-success {
+    color: #28a745 !important;
+    font-weight: 600;
+    padding: 4px 8px;
+    background: #d4edda;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+    font-weight: 600;
+    padding: 4px 8px;
+    background: #f8d7da;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Form actions */
+.form-actions {
+    padding: 20px 25px;
+    background: #f8f9fa;
+    border-top: 1px solid #eee;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #7a6ad8 0%, #9b7bfa 100%);
+    border: 1px solid #7a6ad8;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #6a5acd 0%, #8b6bda 100%);
+    border-color: #6a5acd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(122, 106, 216, 0.3);
+}
+
+/* Alert styling */
+.alert {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border: 1px solid transparent;
+}
+
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #b8d4da;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 5px;
+}
+
+.page-item {
+    display: flex;
+}
+
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    text-decoration: none;
+    border: 1px solid #dee2e6;
+    color: #007bff;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    min-width: 45px;
+    height: 45px;
+}
+
+.page-link:hover {
+    background: #e9ecef;
+    border-color: #dee2e6;
+    transform: translateY(-2px);
+}
+
+.page-item.active .page-link {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.page-item.active .page-link:hover {
+    background: #0056b3;
+    border-color: #0056b3;
+    transform: translateY(-1px);
+}
+/* THÊM: Alert positioning */
+.alert {
+    margin: 20px 0;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #b8d4da;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    padding: 20px 0;
+}
+/* Responsive design */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 15px 20px;
+    }
+
+    .filter-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .filter-group {
+        min-width: auto;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    th, td {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+}

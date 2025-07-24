@@ -15,6 +15,7 @@ public class CourseDto {
     private Category category;
     private Level level;
     private Type type;
+    private int status; // 0 = not public (hidden), 1 = public (visible)
 
     public CourseDto() {
     }
@@ -31,6 +32,22 @@ public class CourseDto {
         this.category = category;
         this.level = level;
         this.type = type;
+        this.status = 1; // Default to public
+    }
+
+    public CourseDto(int id, String title, double price, String information,
+                     int createdBy,String fullname, String image, Category category, Level level, Type type, int status) {
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.information = information;
+        this.createdBy = createdBy;
+        this.image = image;
+        this.fullname = fullname;
+        this.category = category;
+        this.level = level;
+        this.type = type;
+        this.status = status;
     }
 
     public int getId() {
@@ -101,5 +118,13 @@ public class CourseDto {
     }
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

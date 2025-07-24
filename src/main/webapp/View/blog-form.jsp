@@ -4,53 +4,208 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <title><c:choose><c:when
-            test="${not empty blog}">Edit Blog</c:when><c:otherwise>New Blog</c:otherwise></c:choose></title>
-    <!-- Bootstrap CSS -->
+    <title>
+        <c:choose>
+            <c:when test="${not empty blog}">Chỉnh sửa bài viết</c:when>
+            <c:otherwise>Bài viết mới</c:otherwise>
+        </c:choose>
+    </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+    <style>
+        .image-preview {
+            margin-top: 15px;
+            max-width: 300px;
+            max-height: 200px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            object-fit: cover;
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-5" style="max-width: 600px;">
-    <h2 class="mb-4"><c:choose><c:when
-            test="${not empty blog}">Edit Blog</c:when><c:otherwise>New Blog</c:otherwise></c:choose></h2>
+<jsp:include page="header.jsp"/>
 
-    <form action="blogs" method="post">
+<div class="container mt-5">
+
+
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-4">
+            <c:choose>
+                <c:when test="${not empty blog}">Chỉnh sửa bài viết</c:when>
+                <c:otherwise>Bài viết mới</c:otherwise>
+            </c:choose>
+        </h2>
+        <a href="${pageContext.request.contextPath}/blogs" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    <form action="blogs" method="post" enctype="multipart/form-data" onsubmit="prepareSubmit()">
         <input type="hidden" name="action" value="${not empty blog ? 'update' : 'insert'}"/>
         <c:if test="${not empty blog}">
             <input type="hidden" name="id" value="${blog.id}"/>
+            <input type="hidden" name="currentImageUrl" value="${blog.image}"/>
         </c:if>
 
-        <div class="mb-3">
-            <label for="title" class="form-label">Title</label>
-            <input id="title" name="title" type="text" class="form-control" value="${blog.title}" required/>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label class="form-label">Tiêu đề</label>
+                    <input type="text" name="title" class="form-control"
+                           value="${blog.title}" required/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mô tả</label>
+                    <div id="editor-description" style="height: 75px;"></div>
+                    <input type="hidden" name="description" id="description"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nội dung</label>
+                    <div id="editor-content" style="height: 150px;"></div>
+                    <input type="hidden" name="content" id="content"/>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Thể loại</label>
+                    <select name="category" class="form-select" required>
+                        <option value="">-- Chọn loại --</option>
+                        <c:forEach var="cat" items="${categories}">
+                            <option value="${cat.id}"
+                                    <c:if test="${blog.category == cat.id}">selected</c:if>>
+                                    ${cat.name}
+                            </option>
+                        </c:forEach>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <img id="imagePreview"
+                         src="${not empty blog.image ? blog.image : 'https://placehold.co/600x400?text=Chọn+ảnh'}"
+                         alt="Preview" class="image-preview"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Chọn ảnh bìa</label>
+                    <input type="file" name="imageFile" class="form-control" accept="image/*"
+                           onchange="previewImage(event)"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Trạng thái</label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status" id="statusPublic" value="1"
+                                   <c:if test="${blog == null || blog.status == 1}">checked</c:if>>
+                            <label class="form-check-label" for="statusPublic">Công khai</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="status" id="statusHidden" value="0"
+                                   <c:if test="${blog != null && blog.status == 0}">checked</c:if>>
+                            <label class="form-check-label" for="statusHidden">Ẩn</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea id="description" name="description" rows="3" class="form-control" required>${blog.description}</textarea>
-        </div>
-        <div class="mb-3">
-            <label for="content" class="form-label">Content</label>
-            <textarea id="content" name="content" rows="5" class="form-control" required>${blog.content}</textarea>
-        </div>
-
-        <div class="mb-3">
-            <label for="image" class="form-label">Image URL</label>
-            <input type="text" id="image" name="image" class="form-control" value="${blog.image}" />
-        </div>
-
-        <div class="mb-3">
-            <label for="authorId" class="form-label">Created By (User ID)</label>
-            <input id="authorId" name="authorId" type="number" class="form-control" value="${blog.authorId}"
-                   required/>
-        </div>
-
-        <button type="submit" class="btn btn-success">${not empty blog ? 'Update' : 'Create'}</button>
-        <a href="blogs" class="btn btn-secondary ms-2">Cancel</a>
+        <button type="submit" class="btn btn-success">
+            <c:choose>
+                <c:when test="${not empty blog}">Cập nhật</c:when>
+                <c:otherwise>Tạo mới</c:otherwise>
+            </c:choose>
+        </button>
+        <a href="blogs" class="btn btn-secondary ms-2">Hủy</a>
     </form>
+
+    <c:if test="${not empty errorMessage}">
+        <div class="alert alert-danger mt-3">${errorMessage}</div>
+    </c:if>
 </div>
 
-<!-- Bootstrap JS Bundle -->
+<!-- Hidden divs to store blog content for JavaScript -->
+<div id="blogDescription" style="display: none;">
+    <c:if test="${not empty blog && not empty blog.description}">
+        ${blog.description}
+    </c:if>
+</div>
+
+<div id="blogContent" style="display: none;">
+    <c:if test="${not empty blog && not empty blog.content}">
+        ${blog.content}
+    </c:if>
+</div>
+
+<script>
+    // Initialize Quill editors
+    let editorDesc, editorCont;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const toolbarOptions = [
+            [{ header: [1, 2, false] }],
+            ['bold','italic','underline'],
+            ['link', 'image'],
+            [{ list: 'ordered'}, { list: 'bullet' }],
+            ['clean']
+        ];
+
+        // Initialize Quill editors with proper configuration
+        editorDesc = new Quill('#editor-description', {
+            theme: 'snow',
+            modules: { toolbar: toolbarOptions }
+        });
+
+        editorCont = new Quill('#editor-content', {
+            theme: 'snow',
+            modules: { toolbar: toolbarOptions }
+        });
+
+        // Load existing content if editing
+        const blogDescDiv = document.getElementById('blogDescription');
+        if (blogDescDiv && blogDescDiv.innerHTML.trim()) {
+            editorDesc.root.innerHTML = blogDescDiv.innerHTML;
+        }
+
+        const blogContentDiv = document.getElementById('blogContent');
+        if (blogContentDiv && blogContentDiv.innerHTML.trim()) {
+            editorCont.root.innerHTML = blogContentDiv.innerHTML;
+        }
+    });
+
+    function prepareSubmit() {
+        // Get the HTML content from Quill editors and clean empty paragraphs
+        let descriptionContent = editorDesc.root.innerHTML;
+        let contentContent = editorCont.root.innerHTML;
+
+        // Clean up empty paragraph tags that Quill creates
+        descriptionContent = descriptionContent.replace(/<p><br><\/p>/g, '').replace(/<p>\s*<\/p>/g, '').trim();
+        contentContent = contentContent.replace(/<p><br><\/p>/g, '').replace(/<p>\s*<\/p>/g, '').trim();
+
+        // If content is empty after cleaning, set to empty string
+        if (descriptionContent === '' || descriptionContent === '<p></p>') {
+            descriptionContent = '';
+        }
+        if (contentContent === '' || contentContent === '<p></p>') {
+            contentContent = '';
+        }
+
+        document.getElementById('description').value = descriptionContent;
+        document.getElementById('content').value = contentContent;
+        return true;
+    }
+
+    function previewImage(evt) {
+        if (evt.target.files && evt.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => document.getElementById('imagePreview').src = e.target.result;
+            reader.readAsDataURL(evt.target.files[0]);
+        }
+    }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

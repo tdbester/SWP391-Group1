@@ -89,19 +89,19 @@ public class LoginServlet extends HttpServlet {
                 if (roleName != null) {
                     switch (roleName.toLowerCase()) {
                         case "admin":
-                            response.sendRedirect(request.getContextPath() + "/teacher-salary");
+                            response.sendRedirect(request.getContextPath() + "/AdminDashboard");
                             break;
-                        case "student":
-                            response.sendRedirect(request.getContextPath() + "/View/home.jsp");
+                        case "học sinh":
+                            response.sendRedirect(request.getContextPath() + "/StudentDashboard");
                             break;
-                        case "teacher":
+                        case "giáo viên":
                             response.sendRedirect(request.getContextPath() + "/TeacherDashboard");
                             break;
-                        case "training manager":
-                            response.sendRedirect(request.getContextPath() + "/training-manager-view-class");
+                        case "nhân viên sale":
+                            response.sendRedirect("SaleDashboard");
                             break;
-                        case "sale":
-                            response.sendRedirect(request.getContextPath() + "/View/sale-dashboard.jsp");
+                        case "quản lý đào tạo":
+                            response.sendRedirect(request.getContextPath() + "/TrainingManagerDashboard");
                             break;
                         default:
                             response.sendRedirect(request.getContextPath() + "/View/home.jsp");

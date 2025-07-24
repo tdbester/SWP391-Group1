@@ -1,11 +1,11 @@
 package org.example.talentcenter.controller.config;
 
 import com.cloudinary.Cloudinary;
-//import com.cloudinary.Singleton;
-//import com.cloudinary.SingletonManager;
+import com.cloudinary.Singleton;
+import com.cloudinary.SingletonManager;
 import com.cloudinary.utils.ObjectUtils;
 
-//import com.cloudinary.Singleton;
+import com.cloudinary.Singleton;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
@@ -25,9 +25,9 @@ public class CloudinaryConfig implements ServletContextListener {
                 "secure", true
         );
         Cloudinary cloudinary = new Cloudinary(config);
-        //SingletonManager manager= new SingletonManager();
-        //manager.setCloudinary(cloudinary);
-        //manager.init();
+        SingletonManager manager= new SingletonManager();
+        manager.setCloudinary(cloudinary);
+        manager.init();
         System.out.println("Cloudinary instance created and set to Singleton.");
     }
 
@@ -36,3 +36,4 @@ public class CloudinaryConfig implements ServletContextListener {
         System.out.println("CloudinaryConfigListener destroyed...");
     }
 }
+

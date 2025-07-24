@@ -138,7 +138,7 @@ public class AccountDAO {
     public boolean updatePasswordByEmail(String email, String password) {
         String sql = "UPDATE Account SET Password = ? WHERE Email = ?";
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement st = conn.prepareStatement(sql)){
+             PreparedStatement st = conn.prepareStatement(sql)) {
             st.setString(1, password);
             st.setString(2, email);
             int rowsAffected = st.executeUpdate();
@@ -252,4 +252,110 @@ public class AccountDAO {
         }
         return -1; // Không tìm thấy
     }
+
+    public boolean createStudentAccount(String password, String name, String email, String phone) {
+        // Log giá trị truyền vào
+        System.out.println("DEBUG: createStudentAccount - name=" + name + ", email=" + email + ", phone=" + phone + ", password=" + password);
+        if (password == null || password.trim().isEmpty() ||
+            name == null || name.trim().isEmpty() ||
+            email == null || email.trim().isEmpty() ||
+            phone == null || phone.trim().isEmpty()) {
+            System.out.println("ERROR: Một hoặc nhiều trường truyền vào bị null hoặc rỗng!");
+            return false;
+        }
+        String sqlAccount = """
+        INSERT INTO Account (Password, Email, FullName, PhoneNumber, RoleId) 
+        VALUES (?, ?, ?, ?, 2)
+    """;
+
+        String sqlStudent = """
+        INSERT INTO Student (AccountId, parentPhone,EnrollmentDate)
+        VALUES (?, ?, GETDATE())
+    """;
+
+        try (Connection conn = DBConnect.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try {
+                int accountId;
+
+                try (PreparedStatement stmtAccount = conn.prepareStatement(sqlAccount, Statement.RETURN_GENERATED_KEYS)) {
+                    stmtAccount.setString(1, password);
+                    stmtAccount.setString(2, email);
+                    stmtAccount.setString(3, name);
+                    stmtAccount.setString(4, phone);
+
+                    int result = stmtAccount.executeUpdate();
+                    if (result == 0) {
+                        System.out.println("ERROR: Creating account failed, no rows affected.");
+                        throw new SQLException("Creating account failed, no rows affected.");
+                    }
+
+                    try (ResultSet generatedKeys = stmtAccount.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            accountId = generatedKeys.getInt(1);
+                        } else {
+                            System.out.println("ERROR: Creating account failed, no ID obtained.");
+                            throw new SQLException("Creating account failed, no ID obtained.");
+                        }
+                    }
+                }
+
+                try (PreparedStatement stmtStudent = conn.prepareStatement(sqlStudent)) {
+                    stmtStudent.setInt(1, accountId);
+                    stmtStudent.setString(2, phone);
+                    stmtStudent.executeUpdate();
+                }
+
+                conn.commit();
+                System.out.println("DEBUG: createStudentAccount thành công cho email=" + email);
+                return true;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                System.out.println("ERROR: SQL Exception khi tạo tài khoản: " + e.getMessage());
+                e.printStackTrace();
+                return false;
+            }
+        } catch (SQLException e) {
+            System.out.println("ERROR: SQL Exception ngoài cùng khi tạo tài khoản: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean isUsernameExists(String email) {
+        String sql = "SELECT COUNT(*) FROM Account WHERE Email = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+    public int getAccountIdByEmail(String email) {
+        String sql = "SELECT Id FROM Account WHERE Email = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("Id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
 }

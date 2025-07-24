@@ -13,7 +13,8 @@ public class Course {
     private Category category;
     private Level level;
     private Type type;
-
+    private int classCount;
+    private int status; // 0 = not public (hidden), 1 = public (visible)
 
     public Course() {
     }
@@ -28,6 +29,37 @@ public class Course {
         this.category = category;
         this.level = level;
         this.type = type;
+        this.status = 1; // Default to public
+    }
+
+    public Course(int id, String title, double price, String information, int createdBy, String image, Category category, Level level, Type type, int status) {
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.information = information;
+        this.createdBy = createdBy;
+        this.image = image;
+        this.category = category;
+        this.level = level;
+        this.type = type;
+        this.status = status;
+    }
+
+    public Course(int id, String title, double price, String information, int createdBy, int classCount){
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.information = information;
+        this.createdBy = createdBy;
+        this.classCount = classCount;
+    }
+
+    public Course(int id, String title, double price, String information, int createdBy) {
+        this.id = id;
+        this.title = title;
+        this.price = price;
+        this.information = information;
+        this.createdBy = createdBy;
     }
 
     public int getId() {
@@ -92,5 +124,19 @@ public class Course {
     }
     public void setType(Type type) {
         this.type = type;
+    }
+    public int getClassCount() {
+        return classCount;
+    }
+    public void setClassCount(int classCount) {
+        this.classCount = classCount;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

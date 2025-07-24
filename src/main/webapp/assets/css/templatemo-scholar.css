@@ -109,7 +109,7 @@ img {
   overflow: hidden;
 }
 
-/* 
+/*
 ---------------------------------------------
 Global Styles
 --------------------------------------------- 
@@ -1586,6 +1586,26 @@ Contact Style
   color: #fff;
 }
 
+#contact-form select {
+  width: 100%;
+  height: 50px;
+  border-radius: 25px;
+  background-color: rgba(249, 235, 255, 0.15);
+  border: none;
+  outline: none;
+  font-weight: 300;
+  padding: 0px 20px;
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 30px;
+  position: relative;
+  z-index: 3;
+  appearance: none; /* Ẩn style mặc định của trình duyệt */
+}
+#contact-form select option {
+  color: #333; /* Để text trong dropdown dễ đọc */
+}
+
 #contact-form button {
   border: none;
   height: 50px;
@@ -1629,7 +1649,7 @@ Contact Style
   font-weight: 400;
 }
 
-/* 
+/*
 ---------------------------------------------
 TALENT01 Footer Style
 ---------------------------------------------
@@ -1893,6 +1913,7 @@ body {
   footer {
     margin-top: 30px;
   }
+
 }
 
 @media (max-width: 1200px) {
