@@ -13,7 +13,7 @@
 <header class="top-header">
     <div class="header-content">
         <div class="logo">TALENT01</div>
-        <a href="home.jsp" class="back-home-btn">← Về Trang Chủ</a>
+        <a href= "${pageContext.request.contextPath}/home" class="back-home-btn">← Về Trang Chủ</a>
     </div>
 </header>
 

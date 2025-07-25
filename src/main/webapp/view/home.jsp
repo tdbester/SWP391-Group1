@@ -60,8 +60,8 @@
                     <!-- ***** Menu Start ***** -->
                     <ul class="nav">
                         <li class="scroll-to-section"><a href="#top" class="active">Trang chủ</a></li>
-                        <li class="scroll-to-section"><a href="#services">Dịch vụ</a></li>
-                        <li class="scroll-to-section"><a href="#courses">Khóa học</a></li>
+                        <li class="scroll-to-section"><a href="${pageContext.request.contextPath}/guest-blogs">Blog</a></li>
+                        <li class="scroll-to-section"><a href="${pageContext.request.contextPath}/guest-courses">Khóa học</a></li>
 
                         <%
                             Object account = session.getAttribute("account");
@@ -74,12 +74,14 @@
                         <%
                         } else {
                             String dashboardURL = request.getContextPath() +"/View/home.jsp";
-                            if ("teacher".equalsIgnoreCase(role)) {
+                            if ("giáo viên".equalsIgnoreCase(role)) {
                                 dashboardURL = request.getContextPath() +"/View/teacher-dashboard.jsp";
-                            } else if ("sale".equalsIgnoreCase(role)) {
+                            } else if ("nhân viên sale".equalsIgnoreCase(role)) {
                                 dashboardURL = request.getContextPath() +"/View/sale-dashboard.jsp";
-                            }else if("training manager".equalsIgnoreCase(role)){
+                            }else if("quản lý đào tạo".equalsIgnoreCase(role)){
                                 dashboardURL = request.getContextPath() + "/View/training-manager-dashboard.jsp";
+                            }else if ("admin".equalsIgnoreCase(role)){
+                                dashboardURL = request.getContextPath() + "/View/admin-dashboard.jsp";
                             }
                         %>
                         <li class="scroll-to-section"><a href="<%=dashboardURL%>">Dashboard</a></li>
