@@ -22,7 +22,7 @@ public class HomeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        ArrayList<Course> subjects = courseDAO.getAllCourses();
+        ArrayList<Course> subjects = (ArrayList<Course>) courseDAO.getAll();
         request.setAttribute("subjects", subjects);
         if ("true".equals(request.getParameter("success"))) {
             request.setAttribute("message0", "Gửi tư vấn thành công!");

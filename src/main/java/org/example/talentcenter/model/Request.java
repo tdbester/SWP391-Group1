@@ -27,6 +27,7 @@ public class Request {
     private LocalDate toDate;
     private int slot;
     private int scheduleId;
+    private String processedByName;
     private String targetClassName;
     private Integer targetClassId;
     public Request() {
@@ -48,7 +49,6 @@ public class Request {
         this.typeName = typeName;
         this.description = description;
         this.typeId = typeId;
-
     }
 
     public Request(int senderID, String reason, String courseName, String parentPhone, Date createdAt) {
@@ -248,6 +248,14 @@ public class Request {
 
     public void setScheduleId(int scheduleId) {
         this.scheduleId = scheduleId;
+    }
+
+    public void setProcessedByName(String processedByName) {
+        this.processedByName = processedByName;
+    }
+
+    public String getProcessedByName() {
+        return processedByName;
     }
     public String getTargetClassName() {
         return targetClassName;

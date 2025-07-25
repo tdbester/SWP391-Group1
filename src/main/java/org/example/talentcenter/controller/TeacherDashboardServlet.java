@@ -1,9 +1,11 @@
 package org.example.talentcenter.controller;
 
+import org.example.talentcenter.dao.NotificationDAO;
 import org.example.talentcenter.dao.TeacherScheduleDAO;
 import org.example.talentcenter.dao.TeacherDAO;
 import org.example.talentcenter.dao.TeacherRequestDAO;
 import org.example.talentcenter.model.Account;
+import org.example.talentcenter.model.Notification;
 import org.example.talentcenter.model.Schedule;
 import org.example.talentcenter.model.Request;
 import org.example.talentcenter.config.DBConnect;
@@ -48,10 +50,15 @@ public class TeacherDashboardServlet extends HttpServlet {
             // Lấy danh sách đơn gần đây (5 đơn gần nhất trong 7 ngày)
             ArrayList<Request> recentRequests = teacherRequestDAO.getRecentRequests(accountId, 5);
 
+            // Lấy thông báo gần đây cho giáo viên
+            NotificationDAO dao = new NotificationDAO();
+            List<Notification> recentNotifications = dao.getRecentNotificationsForTeacher(accountId);
+
             // Set attributes để JSP sử dụng
             request.setAttribute("todaySchedules", todaySchedules);
             request.setAttribute("currentDate", today);
             request.setAttribute("recentRequests", recentRequests);
+            request.setAttribute("recentNotifications", recentNotifications);
 
             // Forward đến teacher-dashboard.jsp
             request.getRequestDispatcher("View/teacher-dashboard.jsp").forward(request, response);

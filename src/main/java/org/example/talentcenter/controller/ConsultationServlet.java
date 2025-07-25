@@ -60,7 +60,7 @@ public class ConsultationServlet extends HttpServlet {
             return;
         }
 
-        ArrayList<Course> subjects = subjectDAO.getAllCourses();
+        ArrayList<Course> subjects = (ArrayList<Course>) subjectDAO.getAllCourses();
         request.setAttribute("subjects", subjects);
         String action = request.getParameter("action");
         int page = 1, recordsPerPage = 10;
@@ -93,7 +93,6 @@ public class ConsultationServlet extends HttpServlet {
             request.setAttribute("course_filter", courseFilter); // giữ lại các filter cho paging
 
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
-            return; // Chuyển sang đây cho các action search/filter đều dùng như list.
         } else {
             response.sendRedirect("Consultation?action=list");
         }
@@ -103,25 +102,6 @@ public class ConsultationServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        HttpSession session = request.getSession(false);
-
-        if (session == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        Object user = session.getAttribute("account");
-        if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
-        String role = (String) session.getAttribute("userRole");
-        if (role == null || !"sale".equalsIgnoreCase(role)) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
-
         try {
             if ("add".equals(action)) {
                 String name = request.getParameter("name");
@@ -143,6 +123,7 @@ public class ConsultationServlet extends HttpServlet {
                     consult.setCourseId(0);
                 }
                 consultationDAO.addConsultation(consult);
+                HttpSession session = request.getSession();
                 session.setAttribute("message", "Thêm học sinh thành công.");
                 response.sendRedirect("Consultation");
             } else if ("update".equals(action)) {
@@ -163,11 +144,13 @@ public class ConsultationServlet extends HttpServlet {
 
                 consultationDAO.updateConsultation(consult);
 
+                HttpSession session = request.getSession();
                 session.setAttribute("message", "Cập nhật thành công.");
                 response.sendRedirect("Consultation");
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
                 consultationDAO.deleteConsultation(id);
+                HttpSession session = request.getSession();
                 session.setAttribute("message", "Xóa thành công.");
                 response.sendRedirect("Consultation");
             } else if (action.equals("updateConsultationStatus")) {

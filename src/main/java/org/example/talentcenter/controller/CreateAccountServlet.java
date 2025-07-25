@@ -109,6 +109,7 @@ public class CreateAccountServlet extends HttpServlet {
             if (parts.length > 3) {
                 try {
                     courseId = Integer.parseInt(parts[3].trim());
+                    consultationId = Integer.parseInt(parts[4].trim());
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                     response.sendRedirect("CreateAccount?error=invalid_id");

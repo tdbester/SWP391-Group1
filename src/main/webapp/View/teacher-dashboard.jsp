@@ -88,12 +88,12 @@
                     <p>Tạo đơn xin nghỉ hoặc yêu cầu</p>
                 </a>
 
-                <a href="${pageContext.request.contextPath}/teacherViewRequest" class="action-card">
+                <a href="${pageContext.request.contextPath}/teacher-notification" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-bell"></i>
                     </div>
-                    <h3>Đơn từ</h3>
-                    <p>Xem thông tin đơn từ</p>
+                    <h3>Thông báo</h3>
+                    <p>Thông báo mới nhất</p>
                 </a>
             </div>
         </div>
@@ -135,13 +135,70 @@
                 </div>
             </div>
 
-            <!-- Attendance Chart -->
-            <div class="content-card chart-card">
+            <!-- Notification Card -->
+            <div class="content-card">
                 <div class="card-header">
-                    <h3><i class="fas fa-chart-line"></i> Thống kê điểm danh</h3>
+                    <h3><i class="fas fa-bell"></i> Thông báo gần đây</h3>
+                    <a href="${pageContext.request.contextPath}/teacher-notification" class="view-all">Xem tất cả</a>
                 </div>
                 <div class="card-content">
-                    <canvas id="attendanceChart"></canvas>
+                    <c:choose>
+                        <c:when test="${empty recentNotifications}">
+                            <div class="no-data">
+                                <i class="fas fa-bell-slash"></i>
+                                <p>Không có thông báo nào gần đây</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach var="notification" items="${recentNotifications}">
+                                <div class="notification-item">
+                                    <div class="notification-icon ${notification.read ? '' : 'new'}">
+                                        <c:choose>
+                                            <c:when test="${notification.notificationType == 'SYSTEM'}">
+                                                <i class="fas fa-cog"></i>
+                                            </c:when>
+                                            <c:when test="${notification.notificationType == 'CLASS'}">
+                                                <i class="fas fa-chalkboard-teacher"></i>
+                                            </c:when>
+                                            <c:when test="${notification.notificationType == 'SCHEDULE'}">
+                                                <i class="fas fa-calendar-alt"></i>
+                                            </c:when>
+                                            <c:when test="${notification.notificationType == 'ANNOUNCEMENT'}">
+                                                <i class="fas fa-bullhorn"></i>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <i class="fas fa-bell"></i>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                    <div class="notification-content">
+                                        <h4>
+                                                ${notification.title}
+                                            <c:if test="${not notification.read}">
+                                                <span class="new-badge">Mới</span>
+                                            </c:if>
+                                        </h4>
+                                        <p>
+                                            <c:choose>
+                                                <c:when test="${fn:length(notification.content) > 100}">
+                                                    ${fn:substring(notification.content, 0, 100)}...
+                                                </c:when>
+                                                <c:otherwise>
+                                                    ${notification.content}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </p>
+                                        <div class="notification-info">
+                                            <span class="time">
+                                    <i class="fas fa-clock"></i>
+                                    <fmt:formatDate value="${notification.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
+                                </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
 

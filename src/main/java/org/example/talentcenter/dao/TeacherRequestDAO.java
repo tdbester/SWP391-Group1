@@ -85,13 +85,13 @@ public class TeacherRequestDAO {
     public ArrayList<Request> getRequestsBySenderId(int senderId) {
         ArrayList<Request> requests = new ArrayList<>();
         String sql = """
-                    SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
-                           r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
-                    FROM Request r
-                    LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
-                    WHERE r.SenderId = ?
-                    ORDER BY r.CreatedAt DESC
-                """;
+                SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
+                       r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
+                FROM Request r
+                LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
+                WHERE r.SenderId = ?
+                ORDER BY r.CreatedAt DESC
+            """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -115,38 +115,43 @@ public class TeacherRequestDAO {
                 String type = request.getTypeName();
 
                 if (type != null) {
-                    switch (type) {
-                        case "Đơn xin nghỉ phép":
-                            // Format: date|reason
-                            if (parts.length >= 2) {
-                                request.setReason(parts[1]);
-                            } else {
-                                request.setReason(fullReason);
-                            }
-                            break;
+                    try {
+                        switch (type) {
+                            case "Đơn xin nghỉ phép":
+                                // Format: date|reason
+                                if (parts.length >= 2) {
+                                    request.setReason(parts[1]);
+                                } else {
+                                    request.setReason(fullReason);
+                                }
+                                break;
 
-                        case "Đơn xin đổi lịch dạy":
-                            // Format: from|to|slot|scheduleId|reason
-                            if (parts.length >= 5) {
-                                request.setReason(parts[4]);
-                            } else if (parts.length >= 1) {
-                                request.setReason(parts[parts.length - 1]);
-                            } else {
-                                request.setReason(fullReason);
-                            }
-                            break;
+                            case "Đơn xin đổi lịch dạy":
+                                // Format: from|to|slot|scheduleId|reason
+                                if (parts.length >= 5) {
+                                    request.setReason(parts[4]);
+                                } else if (parts.length >= 1) {
+                                    request.setReason(parts[parts.length - 1]);
+                                } else {
+                                    request.setReason(fullReason);
+                                }
+                                break;
 
-
-                        default:
-                            if (parts.length >= 4) {
-                                request.setCourseName(parts[0]);
-                                request.setParentPhone(parts[1]);
-                                request.setPhoneNumber(parts[2]);
-                                request.setReason(parts[3]);
-                            } else {
-                                request.setReason(fullReason);
-                            }
-                            break;
+                            default:
+                                if (parts.length >= 4) {
+                                    request.setCourseName(parts[0]);
+                                    request.setParentPhone(parts[1]);
+                                    request.setPhoneNumber(parts[2]);
+                                    request.setReason(parts[3]);
+                                } else {
+                                    request.setReason(fullReason);
+                                }
+                                break;
+                        }
+                    } catch (Exception e) {
+                        // If parsing fails, use full reason
+                        System.err.println("Error parsing reason for request ID " + request.getId() + ": " + e.getMessage());
+                        request.setReason(fullReason);
                     }
                 } else {
                     request.setReason(fullReason);
@@ -155,8 +160,8 @@ public class TeacherRequestDAO {
                 requests.add(request);
             }
 
-
         } catch (SQLException e) {
+            System.err.println("Database error in getRequestsBySenderId: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -169,12 +174,12 @@ public class TeacherRequestDAO {
     public Request getRequestById(int requestId) {
         Request request = null;
         String sql = """
-                    SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
-                           r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
-                    FROM Request r
-                    LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
-                    WHERE r.Id = ?
-                """;
+                SELECT r.Id, r.SenderId, r.Reason, r.Status, r.Response,
+                       r.CreatedAt, r.ResponseAt, r.ProcessedBy, rt.TypeName
+                FROM Request r
+                LEFT JOIN RequestType rt ON r.TypeID = rt.TypeID
+                WHERE r.Id = ?
+            """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -192,38 +197,73 @@ public class TeacherRequestDAO {
                 String[] parts = fullReason != null ? fullReason.split("\\|") : new String[0];
 
                 if (type != null) {
-                    switch (type) {
-                        case "Đơn xin nghỉ phép":
-                            if (parts.length >= 2) {
-                                request.setReason(parts[1]);
-                                request.setOffDate(LocalDate.parse(parts[0]));  // nhớ set vào model
-                            } else {
-                                request.setReason(fullReason);
-                            }
-                            break;
+                    try {
+                        switch (type) {
+                            case "Đơn xin nghỉ phép":
+                                if (parts.length >= 2) {
+                                    request.setReason(parts[1]);
+                                    // Safely parse date
+                                    try {
+                                        request.setOffDate(LocalDate.parse(parts[0]));
+                                    } catch (Exception e) {
+                                        System.err.println("Error parsing date for leave request: " + parts[0]);
+                                    }
+                                } else {
+                                    request.setReason(fullReason);
+                                }
+                                break;
 
-                        case "Đơn xin đổi lịch dạy":
-                            if (parts.length >= 5) {
-                                request.setReason(parts[4]);
-                                request.setScheduleId(Integer.parseInt(parts[3]));  // nhớ set vào model
-                                request.setFromDate(LocalDate.parse(parts[0]));
-                                request.setToDate(LocalDate.parse(parts[1]));
-                                request.setSlot(Integer.parseInt(parts[2]));
-                            } else {
-                                request.setReason(fullReason);
-                            }
-                            break;
+                            case "Đơn xin đổi lịch dạy":
+                                if (parts.length >= 5) {
+                                    request.setReason(parts[4]);
 
-                        default:
-                            if (parts.length >= 4) {
-                                request.setCourseName(parts[0]);
-                                request.setParentPhone(parts[1]);
-                                request.setPhoneNumber(parts[2]);
-                                request.setReason(parts[3]);
-                            } else {
-                                request.setReason(fullReason);
-                            }
-                            break;
+                                    // Safely parse integers and dates
+                                    try {
+                                        request.setScheduleId(Integer.parseInt(parts[3].trim()));
+                                    } catch (NumberFormatException e) {
+                                        System.err.println("Error parsing schedule ID: " + parts[3]);
+                                    }
+
+                                    try {
+                                        request.setFromDate(LocalDate.parse(parts[0].trim()));
+                                    } catch (Exception e) {
+                                        System.err.println("Error parsing from date: " + parts[0]);
+                                    }
+
+                                    try {
+                                        request.setToDate(LocalDate.parse(parts[1].trim()));
+                                    } catch (Exception e) {
+                                        System.err.println("Error parsing to date: " + parts[1]);
+                                    }
+
+                                    try {
+                                        request.setSlot(Integer.parseInt(parts[2].trim()));
+                                    } catch (NumberFormatException e) {
+                                        System.err.println("Error parsing slot: " + parts[2]);
+                                    }
+                                } else if (parts.length >= 1) {
+                                    // If format is unexpected, just use the last part as reason
+                                    request.setReason(parts[parts.length - 1]);
+                                } else {
+                                    request.setReason(fullReason);
+                                }
+                                break;
+
+                            default:
+                                if (parts.length >= 4) {
+                                    request.setCourseName(parts[0]);
+                                    request.setParentPhone(parts[1]);
+                                    request.setPhoneNumber(parts[2]);
+                                    request.setReason(parts[3]);
+                                } else {
+                                    request.setReason(fullReason);
+                                }
+                                break;
+                        }
+                    } catch (Exception e) {
+                        // If any parsing fails, just use the full reason
+                        System.err.println("Error parsing request details for request ID " + requestId + ": " + e.getMessage());
+                        request.setReason(fullReason);
                     }
                 } else {
                     request.setReason(fullReason);
@@ -237,6 +277,7 @@ public class TeacherRequestDAO {
             }
 
         } catch (SQLException e) {
+            System.err.println("Database error in getRequestById: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -359,7 +400,7 @@ public class TeacherRequestDAO {
      * Xóa đơn từ (chỉ cho phép xóa đơn từ ở trạng thái Pending)
      */
     public boolean deleteRequest(int requestId) {
-        String sql = "DELETE FROM Request WHERE Id = ? AND Status = 'Pending'";
+        String sql = "DELETE FROM Request WHERE Id = ? AND Status = N'Chờ xử lý'";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

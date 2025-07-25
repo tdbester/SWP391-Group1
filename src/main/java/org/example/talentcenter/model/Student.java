@@ -5,6 +5,7 @@ import java.time.LocalDate;
 public class Student {
     private int id;
     private String name;
+    private String fullName;
     private String parentPhone;
     private String motherPhone;
     private int accountId;
@@ -168,5 +169,14 @@ public class Student {
 
     public void setConsultationNote(String consultationNote) {
         this.consultationNote = consultationNote;
+    }
+    public String getMotherPhone() {
+        return motherPhone;
+    }
+    public String getFullName() {
+        return fullName;
+    }
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 }

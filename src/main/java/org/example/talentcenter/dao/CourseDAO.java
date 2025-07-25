@@ -14,7 +14,7 @@ import java.util.List;
 public class CourseDAO {
 
     public void insert(Course course) {
-        String sql = "INSERT INTO Course (Title, Price, Information, CreatedBy, Image, CategoryID, Level, Type, Status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Course (Title, Price, Information, CreatedBy, Image, CategoryID, Level, Type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -26,7 +26,6 @@ public class CourseDAO {
             stmt.setInt(6, course.getCategory().getId());
             stmt.setString(7, course.getLevel() != null ? course.getLevel().name() : null);
             stmt.setString(8, course.getType() != null ? course.getType().name() : null);
-            stmt.setInt(9, course.getStatus());
 
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -39,7 +38,7 @@ public class CourseDAO {
         String sql = """
             SELECT
                 c.Id, c.Title, c.Price, c.Information, c.CreatedBy, c.Image,
-                c.CategoryID, c.Level, c.Type, c.Status,
+                c.CategoryID, c.Level, c.Type,
                 cat.Name AS CategoryName, cat.Type AS CategoryType,
                 a.FullName
             FROM Course c
@@ -88,73 +87,7 @@ public class CourseDAO {
                         rs.getString("Image"),
                         category,
                         level,
-                        type,
-                        rs.getInt("Status")
-                ));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public List<Course> getAllForGuest() {
-        List<Course> list = new ArrayList<>();
-        String sql = """
-            SELECT
-                c.Id, c.Title, c.Price, c.Information, c.CreatedBy, c.Image,
-                c.CategoryID, c.Level, c.Type, c.Status,
-                cat.Name AS CategoryName, cat.Type AS CategoryType,
-                a.FullName
-            FROM Course c
-            JOIN Category cat ON c.CategoryID = cat.Id
-            LEFT JOIN Account a ON c.CreatedBy = a.Id
-            WHERE c.status = 1
-            """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                Category category = new Category(
-                        rs.getInt("CategoryID"),
-                        rs.getString("CategoryName"),
-                        rs.getInt("CategoryType")
-                );
-
-                // Convert string to enum values
-                Level level = null;
-                String levelStr = rs.getString("Level");
-                if (levelStr != null) {
-                    try {
-                        level = Level.valueOf(levelStr);
-                    } catch (IllegalArgumentException e) {
-                        // Handle invalid enum value
-                    }
-                }
-
-                Type type = null;
-                String typeStr = rs.getString("Type");
-                if (typeStr != null) {
-                    try {
-                        type = Type.valueOf(typeStr);
-                    } catch (IllegalArgumentException e) {
-                        // Handle invalid enum value
-                    }
-                }
-
-                list.add(new Course(
-                        rs.getInt("Id"),
-                        rs.getString("Title"),
-                        rs.getDouble("Price"),
-                        rs.getString("Information"),
-                        rs.getInt("CreatedBy"),
-                        rs.getString("Image"),
-                        category,
-                        level,
-                        type,
-                        rs.getInt("Status")
+                        type
                 ));
             }
         } catch (SQLException e) {
@@ -167,7 +100,7 @@ public class CourseDAO {
         String sql = """
             SELECT
                 c.Id, c.Title, c.Price, c.Information, c.CreatedBy, c.Image,
-                c.CategoryID, c.Level, c.Type, c.Status,
+                c.CategoryID, c.Level, c.Type,
                 cat.Name AS CategoryName, cat.Type AS CategoryType
             FROM Course c
             JOIN Category cat ON c.CategoryID = cat.Id
@@ -215,8 +148,7 @@ public class CourseDAO {
                             rs.getString("Image"),
                             category,
                             level,
-                            type,
-                            rs.getInt("Status")
+                            type
                     );
                 }
             }
@@ -227,7 +159,7 @@ public class CourseDAO {
     }
 
     public void update(Course course) {
-        String sql = "UPDATE Course SET Title = ?, Price = ?, Information = ?, CreatedBy = ?, Image = ?, CategoryID = ?, Level = ?, Type = ?, Status = ? WHERE Id = ?";
+        String sql = "UPDATE Course SET Title = ?, Price = ?, Information = ?, CreatedBy = ?, Image = ?, CategoryID = ?, Level = ?, Type = ? WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -239,8 +171,7 @@ public class CourseDAO {
             stmt.setInt(6, course.getCategory().getId());
             stmt.setString(7, course.getLevel() != null ? course.getLevel().name() : null);
             stmt.setString(8, course.getType() != null ? course.getType().name() : null);
-            stmt.setInt(9, course.getStatus());
-            stmt.setInt(10, course.getId());
+            stmt.setInt(9, course.getId());
 
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -248,7 +179,7 @@ public class CourseDAO {
         }
     }
 
-    public void delete(int id) throws SQLException {
+    public void delete(int id) {
         String sql = "DELETE FROM Course WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -256,7 +187,7 @@ public class CourseDAO {
             stmt.setInt(1, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new SQLException("No course was deleted.");
+            e.printStackTrace();
         }
     }
 
@@ -301,51 +232,40 @@ public class CourseDAO {
         return 0;
     }
 
-    public List<CourseDto> pagingCourseWithFilters(int index, String search, Integer categoryId, String level) {
+    public int getTotalCourse() {
+        String sql = "SELECT COUNT(*) FROM Course";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<CourseDto> pagingCourse(int index) {
         List<CourseDto> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("""
+        String sql = """
             SELECT
                 c.Id, c.Title, c.Price, c.Information,
                 c.CreatedBy, a.FullName, c.Image,
-                c.CategoryID, c.Level, c.Type, c.Status,
+                c.CategoryID, c.Level, c.Type,
                 cat.Name AS CategoryName, cat.Type AS CategoryType
             FROM Course c
             JOIN Account a    ON c.CreatedBy  = a.Id
             JOIN Category cat ON c.CategoryID = cat.Id
-            WHERE 1=1
-            """);
-
-        List<Object> parameters = new ArrayList<>();
-
-        // Add search filter
-        if (search != null && !search.trim().isEmpty()) {
-            sql.append(" AND c.Title LIKE ?");
-            parameters.add("%" + search.trim() + "%");
-        }
-
-        // Add category filter
-        if (categoryId != null) {
-            sql.append(" AND c.CategoryID = ?");
-            parameters.add(categoryId);
-        }
-
-        // Add level filter
-        if (level != null && !level.trim().isEmpty()) {
-            sql.append(" AND c.Level = ?");
-            parameters.add(level.trim());
-        }
-
-        sql.append(" ORDER BY c.Id DESC OFFSET ? ROWS FETCH NEXT 10 ROWS ONLY");
-        parameters.add((index - 1) * 10);
+            ORDER BY c.Id DESC
+            OFFSET ? ROWS FETCH NEXT 10 ROWS ONLY
+            """;
 
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            // Set parameters
-            for (int i = 0; i < parameters.size(); i++) {
-                stmt.setObject(i + 1, parameters.get(i));
-            }
-
+            stmt.setInt(1, (index - 1) * 10);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     Category category = new Category(
@@ -355,11 +275,11 @@ public class CourseDAO {
                     );
 
                     // Convert string to enum values
-                    Level levelEnum = null;
+                    Level level = null;
                     String levelStr = rs.getString("Level");
                     if (levelStr != null) {
                         try {
-                            levelEnum = Level.valueOf(levelStr);
+                            level = Level.valueOf(levelStr);
                         } catch (IllegalArgumentException e) {
                             // Handle invalid enum value
                         }
@@ -384,9 +304,8 @@ public class CourseDAO {
                             rs.getString("FullName"),
                             rs.getString("Image"),
                             category,
-                            levelEnum,
-                            type,
-                            rs.getInt("Status")
+                            level,
+                            type
                     ));
                 }
             }
@@ -394,6 +313,30 @@ public class CourseDAO {
             throw new RuntimeException("Error during course paging: " + e.getMessage(), e);
         }
         return list;
+    }
+
+    public List<Course> getAllCourses() {
+        List<Course> courses = new ArrayList<>();
+        String sql = "SELECT * FROM Course";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Course course = new Course();
+                course.setId(rs.getInt("Id"));
+                course.setTitle(rs.getString("Title"));
+                course.setPrice(rs.getDouble("Price"));
+                course.setInformation(rs.getString("Information"));
+                course.setCreatedBy(rs.getInt("CreatedBy"));
+                courses.add(course);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return courses;
     }
 
     /**
@@ -533,54 +476,7 @@ public class CourseDAO {
         }
         return list;
     }
-    /**
-     * Lấy toàn bộ danh sách các khóa học từ cơ sở dữ liệu.
-     *
-     * @return Danh sách các khóa học bao gồm Id, tiêu đề, giá, thông tin mô tả và người tạo.
-     * @author Huyen Trang
-     */
-    public ArrayList<Course> getAllCourses() {
-        ArrayList<Course> subjects = new ArrayList<>();
-        String query = """
-                SELECT c.Id, c.Title, c.Price, c.Information, c.CreatedBy,
-                COUNT(cr.Id) as ClassCount
-                                    FROM Course c
-                                    LEFT JOIN ClassRooms cr ON c.Id = cr.CourseId
-                                    GROUP BY c.Id, c.Title, c.Price, c.Information, c.CreatedBy
-                                    ORDER BY c.Id DESC
-                """;
 
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Course subject = new Course(
-                        rs.getInt("Id"),
-                        rs.getString("Title"),
-                        rs.getDouble("Price"),
-                        rs.getString("Information"),
-                        rs.getInt("CreatedBy"),
-                        rs.getInt("ClassCount")
-                );
-                subjects.add(subject);
-            }
-            System.out.println("Số lượng khóa học: " + subjects.size());
-        } catch (SQLException e) {
-            System.err.println("Lỗi SQL: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        return subjects;
-    }
-
-    /**
-     * Trả về thông tin chi tiết của một khóa học dựa trên ID.
-     *
-     * @param courseId ID của khóa học cần lấy.
-     * @return Đối tượng Course nếu tìm thấy, ngược lại trả về null.
-     * @author Huyen Trang
-     */
     public Course getCourseById(int courseId) {
         String query = "SELECT Id, Title, Price, Information, CreatedBy FROM Course WHERE Id = ?";
 
@@ -664,4 +560,99 @@ public class CourseDAO {
         }
         return null;
     }
+    public List<CourseDto> pagingCourseWithFilters(int index, String search, Integer categoryId, String level) {
+        List<CourseDto> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+                c.Id, c.Title, c.Price, c.Information,
+                c.CreatedBy, a.FullName, c.Image,
+                c.CategoryID, c.Level, c.Type, c.Status,
+                cat.Name AS CategoryName, cat.Type AS CategoryType
+            FROM Course c
+            JOIN Account a    ON c.CreatedBy  = a.Id
+            JOIN Category cat ON c.CategoryID = cat.Id
+            WHERE 1=1
+            """);
+
+        List<Object> parameters = new ArrayList<>();
+
+        // Add search filter
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND c.Title LIKE ?");
+            parameters.add("%" + search.trim() + "%");
+        }
+
+        // Add category filter
+        if (categoryId != null) {
+            sql.append(" AND c.CategoryID = ?");
+            parameters.add(categoryId);
+        }
+
+        // Add level filter
+        if (level != null && !level.trim().isEmpty()) {
+            sql.append(" AND c.Level = ?");
+            parameters.add(level.trim());
+        }
+
+        sql.append(" ORDER BY c.Id DESC OFFSET ? ROWS FETCH NEXT 10 ROWS ONLY");
+        parameters.add((index - 1) * 10);
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            // Set parameters
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Category category = new Category(
+                            rs.getInt("CategoryID"),
+                            rs.getString("CategoryName"),
+                            rs.getInt("CategoryType")
+                    );
+
+                    // Convert string to enum values
+                    Level levelEnum = null;
+                    String levelStr = rs.getString("Level");
+                    if (levelStr != null) {
+                        try {
+                            levelEnum = Level.valueOf(levelStr);
+                        } catch (IllegalArgumentException e) {
+                            // Handle invalid enum value
+                        }
+                    }
+
+                    Type type = null;
+                    String typeStr = rs.getString("Type");
+                    if (typeStr != null) {
+                        try {
+                            type = Type.valueOf(typeStr);
+                        } catch (IllegalArgumentException e) {
+                            // Handle invalid enum value
+                        }
+                    }
+
+                    list.add(new CourseDto(
+                            rs.getInt("Id"),
+                            rs.getString("Title"),
+                            rs.getDouble("Price"),
+                            rs.getString("Information"),
+                            rs.getInt("CreatedBy"),
+                            rs.getString("FullName"),
+                            rs.getString("Image"),
+                            category,
+                            levelEnum,
+                            type,
+                            rs.getInt("Status")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error during course paging: " + e.getMessage(), e);
+        }
+        return list;
+    }
+
 }

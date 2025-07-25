@@ -16,10 +16,6 @@
 
 <!-- ADMIN SIDEBAR -->
 <div class="sidebar">
-  <div class="logo">
-    <i class="fas fa-user-shield"></i>
-    <h2>Trung Tâm Năng Khiếu</h2>
-  </div>
   <nav>
     <div class="nav-section">
       <a href="${pageContext.request.contextPath}/AdminDashboard" 
@@ -38,7 +34,7 @@
         <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
         <span>Danh sách giáo viên</span>
       </a>
-      <a href="${pageContext.request.contextPath}/TeacherSalary"
+      <a href="${pageContext.request.contextPath}/teacher-salary"
          class="nav-item ${pageContext.request.requestURI.contains('teacher-salary.jsp') || pageContext.request.servletPath.contains('/TeacherSalary') ? 'active' : ''}"
          role="link"
          aria-current="${pageContext.request.requestURI.contains('teacher-salary.jsp') || pageContext.request.servletPath.contains('/TeacherSalary') ? 'page' : 'false'}">

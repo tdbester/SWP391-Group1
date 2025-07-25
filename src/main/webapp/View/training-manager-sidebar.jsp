@@ -7,7 +7,7 @@
 --%>
 <!DOCTYPE html>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sidebar and Header Demo</title>
@@ -35,6 +35,16 @@
         </a>
       </div>
 
+      <div>
+          <a href="${pageContext.request.contextPath}/training-manager-view-class"
+             class="nav-item ${pageContext.request.requestURI.contains('training-manager-view-class.jsp') ? 'active' : ''}"
+             role="link"
+             aria-current="${pageContext.request.requestURI.contains('training-manager-view-class.jsp') ? 'page' : 'false'}">
+              <i class="fas fa-chalkboard-teacher" aria-hidden="true"></i>
+              <span>Quản lý lớp học</span>
+          </a>
+      </div>
+
 
       <div class="nav-section">
         <a href="${pageContext.request.contextPath}/ProcessRequest?action=list"
@@ -56,17 +66,17 @@
         </a>
       </div>
     </nav>
-  </div>
+</div>
 <script>
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', function() {
-      document.querySelectorAll('.nav-item').forEach(nav => nav.classroomList.remove('active'));
-      this.classroomList.add('active');
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classroomList.remove('active'));
+            this.classroomList.add('active');
+        });
     });
-  });
 
-  function toggleSidebar() {
-    document.querySelector('.sidebar').classroomList.toggle('active');
-  }
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classroomList.toggle('active');
+    }
 </script>
 

@@ -34,9 +34,15 @@
       </a>
     </div>
     <div class="nav-section">
-      <a href="${pageContext.request.contextPath}/TeacherAbsenceRequest" class="nav-item">
-        <i class="fas fa-user-times"></i>
-        <span>Đơn xin nghỉ học</span>
+      <a href="${pageContext.request.contextPath}/teacher-notification" class="nav-item">
+        <i class="fas fa-bell"></i>
+        <span>Thông báo</span>
+      </a>
+    </div>
+    <div class="nav-section">
+      <a href="${pageContext.request.contextPath}/sendNotification" class="nav-item">
+        <i class="fa-solid fa-envelope" style="color: #fbfdfe;"></i>
+        <span>Gửi thông báo</span>
       </a>
     </div>
   </nav>

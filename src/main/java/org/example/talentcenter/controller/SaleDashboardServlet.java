@@ -85,7 +85,7 @@ public class SaleDashboardServlet extends HttpServlet {
             request.setAttribute("totalPages", totalPages);
             request.getRequestDispatcher("View/sale-notification-list.jsp").forward(request, response);
         } else if ("courseList".equals(action)) {
-            ArrayList<Course> allCourses = courseDAO.getAllCourses();
+            ArrayList<Course> allCourses = (ArrayList<Course>) courseDAO.getAllCourses();
             if (allCourses == null) {
                 response.sendRedirect("SaleDashboard");
                 return;
@@ -114,7 +114,7 @@ public class SaleDashboardServlet extends HttpServlet {
             ArrayList<Notification> latestNotifications = notificationDAO.getLatestNotificationsForSale(3);
             int unreadCount = notificationDAO.getUnreadCountForSale();
             ArrayList<Course> latestCourse = courseDAO.getLatestCourses(2);
-            ArrayList<Course> allCourse = courseDAO.getAllCourses();
+            ArrayList<Course> allCourse = (ArrayList<Course>) courseDAO.getAllCourses();
             request.setAttribute("latestCoursesWithClass", latestCourse);
             request.setAttribute("latestNotifications", latestNotifications);
             request.setAttribute("unreadCount", unreadCount);

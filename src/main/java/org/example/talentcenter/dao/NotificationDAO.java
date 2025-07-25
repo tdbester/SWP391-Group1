@@ -1,42 +1,24 @@
-/*
- *  Copyright (C) 2025 <Group 1>
- *  All rights reserved.
- *
- *  This file is part of the <Talent Center Management> project.
- *  Unauthorized copying of this file, via any medium is strictly prohibited.
- *  Proprietary and confidential.
- *
- *  Created on:        2025-07-07
- *  Author:            Cù Thị Huyền Trang
- *
- *  ========================== Change History ==========================
- *  Date        | Author               | Description
- *  ------------|----------------------|--------------------------------
- *  2025-07-07  | Cù Thị Huyền Trang   | Initial creation
- */
-
 package org.example.talentcenter.dao;
 
 import org.example.talentcenter.config.DBConnect;
 import org.example.talentcenter.model.Notification;
+import org.example.talentcenter.model.ClassRooms;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class NotificationDAO {
+
     /**
      * Tạo một thông báo mới và lưu vào cơ sở dữ liệu.
-     *
-     * @param notification đối tượng {@link Notification} chứa thông tin thông báo cần tạo
-     * @return {@code true} nếu thêm thành công, {@code false} nếu có lỗi xảy ra
-     * @author Huyen Trang
      */
     public boolean createNotification(Notification notification) {
         String sql = """
-                    INSERT INTO Notification 
-                    (Title, Content, SenderName, RecipientRole, RecipientAccountId, NotificationType, RelatedEntityId, RelatedEntityType, CreatedAt, IsRead) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """;
+            INSERT INTO Notification
+            (Title, Content, SenderName, RecipientRole, RecipientAccountId, NotificationType, RelatedEntityId, RelatedEntityType, CreatedAt, IsRead, ClassRoomId)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -45,18 +27,27 @@ public class NotificationDAO {
             stmt.setString(2, notification.getContent());
             stmt.setString(3, notification.getSenderName());
             stmt.setString(4, notification.getRecipientRole());
+
             if (notification.getRecipientAccountId() != null) {
                 stmt.setInt(5, notification.getRecipientAccountId());
             } else {
                 stmt.setNull(5, java.sql.Types.INTEGER);
             }
+
             stmt.setString(6, notification.getNotificationType());
             stmt.setObject(7, notification.getRelatedEntityId());
             stmt.setString(8, notification.getRelatedEntityType());
             stmt.setTimestamp(9, notification.getCreatedAt());
             stmt.setBoolean(10, notification.isRead());
 
+            if (notification.getClassRoomId() != null) {
+                stmt.setInt(11, notification.getClassRoomId());
+            } else {
+                stmt.setNull(11, java.sql.Types.INTEGER);
+            }
+
             return stmt.executeUpdate() > 0;
+
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -64,18 +55,268 @@ public class NotificationDAO {
     }
 
     /**
-     * Lấy danh sách thông báo mới nhất cho một vai trò cụ thể và tài khoản
-     * Trả về các thông báo được gửi đến:
-     * - Tất cả người dùng ("ALL"),
-     * - Người dùng thuộc vai trò {@code role} và không chỉ định người nhận cụ thể,
-     * - Người dùng thuộc vai trò {@code role} và có {@code accountId} trùng khớp.
-     *
-     * @param role vai trò người nhận (ví dụ: "Student", "Teacher", ...)
-     * @param accountId ID tài khoản người nhận cụ thể (có thể null)
-     * @param limit số lượng thông báo muốn lấy
-     * @return danh sách {@link Notification} theo điều kiện lọc
-     * @author Huyen Trang
+     * Tạo thông báo gửi đến classroom
      */
+    public boolean createNotificationForClassRoom(Notification notification) {
+        String sql = """
+            INSERT INTO Notification
+            (Title, Content, SenderName, RecipientRole, ClassRoomId, NotificationType, CreatedAt, IsRead)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, notification.getTitle());
+            stmt.setString(2, notification.getContent());
+            stmt.setString(3, notification.getSenderName());
+            stmt.setString(4, "Student"); // Gửi đến học sinh
+            stmt.setInt(5, notification.getClassRoomId());
+            stmt.setString(6, notification.getNotificationType());
+            stmt.setTimestamp(7, notification.getCreatedAt());
+            stmt.setBoolean(8, notification.isRead());
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Lấy danh sách classroom để hiển thị trong dropdown
+     */
+    public ArrayList<ClassRooms> getAllClassRooms() {
+        ArrayList<ClassRooms> classRooms = new ArrayList<>();
+        String sql = """
+            SELECT cr.Id, cr.Name, c.Title as CourseTitle
+            FROM ClassRooms cr
+            JOIN Course c ON cr.CourseId = c.Id
+            ORDER BY cr.Name
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                ClassRooms classRoom = new ClassRooms();
+                classRoom.setId(rs.getInt("Id"));
+                classRoom.setName(rs.getString("Name"));
+                classRoom.setCourseTitle(rs.getString("CourseTitle"));
+                classRooms.add(classRoom);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return classRooms;
+    }
+
+    /**
+     * Lấy thông báo theo classroom với filter
+     */
+    public ArrayList<Notification> getNotificationsForClassRoom(Integer classRoomId, String searchKeyword, String dateFrom, String dateTo) {
+        ArrayList<Notification> notifications = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+            SELECT n.*, cr.Name as ClassName, c.Title as CourseTitle
+            FROM Notification n
+            LEFT JOIN ClassRooms cr ON n.ClassRoomId = cr.Id
+            LEFT JOIN Course c ON cr.CourseId = c.Id
+            WHERE n.RecipientRole = 'Student'
+            """);
+
+        ArrayList<Object> params = new ArrayList<>();
+
+        if (classRoomId != null) {
+            sql.append(" AND n.ClassRoomId = ?");
+            params.add(classRoomId);
+        }
+
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            sql.append(" AND (n.Title LIKE ? OR n.Content LIKE ? OR n.SenderName LIKE ?)");
+            String searchPattern = "%" + searchKeyword + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+            sql.append(" AND n.CreatedAt >= ?");
+            params.add(dateFrom + " 00:00:00");
+        }
+
+        if (dateTo != null && !dateTo.trim().isEmpty()) {
+            sql.append(" AND n.CreatedAt <= ?");
+            params.add(dateTo + " 23:59:59");
+        }
+
+        sql.append(" ORDER BY n.CreatedAt DESC");
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Notification notification = mapResultSetToNotification(rs);
+                notifications.add(notification);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return notifications;
+    }
+
+    /**
+     * Lấy thông báo theo ID
+     */
+    public Notification getNotificationById(int notificationId) {
+        Notification notification = null;
+        String sql = "SELECT * FROM Notification WHERE Id = ?";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, notificationId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                notification = mapResultSetToNotification(rs);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return notification;
+    }
+
+    /**
+     * Cập nhật thông báo
+     */
+    public boolean updateNotification(Notification notification) {
+        String sql = """
+            UPDATE Notification 
+            SET Title = ?, Content = ?, NotificationType = ?, ClassRoomId = ?
+            WHERE Id = ?
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, notification.getTitle());
+            stmt.setString(2, notification.getContent());
+            stmt.setString(3, notification.getNotificationType());
+
+            if (notification.getClassRoomId() != null) {
+                stmt.setInt(4, notification.getClassRoomId());
+            } else {
+                stmt.setNull(4, java.sql.Types.INTEGER);
+            }
+
+            stmt.setInt(5, notification.getId());
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
+     * Tìm kiếm thông báo theo từ khóa
+     */
+    public ArrayList<Notification> searchNotificationsByKeyword(String keyword, String role, Integer accountId) {
+        ArrayList<Notification> notifications = new ArrayList<>();
+        String sql = """
+            SELECT * FROM Notification
+            WHERE ((RecipientRole = ? AND RecipientAccountId IS NULL)
+            OR (RecipientRole = ? AND RecipientAccountId = ?)
+            OR (RecipientRole = 'ALL'))
+            AND (Title LIKE ? OR Content LIKE ? OR SenderName LIKE ?)
+            ORDER BY CreatedAt DESC
+            """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, role);
+            stmt.setString(2, role);
+            if (accountId != null) {
+                stmt.setInt(3, accountId);
+            } else {
+                stmt.setNull(3, java.sql.Types.INTEGER);
+            }
+
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(4, searchPattern);
+            stmt.setString(5, searchPattern);
+            stmt.setString(6, searchPattern);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Notification notification = mapResultSetToNotification(rs);
+                notifications.add(notification);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return notifications;
+    }
+
+    /**
+     * Thông báo mới của giáo viên
+     */
+
+    public List<Notification> getRecentNotificationsForTeacher(int accountId) {
+        List<Notification> notifications = new ArrayList<>();
+        String sql = "SELECT Id, Title, Content, SenderName, RecipientRole, RecipientAccountId, " +
+                "NotificationType, RelatedEntityId, RelatedEntityType, CreatedAt, IsRead, ClassRoomId " +
+                "FROM Notification " +
+                "WHERE RecipientAccountId = ? " +
+                "AND CreatedAt >= DATEADD(DAY, -7, GETDATE()) " +
+                "ORDER BY CreatedAt DESC";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, accountId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Notification n = new Notification();
+                    n.setId(rs.getInt("Id"));
+                    n.setTitle(rs.getString("Title"));
+                    n.setContent(rs.getString("Content"));
+                    n.setSenderName(rs.getString("SenderName"));
+                    n.setRecipientRole(rs.getString("RecipientRole"));
+                    n.setRecipientAccountId(rs.getInt("RecipientAccountId"));
+                    n.setNotificationType(rs.getString("NotificationType"));
+                    n.setRelatedEntityId(rs.getInt("RelatedEntityId"));
+                    n.setRelatedEntityType(rs.getString("RelatedEntityType"));
+                    n.setCreatedAt(Timestamp.valueOf(rs.getTimestamp("CreatedAt").toLocalDateTime()));
+                    n.setRead(rs.getBoolean("IsRead"));
+                    n.setClassRoomId(rs.getInt("ClassRoomId"));
+                    notifications.add(n);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return notifications;
+    }
+
     public ArrayList<Notification> getLatestNotificationsForRole(String role, Integer accountId, int limit) {
         ArrayList<Notification> notifications = new ArrayList<>();
         String sql = """
@@ -170,7 +411,7 @@ public class NotificationDAO {
      * @return danh sách {@link Notification} theo phân trang và điều kiện lọc
      * @author Huyen Trang
      */
-      public ArrayList<Notification> getAllNotificationsForRoleWithPaging(
+    public ArrayList<Notification> getAllNotificationsForRoleWithPaging(
             String role, Integer accountId, int offset, int limit) {
         ArrayList<Notification> notifications = new ArrayList<>();
         String sql = """
@@ -572,5 +813,4 @@ public class NotificationDAO {
     public int getTotalNotificationsCountForTrainingManager() {
         return getTotalNotificationsCountForRole("TrainingManager", null);
     }
-
 }

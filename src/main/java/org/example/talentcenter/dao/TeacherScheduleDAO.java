@@ -1,12 +1,14 @@
 package org.example.talentcenter.dao;
 
 import org.example.talentcenter.config.DBConnect;
+import org.example.talentcenter.model.ClassSchedulePattern;
 import org.example.talentcenter.model.Schedule;
 
 import java.sql.*;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 public class TeacherScheduleDAO {
 
@@ -72,7 +74,7 @@ public class TeacherScheduleDAO {
         JOIN Teacher t ON c.TeacherId = t.Id
         JOIN Account a ON t.AccountId = a.Id
         JOIN Course co ON c.CourseId = co.Id
-        WHERE t.Id = ? AND CONVERT(date, s.Date) = ?
+        WHERE t.Id = ? AND s.Date = ?
         ORDER BY sl.StartTime
         """;
 
@@ -93,25 +95,6 @@ public class TeacherScheduleDAO {
         }
 
         return schedules;
-    }
-    public ArrayList<Schedule> getAllSlots() {
-        ArrayList<Schedule> slots = new ArrayList<>();
-        String sql = "SELECT Id, StartTime, EndTime FROM Slot ORDER BY Id";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                Schedule slot = new Schedule();
-                slot.setSlotId(rs.getInt("Id"));
-                slot.setSlotStartTime(rs.getTime("StartTime").toLocalTime());
-                slot.setSlotEndTime(rs.getTime("EndTime").toLocalTime());
-                slots.add(slot);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return slots;
     }
 
     /**
@@ -203,7 +186,6 @@ public class TeacherScheduleDAO {
 
         return false;
     }
-
     /**
      * Cập nhật ngày học cho một lịch học
      */
@@ -224,7 +206,6 @@ public class TeacherScheduleDAO {
 
         return false;
     }
-
     /**
      * Xóa lịch học (để xử lý nghỉ phép)
      */
@@ -244,7 +225,6 @@ public class TeacherScheduleDAO {
 
         return false;
     }
-
     public boolean updateScheduleDateAndSlot(int scheduleId, String newDate, int newSlot) {
         String sql = "UPDATE Schedule SET Date = ?, SlotId = ? WHERE Id = ?";
         try (Connection conn = DBConnect.getConnection();
@@ -258,6 +238,185 @@ public class TeacherScheduleDAO {
             return false;
         }
     }
+    public ArrayList<Schedule> getAllSlots() {
+        ArrayList<Schedule> slots = new ArrayList<>();
+        String sql = "SELECT Id, StartTime, EndTime FROM Slot ORDER BY Id";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Schedule slot = new Schedule();
+                slot.setSlotId(rs.getInt("Id"));
+                slot.setSlotStartTime(rs.getTime("StartTime").toLocalTime());
+                slot.setSlotEndTime(rs.getTime("EndTime").toLocalTime());
+                slots.add(slot);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return slots;
+    }
+    /**
+     * Kiểm tra xung đột phòng học với lịch
+     */
+    public boolean hasRoomConflict(int roomId, int slotId, List<Integer> daysOfWeek,
+                                   LocalDate startDate, LocalDate endDate) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(*) FROM Schedule s ")
+                .append("INNER JOIN ClassSchedulePattern csp ON s.ClassRoomId = csp.ClassRoomId ")
+                .append("WHERE s.RoomId = ? ")
+                .append("AND s.SlotId = ? ")
+                .append("AND csp.DayOfWeek IN (");
+
+        // Add placeholders for days of week
+        for (int i = 0; i < daysOfWeek.size(); i++) {
+            sql.append("?");
+            if (i < daysOfWeek.size() - 1) {
+                sql.append(",");
+            }
+        }
+
+        sql.append(") ")
+                .append("AND (")
+                .append("(csp.StartDate <= ? AND csp.EndDate >= ?) OR ") // New period starts during existing
+                .append("(csp.StartDate <= ? AND csp.EndDate >= ?) OR ") // New period ends during existing
+                .append("(csp.StartDate >= ? AND csp.EndDate <= ?)")     // Existing period within new period
+                .append(")");
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            stmt.setInt(paramIndex++, roomId);
+            stmt.setInt(paramIndex++, slotId);
+
+            // Set days of week parameters
+            for (Integer day : daysOfWeek) {
+                stmt.setInt(paramIndex++, day);
+            }
+
+            // Set date parameters for overlap check
+            stmt.setDate(paramIndex++, java.sql.Date.valueOf(startDate));
+            stmt.setDate(paramIndex++, java.sql.Date.valueOf(startDate));
+            stmt.setDate(paramIndex++, java.sql.Date.valueOf(endDate));
+            stmt.setDate(paramIndex++, java.sql.Date.valueOf(endDate));
+            stmt.setDate(paramIndex++, java.sql.Date.valueOf(startDate));
+            stmt.setDate(paramIndex, java.sql.Date.valueOf(endDate));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0; // True if conflict exists
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking room conflict: " + e.getMessage());
+            e.printStackTrace();
+            return true; // Assume conflict on error to be safe
+        }
+        return false;
+    }
+
+    // Duyệt các pattern, lặp từ startDate đến endDate, đúng dayOfWeek thì insert
+    public void generateSchedulesFromPattern(List<ClassSchedulePattern> patterns, int classRoomId, int roomId) throws SQLException {
+        if (patterns == null || patterns.isEmpty()) {
+            throw new IllegalArgumentException("Patterns cannot be null or empty");
+        }
+
+        if (classRoomId <= 0 || roomId <= 0) {
+            throw new IllegalArgumentException("ClassRoomId and RoomId must be positive");
+        }
+
+        String insertSql = "INSERT INTO Schedule (Date, SlotId, RoomId, ClassRoomId) VALUES (?, ?, ?, ?)";
+        String checkSql = "SELECT COUNT(*) FROM Schedule WHERE Date = ? AND SlotId = ? AND RoomId = ?";
+
+        Connection conn = null;
+        PreparedStatement insertStmt = null;
+        PreparedStatement checkStmt = null;
+
+        try {
+            conn = DBConnect.getConnection();
+            conn.setAutoCommit(false); // Start transaction
+
+            insertStmt = conn.prepareStatement(insertSql);
+            checkStmt = conn.prepareStatement(checkSql);
+
+            int batchCount = 0;
+
+            for (ClassSchedulePattern pattern : patterns) {
+                if (pattern.getStartDate() == null || pattern.getEndDate() == null) {
+                    throw new IllegalArgumentException("Pattern dates cannot be null");
+                }
+
+                LocalDate currentDate = pattern.getStartDate();
+
+                while (!currentDate.isAfter(pattern.getEndDate())) {
+                    // Check if current date matches the pattern's day of week
+                    if (currentDate.getDayOfWeek().getValue() == pattern.getDayOfWeek()) {
+                        // Check for schedule conflicts
+                        checkStmt.setDate(1, Date.valueOf(currentDate));
+                        checkStmt.setInt(2, pattern.getSlotId());
+                        checkStmt.setInt(3, roomId);
+
+                        try (ResultSet rs = checkStmt.executeQuery()) {
+                            if (rs.next() && rs.getInt(1) == 0) { // No conflict found
+                                insertStmt.setDate(1, Date.valueOf(currentDate));
+                                insertStmt.setInt(2, pattern.getSlotId());
+                                insertStmt.setInt(3, roomId);
+                                insertStmt.setInt(4, classRoomId);
+                                insertStmt.addBatch();
+                                batchCount++;
+
+                                // Execute batch every 100 records for performance
+                                if (batchCount % 100 == 0) {
+                                    insertStmt.executeBatch();
+                                    insertStmt.clearBatch();
+                                }
+                            } else {
+                                // Log conflict but continue processing
+                                System.out.println("Schedule conflict detected for date: " + currentDate +
+                                        ", slot: " + pattern.getSlotId() +
+                                        ", room: " + roomId);
+                            }
+                        }
+                    }
+                    currentDate = currentDate.plusDays(1);
+                }
+            }
+
+            // Execute remaining batch
+            if (batchCount % 100 != 0) {
+                insertStmt.executeBatch();
+            }
+
+            conn.commit(); // Commit transaction
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Rollback on error
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            throw new SQLException("Error generating schedules from pattern: " + e.getMessage(), e);
+        } finally {
+            // Close resources
+            if (checkStmt != null) {
+                try { checkStmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            if (insertStmt != null) {
+                try { insertStmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true); // Reset auto-commit
+                    conn.close();
+                } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
+    }
+
 
     // Helper method để tạo Schedule object từ ResultSet
     private Schedule createScheduleFromResultSet(ResultSet rs) throws SQLException {
@@ -276,6 +435,5 @@ public class TeacherScheduleDAO {
         schedule.setTeacherName(rs.getString("TeacherName"));
         return schedule;
     }
-
 
 }

@@ -241,25 +241,39 @@ public class AccountDAO {
         }
     }
 
+    public int getTeacherIdByAccountId(int accountId) throws SQLException {
+        String sql = "SELECT Id FROM Teacher WHERE AccountId = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, accountId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("Id");
+            }
+        }
+        return -1; // Không tìm thấy
+    }
+
     public boolean createStudentAccount(String password, String name, String email, String phone, int consultationId) {
+
         // Log giá trị truyền vào
         System.out.println("DAO INPUT: " + name + " | " + email + " | " + phone + " | " + password);
         if (password == null || password.trim().isEmpty() ||
-            name == null || name.trim().isEmpty() ||
-            email == null || email.trim().isEmpty() ||
-            phone == null || phone.trim().isEmpty()) {
+                name == null || name.trim().isEmpty() ||
+                email == null || email.trim().isEmpty() ||
+                phone == null || phone.trim().isEmpty()) {
             System.out.println("ERROR: Một hoặc nhiều trường truyền vào bị null hoặc rỗng!");
             return false;
         }
         String sqlAccount = """
-        INSERT INTO Account (Password, Email, FullName, PhoneNumber, RoleId) 
-        VALUES (?, ?, ?, ?, 2)
-    """;
+                    INSERT INTO Account (Password, Email, FullName, PhoneNumber, RoleId) 
+                    VALUES (?, ?, ?, ?, 2)
+                """;
 
         String sqlStudent = """
-        INSERT INTO Student (AccountId, parentPhone,EnrollmentDate, consultationId)
-        VALUES (?, ?, GETDATE(), ?)
-    """;
+                    INSERT INTO Student (AccountId, parentPhone,EnrollmentDate, consultationId)
+                    VALUES (?, ?, GETDATE(), ?)
+                """;
 
         try (Connection conn = DBConnect.getConnection()) {
             conn.setAutoCommit(false);
@@ -332,6 +346,7 @@ public class AccountDAO {
 
         return false;
     }
+
     public int getAccountIdByEmail(String email) {
         String sql = "SELECT Id FROM Account WHERE Email = ?";
         try (Connection conn = DBConnect.getConnection();

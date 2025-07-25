@@ -8,9 +8,7 @@ import org.example.talentcenter.model.Student;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class AttendanceDAO {
 
@@ -18,17 +16,16 @@ public class AttendanceDAO {
     public List<ClassRooms> getAllClassesByTeacherId(int teacherId) {
         List<ClassRooms> classes = new ArrayList<>();
         String sql = """
-                
-                    SELECT c.Id, c.Name, c.CourseId, c.TeacherId, c.SlotId,
-                                      course.Title as CourseTitle,
-                                      slot.StartTime, slot.EndTime,
-                                      (SELECT COUNT(*) FROM Student_Class sc WHERE sc.ClassRoomId = c.Id) as StudentCount
-                               FROM ClassRooms c
-                               JOIN Course course ON c.CourseId = course.Id
-                               LEFT JOIN Slot slot ON c.SlotId = slot.Id
-                               WHERE c.TeacherId = ?
-                               ORDER BY c.Name
-                """;
+            SELECT c.Id, c.Name, c.CourseId, c.TeacherId, c.SlotId,
+                   course.Title as CourseTitle,
+                   slot.StartTime, slot.EndTime,
+                   (SELECT COUNT(*) FROM Student_Class sc WHERE sc.ClassRoomId = c.Id) as StudentCount
+            FROM ClassRooms c
+            JOIN Course course ON c.CourseId = course.Id
+            JOIN Slot slot ON c.SlotId = slot.Id
+            WHERE c.TeacherId = ?
+            ORDER BY c.Name
+            """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -44,18 +41,8 @@ public class AttendanceDAO {
                 classRoom.setTeacherId(rs.getInt("TeacherId"));
                 classRoom.setSlotId(rs.getInt("SlotId"));
                 classRoom.setCourseTitle(rs.getString("CourseTitle"));
-                Time startTime = rs.getTime("StartTime");
-                if (startTime != null) {
-                    classRoom.setStartTime(startTime.toLocalTime());
-                } else {
-                    classRoom.setStartTime(null);
-                }
-                Time endTime = rs.getTime("EndTime");
-                if (endTime != null) {
-                    classRoom.setEndTime(endTime.toLocalTime());
-                } else {
-                    classRoom.setEndTime(null);
-                }
+                classRoom.setStartTime(rs.getTime("StartTime").toLocalTime());
+                classRoom.setEndTime(rs.getTime("EndTime").toLocalTime());
                 classRoom.setStudentCount(rs.getInt("StudentCount"));
 
                 classes.add(classRoom);
@@ -70,18 +57,17 @@ public class AttendanceDAO {
     public List<ClassRooms> getTodayClassesByTeacherId(int teacherId) {
         List<ClassRooms> classes = new ArrayList<>();
         String sql = """
-                
-                    SELECT DISTINCT c.Id, c.Name, c.CourseId, c.TeacherId, c.SlotId,
-                                              course.Title as CourseTitle,
-                                              slot.StartTime, slot.EndTime,
-                                              (SELECT COUNT(*) FROM Student_Class sc WHERE sc.ClassRoomId = c.Id) as StudentCount
-                                       FROM ClassRooms c
-                                       JOIN Course course ON c.CourseId = course.Id
-                                       LEFT JOIN Slot slot ON c.SlotId = slot.Id
-                                       JOIN Schedule s ON s.ClassRoomId = c.Id
-                                       WHERE c.TeacherId = ? AND s.Date = CAST(GETDATE() AS DATE)
-                                       ORDER BY slot.StartTime
-                """;
+            SELECT DISTINCT c.Id, c.Name, c.CourseId, c.TeacherId, c.SlotId,
+                   course.Title as CourseTitle,
+                   slot.StartTime, slot.EndTime,
+                   (SELECT COUNT(*) FROM Student_Class sc WHERE sc.ClassRoomId = c.Id) as StudentCount
+            FROM ClassRooms c
+            JOIN Course course ON c.CourseId = course.Id
+            JOIN Slot slot ON c.SlotId = slot.Id
+            JOIN Schedule s ON s.ClassRoomId = c.Id
+            WHERE c.TeacherId = ? AND s.Date = CAST(GETDATE() AS DATE)
+            ORDER BY slot.StartTime
+            """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -97,18 +83,8 @@ public class AttendanceDAO {
                 classRoom.setTeacherId(rs.getInt("TeacherId"));
                 classRoom.setSlotId(rs.getInt("SlotId"));
                 classRoom.setCourseTitle(rs.getString("CourseTitle"));
-                Time startTime = rs.getTime("StartTime");
-                if (startTime != null) {
-                    classRoom.setStartTime(startTime.toLocalTime());
-                } else {
-                    classRoom.setStartTime(null);
-                }
-                Time endTime = rs.getTime("EndTime");
-                if (endTime != null) {
-                    classRoom.setEndTime(endTime.toLocalTime());
-                } else {
-                    classRoom.setEndTime(null);
-                }
+                classRoom.setStartTime(rs.getTime("StartTime").toLocalTime());
+                classRoom.setEndTime(rs.getTime("EndTime").toLocalTime());
                 classRoom.setStudentCount(rs.getInt("StudentCount"));
 
                 classes.add(classRoom);
@@ -123,7 +99,8 @@ public class AttendanceDAO {
     public List<Student> getStudentsByClassId(int classId) {
         List<Student> students = new ArrayList<>();
         String sql = """
-                SELECT s.Id, a.FullName, s.ParentPhone, s.MotherPhone,
+            
+                SELECT s.Id, a.FullName, s.ParentPhone,
                                       s.AccountId, s.EnrollmentDate
                                FROM Student s
                                JOIN Account a ON s.AccountId = a.Id
@@ -141,9 +118,8 @@ public class AttendanceDAO {
             while (rs.next()) {
                 Student student = new Student();
                 student.setId(rs.getInt("Id"));
-                student.setName(rs.getString("FullName"));
+                student.setFullName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("ParentPhone"));
-                student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
                 student.setEnrollmentDate(rs.getDate("EnrollmentDate").toLocalDate());
 
@@ -366,7 +342,7 @@ public class AttendanceDAO {
     public List<Student> getStudentsWithAttendanceStatus(int classId, int scheduleId) {
         List<Student> students = new ArrayList<>();
         String sql = """
-        SELECT s.Id, a.FullName, s.ParentPhone, s.MotherPhone, 
+        SELECT s.Id, a.FullName, s.ParentPhone,
                s.AccountId, s.EnrollmentDate,
                att.Id as AttendanceId, att.Status, att.Note
         FROM Student s
@@ -387,9 +363,8 @@ public class AttendanceDAO {
             while (rs.next()) {
                 Student student = new Student();
                 student.setId(rs.getInt("Id"));
-                student.setName(rs.getString("FullName"));
+                student.setFullName(rs.getString("FullName"));
                 student.setParentPhone(rs.getString("ParentPhone"));
-                student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
                 student.setEnrollmentDate(rs.getDate("EnrollmentDate").toLocalDate());
 
@@ -412,41 +387,6 @@ public class AttendanceDAO {
             e.printStackTrace();
         }
         return students;
-    }
-
-    // Thêm điểm danh cho học sinh mới
-    public boolean addAttendanceForNewStudents(int scheduleId, List<Attendance> newAttendances) {
-        if (newAttendances.isEmpty()) {
-            return true; // Không có học sinh mới thì coi như thành công
-        }
-
-        String sql = "INSERT INTO Attendance (ScheduleId, StudentId, Status, Note) VALUES (?, ?, ?, ?)";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            for (Attendance attendance : newAttendances) {
-                pstmt.setInt(1, attendance.getScheduleId());
-                pstmt.setInt(2, attendance.getStudentId());
-                pstmt.setString(3, attendance.getStatus());
-                pstmt.setString(4, attendance.getNote());
-                pstmt.addBatch();
-            }
-
-            int[] results = pstmt.executeBatch();
-
-            // Kiểm tra tất cả đều thành công
-            for (int result : results) {
-                if (result <= 0) {
-                    return false;
-                }
-            }
-            return true;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     // Lấy thông tin lớp học theo Id
@@ -473,18 +413,8 @@ public class AttendanceDAO {
                 classRoom.setTeacherId(rs.getInt("TeacherId"));
                 classRoom.setSlotId(rs.getInt("SlotId"));
                 classRoom.setCourseTitle(rs.getString("CourseTitle"));
-                Time startTime = rs.getTime("StartTime");
-                if (startTime != null) {
-                    classRoom.setStartTime(startTime.toLocalTime());
-                } else {
-                    classRoom.setStartTime(null);
-                }
-                Time endTime = rs.getTime("EndTime");
-                if (endTime != null) {
-                    classRoom.setEndTime(endTime.toLocalTime());
-                } else {
-                    classRoom.setEndTime(null);
-                }
+                classRoom.setStartTime(rs.getTime("StartTime").toLocalTime());
+                classRoom.setEndTime(rs.getTime("EndTime").toLocalTime());
                 classRoom.setStudentCount(rs.getInt("StudentCount"));
                 return classRoom;
             }

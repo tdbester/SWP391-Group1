@@ -14,6 +14,7 @@ public class Notification {
     private Timestamp createdAt;
     private boolean isRead;
     private Integer recipientAccountId;
+    private Integer classRoomId; // Thêm trường mới cho classroom
 
     public Notification() {
     }
@@ -104,5 +105,13 @@ public class Notification {
 
     public void setRecipientAccountId(Integer recipientAccountId) {
         this.recipientAccountId = recipientAccountId;
+    }
+
+    public Integer getClassRoomId() {
+        return classRoomId;
+    }
+
+    public void setClassRoomId(Integer classRoomId) {
+        this.classRoomId = classRoomId;
     }
 }
