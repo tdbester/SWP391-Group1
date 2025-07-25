@@ -59,7 +59,7 @@ public class ProcessRequestServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("userRole");
-        if (role == null || !"training manager".equalsIgnoreCase(role)) {
+        if (role == null || !"quản lý đào tạo".equalsIgnoreCase(role)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -190,7 +190,7 @@ public class ProcessRequestServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("userRole");
-        if (role == null || !"training manager".equalsIgnoreCase(role)) {
+        if (role == null || !"quản lý đào tạo".equalsIgnoreCase(role)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -209,6 +209,7 @@ public class ProcessRequestServlet extends HttpServlet {
 
             int requestId = Integer.parseInt(requestIdParam);
             Request requestDetail = requestDAO.getRequestDetailById(requestId);
+            // Parse lại offDate cho đơn xin nghỉ phép (fix lỗi không gửi thông báo)
             String reason = requestDetail.getReason();
             if (reason != null && reason.contains("|")) {
                 String[] parts = reason.split("\\|");
@@ -221,6 +222,7 @@ public class ProcessRequestServlet extends HttpServlet {
                     }
                 }
             }
+
             if (requestDetail == null) {
                 request.setAttribute("errorMessage", "Không tìm thấy đơn cần xử lý.");
                 request.getRequestDispatcher("View/error.jsp").forward(request, response);
@@ -250,7 +252,6 @@ public class ProcessRequestServlet extends HttpServlet {
                         }
                         Schedule newSchedule = scheduleDAO.getScheduleById(scheduleId);
                         if (newSchedule != null) {
-                            // lấy danh sách học sinh của lớp này
                             ArrayList<Account> students = studentDAO.getStudentsByClassId(newSchedule.getClassRoomId());
                             for (Account student : students) {
                                 try {
@@ -273,36 +274,40 @@ public class ProcessRequestServlet extends HttpServlet {
                             return;
                         }
                     }
-                    if ("Đơn xin nghỉ phép".equals(requestDetail.getTypeName())) {
-                        LocalDate offDate = requestDetail.getOffDate();
-                        int teacherId = teacherDAO.getTeacherByAccountId(requestDetail.getSenderID()).getId();
 
-                        if (offDate != null) {
-                            ArrayList<Schedule> schedules = scheduleDAO.getScheduleByTeacherIdAndDate(teacherId, offDate);
+                }
+                if ("Đơn xin nghỉ phép".equals(requestDetail.getTypeName())) {
+                    LocalDate offDate = requestDetail.getOffDate();
+                    int teacherId = teacherDAO.getTeacherByAccountId(requestDetail.getSenderID()).getId();
 
-                            for (Schedule schedule : schedules) {
-                                ArrayList<Account> students = studentDAO.getStudentsByClassId(schedule.getClassRoomId());
-                                for (Account student : students) {
+                    if (offDate != null) {
+                        ArrayList<Schedule> schedules = scheduleDAO.getScheduleByTeacherIdAndDate(teacherId, offDate);
 
-                                    try {
-                                        NotificationService.notifyStudentAbsence(
-                                                student.getId(),
-                                                requestDetail.getSenderName(),
-                                                schedule.getClassName(),
-                                                offDate,
-                                                schedule.getSlotStartTime(),
-                                                schedule.getSlotEndTime(),
-                                                schedule.getId()
-                                        );
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
+                        for (Schedule schedule : schedules) {
+                            ArrayList<Account> students = studentDAO.getStudentsByClassId(schedule.getClassRoomId());
+                            for (Account student : students) {
+                                try {
+                                    NotificationService.notifyStudentAbsence(
+                                            student.getId(),
+                                            requestDetail.getSenderName(),
+                                            schedule.getClassName(),
+                                            offDate,
+                                            schedule.getSlotStartTime(),
+                                            schedule.getSlotEndTime(),
+                                            schedule.getId()
+                                    );
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
                             }
                         }
+                        // Xóa tất cả lịch học của giáo viên trong ngày xin nghỉ
+                        for (Schedule schedule : schedules) {
+                            boolean deleted = scheduleDAO.deleteSchedule(schedule.getId());
+                            System.out.println("Deleted schedule id=" + schedule.getId() + ": " + deleted);
+                        }
                     }
                 }
-
             } else if ("reject".equals(action)) {
                 status = "Từ chối";
             } else {

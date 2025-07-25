@@ -130,7 +130,7 @@
                     <td><%= requestDetail.getPhoneNumber() != null ? requestDetail.getPhoneNumber() : "" %></td>
                 </tr>
 
-                <% if ("Teacher".equalsIgnoreCase(senderRole)) { %>
+                <% if ("giáo viên".equalsIgnoreCase(senderRole)) { %>
                 <tr>
                     <td><i class="fas fa-envelope"></i> Email:</td>
                     <td><%= requestDetail.getSenderEmail() != null ? requestDetail.getSenderEmail() : "" %></td>
@@ -267,6 +267,7 @@
         </div>
 
         <!-- Lịch sử xử lý -->
+        <% if (!"Chờ xử lý".equals(requestDetail.getStatus())) { %>
         <div class="info-section">
             <h2 class="section-title">
                 <i class="fas fa-history"></i> Lịch sử xử lý
@@ -289,6 +290,7 @@
             </div>
             <% } %>
         </div>
+        <% } %>
 
         <!-- Form xử lý đơn -->
         <% if ("Chờ xử lý".equals(requestDetail.getStatus())) { %>

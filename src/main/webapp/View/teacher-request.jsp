@@ -154,9 +154,20 @@
 
                         <div class="row mt-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Ngày muốn chuyển sang</label>
+                                <label class="form-label fw-bold">Ngày muốn chuyển sang <span class="text-danger">*</span></label>
                                 <input type="date" name="changeToDate" class="form-control"
-                                       value="${param.changeToDate}" min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>">
+                                       value="${param.changeToDate}" min="<fmt:formatDate value='<%=new java.util.Date()%>' pattern='yyyy-MM-dd'/>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Chọn ca dạy (slot) <span class="text-danger">*</span></label>
+                                <select name="changeToSlot" class="form-select" required>
+                                    <option value="">-- Chọn ca dạy --</option>
+                                    <c:forEach var="slot" items="${slotList}">
+                                        <option value="${slot.slotId}" ${param.changeToSlot == slot.slotId ? 'selected' : ''}>
+                                            Ca ${slot.slotId}: ${slot.slotStartTime} - ${slot.slotEndTime}
+                                        </option>
+                                    </c:forEach>
+                                </select>
                             </div>
                         </div>
                     </div>

@@ -53,7 +53,7 @@ public class SaleDashboardServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("userRole");
-        if (role == null || !"sale".equalsIgnoreCase(role)) {
+        if (role == null || !"nhân viên sale".equalsIgnoreCase(role)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -85,7 +85,7 @@ public class SaleDashboardServlet extends HttpServlet {
             request.setAttribute("totalPages", totalPages);
             request.getRequestDispatcher("View/sale-notification-list.jsp").forward(request, response);
         } else if ("courseList".equals(action)) {
-            ArrayList<Course> allCourses = (ArrayList<Course>) courseDAO.getAllCourses();
+            ArrayList<Course> allCourses = courseDAO.getAllCoursesForSale();
             if (allCourses == null) {
                 response.sendRedirect("SaleDashboard");
                 return;
@@ -142,7 +142,7 @@ public class SaleDashboardServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("userRole");
-        if (role == null || !"sale".equalsIgnoreCase(role)) {
+        if (role == null || !"nhân viên sale".equalsIgnoreCase(role)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }

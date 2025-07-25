@@ -654,5 +654,45 @@ public class CourseDAO {
         }
         return list;
     }
+    /**
+     * Lấy toàn bộ danh sách các khóa học từ cơ sở dữ liệu.
+     *
+     * @return Danh sách các khóa học bao gồm Id, tiêu đề, giá, thông tin mô tả và người tạo.
+     * @author Huyen Trang
+     */
+    public ArrayList<Course> getAllCoursesForSale() {
+        ArrayList<Course> subjects = new ArrayList<>();
+        String query = """
+                SELECT c.Id, c.Title, c.Price, c.Information, c.CreatedBy,
+                COUNT(cr.Id) as ClassCount
+                                    FROM Course c
+                                    LEFT JOIN ClassRooms cr ON c.Id = cr.CourseId
+                                    GROUP BY c.Id, c.Title, c.Price, c.Information, c.CreatedBy
+                                    ORDER BY c.Id DESC
+                """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Course subject = new Course(
+                        rs.getInt("Id"),
+                        rs.getString("Title"),
+                        rs.getDouble("Price"),
+                        rs.getString("Information"),
+                        rs.getInt("CreatedBy"),
+                        rs.getInt("ClassCount")
+                );
+                subjects.add(subject);
+            }
+            System.out.println("Số lượng khóa học: " + subjects.size());
+        } catch (SQLException e) {
+            System.err.println("Lỗi SQL: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return subjects;
+    }
 
 }

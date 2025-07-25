@@ -50,7 +50,7 @@ public class TrainingManagerDashboardServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("userRole");
-        if (role == null || !"training manager".equalsIgnoreCase(role)) {
+        if (role == null || !"quản lý đào tạo".equalsIgnoreCase(role)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -121,7 +121,7 @@ public class TrainingManagerDashboardServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("userRole");
-        if (role == null || !"training manager".equalsIgnoreCase(role)) {
+        if (role == null || !"quản lý đào tạo".equalsIgnoreCase(role)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }

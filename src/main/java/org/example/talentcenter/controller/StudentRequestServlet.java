@@ -38,7 +38,7 @@ public class StudentRequestServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("userRole");
-        if (role == null || !"student".equalsIgnoreCase(role)) {
+        if (role == null || !"học sinh".equalsIgnoreCase(role)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -142,7 +142,7 @@ public class StudentRequestServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("userRole");
-        if (role == null || !"student".equalsIgnoreCase(role)) {
+        if (role == null || !"học sinh".equalsIgnoreCase(role)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }

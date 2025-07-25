@@ -17,10 +17,10 @@
     <!-- Bootstrap core CSS -->
     <link href="${pageContext.request.contextPath}/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <!-- Additional CSS Files -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/${pageContext.request.contextPath}/assets/css/fontawesome.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/${pageContext.request.contextPath}/assets/css/templatemo-scholar.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/${pageContext.request.contextPath}/assets/css/owl.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/${pageContext.request.contextPath}/assets/css/animate.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/fontawesome.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/templatemo-scholar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/owl.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/animate.css">
     <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
 </head>
 

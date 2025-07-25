@@ -55,7 +55,7 @@ public class ConsultationServlet extends HttpServlet {
 
         // Kiểm tra role có phải là "sale" không
         String role = (String) session.getAttribute("userRole");
-        if (role == null || !"sale".equalsIgnoreCase(role)) {
+        if (role == null || !"nhân viên sale".equalsIgnoreCase(role)) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
@@ -67,7 +67,8 @@ public class ConsultationServlet extends HttpServlet {
         try {
             String pageParam = request.getParameter("page");
             if (pageParam != null) page = Integer.parseInt(pageParam);
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
 
         int offset = (page - 1) * recordsPerPage;
 
@@ -102,6 +103,26 @@ public class ConsultationServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+        HttpSession session = request.getSession(false);
+        // Kiểm tra session có tồn tại không
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // Kiểm tra user có trong session không
+        Object user = session.getAttribute("account");
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // Kiểm tra role có phải là "sale" không
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"nhân viên sale".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         try {
             if ("add".equals(action)) {
                 String name = request.getParameter("name");
@@ -123,7 +144,6 @@ public class ConsultationServlet extends HttpServlet {
                     consult.setCourseId(0);
                 }
                 consultationDAO.addConsultation(consult);
-                HttpSession session = request.getSession();
                 session.setAttribute("message", "Thêm học sinh thành công.");
                 response.sendRedirect("Consultation");
             } else if ("update".equals(action)) {
@@ -144,13 +164,11 @@ public class ConsultationServlet extends HttpServlet {
 
                 consultationDAO.updateConsultation(consult);
 
-                HttpSession session = request.getSession();
                 session.setAttribute("message", "Cập nhật thành công.");
                 response.sendRedirect("Consultation");
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
                 consultationDAO.deleteConsultation(id);
-                HttpSession session = request.getSession();
                 session.setAttribute("message", "Xóa thành công.");
                 response.sendRedirect("Consultation");
             } else if (action.equals("updateConsultationStatus")) {

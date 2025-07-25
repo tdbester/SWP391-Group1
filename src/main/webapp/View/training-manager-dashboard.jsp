@@ -5,8 +5,7 @@
   Time: 3:57 PM
   To change this template use File | Settings | File Templates.
 --%>
-
-<%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
@@ -20,7 +19,7 @@
 
 </head>
 <body>
-<jsp:include page="header.jsp"/>
+<%@ include file="header.jsp" %>
 <div class="container">
     <jsp:include page="training-manager-sidebar.jsp"/>
     <div class="main-content">
@@ -44,7 +43,12 @@
             <div class="sale-quick-nav">
                 <h2>Quick Actions</h2>
                 <div class="sale-nav-buttons">
-
+                    <a href="${pageContext.request.contextPath}/ProcessRequest?action=list" class="sale-nav-btn">
+                        <i class="fas fa-book"></i>Quản lý khoá học
+                    </a>
+                    <a href="${pageContext.request.contextPath}/ProcessRequest?action=list" class="sale-nav-btn">
+                        <i class="fas fa-tasks"></i>Quản lý lớp học
+                    </a>
                     <a href="${pageContext.request.contextPath}/ProcessRequest?action=list" class="sale-nav-btn">
                         <i class="fas fa-tasks"></i>Danh sách đơn cần xử lý
                     </a>
@@ -183,20 +187,6 @@
                         </a>
                     </div>
 
-                    <!-- Học sinh chưa có tài khoản -->
-                    <div style="background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 4px solid #dc3545;">
-                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                            <div style="background: #dc3545; color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-                                <i class="fas fa-user-plus"></i>
-                            </div>
-                            <h3 style="margin: 0; font-size: 14px; color: #666;">Học sinh chưa có tài khoản</h3>
-                        </div>
-                        <div style="font-size: 28px; font-weight: bold; color: #333; margin: 10px 0;">${studentsWithoutAccount}</div>
-                        <a href="AccountManagement?action=pending"
-                           style="color: #dc3545; text-decoration: none; font-size: 12px;">
-                            <i class="fas fa-user-cog"></i> Cấp tài khoản
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>

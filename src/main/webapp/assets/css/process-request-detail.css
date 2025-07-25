@@ -122,73 +122,78 @@
 
 .reason-box {
     flex: 1;
-    background: white;
-    border: 1px solid #e9ecef;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    background: #f9fafb;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.04);
 }
 
 .reason-box h3 {
-    color: #2c3e50;
+    color: #2563eb;
     margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 18px;
+    margin-bottom: 12px;
+    font-size: 17px;
     display: flex;
     align-items: center;
 }
 
 .reason-box h3 i {
-    margin-right: 10px;
-    color: #3498db;
+    margin-right: 8px;
+    color: #2563eb;
 }
 
 .reason-content {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 10px;
-    border-left: 4px solid #3498db;
+    background: #f1f5f9;
+    padding: 16px;
+    border-radius: 8px;
+    border-left: 4px solid #2563eb;
     line-height: 1.6;
-    color: #2c3e50;
+    color: #22223b;
     white-space: pre-wrap;
 }
 
 /* Transfer info box */
 .transfer-box {
     flex: 1;
-    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-    color: white;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 8px 25px rgba(116, 185, 255, 0.3);
+    background: #f9fafb;
+    color: #22223b;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #dbeafe;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.04);
 }
 
 .transfer-box h3 {
     margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 18px;
+    margin-bottom: 14px;
+    font-size: 17px;
     display: flex;
     align-items: center;
+    color: #2563eb;
 }
 
 .transfer-box h3 i {
-    margin-right: 10px;
+    margin-right: 8px;
+    color: #2563eb;
 }
 
 .transfer-detail {
-    background: rgba(255, 255, 255, 0.15);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    backdrop-filter: blur(10px);
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 3px solid #2563eb;
+    color: #22223b;
 }
 
 .transfer-note {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 15px;
-    border-radius: 10px;
-    border-left: 4px solid white;
-    margin-top: 15px;
+    background: #e0e7ef;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #2563eb;
+    margin-top: 10px;
+    color: #22223b;
 }
 
 /* Form styling */

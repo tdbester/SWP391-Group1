@@ -21,12 +21,23 @@ public class TeacherAbsenceRequestServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
-        HttpSession session = request.getSession();
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
-            response.sendRedirect("View/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"giáo viên".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
@@ -85,12 +96,23 @@ public class TeacherAbsenceRequestServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
-        HttpSession session = request.getSession();
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
-            response.sendRedirect("View/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"nhân viên sale".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         int teacherId = teacherDAO.getTeacherByAccountId(account.getId()).getId();

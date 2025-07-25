@@ -222,7 +222,7 @@
                     <ul class="pagination">
                         <c:forEach begin="1" end="${totalPages}" var="i">
                             <li class="page-item ${i == currentPage ? 'active' : ''}">
-                                <a class="page-link" href="SaleDashboard?action=notifications&page=${i}">${i}</a>
+                                <a class="page-link" href="TrainingManagerDashboard?action=notifications&page=${i}">${i}</a>
                             </li>
                         </c:forEach>
                     </ul>

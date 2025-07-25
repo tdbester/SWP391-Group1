@@ -38,21 +38,22 @@ public class StudentAttendanceReportDAO {
         ArrayList<StudentAttendanceReport> schedules = new ArrayList<>();
         String sql = """
                 SELECT s.Date, s.SlotId, sl.StartTime, sl.EndTime, att.Status, 
-                                       r.Code AS RoomCode, c.Name AS ClassName, 
-                                       co.Title AS CourseTitle, a.FullName AS TeacherName
-                                FROM Schedule s
-                                JOIN Slot sl on s.SlotId = sl.Id
-                                JOIN Room r ON s.RoomId = r.Id
-                                JOIN ClassRooms c ON s.ClassRoomId = c.Id
-                                JOIN Teacher t ON c.TeacherId = t.Id
-                                JOIN Account a ON t.AccountId = a.Id
-                                JOIN Course co ON c.CourseId = co.Id
-                                JOIN Student_Class sc ON c.Id = sc.ClassRoomId
-                                JOIN Student st ON sc.StudentId = st.Id
-                                JOIN Attendance att ON att.ScheduleId = s.Id AND att.StudentId = st.Id
-                                WHERE st.Id = ?
-                                    ORDER BY s.Date, sl.StartTime          
-                """;
+                       att.Note,
+                       r.Code AS RoomCode, c.Name AS ClassName, 
+                       co.Title AS CourseTitle, a.FullName AS TeacherName
+                FROM Schedule s
+                JOIN Slot sl on s.SlotId = sl.Id
+                JOIN Room r ON s.RoomId = r.Id
+                JOIN ClassRooms c ON s.ClassRoomId = c.Id
+                JOIN Teacher t ON c.TeacherId = t.Id
+                JOIN Account a ON t.AccountId = a.Id
+                JOIN Course co ON c.CourseId = co.Id
+                JOIN Student_Class sc ON c.Id = sc.ClassRoomId
+                JOIN Student st ON sc.StudentId = st.Id
+                JOIN Attendance att ON att.ScheduleId = s.Id AND att.StudentId = st.Id
+                WHERE st.Id = ?
+                ORDER BY s.Date, sl.StartTime          
+        """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -71,6 +72,7 @@ public class StudentAttendanceReportDAO {
                 studentAttendanceReport.setCourseTitle(rs.getString("CourseTitle"));
                 studentAttendanceReport.setTeacherName(rs.getString("TeacherName"));
                 studentAttendanceReport.setStatus(rs.getString("Status"));
+                studentAttendanceReport.setNote(rs.getString("Note"));
                 schedules.add(studentAttendanceReport);
             }
 

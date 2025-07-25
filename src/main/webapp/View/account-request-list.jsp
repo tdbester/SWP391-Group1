@@ -269,15 +269,14 @@
             <table>
                 <thead>
                 <tr>
-                    <%
-                        if (requests != null && !requests.isEmpty()) {
-                    %>
+                    <% if (requests != null && !requests.isEmpty()) { %>
                     <th class="checkbox-cell">
                         <input type="checkbox" id="selectAll" onchange="selectAll()" title="Chọn tất cả">
                     </th>
-                    <%
-                        }
-                    %>
+                    <th>STT</th>
+                    <% } else { %>
+                    <th>STT</th>
+                    <% } %>
                     <th>Tên học viên</th>
                     <th>Email</th>
                     <th>Số điện thoại</th>
@@ -288,7 +287,11 @@
                 </thead>
                 <tbody>
                 <%
+                    int colspan = (requests != null && !requests.isEmpty()) ? 8 : 7;
+                %>
+                <%
                     if (requests != null && !requests.isEmpty()) {
+                        int stt = 1;
                         for (Map<String, String> req : requests) {
                             String[] parts = req.get("reason").split("\\|");
                             boolean isCreated = "Đã duyệt".equals(req.get("status"));
@@ -301,6 +304,7 @@
                             <%= isCreated ? "disabled" : "" %>
                                title="<%= isCreated ? "Tài khoản đã được tạo" : "Chọn để tạo tài khoản" %>">
                     </td>
+                    <td><%= stt++ %></td>
                     <td><%= parts.length > 0 ? parts[0] : "" %></td>
                     <td><%= parts.length > 1 ? parts[1] : "" %></td>
                     <td><%= parts.length > 2 ? parts[2] : "" %></td>
@@ -330,7 +334,7 @@
                 } else {
                 %>
                 <tr>
-                    <td colspan="7" class="text-center text-danger">
+                    <td colspan="<%= colspan %>" class="text-center text-danger">
                         <i class="fas fa-inbox"></i> Không có yêu cầu nào
                     </td>
                 </tr>

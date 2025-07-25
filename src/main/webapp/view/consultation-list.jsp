@@ -121,7 +121,7 @@
                 <table class="table table-hover mb-0">
                     <thead>
                     <tr>
-                        <th><i class="fas fa-hashtag me-1"></i>ID</th>
+                        <th><i class="fas fa-hashtag me-1"></i>STT</th>
                         <th><i class="fas fa-user me-1"></i>Họ tên</th>
                         <th><i class="fas fa-envelope me-1"></i>Email</th>
                         <th><i class="fas fa-phone me-1"></i>Số điện thoại</th>
@@ -132,9 +132,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <c:forEach var="c" items="${consultations}">
+                    <c:forEach var="c" items="${consultations}" varStatus="st">
                         <tr>
-                            <td><span class="badge bg-light text-dark">${c.id}</span></td>
+                            <td><span class="badge bg-light text-dark">${st.index + 1}</span></td>
                             <td>${c.fullName}</td>
                             <td>${c.email}</td>
                             <td>${c.phone}</td>

@@ -72,6 +72,9 @@ To change this template use File | Settings | File Templates.
 
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+    Integer selectedMonth = (Integer) request.getAttribute("selectedMonth");
+    if (selectedMonth == null) selectedMonth = LocalDate.now().getMonthValue();
 %>
 <html lang="vi">
 <head>
@@ -129,14 +132,12 @@ To change this template use File | Settings | File Templates.
             </div>
 
             <div style="display: flex; align-items: center; gap: 8px;">
-                <label for="year" style="font-weight: 600;">Năm:</label>
-                <select name="year" id="year" onchange="this.form.submit()"
+                <label for="month" style="font-weight: 600;">Tháng:</label>
+                <select name="month" id="month" onchange="this.form.submit()"
                         style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px;">
-                    <%
-                        int currentYear = LocalDate.now().getYear();
-                        for (int y = currentYear - 2; y <= currentYear + 1; y++) {
-                    %>
-                    <option value="<%=y%>" <%= y == selectedYear ? "selected" : "" %>><%=y%></option>
+                    <option value="">Tất cả</option>
+                    <% for (int m = 1; m <= 12; m++) { %>
+                        <option value="<%=m%>" <%= m == selectedMonth ? "selected" : "" %>>Tháng <%=m%></option>
                     <% } %>
                 </select>
             </div>
@@ -195,6 +196,11 @@ To change this template use File | Settings | File Templates.
                 <div class="card-room"><%=report.getTeacherName() != null ? report.getTeacherName() : "N/A"%></div>
                 <div class="card-room">Lớp: <%=report.getClassName() != null ? report.getClassName() : "N/A"%></div>
                 <div class="status-badge <%=statusClass%>"><%=statusText%></div>
+                <% if (report.getNote() != null && !report.getNote().trim().isEmpty()) { %>
+                <div class="card-note">
+                    <i class="fas fa-sticky-note"></i> Ghi chú giáo viên: <%= report.getNote() %>
+                </div>
+                <% } %>
             </div>
             <%
                     }
@@ -241,11 +247,11 @@ To change this template use File | Settings | File Templates.
 <script>
     document.querySelectorAll('.view-option').forEach(option => {
         option.addEventListener('click', function() {
-            document.querySelectorAll('.view-option').forEach(opt => opt.classroomList.remove('active'));
-            this.classroomList.add('active');
+            document.querySelectorAll('.view-option').forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
 
             const grid = document.querySelector('.attendance-grid');
-            if (this.querySelector('i').classroomList.contains('fa-list')) {
+            if (this.querySelector('i').classList.contains('fa-list')) {
                 grid.style.gridTemplateColumns = '1fr';
             } else {
                 grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';

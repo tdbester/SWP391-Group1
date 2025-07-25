@@ -87,11 +87,12 @@
         <div class="table-container">
             <form method="post" action="${pageContext.request.contextPath}/StudentAccountRequest">
                 <input type="hidden" name="action" value="sentRequest"/>
+                <input type="hidden" name="page" value="${currentPage}"/>
                 <table>
                     <thead>
                     <tr>
                         <th><input type="checkbox" id="selectAll"/></th>
-                        <th>ID</th>
+                        <th>STT</th>
                         <th>Họ tên</th>
                         <th>Email</th>
                         <th>Số điện thoại</th>
@@ -100,11 +101,11 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <c:forEach var="s" items="${agreedStudents}">
+                    <c:forEach var="s" items="${agreedStudents}" varStatus="st">
                         <tr>
                             <td><input type="checkbox" name="selectedStudentIds" value="${s.id}"
                                        <c:if test="${s.accountRequestSent}">disabled</c:if>/></td>
-                            <td>${s.id}</td>
+                            <td>${(currentPage-1)*10 + st.index + 1}</td>
                             <td>${s.fullName}</td>
                             <td>${s.email}</td>
                             <td>${s.phone}</td>

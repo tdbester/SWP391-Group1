@@ -28,19 +28,23 @@ public class NotificationDAO {
             stmt.setString(3, notification.getSenderName());
             stmt.setString(4, notification.getRecipientRole());
 
-            if (notification.getRecipientAccountId() != null) {
+            if (notification.getRecipientAccountId() != null && notification.getRecipientAccountId() > 0) {
                 stmt.setInt(5, notification.getRecipientAccountId());
             } else {
                 stmt.setNull(5, java.sql.Types.INTEGER);
             }
 
             stmt.setString(6, notification.getNotificationType());
-            stmt.setObject(7, notification.getRelatedEntityId());
+            if (notification.getRelatedEntityId() != null) {
+                stmt.setObject(7, notification.getRelatedEntityId());
+            } else {
+                stmt.setNull(7, java.sql.Types.INTEGER);
+            }
             stmt.setString(8, notification.getRelatedEntityType());
             stmt.setTimestamp(9, notification.getCreatedAt());
             stmt.setBoolean(10, notification.isRead());
 
-            if (notification.getClassRoomId() != null) {
+            if (notification.getClassRoomId() != null && notification.getClassRoomId() > 0) {
                 stmt.setInt(11, notification.getClassRoomId());
             } else {
                 stmt.setNull(11, java.sql.Types.INTEGER);
@@ -49,6 +53,7 @@ public class NotificationDAO {
             return stmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
+            System.err.println("Error inserting notification: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
