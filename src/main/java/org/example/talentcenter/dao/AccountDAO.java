@@ -241,7 +241,7 @@ public class AccountDAO {
         }
     }
 
-    public boolean createStudentAccount(String password, String name, String email, String phone) {
+    public boolean createStudentAccount(String password, String name, String email, String phone, int consultationId) {
         // Log giá trị truyền vào
         System.out.println("DEBUG: createStudentAccount - name=" + name + ", email=" + email + ", phone=" + phone + ", password=" + password);
         if (password == null || password.trim().isEmpty() ||
@@ -257,8 +257,8 @@ public class AccountDAO {
     """;
 
         String sqlStudent = """
-        INSERT INTO Student (AccountId, parentPhone,EnrollmentDate)
-        VALUES (?, ?, GETDATE())
+        INSERT INTO Student (AccountId, parentPhone,EnrollmentDate, consultationId)
+        VALUES (?, ?, GETDATE(), ?)
     """;
 
         try (Connection conn = DBConnect.getConnection()) {
@@ -292,6 +292,7 @@ public class AccountDAO {
                 try (PreparedStatement stmtStudent = conn.prepareStatement(sqlStudent)) {
                     stmtStudent.setInt(1, accountId);
                     stmtStudent.setString(2, phone);
+                    stmtStudent.setInt(3, consultationId);
                     stmtStudent.executeUpdate();
                 }
 

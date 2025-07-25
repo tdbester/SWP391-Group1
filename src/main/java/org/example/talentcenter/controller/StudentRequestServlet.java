@@ -206,6 +206,7 @@ public class StudentRequestServlet extends HttpServlet {
             studentRequest.setReason(combinedReason);
             studentRequest.setCreatedAt(utilDate);
             studentRequest.setTypeId(requestTypeId);
+            studentRequest.setStatus("Chờ xử lý");
 
             RequestDAO dao = new RequestDAO();
             boolean success = dao.insert(studentRequest);

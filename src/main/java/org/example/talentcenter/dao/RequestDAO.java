@@ -41,7 +41,7 @@ public class RequestDAO {
      * @param phone    Số điện thoại học viên
      * @return true nếu insert thành công, false nếu có lỗi xảy ra
      */
-    public boolean sendCreateAccountRequest(int senderId, String name, String email, String phone, int courseId) {
+    public boolean sendCreateAccountRequest(int senderId, String name, String email, String phone, int courseId, int consultationId) {
         String sql = """
                     INSERT INTO Request (TypeId, SenderId, Reason, Status, CreatedAt) 
                     VALUES (6, ?, ?, ?, GETDATE())
@@ -51,7 +51,7 @@ public class RequestDAO {
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, senderId);
-            stmt.setString(2, name + "|" + email + "|" + phone + "|" + courseId);
+            stmt.setString(2, name + "|" + email + "|" + phone + "|" + courseId+"|" + consultationId);
             stmt.setString(3, "Chờ xử lý");
 
             return stmt.executeUpdate() > 0;
@@ -158,6 +158,9 @@ public class RequestDAO {
                                 } else {
                                     request.setReason(fullReason);
                                 }
+                                break;
+                            case "Đơn yêu cầu cấp tài khoản học viên":
+                                request.setReason(fullReason);
                                 break;
                             default:
                                 if (parts.length >= 4) {
@@ -302,7 +305,6 @@ public class RequestDAO {
                                 request.setReason(fullReason);
                             }
                             break;
-
                         case "Đơn xin nghỉ phép":
                             // Format: date|reason
                             if (parts.length >= 2) {
@@ -774,7 +776,7 @@ public class RequestDAO {
                      JOIN RequestType rt ON r.TypeID = rt.TypeID
                      JOIN Account acc ON r.SenderId = acc.Id
                      JOIN Role role ON acc.RoleId = role.Id
-                     WHERE r.TypeID NOT IN (3, 6)
+                     WHERE r.TypeID NOT IN (3, 6, 2)
                 """);
 
         ArrayList<Object> params = new ArrayList<>();

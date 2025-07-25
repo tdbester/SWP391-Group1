@@ -3,10 +3,8 @@ package org.example.talentcenter.dao;
 import org.example.talentcenter.config.DBConnect;
 import org.example.talentcenter.model.Account;
 import org.example.talentcenter.model.Student;
-import org.example.talentcenter.model.StudentSchedule;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class StudentDAO {
@@ -54,32 +52,34 @@ public class StudentDAO {
      * Cập nhật lớp học mới cho học sinh dựa trên tên lớp và accountId.
      *
      * @param studentAccountId ID tài khoản của học sinh
-     * @param targetClassName  Tên lớp mục tiêu cần chuyển đến
      * @return {@code true} nếu chuyển lớp thành công, ngược lại {@code false}
      * @author Huyen Trang
      */
     public boolean transferStudentToClass(int studentAccountId, String targetClassName) {
         String sql = """
-        UPDATE StudentClass 
-        SET ClassroomID = (
-            SELECT ClassroomID FROM Classroom WHERE ClassroomName = ?
-        )
-        WHERE StudentID = (
-            SELECT Id FROM Student WHERE AccountID = ?
-        )
-    """;
+                            UPDATE Student_Class
+                                             SET ClassRoomId = (
+                                                 SELECT Id FROM Classrooms WHERE Name = ?
+                                             )
+                                             WHERE StudentID = (
+                                                 SELECT Id FROM Student WHERE AccountID = ?
+                                             )
+                """;
 
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnect.getConnection()) {
+            conn.setAutoCommit(false); // Transaction
 
-            stmt.setString(1, targetClassName);  // ✅ Dùng String
-            stmt.setInt(2, studentAccountId);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, targetClassName);
+                stmt.setInt(2, studentAccountId);
+                int rows = stmt.executeUpdate();
+                conn.commit();
+                return rows > 0;
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw ex;
 
-            int rowsAffected = stmt.executeUpdate();
-            System.out.println("Rows affected in transfer: " + rowsAffected);
-            System.out.println("Transferred to class: " + targetClassName);
-
-            return rowsAffected > 0;
+            }
 
         } catch (SQLException e) {
             System.err.println("Lỗi khi chuyển lớp: " + e.getMessage());
@@ -114,6 +114,7 @@ public class StudentDAO {
         }
         return students;
     }
+
     /**
      * Lấy danh sách học sinh có thể được thêm vào lớp học cụ thể.
      * Điều kiện: Student.ConsultationId -> Consultation.courseId = ClassRooms.courseId
@@ -126,30 +127,29 @@ public class StudentDAO {
     public ArrayList<Student> getEligibleStudentsForClassroom(int classroomId) {
         ArrayList<Student> students = new ArrayList<>();
         String query = """
-                SELECT DISTINCT
-                    s.Id,
-                    a.FullName as Name,
-                    s.ParentPhone,
-                    s.MotherPhone,
-                    s.AccountId,
-                    s.EnrollmentDate,
-                    s.ConsultationId,
-                    a.PhoneNumber,
-                    c.Note as ConsultationNote,
-                    c.FullName as ConsultationName,
-                    c.Email as ConsultationEmail
-                FROM Student s
-                JOIN Account a ON s.AccountId = a.Id
-                JOIN Consultations c ON s.ConsultationId = c.Id
-                JOIN ClassRooms cr ON c.CourseId = cr.CourseId
-                WHERE cr.Id = ?
-                AND s.Id NOT IN (
-                    SELECT sc.StudentId
-                    FROM Student_Class sc
-                    WHERE sc.ClassRoomId = ?
-                )
-                ORDER BY a.FullName
-            """;
+                    SELECT DISTINCT
+                        s.Id,
+                        a.FullName as Name,
+                        s.ParentPhone,
+                        s.AccountId,
+                        s.EnrollmentDate,
+                        s.ConsultationId,
+                        a.PhoneNumber,
+                        c.Note as ConsultationNote,
+                        c.FullName as ConsultationName,
+                        c.Email as ConsultationEmail
+                    FROM Student s
+                    JOIN Account a ON s.AccountId = a.Id
+                    JOIN Consultations c ON s.ConsultationId = c.Id
+                    JOIN ClassRooms cr ON c.CourseId = cr.CourseId
+                    WHERE cr.Id = ?
+                    AND s.Id NOT IN (
+                        SELECT sc.StudentId
+                        FROM Student_Class sc
+                        WHERE sc.ClassRoomId = ?
+                    )
+                    ORDER BY a.FullName
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
@@ -163,7 +163,6 @@ public class StudentDAO {
                 student.setId(rs.getInt("Id"));
                 student.setName(rs.getString("Name"));
                 student.setParentPhone(rs.getString("ParentPhone"));
-                student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
                 student.setEnrollmentDate(rs.getDate("EnrollmentDate") != null ?
                         rs.getDate("EnrollmentDate").toLocalDate() : null);

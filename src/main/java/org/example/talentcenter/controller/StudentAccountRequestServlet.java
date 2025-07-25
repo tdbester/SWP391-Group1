@@ -100,7 +100,7 @@ public class StudentAccountRequestServlet extends HttpServlet {
                         int id = Integer.parseInt(idStr);
                         Consultation consult = consultationDAO.getById(id);
                         if (consult != null) {
-                            boolean success = dao.sendCreateAccountRequest(senderId, consult.getFullName(), consult.getEmail(), consult.getPhone(), consult.getCourseId());
+                            boolean success = dao.sendCreateAccountRequest(senderId, consult.getFullName(), consult.getEmail(), consult.getPhone(), consult.getCourseId(), consult.getId());
                             if (success) {
                                 consultationDAO.updateAccountRequestSentStatus(id, true);
                                 successCount++;
