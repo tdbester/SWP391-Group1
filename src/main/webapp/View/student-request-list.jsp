@@ -110,6 +110,7 @@
             <table>
                 <thead>
                 <tr>
+                    <th>Loại đơn</th>
                     <th>Lý do</th>
                     <th>Ngày tạo</th>
                     <th>Ghi chú xử lý</th>
@@ -122,13 +123,14 @@
                     if (requestList.isEmpty()) {
                 %>
                 <tr>
-                    <td colspan="5" style="text-align: center;">Chưa có đơn nào được gửi</td>
+                    <td colspan="6" style="text-align: center;">Chưa có đơn nào được gửi</td>
                 </tr>
                 <%
                 } else {
                     for (Request r : requestList) {
                 %>
                 <tr>
+                    <td><%= r.getTypeName() != null ? r.getTypeName() : "" %></td>
                     <td class="reason-text"><%= r.getReason() != null ? r.getReason() : "" %></td>
                     <td><%= r.getCreatedAt() != null ? dateFormat.format(r.getCreatedAt()) : "" %></td>
                     <td><%= r.getResponse() != null ? r.getResponse() : "" %></td>

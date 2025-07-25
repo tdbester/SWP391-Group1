@@ -38,75 +38,61 @@ public class ConsultationServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+
+        // Kiểm tra session có tồn tại không
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // Kiểm tra user có trong session không
+        Object user = session.getAttribute("account");
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // Kiểm tra role có phải là "sale" không
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"nhân viên sale".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         ArrayList<Course> subjects = (ArrayList<Course>) subjectDAO.getAllCourses();
         request.setAttribute("subjects", subjects);
         String action = request.getParameter("action");
-        if (action == null || action.equals("list")) {
-            int page = 1;
-            int recordsPerPage = 10;
-            try {
-                String pageParam = request.getParameter("page");
-                if (pageParam != null) page = Integer.parseInt(pageParam);
-            } catch (NumberFormatException ignored) {
-            }
+        int page = 1, recordsPerPage = 10;
+        try {
+            String pageParam = request.getParameter("page");
+            if (pageParam != null) page = Integer.parseInt(pageParam);
+        } catch (NumberFormatException ignored) {
+        }
 
-            int offset = (page - 1) * recordsPerPage;
-            ArrayList<Consultation> consultations = consultationDAO.getConsultationsWithPaging(offset, recordsPerPage);
-            int totalRecords = consultationDAO.getTotalConsultationCount();
-            int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+        int offset = (page - 1) * recordsPerPage;
+
+        if (action == null || action.equals("list") || action.equals("search") || action.equals("filterByStatus") || action.equals("filterByCourse")) {
+            String keyword = request.getParameter("keyword");
+            String statusFilter = request.getParameter("statusFilter");
+            String courseFilter = request.getParameter("course_filter");
+
+            // Tạo hàm lọc linh hoạt trong DAO theo nhiều điều kiện filter.
+            int totalRecords = consultationDAO.countConsultationsFiltered(keyword, statusFilter, courseFilter);
+            ArrayList<Consultation> consultations = consultationDAO.getConsultationsFiltered(
+                    keyword, statusFilter, courseFilter, offset, recordsPerPage);
+
+            int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
 
             request.setAttribute("consultations", consultations);
             request.setAttribute("currentPage", page);
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("subjects", subjects);
-            request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
-        } else if (action.equals("edit")) {
-            String idRaw = request.getParameter("id");
-            try {
-                int id = Integer.parseInt(idRaw);
-                Consultation consult = consultationDAO.getById(id);
-                if (consult == null) {
-                    response.sendRedirect("Consultation?action=list");
-                    return;
-                }
-                request.setAttribute("consult", consult);
-                request.setAttribute("subjects", subjects);
-                request.getRequestDispatcher("View/edit-consultation.jsp").forward(request, response);
-            } catch (NumberFormatException e) {
-                response.sendRedirect("Consultation?action=list");
-            }
-        } else if (action.equals("search")) {
-            String keyword = request.getParameter("keyword");
-            if (keyword == null || keyword.trim().isEmpty()) {
-                response.sendRedirect("Consultation?action=list");
-                return;
-            }
-            ArrayList<Consultation> consultations = consultationDAO.searchConsultations(keyword.trim());
-            request.setAttribute("consultations", consultations);
+
             request.setAttribute("keyword", keyword);
-            request.setAttribute("subjects", subjects);
-            request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
-        } else if (action.equals("filterByCourse")) {
-            String courseFilter = request.getParameter("course_filter");
-            if (courseFilter == null || courseFilter.trim().isEmpty()) {
-                response.sendRedirect("Consultation?action=list");
-                return;
-            }
-            ArrayList<Consultation> consultations = consultationDAO.filterConsultationsByCourse(courseFilter.trim());
-            request.setAttribute("consultations", consultations);
-            request.setAttribute("subjects", subjects);
-            request.setAttribute("course_filter", courseFilter);
-            request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
-        } else if (action.equals("filterByStatus")) {
-            String statusFilter = request.getParameter("statusFilter");
-            if (statusFilter == null || statusFilter.trim().isEmpty()) {
-                response.sendRedirect("Consultation?action=list");
-                return;
-            }
-            ArrayList<Consultation> consultations = consultationDAO.filterConsultationsByStatus(statusFilter.trim());
-            request.setAttribute("consultations", consultations);
-            request.setAttribute("subjects", subjects);
             request.setAttribute("statusFilter", statusFilter);
+            request.setAttribute("course_filter", courseFilter); // giữ lại các filter cho paging
+
             request.getRequestDispatcher("View/consultation-list.jsp").forward(request, response);
         } else {
             response.sendRedirect("Consultation?action=list");
@@ -117,6 +103,26 @@ public class ConsultationServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+        HttpSession session = request.getSession(false);
+        // Kiểm tra session có tồn tại không
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // Kiểm tra user có trong session không
+        Object user = session.getAttribute("account");
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        // Kiểm tra role có phải là "sale" không
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"nhân viên sale".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         try {
             if ("add".equals(action)) {
                 String name = request.getParameter("name");
@@ -138,7 +144,6 @@ public class ConsultationServlet extends HttpServlet {
                     consult.setCourseId(0);
                 }
                 consultationDAO.addConsultation(consult);
-                HttpSession session = request.getSession();
                 session.setAttribute("message", "Thêm học sinh thành công.");
                 response.sendRedirect("Consultation");
             } else if ("update".equals(action)) {
@@ -159,13 +164,11 @@ public class ConsultationServlet extends HttpServlet {
 
                 consultationDAO.updateConsultation(consult);
 
-                HttpSession session = request.getSession();
                 session.setAttribute("message", "Cập nhật thành công.");
                 response.sendRedirect("Consultation");
             } else if ("delete".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
                 consultationDAO.deleteConsultation(id);
-                HttpSession session = request.getSession();
                 session.setAttribute("message", "Xóa thành công.");
                 response.sendRedirect("Consultation");
             } else if (action.equals("updateConsultationStatus")) {

@@ -8,7 +8,6 @@
 <!DOCTYPE html>
 
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sidebar and Header Demo</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
@@ -45,15 +44,6 @@
           </a>
       </div>
 
-      <div class="nav-section">
-        <a href="${pageContext.request.contextPath}/CreateAccount"
-           class="nav-item ${pageContext.request.requestURI.contains('account-request-list.jsp') ? 'active' : ''}"
-           role="link"
-           aria-current="${pageContext.request.requestURI.contains('account-request-list.jsp') ? 'page' : 'false'}">
-          <i class="fas fa-user-check" aria-hidden="true"></i>
-          <span>Danh sách yêu cầu cấp tài khoản</span>
-        </a>
-      </div>
 
       <div class="nav-section">
         <a href="${pageContext.request.contextPath}/ProcessRequest?action=list"
@@ -88,3 +78,4 @@
         document.querySelector('.sidebar').classroomList.toggle('active');
     }
 </script>
+

@@ -28,6 +28,8 @@ public class Request {
     private int slot;
     private int scheduleId;
     private String processedByName;
+    private String targetClassName;
+    private Integer targetClassId;
     public Request() {
     }
 
@@ -254,5 +256,17 @@ public class Request {
 
     public String getProcessedByName() {
         return processedByName;
+    }
+    public String getTargetClassName() {
+        return targetClassName;
+    }
+    public void setTargetClassName(String targetClassName) {
+        this.targetClassName = targetClassName;
+    }
+    public Integer getTargetClassId() {
+        return targetClassId;
+    }
+    public void setTargetClassId(Integer targetClassId) {
+        this.targetClassId = targetClassId;
     }
 }

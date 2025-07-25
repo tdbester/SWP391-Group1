@@ -60,14 +60,14 @@ public class StudentDAO {
      */
     public boolean transferStudentToClass(int studentAccountId, String targetClassName) {
         String sql = """
-        UPDATE StudentClass 
-        SET ClassroomID = (
-            SELECT ClassroomID FROM Classroom WHERE ClassroomName = ?
-        )
-        WHERE StudentID = (
-            SELECT Id FROM Student WHERE AccountID = ?
-        )
-    """;
+                    UPDATE Student_Class
+                                                                  SET ClassRoomId = (
+                                                                      SELECT Id FROM Classrooms WHERE Name = ?
+                                                                  )
+                                                                  WHERE StudentID = (
+                                                                      SELECT Id FROM Student WHERE AccountID = ?
+                                                                  )
+                """;
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -163,6 +163,7 @@ public class StudentDAO {
                 student.setId(rs.getInt("Id"));
                 student.setName(rs.getString("Name"));
                 student.setParentPhone(rs.getString("ParentPhone"));
+                student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
                 student.setEnrollmentDate(rs.getDate("EnrollmentDate") != null ?
                         rs.getDate("EnrollmentDate").toLocalDate() : null);

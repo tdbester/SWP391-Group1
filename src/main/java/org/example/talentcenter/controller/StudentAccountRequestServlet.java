@@ -40,42 +40,48 @@ public class StudentAccountRequestServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        if (action == null || action.equals("list")) {
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"nhân viên sale".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        if (action == null || action.equals("list") || action.equals("search") || action.equals("filterByStatus")) {
             int page = 1;
             int recordsPerPage = 10;
-            try {
-                String pageParam = request.getParameter("page");
-                if (pageParam != null) page = Integer.parseInt(pageParam);
-            } catch (NumberFormatException ignored) {
+            if (request.getParameter("page") != null) {
+                try {
+                    page = Integer.parseInt(request.getParameter("page"));
+                } catch (NumberFormatException ignored) {
+                }
             }
 
-            int offset = (page - 1) * recordsPerPage;
-            ArrayList<Consultation> agreedStudents = consultationDAO.getAgreedConsultationsWithPaging(offset, recordsPerPage);
-            int totalRecords = consultationDAO.getTotalAgreedConsultationCount();
-            int totalPages = (int) Math.ceil(totalRecords * 1.0 / recordsPerPage);
+            String keyword = request.getParameter("keyword");
+            String statusFilter = request.getParameter("statusFilter");
+
+            // Đếm tổng số bản ghi
+            int totalRecords = consultationDAO.countAgreedConsultationsFiltered(keyword, statusFilter);
+
+            ArrayList<Consultation> agreedStudents = consultationDAO.getAgreedConsultationsFiltered(keyword, statusFilter, (page - 1) * recordsPerPage, recordsPerPage);
+
+            int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
 
             request.setAttribute("agreedStudents", agreedStudents);
             request.setAttribute("currentPage", page);
             request.setAttribute("totalPages", totalPages);
-            request.getRequestDispatcher("View/student-account-request.jsp").forward(request, response);
-        } else if (action.equals("search")) {
-            String keyword = request.getParameter("keyword");
-            if (keyword == null || keyword.trim().isEmpty()) {
-                response.sendRedirect("Consultation?action=list");
-                return;
-            }
-            ArrayList<Consultation> agreedStudents = consultationDAO.searchAgreedConsultations(keyword.trim());
-            request.setAttribute("agreedStudents", agreedStudents);
             request.setAttribute("keyword", keyword);
-            request.getRequestDispatcher("View/student-account-request.jsp").forward(request, response);
-        } else if (action.equals("filterByStatus")) {
-            String statusFilter = request.getParameter("statusFilter");
-            if (statusFilter == null || statusFilter.trim().isEmpty()) {
-                response.sendRedirect("StudentAccountRequest?action=list");
-                return;
-            }
-            ArrayList<Consultation> agreedStudents = consultationDAO.filterConsultationsByPaymentStatus(statusFilter.trim());
-            request.setAttribute("agreedStudents", agreedStudents);
             request.setAttribute("statusFilter", statusFilter);
             request.getRequestDispatcher("View/student-account-request.jsp").forward(request, response);
         } else {
@@ -87,13 +93,30 @@ public class StudentAccountRequestServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int senderId = (Integer) request.getSession().getAttribute("accountId");
         String action = request.getParameter("action");
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"nhân viên sale".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
         String[] selectedIds = request.getParameterValues("selectedStudentIds");
 
         try {
             if ("sentRequest".equals(action)) {
                 if (selectedIds != null && selectedIds.length > 0) {
                     int successCount = 0;
-                    HttpSession session = request.getSession();
                     Account saleAccount = (Account) session.getAttribute("account");
 
                     for (String idStr : selectedIds) {
@@ -119,8 +142,13 @@ public class StudentAccountRequestServlet extends HttpServlet {
                     request.setAttribute("message", "Vui lòng chọn ít nhất một học sinh để gửi yêu cầu.");
                 }
 
-                // Reload danh sách sau khi gửi
+                // Lấy lại trang hiện tại từ request
                 int page = 1;
+                if (request.getParameter("page") != null) {
+                    try {
+                        page = Integer.parseInt(request.getParameter("page"));
+                    } catch (NumberFormatException ignored) {}
+                }
                 int recordsPerPage = 10;
                 int offset = (page - 1) * recordsPerPage;
                 ArrayList<Consultation> agreedStudents = consultationDAO.getAgreedConsultationsWithPaging(offset, recordsPerPage);
@@ -137,8 +165,13 @@ public class StudentAccountRequestServlet extends HttpServlet {
 
                 boolean updated = consultationDAO.updatePaymentStatus(id, status);
 
-                // Load lại danh sách
+                // Lấy lại trang hiện tại từ request
                 int page = 1;
+                if (request.getParameter("page") != null) {
+                    try {
+                        page = Integer.parseInt(request.getParameter("page"));
+                    } catch (NumberFormatException ignored) {}
+                }
                 int recordsPerPage = 10;
                 int offset = (page - 1) * recordsPerPage;
                 ArrayList<Consultation> agreedStudents = consultationDAO.getAgreedConsultationsWithPaging(offset, recordsPerPage);

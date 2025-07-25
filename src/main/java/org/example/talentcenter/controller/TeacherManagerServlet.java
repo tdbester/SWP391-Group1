@@ -41,6 +41,9 @@ public class TeacherManagerServlet extends HttpServlet {
 
         switch (action) {
             case "detail": showTeacherDetail(req, resp); break;
+            case "new": showNewTeacherForm(req, resp); break;
+            case "edit": showEditTeacherForm(req, resp); break;
+            case "delete": deleteTeacher(req, resp); break;
             default: listTeachers(req, resp); break;
         }
     }
@@ -65,6 +68,7 @@ public class TeacherManagerServlet extends HttpServlet {
 
         switch (action) {
             case "update": updateTeacher(req, resp); break;
+            case "insert": insertTeacher(req, resp); break;
             default: resp.sendRedirect("teachers"); break;
         }
     }
@@ -91,6 +95,50 @@ public class TeacherManagerServlet extends HttpServlet {
         req.setAttribute("teacherList", filtered);
         req.setAttribute("endP", endPage);
         req.setAttribute("currentIndex", index);
+
+        // Handle success/error messages from previous operations
+        String successMessage = req.getParameter("success");
+        String errorMessage = req.getParameter("error");
+
+        if (successMessage != null) {
+            switch (successMessage) {
+                case "created":
+                    req.setAttribute("successMessage", "Giáo viên đã được thêm thành công!");
+                    break;
+                case "updated":
+                    req.setAttribute("successMessage", "Thông tin giáo viên đã được cập nhật thành công!");
+                    break;
+                case "deleted":
+                    req.setAttribute("successMessage", "Giáo viên đã được xóa thành công!");
+                    break;
+            }
+        }
+
+        if (errorMessage != null) {
+            switch (errorMessage) {
+                case "TeacherNotFound":
+                    req.setAttribute("errorMessage", "Không tìm thấy giáo viên!");
+                    break;
+                case "InvalidID":
+                    req.setAttribute("errorMessage", "ID giáo viên không hợp lệ!");
+                    break;
+                case "DeleteFailed":
+                    req.setAttribute("errorMessage", "Không thể xóa giáo viên! Giáo viên có thể đang được phân công lớp học.");
+                    break;
+                case "CreateFailed":
+                    req.setAttribute("errorMessage", "Không thể thêm giáo viên!");
+                    break;
+                case "UpdateFailed":
+                    req.setAttribute("errorMessage", "Cập nhật thông tin thất bại!");
+                    break;
+                case "InvalidData":
+                    req.setAttribute("errorMessage", "Dữ liệu không hợp lệ!");
+                    break;
+                case "EmailExists":
+                    req.setAttribute("errorMessage", "Email đã tồn tại trong hệ thống!");
+                    break;
+            }
+        }
 
         req.getRequestDispatcher("/View/teacher-list.jsp").forward(req, resp);
     }
@@ -148,6 +196,107 @@ public class TeacherManagerServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             resp.sendRedirect("teachers?error=InvalidData");
+        }
+    }
+
+    private void showNewTeacherForm(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        req.getRequestDispatcher("/View/teacher-form.jsp").forward(req, resp);
+    }
+
+    private void showEditTeacherForm(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            int id = Integer.parseInt(req.getParameter("id"));
+            Teacher teacher = teacherDAO.getTeacherById(id);
+            if (teacher != null) {
+                req.setAttribute("teacher", teacher);
+                req.getRequestDispatcher("/View/teacher-form.jsp").forward(req, resp);
+            } else {
+                resp.sendRedirect("teachers?error=TeacherNotFound");
+            }
+        } catch (NumberFormatException e) {
+            resp.sendRedirect("teachers?error=InvalidID");
+        }
+    }
+
+    private void insertTeacher(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            // Validate required fields
+            String fullName = req.getParameter("fullName");
+            String email = req.getParameter("email");
+            String phoneNumber = req.getParameter("phoneNumber");
+            String address = req.getParameter("address");
+            String department = req.getParameter("department");
+            String salaryStr = req.getParameter("salary");
+
+            if (fullName == null || fullName.trim().isEmpty() ||
+                email == null || email.trim().isEmpty() ||
+                phoneNumber == null || phoneNumber.trim().isEmpty() ||
+                department == null || department.trim().isEmpty() ||
+                salaryStr == null || salaryStr.trim().isEmpty()) {
+                resp.sendRedirect("teachers?error=InvalidData");
+                return;
+            }
+
+            double salary;
+            try {
+                salary = Double.parseDouble(salaryStr);
+                if (salary < 0) {
+                    resp.sendRedirect("teachers?error=InvalidData");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                resp.sendRedirect("teachers?error=InvalidData");
+                return;
+            }
+
+            // Check if email already exists
+            if (teacherDAO.isEmailExists(email.trim())) {
+                resp.sendRedirect("teachers?error=EmailExists");
+                return;
+            }
+
+            // Create Account object
+            Account account = new Account();
+            account.setFullName(fullName.trim());
+            account.setEmail(email.trim());
+            account.setPassword("123456"); // Default password
+            account.setPhoneNumber(phoneNumber.trim());
+            account.setAddress(address != null ? address.trim() : "");
+
+            // Create Teacher object
+            Teacher teacher = new Teacher();
+            teacher.setAccount(account);
+            teacher.setDepartment(department.trim());
+            teacher.setSalary(salary);
+
+            boolean success = teacherDAO.addTeacher(teacher);
+            if (success) {
+                resp.sendRedirect("teachers?success=created");
+            } else {
+                resp.sendRedirect("teachers?error=CreateFailed");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.sendRedirect("teachers?error=InvalidData");
+        }
+    }
+
+    private void deleteTeacher(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            int id = Integer.parseInt(req.getParameter("id"));
+            boolean success = teacherDAO.deleteTeacher(id);
+            if (success) {
+                resp.sendRedirect("teachers?success=deleted");
+            } else {
+                resp.sendRedirect("teachers?error=DeleteFailed");
+            }
+        } catch (NumberFormatException e) {
+            resp.sendRedirect("teachers?error=InvalidID");
+        } catch (Exception e) {
+            resp.sendRedirect("teachers?error=DeleteFailed");
         }
     }
 

@@ -94,311 +94,9 @@
     <title>Chi tiết đơn - Training Manager</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/process-request-detail.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
-    <style>
-        /* Header */
-        .page-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-        }
 
-        .page-header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 600;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            color: white;
-            text-decoration: none;
-            margin-top: 10px;
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .back-link:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateX(-5px);
-        }
-
-        /* Section styling */
-        .info-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e9ecef;
-        }
-
-        .section-title {
-            color: #2c3e50;
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #3498db;
-            display: flex;
-            align-items: center;
-        }
-
-        .section-title i {
-            margin-right: 10px;
-            color: #3498db;
-        }
-
-        /* Table styling */
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        .info-table td {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            vertical-align: top;
-        }
-
-        .info-table td:first-child {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #495057;
-            width: 200px;
-            border-right: 3px solid #dee2e6;
-        }
-
-        .info-table td:last-child {
-            color: #2c3e50;
-        }
-
-        .info-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Status badge */
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .status-approved {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #00b894;
-        }
-
-        .status-rejected {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #e17055;
-        }
-
-        /* Content area */
-        .content-area {
-            display: flex;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-
-        .reason-box {
-            flex: 1;
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .reason-box h3 {
-            color: #2c3e50;
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-        }
-
-        .reason-box h3 i {
-            margin-right: 10px;
-            color: #3498db;
-        }
-
-        .reason-content {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #3498db;
-            line-height: 1.6;
-            color: #2c3e50;
-            white-space: pre-wrap;
-        }
-
-        /* Transfer info box */
-        .transfer-box {
-            flex: 1;
-            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 25px rgba(116, 185, 255, 0.3);
-        }
-
-        .transfer-box h3 {
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-        }
-
-        .transfer-box h3 i {
-            margin-right: 10px;
-        }
-
-        .transfer-detail {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            backdrop-filter: blur(10px);
-        }
-
-        .transfer-note {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid white;
-            margin-top: 15px;
-        }
-
-        /* Form styling */
-        .process-form {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e9ecef;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .form-textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: 14px;
-            resize: vertical;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-textarea:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-        }
-
-        /* Button styling */
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            text-decoration: none;
-        }
-
-        .btn i {
-            margin-right: 8px;
-        }
-
-        .btn-approve {
-            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
-        }
-
-        .btn-approve:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
-        }
-
-        .btn-reject {
-            background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(225, 112, 85, 0.3);
-        }
-
-        .btn-reject:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(225, 112, 85, 0.4);
-        }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-            font-style: italic;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 20px;
-            }
-
-            .content-area {
-                flex-direction: column;
-            }
-
-            .btn-group {
-                flex-direction: column;
-            }
-
-            .info-table td:first-child {
-                width: auto;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -432,7 +130,7 @@
                     <td><%= requestDetail.getPhoneNumber() != null ? requestDetail.getPhoneNumber() : "" %></td>
                 </tr>
 
-                <% if ("Teacher".equalsIgnoreCase(senderRole)) { %>
+                <% if ("giáo viên".equalsIgnoreCase(senderRole)) { %>
                 <tr>
                     <td><i class="fas fa-envelope"></i> Email:</td>
                     <td><%= requestDetail.getSenderEmail() != null ? requestDetail.getSenderEmail() : "" %></td>
@@ -569,6 +267,7 @@
         </div>
 
         <!-- Lịch sử xử lý -->
+        <% if (!"Chờ xử lý".equals(requestDetail.getStatus())) { %>
         <div class="info-section">
             <h2 class="section-title">
                 <i class="fas fa-history"></i> Lịch sử xử lý
@@ -591,6 +290,7 @@
             </div>
             <% } %>
         </div>
+        <% } %>
 
         <!-- Form xử lý đơn -->
         <% if ("Chờ xử lý".equals(requestDetail.getStatus())) { %>

@@ -23,6 +23,7 @@
 <%--    */--%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html>
@@ -86,11 +87,12 @@
         <div class="table-container">
             <form method="post" action="${pageContext.request.contextPath}/StudentAccountRequest">
                 <input type="hidden" name="action" value="sentRequest"/>
+                <input type="hidden" name="page" value="${currentPage}"/>
                 <table>
                     <thead>
                     <tr>
                         <th><input type="checkbox" id="selectAll"/></th>
-                        <th>ID</th>
+                        <th>STT</th>
                         <th>Họ tên</th>
                         <th>Email</th>
                         <th>Số điện thoại</th>
@@ -99,10 +101,11 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <c:forEach var="s" items="${agreedStudents}">
+                    <c:forEach var="s" items="${agreedStudents}" varStatus="st">
                         <tr>
-                            <td><input type="checkbox" name="selectedStudentIds" value="${s.id}"/></td>
-                            <td>${s.id}</td>
+                            <td><input type="checkbox" name="selectedStudentIds" value="${s.id}"
+                                       <c:if test="${s.accountRequestSent}">disabled</c:if>/></td>
+                            <td>${(currentPage-1)*10 + st.index + 1}</td>
                             <td>${s.fullName}</td>
                             <td>${s.email}</td>
                             <td>${s.phone}</td>
@@ -153,7 +156,8 @@
             <ul class="pagination">
                 <c:forEach begin="1" end="${totalPages}" var="i">
                     <li class="page-item ${i == currentPage ? 'active' : ''}">
-                        <a class="page-link" href="StudentAccountRequest?action=list&page=${i}">${i}</a>
+                        <a class="page-link" href="StudentAccountRequest?action=list&page=${i
+    }&keyword=${fn:escapeXml(keyword)}&statusFilter=${fn:escapeXml(statusFilter)}">${i}</a>
                     </li>
                 </c:forEach>
             </ul>

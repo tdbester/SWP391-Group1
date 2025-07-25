@@ -32,6 +32,7 @@
     ArrayList<Request> requestTypes = (ArrayList<Request>) request.getAttribute("requestTypes");
     if (requestList == null) requestList = new ArrayList<>();
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    int currentPage = (int) request.getAttribute("currentPage");
 %>
 
 <html lang="vi">
@@ -166,8 +167,7 @@
                         }
                 %>
                 <tr>
-                    <td style="text-align: center; font-weight: 600;"><%= index++ %>
-                    </td>
+                    <td style="text-align: center; font-weight: 600;"><%= (currentPage-1)*10 + index %></td>
                     <td><%= r.getSenderName() != null ? r.getSenderName() : "" %>
                     </td>
                     <td class="<%= roleClass %>">
@@ -190,19 +190,21 @@
                         </span>
                     </td>
                     <td style="text-align: center;">
-                        <a href="ProcessRequest?id=<%= r.getId() %>" class="action-btn btn-view">
-                            <i class="fas fa-eye"></i> Xem
-                        </a>
                         <% if ("Chờ xử lý".equals(r.getStatus())) { %>
                         <a href="ProcessRequest?id=<%= r.getId() %>" class="action-btn btn-process">
                             <i class="fas fa-cogs"></i> Xử lý
+                        </a>
+                        <% } else { %>
+                        <a href="ProcessRequest?id=<%= r.getId() %>" class="action-btn btn-view">
+                            <i class="fas fa-eye"></i> Xem
                         </a>
                         <% } %>
                     </td>
                 </tr>
                 <%
-                        }
+                        index++;
                     }
+                }
                 %>
                 </tbody>
             </table>

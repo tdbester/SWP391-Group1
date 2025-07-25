@@ -41,13 +41,15 @@
         <i class="fas fa-calculator" aria-hidden="true"></i>
         <span>Tính lương giáo viên</span>
       </a>
-      <a href="${pageContext.request.contextPath}/AccountManagement"
-         class="nav-item ${pageContext.request.requestURI.contains('account-list.jsp') || pageContext.request.servletPath.contains('/AccountManagement') ? 'active' : ''}"
-         role="link"
-         aria-current="${pageContext.request.requestURI.contains('account-list.jsp') || pageContext.request.servletPath.contains('/AccountManagement') ? 'page' : 'false'}">
-        <i class="fas fa-users" aria-hidden="true"></i>
-        <span>Danh sách tài khoản</span>
-      </a>
+      <div class="nav-section">
+        <a href="${pageContext.request.contextPath}/CreateAccount"
+           class="nav-item ${pageContext.request.requestURI.contains('account-request-list.jsp') ? 'active' : ''}"
+           role="link"
+           aria-current="${pageContext.request.requestURI.contains('account-request-list.jsp') ? 'page' : 'false'}">
+          <i class="fas fa-user-check" aria-hidden="true"></i>
+          <span>Danh sách yêu cầu cấp tài khoản học viên</span>
+        </a>
+      </div>
     </div>
   </nav>
 </div>

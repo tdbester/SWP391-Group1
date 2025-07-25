@@ -407,24 +407,6 @@ public class ConsultationDAO {
     }
 
     /**
-     * Đếm tổng số lượt tư vấn trong hệ thống.
-     *
-     * @return tổng số dòng trong bảng Consultations
-     * @author Huyen Trang
-     */
-    public int getTotalConsultationCount() {
-        String sql = "SELECT COUNT(*) FROM Consultations";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) return rs.getInt(1);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    /**
      * Đếm tổng số lượt học sinh đã đồng ý tư vấn trong hệ thống.
      *
      * @return tổng số dòng trong bảng Consultations
@@ -442,30 +424,145 @@ public class ConsultationDAO {
         return 0;
     }
 
-    /**
-     * Tìm kiếm học sinh đồng ý học theo từ khoá (họ tên, số điện thoại hoặc email).
-     * @param keyword từ khoá tìm kiếm
-     * @return danh sách tư vấn khớp từ khoá
-     * @author Huyen Trang
-     */
-    public ArrayList<Consultation> searchAgreedConsultations(String keyword) {
-        ArrayList<Consultation> result = new ArrayList<>();
-        String sql = """
-                SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.Status, c.Note
-                FROM Consultations c
-                JOIN Course cs ON c.CourseId = cs.Id
-                WHERE (c.FullName LIKE ? OR c.Phone LIKE ? OR c.Email LIKE ?)
-                  AND c.Status = N'Đồng ý'
-                """;
+    public ArrayList<Consultation> getAgreedConsultationsFiltered(String keyword, String status, int offset, int limit) {
+        ArrayList<Consultation> consultations = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+                SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.PaymentStatus, c.AccountRequestSent
+                FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id
+                WHERE c.Status = N'Đồng ý'
+            """);
+
+        ArrayList<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.isEmpty()) {
+            sql.append(" AND (c.FullName LIKE ? OR c.Email LIKE ? OR c.Phone LIKE ?) ");
+            String searchPattern = "%" + keyword + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND c.PaymentStatus = ? ");
+            params.add(status);
+        }
+
+        sql.append(" ORDER BY c.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+        params.add(offset);
+        params.add(limit);
 
         try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Consultation c = new Consultation(
+                            rs.getInt("Id"),
+                            rs.getString("FullName"),
+                            rs.getString("Email"),
+                            rs.getString("Phone"),
+                            rs.getString("Title"),
+                            rs.getString("PaymentStatus"),
+                            rs.getBoolean("AccountRequestSent")
+                    );
+                    consultations.add(c);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return consultations;
+    }
+
+    public int countAgreedConsultationsFiltered(String keyword, String status) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT COUNT(*)
+                FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id
+                WHERE c.Status = N'Đồng ý'
+            """);
+
+        ArrayList<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.isEmpty()) {
+            sql.append(" AND (c.FullName LIKE ? OR c.Email LIKE ? OR c.Phone LIKE ?) ");
+            String searchPattern = "%" + keyword + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND c.PaymentStatus = ? ");
+            params.add(status);
+        }
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    public int countConsultationsFiltered(String keyword, String status, String courseTitle) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id WHERE 1=1 ");
+        ArrayList<Object> params = new ArrayList<>();
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND (c.FullName LIKE ? OR c.Phone LIKE ? OR c.Email LIKE ? OR c.Note LIKE ?) ");
             String key = "%" + keyword + "%";
-            ps.setString(1, key);
-            ps.setString(2, key);
-            ps.setString(3, key);
+            params.add(key); params.add(key); params.add(key); params.add(key);
+        }
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND c.Status = ? ");
+            params.add(status);
+        }
+        if (courseTitle != null && !courseTitle.isBlank()) {
+            sql.append(" AND cs.Title = ? ");
+            params.add(courseTitle);
+        }
+        try (Connection con = DBConnect.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) { e.printStackTrace();}
+        return 0;
+    }
 
+    public ArrayList<Consultation> getConsultationsFiltered(String keyword, String status, String courseTitle, int offset, int limit) {
+        ArrayList<Consultation> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT c.Id, c.FullName, c.Email, c.Phone, c.CourseId, cs.Title, c.Status, c.Note FROM Consultations c JOIN Course cs ON c.CourseId = cs.Id WHERE 1=1 ");
+        ArrayList<Object> params = new ArrayList<>();
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND (c.FullName LIKE ? OR c.Phone LIKE ? OR c.Email LIKE ? OR c.Note LIKE ?) ");
+            String key = "%" + keyword + "%";
+            params.add(key); params.add(key); params.add(key); params.add(key);
+        }
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND c.Status = ? ");
+            params.add(status);
+        }
+        if (courseTitle != null && !courseTitle.isBlank()) {
+            sql.append(" AND cs.Title = ? ");
+            params.add(courseTitle);
+        }
+        sql.append("ORDER BY c.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ");
+        params.add(offset);
+        params.add(limit);
+
+        try (Connection con = DBConnect.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Consultation c = new Consultation();
@@ -477,12 +574,10 @@ public class ConsultationDAO {
                 c.setTitle(rs.getString("Title"));
                 c.setStatus(rs.getString("Status"));
                 c.setNote(rs.getString("Note"));
-                result.add(c);
+                list.add(c);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
     }
 
 

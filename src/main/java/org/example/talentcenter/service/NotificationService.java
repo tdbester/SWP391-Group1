@@ -188,9 +188,7 @@ public class NotificationService {
         notification.setRelatedEntityType("Schedule");
         notification.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         notification.setRead(false);
-
-        notificationDAO.createNotification(notification);
-        System.out.println("Sent absence notification to student " + studentAccountId);
+        boolean ok = notificationDAO.createNotification(notification);
     }
 
     /**

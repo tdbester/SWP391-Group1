@@ -2,6 +2,7 @@ package org.example.talentcenter.dao;
 
 import org.example.talentcenter.config.DBConnect;
 import org.example.talentcenter.model.Account;
+
 import java.sql.*;
 
 import static org.example.talentcenter.config.DBConnect.getConnection;
@@ -266,24 +267,25 @@ public class AccountDAO {
     }
 
     public boolean createStudentAccount(String password, String name, String email, String phone, int consultationId) {
+
         // Log giá trị truyền vào
-        System.out.println("DEBUG: createStudentAccount - name=" + name + ", email=" + email + ", phone=" + phone + ", password=" + password);
+        System.out.println("DAO INPUT: " + name + " | " + email + " | " + phone + " | " + password);
         if (password == null || password.trim().isEmpty() ||
-            name == null || name.trim().isEmpty() ||
-            email == null || email.trim().isEmpty() ||
-            phone == null || phone.trim().isEmpty()) {
+                name == null || name.trim().isEmpty() ||
+                email == null || email.trim().isEmpty() ||
+                phone == null || phone.trim().isEmpty()) {
             System.out.println("ERROR: Một hoặc nhiều trường truyền vào bị null hoặc rỗng!");
             return false;
         }
         String sqlAccount = """
-        INSERT INTO Account (Password, Email, FullName, PhoneNumber, RoleId) 
-        VALUES (?, ?, ?, ?, 2)
-    """;
+                    INSERT INTO Account (Password, Email, FullName, PhoneNumber, RoleId) 
+                    VALUES (?, ?, ?, ?, 2)
+                """;
 
         String sqlStudent = """
-        INSERT INTO Student (AccountId, parentPhone,EnrollmentDate,consultationId)
-        VALUES (?, ?, GETDATE(),?)
-    """;
+                    INSERT INTO Student (AccountId, parentPhone,EnrollmentDate, consultationId)
+                    VALUES (?, ?, GETDATE(), ?)
+                """;
 
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
@@ -356,6 +358,7 @@ public class AccountDAO {
 
         return false;
     }
+
     public int getAccountIdByEmail(String email) {
         String sql = "SELECT Id FROM Account WHERE Email = ?";
         try (Connection conn = getConnection();

@@ -39,11 +39,22 @@ public class StudentAttendanceReportServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
 
-        HttpSession session = request.getSession();
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
-            response.sendRedirect("View/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"học sinh".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
@@ -51,31 +62,31 @@ public class StudentAttendanceReportServlet extends HttpServlet {
             int studentId = studentDAO.getStudentById(account.getId()).getId();
 
             String selectedClass = request.getParameter("class");
-            String yearParam = request.getParameter("year");
-
-            int selectedYear;
-            if (yearParam != null) {
-                selectedYear = Integer.parseInt(yearParam);
-            } else {
-                selectedYear = LocalDate.now().getYear();
+            String monthParam = request.getParameter("month");
+            Integer selectedMonth = null;
+            if (monthParam != null && !monthParam.isEmpty()) {
+                selectedMonth = Integer.parseInt(monthParam);
             }
 
-            // Lấy tất cả báo cáo điểm danh của sinh viên trong năm được chọn
+            // Lấy tất cả báo cáo điểm danh của sinh viên
             List<StudentAttendanceReport> attendanceReports = studentAttendanceReportDAO.getAttendanceByStudentId(studentId);
 
-            // Lọc theo lớp nếu có
-            if (selectedClass != null && !selectedClass.isEmpty()) {
-                attendanceReports.removeIf(r -> !r.getClassName().equalsIgnoreCase(selectedClass));
+            final String classFilter = selectedClass;
+            final Integer monthFilter = selectedMonth;
+
+            if (classFilter != null && !classFilter.isEmpty()) {
+                attendanceReports.removeIf(r -> !r.getClassName().equalsIgnoreCase(classFilter));
             }
 
-            // Lọc theo năm
-            attendanceReports.removeIf(r -> r.getDate().getYear() != selectedYear);
+            if (monthFilter != null) {
+                attendanceReports.removeIf(r -> r.getDate().getMonthValue() != monthFilter);
+            }
 
             List<String> classNames = classroomDAO.getClassNamesByStudentId(studentId);
             request.setAttribute("classNames", classNames);
             request.setAttribute("selectedClass", selectedClass);
             request.setAttribute("attendanceReports", attendanceReports);
-            request.setAttribute("selectedYear", selectedYear);
+            request.setAttribute("selectedMonth", selectedMonth);
 
             request.getRequestDispatcher("View/student-attendance-report.jsp").forward(request, response);
         } catch (Exception e) {

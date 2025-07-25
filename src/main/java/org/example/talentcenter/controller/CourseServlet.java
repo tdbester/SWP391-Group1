@@ -423,7 +423,7 @@ public class CourseServlet extends HttpServlet {
             courseDAO.update(c);
             resp.sendRedirect("courses?success=updated");
         } catch (Exception e) {
-            req.setAttribute("errorMessage", "Có lỗi xảy ra khi cập nhật khóa học: " + e.getMessage());
+            req.setAttribute("errorMessage", "Có lỗi khi cập nhật khóa học: " + e.getMessage());
             showEditCourseForm(req, resp);
         }
     }
