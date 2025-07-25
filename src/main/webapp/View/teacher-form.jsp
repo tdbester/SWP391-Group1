@@ -29,6 +29,17 @@
             background-color: #6a5acd;
             border-color: #6a5acd;
         }
+        .invalid-feedback {
+            display: none;
+        }
+
+        .was-validated .form-control:invalid ~ .invalid-feedback {
+            display: block;
+        }
+
+        .was-validated .form-control:valid ~ .invalid-feedback {
+            display: none;
+        }
     </style>
 </head>
 
@@ -40,15 +51,15 @@
         String userRole = (String) session.getAttribute("userRole");
         if ("admin".equalsIgnoreCase(userRole)) {
     %>
-        <jsp:include page="admin-sidebar.jsp" />
+    <jsp:include page="admin-sidebar.jsp" />
     <%
-        } else {
+    } else {
     %>
-        <jsp:include page="training-manager-sidebar.jsp" />
+    <jsp:include page="training-manager-sidebar.jsp" />
     <%
         }
     %>
-    
+
     <div class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>
@@ -65,13 +76,13 @@
         <!-- Error Message -->
         <c:if test="${not empty errorMessage}">
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                ${errorMessage}
+                    ${errorMessage}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </c:if>
 
         <div class="form-container">
-            <form action="teachers" method="post" novalidate>
+            <form action="teachers" method="post" id="teacherForm" novalidate>
                 <input type="hidden" name="action" value="${not empty teacher ? 'update' : 'insert'}" />
                 <c:if test="${not empty teacher}">
                     <input type="hidden" name="teacherId" value="${teacher.id}" />
@@ -84,39 +95,55 @@
                             <label for="fullName" class="form-label">Họ tên <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="fullName" name="fullName"
                                    value="${not empty teacher ? teacher.account.fullName : ''}" required>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập họ tên.
+                            </div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                             <input type="email" class="form-control" id="email" name="email"
-                                   value="${not empty teacher ? teacher.account.email : ''}" 
-                                   ${not empty teacher ? 'readonly' : ''} required>
+                                   value="${not empty teacher ? teacher.account.email : ''}"
+                            ${not empty teacher ? 'readonly' : ''} required>
                             <c:if test="${not empty teacher}">
                                 <div class="form-text">Email không thể thay đổi sau khi tạo tài khoản.</div>
                             </c:if>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập email hợp lệ.
+                            </div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label for="phoneNumber" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
                             <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber"
                                    value="${not empty teacher ? teacher.account.phoneNumber : ''}" required>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập số điện thoại.
+                            </div>
                         </div>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="department" class="form-label">Khoa <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="department" name="department"
                                    value="${not empty teacher ? teacher.department : ''}" required>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập tên khoa.
+                            </div>
                         </div>
-                        
+
                         <div class="mb-3">
-                            <label for="salary" class="form-label">Lương cơ bản (VNĐ) <span class="text-danger">*</span></label>
+                            <label for="salary" class="form-label">Đơn giá/slot (VNĐ) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="salary" name="salary"
                                    value="<fmt:formatNumber value='${not empty teacher ? teacher.salary : 0}' groupingUsed='false' pattern='#'/>"
-                                   step="1" required min="0" placeholder="Nhập lương cơ bản">
+                                   step="1" required min="1001" placeholder="Nhập đơn giá/slot (tối thiểu 1.001 VNĐ)">
+                            <div class="invalid-feedback" id="salaryError">
+                                Đơn giá/slot phải lớn hơn 1.000 VNĐ.
+                            </div>
+                            <div class="form-text">Đơn giá/slot tối thiểu là 1.001 VNĐ</div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label for="address" class="form-label">Địa chỉ</label>
                             <textarea class="form-control" id="address" name="address" rows="3"
@@ -128,7 +155,7 @@
                 <c:if test="${empty teacher}">
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Lưu ý:</strong> Mật khẩu mặc định cho tài khoản mới là <strong>123456</strong>. 
+                        <strong>Lưu ý:</strong> Mật khẩu mặc định cho tài khoản mới là <strong>123456</strong>.
                         Giáo viên có thể thay đổi mật khẩu sau khi đăng nhập.
                     </div>
                 </c:if>
@@ -156,16 +183,61 @@
     (function() {
         'use strict';
         window.addEventListener('load', function() {
-            var forms = document.getElementsByClassName('needs-validation');
-            var validation = Array.prototype.filter.call(forms, function(form) {
-                form.addEventListener('submit', function(event) {
-                    if (form.checkValidity() === false) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
+            var form = document.getElementById('teacherForm');
+            var salaryInput = document.getElementById('salary');
+            var salaryError = document.getElementById('salaryError');
+
+            // Custom salary validation
+            function validateSalary() {
+                var salaryValue = parseFloat(salaryInput.value);
+
+                // Only validate if user has entered something
+                if (salaryInput.value.trim() === '') {
+                    salaryInput.setCustomValidity('');
+                    return true; // Let the required attribute handle empty validation
+                }
+
+                if (isNaN(salaryValue) || salaryValue <= 1000) {
+                    salaryInput.setCustomValidity('Đơn giá/slot phải lớn hơn 1.000 VNĐ');
+                    salaryError.textContent = 'Đơn giá/slot phải lớn hơn 1.000 VNĐ.';
+                    return false;
+                } else {
+                    salaryInput.setCustomValidity('');
+                    return true;
+                }
+            }
+
+            // Only validate salary on input if form has been submitted before
+            salaryInput.addEventListener('input', function() {
+                if (form.classList.contains('was-validated')) {
+                    validateSalary();
+                }
             });
+
+            // Validate salary on blur only if there's a value
+            salaryInput.addEventListener('blur', function() {
+                if (salaryInput.value.trim() !== '' && form.classList.contains('was-validated')) {
+                    validateSalary();
+                }
+            });
+
+            form.addEventListener('submit', function(event) {
+                var isValid = true;
+
+                // Validate salary before submission
+                if (!validateSalary()) {
+                    isValid = false;
+                }
+
+                // Check form validity
+                if (!form.checkValidity() || !isValid) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                // Only add was-validated class after first submit attempt
+                form.classList.add('was-validated');
+            }, false);
         }, false);
     })();
 </script>

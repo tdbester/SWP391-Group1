@@ -7,7 +7,6 @@ public class Student {
     private String name;
     private String fullName;
     private String parentPhone;
-    private String motherPhone;
     private int accountId;
     private int classRoomId;
     private String className;
@@ -24,11 +23,10 @@ public class Student {
     private String attendanceNote;
     private boolean hasAttendance;
 
-    public Student(int id, String name, String parentPhone, String motherPhone, int accountId, LocalDate enrollmentDate, int classRoomId, String classRoomName, String phoneNumber) {
+    public Student(int id, String name, String parentPhone, int accountId, LocalDate enrollmentDate, int classRoomId, String classRoomName, String phoneNumber) {
         this.id = id;
         this.name = name;
         this.parentPhone = parentPhone;
-        this.motherPhone = motherPhone;
         this.accountId = accountId;
         this.enrollmentDate = enrollmentDate;
         this.classRoomId = classRoomId;
@@ -61,10 +59,6 @@ public class Student {
 
     public void setParentPhone(String parentPhone) {
         this.parentPhone = parentPhone;
-    }
-
-    public void setMotherPhone(String motherPhone) {
-        this.motherPhone = motherPhone;
     }
 
     public int getAccountId() {
@@ -170,9 +164,7 @@ public class Student {
     public void setConsultationNote(String consultationNote) {
         this.consultationNote = consultationNote;
     }
-    public String getMotherPhone() {
-        return motherPhone;
-    }
+
     public String getFullName() {
         return fullName;
     }

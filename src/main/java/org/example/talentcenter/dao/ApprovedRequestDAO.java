@@ -80,64 +80,7 @@ public class ApprovedRequestDAO {
         return requests;
     }
 
-    /**
-     * Đếm tổng số request của teacher cụ thể với filter
-     */
-    public int getFilteredRequestCountByTeacher(int teacherId, String typeName, String dateFrom,
-                                                String dateTo, String searchKeyword) {
-        StringBuilder sql = new StringBuilder("""
-            SELECT COUNT(*)
-            FROM Request r
-            JOIN RequestType rt ON r.TypeID = rt.TypeID
-            JOIN Account a ON r.SenderId = a.Id
-            WHERE r.Status = N'Đã duyệt' AND r.SenderId = ?
-            """);
 
-        List<Object> params = new ArrayList<>();
-        params.add(teacherId);
-
-        // Apply same filters as main query
-        if (typeName != null && !typeName.trim().isEmpty() && !typeName.equals("all")) {
-            sql.append(" AND rt.TypeName = ?");
-            params.add(typeName);
-        }
-
-        if (dateFrom != null && !dateFrom.trim().isEmpty()) {
-            sql.append(" AND CAST(r.CreatedAt AS DATE) >= ?");
-            params.add(dateFrom);
-        }
-
-        if (dateTo != null && !dateTo.trim().isEmpty()) {
-            sql.append(" AND CAST(r.CreatedAt AS DATE) <= ?");
-            params.add(dateTo);
-        }
-
-        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
-            sql.append(" AND (r.Response LIKE ? OR r.Reason LIKE ? OR a.FullName LIKE ?)");
-            String searchPattern = "%" + searchKeyword + "%";
-            params.add(searchPattern);
-            params.add(searchPattern);
-            params.add(searchPattern);
-        }
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
-
-            for (int i = 0; i < params.size(); i++) {
-                stmt.setObject(i + 1, params.get(i));
-            }
-
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return 0;
-    }
 
     /**
      * Lấy request theo ID và chỉ của teacher cụ thể
@@ -174,28 +117,6 @@ public class ApprovedRequestDAO {
         return null;
     }
 
-    /**
-     * Đếm tổng số request đã approved của teacher cụ thể
-     */
-    public int getTotalRequestsByTeacher(int teacherId) {
-        String sql = "SELECT COUNT(*) FROM Request WHERE Status = N'Đã duyệt' AND SenderId = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, teacherId);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return 0;
-    }
 
 
     /**

@@ -159,9 +159,6 @@ public class BlogDAO {
         return 0;
     }
 
-    public List<BlogDto> pagingBlog(int index) {
-        return pagingBlogWithFilters(index, null, null);
-    }
 
     public List<BlogDto> pagingBlogWithFilters(int index, String search, Integer categoryId) {
         List<BlogDto> list = new ArrayList<>();
@@ -255,37 +252,7 @@ public class BlogDAO {
         return list;
     }
 
-    /**
-     * Get blog by ID for guests (works with existing database schema)
-     */
-    public BlogDto getPublicBlogById(int id) {
-        String sql = "SELECT b.Id, b.Title, b.Description, b.Content, b.CreatedAt, ac.FullName, b.Category " +
-                "FROM Blog b " +
-                "JOIN Account ac ON b.authorId = ac.Id " +
-                "WHERE b.Id = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new BlogDto(
-                            rs.getInt("Id"),
-                            rs.getString("Title"),
-                            rs.getString("Description"),
-                            rs.getString("Content"),
-                            rs.getString("image"),
-                            rs.getDate("CreatedAt"),
-                            rs.getString("FullName"),
-                            rs.getInt("Category"),
-                            1 // Default to public status
-                    );
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+
     public int getSaleIdByAccountId(int accountId) {
         int saleId = -1;
         String sql = "SELECT Id FROM Sale WHERE AccountId = ?";

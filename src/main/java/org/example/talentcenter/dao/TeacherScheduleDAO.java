@@ -141,71 +141,8 @@ public class TeacherScheduleDAO {
         return null;
     }
 
-    /**
-     * Kiểm tra xem có lịch học nào trong ngày và slot cụ thể không
-     */
-    public boolean hasScheduleInSlot(LocalDate date, int slotId, int roomId) {
-        String sql = "SELECT COUNT(*) FROM Schedule WHERE Date = ? AND SlotId = ? AND RoomId = ?";
 
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setDate(1, Date.valueOf(date));
-            ps.setInt(2, slotId);
-            ps.setInt(3, roomId);
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    /**
-     * Cập nhật phòng học cho một lịch học
-     */
-    public boolean updateScheduleRoom(int scheduleId, int newRoomId) {
-        String sql = "UPDATE Schedule SET RoomId = ? WHERE Id = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, newRoomId);
-            ps.setInt(2, scheduleId);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-    /**
-     * Cập nhật ngày học cho một lịch học
-     */
-    public boolean updateScheduleDate(int scheduleId, LocalDate newDate) {
-        String sql = "UPDATE Schedule SET Date = ? WHERE Id = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setDate(1, Date.valueOf(newDate));
-            ps.setInt(2, scheduleId);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
     /**
      * Xóa lịch học (để xử lý nghỉ phép)
      */

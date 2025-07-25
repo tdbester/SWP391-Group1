@@ -235,60 +235,6 @@ public class TeacherDAO {
         return classes;
     }
 
-    public List<Course> getCoursesByTeacherId(int teacherId) {
-        List<Course> courses = new ArrayList<>();
-        String sql = """
-        SELECT DISTINCT co.Id, co.Title, co.Price, co.Information, co.Level, co.Type
-        FROM Course co
-        JOIN ClassRooms c ON co.Id = c.CourseId
-        WHERE c.TeacherId = ?
-        ORDER BY co.Title
-        """;
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, teacherId);
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                // Convert string to enum values
-                Level level = null;
-                String levelStr = rs.getString("Level");
-                if (levelStr != null) {
-                    try {
-                        level = Level.valueOf(levelStr);
-                    } catch (IllegalArgumentException e) {
-                        // Handle invalid enum value
-                    }
-                }
-
-                Type type = null;
-                String typeStr = rs.getString("Type");
-                if (typeStr != null) {
-                    try {
-                        type = Type.valueOf(typeStr);
-                    } catch (IllegalArgumentException e) {
-                        // Handle invalid enum value
-                    }
-                }
-
-                Course course = new Course();
-                course.setId(rs.getInt("Id"));
-                course.setTitle(rs.getString("Title"));
-                course.setPrice(rs.getDouble("Price"));
-                course.setInformation(rs.getString("Information"));
-                course.setLevel(level);
-                course.setType(type);
-                courses.add(course);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return courses;
-    }
 
     /**
      * Check if email already exists in the system

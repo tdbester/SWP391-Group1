@@ -15,31 +15,6 @@ import java.util.Date;
  */
 public class StudentClassDAO {
 
-    /**
-     * Thêm một học sinh vào lớp học.
-     *
-     * @param studentId ID của học sinh
-     * @param classroomId ID của lớp học
-     * @return true nếu thêm thành công, false nếu thất bại
-     */
-    public boolean addStudentToClass(int studentId, int classroomId) {
-        String sql = "INSERT INTO Student_Class (ClassRoomId, StudentId, JoinDate) VALUES (?, ?, GETDATE())";
-        
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            ps.setInt(1, classroomId);
-            ps.setInt(2, studentId);
-            
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
-            
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi thêm học sinh vào lớp: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     /**
      * Thêm nhiều học sinh vào lớp học trong một transaction.
@@ -137,62 +112,4 @@ public class StudentClassDAO {
         return false;
     }
 
-    /**
-     * Xóa học sinh khỏi lớp học.
-     *
-     * @param studentId ID của học sinh
-     * @param classroomId ID của lớp học
-     * @return true nếu xóa thành công, false nếu thất bại
-     */
-    public boolean removeStudentFromClass(int studentId, int classroomId) {
-        String sql = "DELETE FROM Student_Class WHERE StudentId = ? AND ClassRoomId = ?";
-        
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            ps.setInt(1, studentId);
-            ps.setInt(2, classroomId);
-            
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
-            
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi xóa học sinh khỏi lớp: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * Lấy danh sách tất cả StudentClass records theo classroomId.
-     *
-     * @param classroomId ID của lớp học
-     * @return Danh sách StudentClass records
-     */
-    public ArrayList<StudentClass> getStudentClassesByClassroomId(int classroomId) {
-        ArrayList<StudentClass> studentClasses = new ArrayList<>();
-        String sql = "SELECT Id, ClassRoomId, StudentId, JoinDate FROM Student_Class WHERE ClassRoomId = ?";
-        
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            ps.setInt(1, classroomId);
-            ResultSet rs = ps.executeQuery();
-            
-            while (rs.next()) {
-                StudentClass sc = new StudentClass();
-                sc.setId(rs.getInt("Id"));
-                sc.setClassRoomId(rs.getInt("ClassRoomId"));
-                sc.setStudentId(rs.getInt("StudentId"));
-                sc.setJoinDate(rs.getDate("JoinDate"));
-                
-                studentClasses.add(sc);
-            }
-            
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi lấy danh sách StudentClass: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return studentClasses;
-    }
 }

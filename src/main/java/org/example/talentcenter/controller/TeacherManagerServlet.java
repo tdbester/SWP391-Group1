@@ -10,7 +10,7 @@ import org.example.talentcenter.model.Teacher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-        import java.io.IOException;
+import java.io.IOException;
 import java.util.List;
 
 @WebServlet(name = "teacher", value = "/teachers")
@@ -137,6 +137,9 @@ public class TeacherManagerServlet extends HttpServlet {
                 case "EmailExists":
                     req.setAttribute("errorMessage", "Email đã tồn tại trong hệ thống!");
                     break;
+                case "InvalidSalary":
+                    req.setAttribute("errorMessage", "Đơn giá/slot phải lớn hơn 1.000 VNĐ!");
+                    break;
             }
         }
 
@@ -173,11 +176,24 @@ public class TeacherManagerServlet extends HttpServlet {
             int teacherId = Integer.parseInt(req.getParameter("teacherId"));
             int accountId = Integer.parseInt(req.getParameter("accountId"));
 
+            // Validate salary
+            double salary;
+            try {
+                salary = Double.parseDouble(req.getParameter("salary"));
+                if (salary <= 1000) {
+                    resp.sendRedirect("teachers?action=edit&id=" + teacherId + "&error=InvalidSalary");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                resp.sendRedirect("teachers?action=edit&id=" + teacherId + "&error=InvalidData");
+                return;
+            }
+
             Teacher teacher = new Teacher();
             teacher.setId(teacherId);
             teacher.setAccountId(accountId);
             teacher.setDepartment(req.getParameter("department"));
-            teacher.setSalary(Double.parseDouble(req.getParameter("salary")));
+            teacher.setSalary(salary);
 
             Account account = new Account();
             account.setId(accountId);
@@ -211,6 +227,23 @@ public class TeacherManagerServlet extends HttpServlet {
             Teacher teacher = teacherDAO.getTeacherById(id);
             if (teacher != null) {
                 req.setAttribute("teacher", teacher);
+
+                // Handle error messages for edit form
+                String errorMessage = req.getParameter("error");
+                if (errorMessage != null) {
+                    switch (errorMessage) {
+                        case "InvalidSalary":
+                            req.setAttribute("errorMessage", "Đơn giá/slot phải lớn hơn 1.000 VNĐ!");
+                            break;
+                        case "InvalidData":
+                            req.setAttribute("errorMessage", "Dữ liệu không hợp lệ!");
+                            break;
+                        case "UpdateFailed":
+                            req.setAttribute("errorMessage", "Cập nhật thông tin thất bại!");
+                            break;
+                    }
+                }
+
                 req.getRequestDispatcher("/View/teacher-form.jsp").forward(req, resp);
             } else {
                 resp.sendRedirect("teachers?error=TeacherNotFound");
@@ -232,10 +265,10 @@ public class TeacherManagerServlet extends HttpServlet {
             String salaryStr = req.getParameter("salary");
 
             if (fullName == null || fullName.trim().isEmpty() ||
-                email == null || email.trim().isEmpty() ||
-                phoneNumber == null || phoneNumber.trim().isEmpty() ||
-                department == null || department.trim().isEmpty() ||
-                salaryStr == null || salaryStr.trim().isEmpty()) {
+                    email == null || email.trim().isEmpty() ||
+                    phoneNumber == null || phoneNumber.trim().isEmpty() ||
+                    department == null || department.trim().isEmpty() ||
+                    salaryStr == null || salaryStr.trim().isEmpty()) {
                 resp.sendRedirect("teachers?error=InvalidData");
                 return;
             }
@@ -243,8 +276,8 @@ public class TeacherManagerServlet extends HttpServlet {
             double salary;
             try {
                 salary = Double.parseDouble(salaryStr);
-                if (salary < 0) {
-                    resp.sendRedirect("teachers?error=InvalidData");
+                if (salary < 1000) {
+                    resp.sendRedirect("teachers?error=InvalidSalary");
                     return;
                 }
             } catch (NumberFormatException e) {

@@ -30,27 +30,4 @@ public class RoomDAO {
         return rooms;
     }
 
-    /**
-     * Lấy thông tin phòng theo ID
-     */
-    public Room getRoomById(int roomId) throws SQLException {
-        String sql = "SELECT Id, Code FROM Room WHERE Id = ?";
-
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, roomId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    Room room = new Room();
-                    room.setId(rs.getInt("Id"));
-                    room.setCode(rs.getString("Code"));
-                    return room;
-                }
-            }
-        }
-
-        return null;
-    }
 }

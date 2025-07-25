@@ -98,18 +98,18 @@ public class LoginServlet extends HttpServlet {
                             response.sendRedirect(request.getContextPath() + "/TeacherDashboard");
                             break;
                         case "nhân viên sale":
-                            response.sendRedirect("SaleDashboard");
+                            response.sendRedirect(request.getContextPath() + "/SaleDashboard");
                             break;
                         case "quản lý đào tạo":
                             response.sendRedirect(request.getContextPath() + "/TrainingManagerDashboard");
                             break;
                         default:
-                            response.sendRedirect(request.getContextPath() + "/View/home.jsp");
+                            response.sendRedirect(request.getContextPath() + "/home");
                             break;
 
                     }
                 } else {
-                    response.sendRedirect("View/home.jsp");
+                    response.sendRedirect("/home");
                 }
 
             } else {

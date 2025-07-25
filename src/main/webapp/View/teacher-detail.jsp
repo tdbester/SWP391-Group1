@@ -91,7 +91,7 @@
           <p class="form-control-plaintext">${teacher.department}</p>
         </div>
         <div class="mb-3">
-          <label class="form-label fw-bold">Lương cơ bản</label>
+          <label class="form-label fw-bold">Đơn giá/slot</label>
           <p class="form-control-plaintext">
             <fmt:formatNumber value="${teacher.salary}" type="number" groupingUsed="true" /> VNĐ
           </p>

@@ -163,7 +163,6 @@ public class StudentDAO {
                 student.setId(rs.getInt("Id"));
                 student.setName(rs.getString("Name"));
                 student.setParentPhone(rs.getString("ParentPhone"));
-                student.setMotherPhone(rs.getString("MotherPhone"));
                 student.setAccountId(rs.getInt("AccountId"));
                 student.setEnrollmentDate(rs.getDate("EnrollmentDate") != null ?
                         rs.getDate("EnrollmentDate").toLocalDate() : null);

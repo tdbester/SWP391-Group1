@@ -56,16 +56,20 @@
 <header>
   <div class="logo">TALENT01</div>
   <div class="nav">
-    <a href="<%=request.getContextPath()%>/View/home.jsp">Trang Chủ</a>
-    <a href="#">Dịch Vụ</a>
-    <a href="#">Khóa Học</a>
+    <a href="<%=request.getContextPath()%>/home">Trang Chủ</a>
+    <a href="${pageContext.request.contextPath}/guest-blogs">Blog</a>
+    <a href="${pageContext.request.contextPath}/guest-courses">Khóa Học</a>
     <%
       String role = (String) session.getAttribute("userRole");
       String dashboardURL = "View/home.jsp";
-      if ("teacher".equalsIgnoreCase(role)) {
-        dashboardURL = request.getContextPath() + "/View/teacher-dashboard.jsp";
-      } else if ("sale".equalsIgnoreCase(role)) {
-        dashboardURL ="/View/sale-dashboard.jsp";
+      if ("giáo viên".equalsIgnoreCase(role)) {
+        dashboardURL = request.getContextPath() +"/View/teacher-dashboard.jsp";
+      } else if ("nhân viên sale".equalsIgnoreCase(role)) {
+        dashboardURL = request.getContextPath() +"/View/sale-dashboard.jsp";
+      }else if("quản lý đào tạo".equalsIgnoreCase(role)){
+        dashboardURL = request.getContextPath() + "/View/training-manager-dashboard.jsp";
+      }else if ("admin".equalsIgnoreCase(role)){
+        dashboardURL = request.getContextPath() + "/View/admin-dashboard.jsp";
       }
     %>
     <a href="<%=dashboardURL%>">Dashboard</a>
