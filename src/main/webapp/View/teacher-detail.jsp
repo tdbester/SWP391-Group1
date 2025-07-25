@@ -62,7 +62,12 @@
 <div class="container mt-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Chi tiết giáo viên</h2>
-    <a href="teachers" class="btn btn-secondary">Quay lại danh sách</a>
+    <div>
+      <a href="teachers?action=edit&id=${teacher.id}" class="btn btn-warning me-2">
+        <i class="fas fa-edit"></i> Chỉnh sửa
+      </a>
+      <a href="teachers" class="btn btn-secondary">Quay lại danh sách</a>
+    </div>
   </div>
 
   <c:if test="${param.success == 'true'}">
@@ -72,61 +77,42 @@
     <div class="alert alert-danger">Cập nhật thông tin thất bại!</div>
   </c:if>
 
-  <!-- Teacher Information Form -->
+  <!-- Teacher Information Display -->
   <div class="section-title">Thông tin giáo viên</div>
-  <form action="teachers" method="post" class="mb-4">
-    <input type="hidden" name="action" value="update">
-    <input type="hidden" name="teacherId" value="${teacher.id}">
-    <input type="hidden" name="accountId" value="${teacher.accountId}">
-
+  <div class="mb-4">
     <div class="row">
       <div class="col-md-6">
         <div class="mb-3">
-          <label for="fullName" class="form-label">Họ tên</label>
-          <input type="text" class="form-control" id="fullName" name="fullName"
-                 value="${teacher.account.fullName}" required>
+          <label class="form-label fw-bold">Họ tên</label>
+          <p class="form-control-plaintext">${teacher.account.fullName}</p>
         </div>
         <div class="mb-3">
-          <label for="department" class="form-label">Khoa</label>
-          <input type="text" class="form-control" id="department" name="department"
-                 value="${teacher.department}" required>
+          <label class="form-label fw-bold">Khoa</label>
+          <p class="form-control-plaintext">${teacher.department}</p>
         </div>
         <div class="mb-3">
-          <label for="salary" class="form-label">Lương cơ bản(VNĐ)</label>
-          <input type="number" class="form-control" id="salary" name="salary"
-                 value="<fmt:formatNumber value='${teacher.salary}' groupingUsed='true' pattern='#'/>" step="1" required min="0"/>
+          <label class="form-label fw-bold">Lương cơ bản</label>
+          <p class="form-control-plaintext">
+            <fmt:formatNumber value="${teacher.salary}" type="number" groupingUsed="true" /> VNĐ
+          </p>
         </div>
       </div>
       <div class="col-md-6">
         <div class="mb-3">
-          <label for="phoneNumber" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-          <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber"
-                 value="${teacher.account.phoneNumber}"
-                 pattern="^0[3-9][0-9]{8,9}$"
-                 title="Số điện thoại phải có 10-11 chữ số, bắt đầu bằng số 0"
-                 required
-                 maxlength="11"
-                 placeholder="Ví dụ: 0901234567">
-          <div class="invalid-feedback">
-            Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số, bắt đầu bằng số 0)
-          </div>
-          <div class="valid-feedback">
-            Số điện thoại hợp lệ
-          </div>
+          <label class="form-label fw-bold">Số điện thoại</label>
+          <p class="form-control-plaintext">${teacher.account.phoneNumber}</p>
         </div>
         <div class="mb-3">
-          <label for="email" class="form-label">Email</label>
-          <input type="email" class="form-control" id="email" name="email"
-                 value="${teacher.account.email}">
+          <label class="form-label fw-bold">Email</label>
+          <p class="form-control-plaintext">${teacher.account.email}</p>
         </div>
         <div class="mb-3">
-          <label for="address" class="form-label">Địa chỉ</label>
-          <textarea class="form-control" id="address" name="address" rows="3">${teacher.account.address}</textarea>
+          <label class="form-label fw-bold">Địa chỉ</label>
+          <p class="form-control-plaintext">${not empty teacher.account.address ? teacher.account.address : 'Chưa cập nhật'}</p>
         </div>
       </div>
     </div>
-    <button type="submit" class="btn btn-primary">Cập nhật thông tin</button>
-  </form>
+  </div>
 
   <!-- Classes Table -->
   <div class="section-title">Danh sách lớp giảng dạy</div>

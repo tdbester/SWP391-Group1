@@ -289,4 +289,146 @@ public class TeacherDAO {
 
         return courses;
     }
+
+    /**
+     * Check if email already exists in the system
+     */
+    public boolean isEmailExists(String email) {
+        String sql = "SELECT COUNT(*) FROM Account WHERE Email = ?";
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Add a new teacher to the system
+     * Creates both Account and Teacher records in a transaction
+     */
+    public boolean addTeacher(Teacher teacher) {
+        String sqlAccount = "INSERT INTO Account (FullName, Email, Password, PhoneNumber, Address, RoleId) VALUES (?, ?, ?, ?, ?, ?)";
+        String sqlTeacher = "INSERT INTO Teacher (AccountId, Department, Salary) VALUES (?, ?, ?)";
+
+        try (Connection conn = DBConnect.getConnection()) {
+            conn.setAutoCommit(false);
+
+            try {
+                int accountId;
+
+                // Insert Account first
+                try (PreparedStatement ps1 = conn.prepareStatement(sqlAccount, Statement.RETURN_GENERATED_KEYS)) {
+                    ps1.setString(1, teacher.getAccount().getFullName());
+                    ps1.setString(2, teacher.getAccount().getEmail());
+                    ps1.setString(3, teacher.getAccount().getPassword());
+                    ps1.setString(4, teacher.getAccount().getPhoneNumber());
+                    ps1.setString(5, teacher.getAccount().getAddress());
+                    ps1.setInt(6, 3); // RoleId 3 for Teacher (based on database schema)
+
+                    int result = ps1.executeUpdate();
+                    if (result == 0) {
+                        throw new SQLException("Creating account failed, no rows affected.");
+                    }
+
+                    try (ResultSet generatedKeys = ps1.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            accountId = generatedKeys.getInt(1);
+                        } else {
+                            throw new SQLException("Creating account failed, no ID obtained.");
+                        }
+                    }
+                }
+
+                // Insert Teacher record
+                try (PreparedStatement ps2 = conn.prepareStatement(sqlTeacher)) {
+                    ps2.setInt(1, accountId);
+                    ps2.setString(2, teacher.getDepartment());
+                    ps2.setDouble(3, teacher.getSalary());
+                    ps2.executeUpdate();
+                }
+
+                conn.commit();
+                return true;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                e.printStackTrace();
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Delete a teacher from the system
+     * Checks for constraints (classes assigned) before deletion
+     */
+    public boolean deleteTeacher(int teacherId) {
+        // First check if teacher has any classes assigned
+        String checkClassesSQL = "SELECT COUNT(*) FROM ClassRooms WHERE TeacherId = ?";
+        String deleteTeacherSQL = "DELETE FROM Teacher WHERE Id = ?";
+        String deleteAccountSQL = "DELETE FROM Account WHERE Id = ?";
+
+        try (Connection conn = DBConnect.getConnection()) {
+            // Check for constraints
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkClassesSQL)) {
+                checkStmt.setInt(1, teacherId);
+                ResultSet rs = checkStmt.executeQuery();
+                if (rs.next() && rs.getInt(1) > 0) {
+                    // Teacher has classes assigned, cannot delete
+                    return false;
+                }
+            }
+
+            // Get the accountId before deletion
+            int accountId = 0;
+            String getAccountIdSQL = "SELECT AccountId FROM Teacher WHERE Id = ?";
+            try (PreparedStatement getAccountStmt = conn.prepareStatement(getAccountIdSQL)) {
+                getAccountStmt.setInt(1, teacherId);
+                ResultSet rs = getAccountStmt.executeQuery();
+                if (rs.next()) {
+                    accountId = rs.getInt("AccountId");
+                }
+            }
+
+            if (accountId == 0) {
+                return false; // Teacher not found
+            }
+
+            conn.setAutoCommit(false);
+
+            try {
+                // Delete Teacher record first
+                try (PreparedStatement deleteTeacherStmt = conn.prepareStatement(deleteTeacherSQL)) {
+                    deleteTeacherStmt.setInt(1, teacherId);
+                    deleteTeacherStmt.executeUpdate();
+                }
+
+                // Delete Account record
+                try (PreparedStatement deleteAccountStmt = conn.prepareStatement(deleteAccountSQL)) {
+                    deleteAccountStmt.setInt(1, accountId);
+                    deleteAccountStmt.executeUpdate();
+                }
+
+                conn.commit();
+                return true;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                e.printStackTrace();
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

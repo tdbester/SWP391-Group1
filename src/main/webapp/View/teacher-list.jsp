@@ -15,9 +15,8 @@
 <head>
     <meta charset="UTF-8" />
     <title>Teacher List</title>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/dashboard.css">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         .btn-primary,
@@ -61,7 +60,7 @@
 <body>
 <jsp:include page="header.jsp" />
 
-<div class=" mt-5">
+<div class="">
         <%
         String userRole = (String) session.getAttribute("userRole");
         if ("admin".equalsIgnoreCase(userRole)) {
@@ -76,17 +75,37 @@
     %>
     <div class="main-content">
     <h2 class="mb-4">Danh sách giáo viên</h2>
-    <div class="d-flex justify-content-end">
-        <form action="teachers" method="get" class="row g-2 mb-3">
-            <div class="col-auto">
-                <input type="search" name="search" class="form-control" placeholder="Tìm kiếm tên hoặc khoa"
-                       value="${param.search}" />
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-primary">Lọc</button>
-            </div>
-        </form>
-    </div>
+
+    <!-- Success Message -->
+    <c:if test="${not empty successMessage}">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            ${successMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </c:if>
+
+    <!-- Error Message -->
+    <c:if test="${not empty errorMessage}">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            ${errorMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </c:if>
+
+    <form action="teachers" method="get" class="row g-2 mb-3">
+        <div class="col-auto">
+            <input type="search" name="search" class="form-control" placeholder="Tìm kiếm tên hoặc khoa"
+                   value="${param.search}" />
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary">Lọc</button>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="teachers?action=new" class="btn btn-success">
+                <i class="fas fa-plus"></i> Thêm giáo viên
+            </a>
+        </div>
+    </form>
 
     <table class="table table-striped">
         <thead class="table-dark">
@@ -116,6 +135,9 @@
                 <td>${teacher.account.address}</td>
                 <td>
                     <a href="teachers?action=detail&id=${teacher.id}" class="btn btn-primary btn-sm">Chi tiết</a>
+                    <a href="teachers?action=edit&id=${teacher.id}" class="btn btn-warning btn-sm">Sửa</a>
+                    <a href="teachers?action=delete&id=${teacher.id}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Xác nhận xóa giáo viên này? Lưu ý: Không thể xóa nếu giáo viên đang được phân công lớp học.')">Xóa</a>
                 </td>
             </tr>
         </c:forEach>
