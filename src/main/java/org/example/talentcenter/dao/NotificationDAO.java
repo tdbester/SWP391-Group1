@@ -6,6 +6,7 @@ import org.example.talentcenter.model.ClassRooms;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class NotificationDAO {
 
@@ -272,6 +273,47 @@ public class NotificationDAO {
             e.printStackTrace();
         }
 
+        return notifications;
+    }
+
+    /**
+     * Thông báo mới của giáo viên
+     */
+
+    public List<Notification> getRecentNotificationsForTeacher(int accountId) {
+        List<Notification> notifications = new ArrayList<>();
+        String sql = "SELECT Id, Title, Content, SenderName, RecipientRole, RecipientAccountId, " +
+                "NotificationType, RelatedEntityId, RelatedEntityType, CreatedAt, IsRead, ClassRoomId " +
+                "FROM Notification " +
+                "WHERE RecipientAccountId = ? " +
+                "AND CreatedAt >= DATEADD(DAY, -7, GETDATE()) " +
+                "ORDER BY CreatedAt DESC";
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, accountId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Notification n = new Notification();
+                    n.setId(rs.getInt("Id"));
+                    n.setTitle(rs.getString("Title"));
+                    n.setContent(rs.getString("Content"));
+                    n.setSenderName(rs.getString("SenderName"));
+                    n.setRecipientRole(rs.getString("RecipientRole"));
+                    n.setRecipientAccountId(rs.getInt("RecipientAccountId"));
+                    n.setNotificationType(rs.getString("NotificationType"));
+                    n.setRelatedEntityId(rs.getInt("RelatedEntityId"));
+                    n.setRelatedEntityType(rs.getString("RelatedEntityType"));
+                    n.setCreatedAt(Timestamp.valueOf(rs.getTimestamp("CreatedAt").toLocalDateTime()));
+                    n.setRead(rs.getBoolean("IsRead"));
+                    n.setClassRoomId(rs.getInt("ClassRoomId"));
+                    notifications.add(n);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return notifications;
     }
 

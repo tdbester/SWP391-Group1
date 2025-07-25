@@ -28,13 +28,7 @@
                 <p>Xem tình trạng và kết quả xử lý các đơn từ đã gửi</p>
             </div>
 
-            <!-- Success/Error Messages -->
-            <c:if test="${not empty success}">
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i>
-                        ${success}
-                </div>
-            </c:if>
+
 
             <c:if test="${not empty error}">
                 <div class="alert alert-error">
@@ -92,7 +86,7 @@
                         <select id="requestType" name="requestType">
                             <option value="">Tất cả loại đơn</option>
                             <option value="Đơn xin nghỉ phép" ${selectedRequestType == 'Đơn xin nghỉ phép' ? 'selected' : ''}>Đơn xin nghỉ phép</option>
-                            <option value="Đơn thay đổi lịch dạy" ${selectedRequestType == 'Đơn thay đổi lịch dạy' ? 'selected' : ''}>Đơn thay đổi lịch dạy</option>
+                            <option value="Đơn xin đổi lịch dạy" ${selectedRequestType == 'Đơn xin đổi lịch dạy' ? 'selected' : ''}>Đơn xin đổi lịch dạy</option>
                             <option value="Đơn khác" ${selectedRequestType == 'Đơn khác' ? 'selected' : ''}>Đơn khác</option>
                         </select>
                     </div>
@@ -148,7 +142,7 @@
                                             <c:when test="${request.typeName == 'Đơn xin nghỉ phép'}">
                                                 <span class="request-type leave">${request.typeName}</span>
                                             </c:when>
-                                            <c:when test="${request.typeName == 'Đơn thay đổi lịch dạy'}">
+                                            <c:when test="${request.typeName == 'Đơn xin đổi lịch dạy'}">
                                                 <span class="request-type schedule-change">${request.typeName}</span>
                                             </c:when>
                                             <c:otherwise>
