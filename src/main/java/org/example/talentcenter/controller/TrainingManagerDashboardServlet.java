@@ -38,10 +38,20 @@ public class TrainingManagerDashboardServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
-        Account account = (Account) session.getAttribute("account");
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
+        Account account = (Account) session.getAttribute("account");
         if (account == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"training manager".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
@@ -99,10 +109,20 @@ public class TrainingManagerDashboardServlet extends HttpServlet {
 
         String action = request.getParameter("action");
         HttpSession session = request.getSession(false);
-        Account account = (Account) session.getAttribute("account");
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
+        Account account = (Account) session.getAttribute("account");
         if (account == null) {
-            response.sendRedirect("login");
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String role = (String) session.getAttribute("userRole");
+        if (role == null || !"training manager".equalsIgnoreCase(role)) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         if ("deleteNotification".equals(action)) {

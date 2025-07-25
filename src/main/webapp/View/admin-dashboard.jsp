@@ -65,6 +65,9 @@
           <a href="${pageContext.request.contextPath}/courses" class="sale-nav-btn">
             <i class="fas fa-book-open"></i>Quản lý khóa học
           </a>
+          <a href="${pageContext.request.contextPath}/CreateAccount" class="sale-nav-btn">
+            <i class="fas fa-user-check"></i>Danh sách yêu cầu cấp tài khoản
+          </a>
         </div>
       </div>
 

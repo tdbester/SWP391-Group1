@@ -215,27 +215,6 @@ public class RequestDAO {
     }
 
     /**
-     * Đếm tổng số yêu cầu của một người gửi.
-     *
-     * @param senderId ID của người gửi
-     * @return Tổng số yêu cầu
-     */
-    public int getTotalRequestCountBySenderId(int senderId) {
-        String sql = "SELECT COUNT(*) FROM Request WHERE SenderId = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, senderId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    /**
      * Lấy chi tiết một yêu cầu theo ID, bao gồm cả thông tin người gửi và xử lý lý do theo loại đơn.
      *
      * @param requestId ID của yêu cầu cần lấy
@@ -517,6 +496,7 @@ public class RequestDAO {
 
     /**
      * Lấy danh sách đơn xin nghỉ học (TypeID = 3) theo trạng thái
+     * @author Huyen Trang
      */
     public ArrayList<Request> getAbsenceRequestsByStatus(String status) {
         ArrayList<Request> requests = new ArrayList<>();
@@ -561,6 +541,7 @@ public class RequestDAO {
 
     /**
      * Tìm kiếm đơn xin nghỉ học (TypeID = 3) theo keyword (tên học sinh, lý do, trạng thái)
+     * @author Huyen Trang
      */
     public ArrayList<Request> searchAbsenceRequests(String keyword) {
         ArrayList<Request> requests = new ArrayList<>();
@@ -618,6 +599,7 @@ public class RequestDAO {
      * @param offset   Vị trí bắt đầu
      * @param limit    Số lượng bản ghi
      * @return Danh sách yêu cầu đã lọc
+     * @author Huyen Trang
      */
     public ArrayList<Request> getStudentRequestsFiltered(int senderId, String keyword, Integer typeId, String status, int offset, int limit) {
         ArrayList<Request> requests = new ArrayList<>();
@@ -689,6 +671,7 @@ public class RequestDAO {
      * @param typeId   ID loại đơn (có thể null)
      * @param status   Trạng thái (có thể null)
      * @return Tổng số yêu cầu khớp
+     * @author Huyen Trang
      */
     public int countStudentRequestsFiltered(int senderId, String keyword, Integer typeId, String status) {
         StringBuilder sql = new StringBuilder("""
@@ -738,6 +721,7 @@ public class RequestDAO {
      * Lấy tất cả các loại đơn cho manager (trừ đơn tạo tài khoản và đơn nghỉ học).
      *
      * @return Danh sách các loại đơn
+     * @author Huyen Trang
      */
     public ArrayList<Request> getAllRequestTypesForManager() {
         ArrayList<Request> requestTypes = new ArrayList<>();
@@ -766,6 +750,7 @@ public class RequestDAO {
      * @param offset       Vị trí bắt đầu
      * @param limit        Số lượng bản ghi
      * @return Danh sách yêu cầu đã lọc
+     * @author Huyen Trang
      */
     public ArrayList<Request> getManagerRequestsFiltered(String keyword, String typeFilter, String statusFilter, int offset, int limit) {
         ArrayList<Request> requests = new ArrayList<>();
@@ -816,7 +801,6 @@ public class RequestDAO {
 
                     String fullReason = rs.getString("Reason");
                     String typeName = rs.getString("TypeName");
-                    String senderRole = rs.getString("SenderRole");
                     String extractedReason = fullReason; // Default to full reason
 
                     if (fullReason != null && !fullReason.trim().isEmpty() && typeName != null) {
@@ -874,6 +858,7 @@ public class RequestDAO {
      * @param typeFilter   Tên loại đơn
      * @param statusFilter Trạng thái
      * @return Tổng số yêu cầu khớp
+     * @author Huyen Trang
      */
     public int countManagerRequestsFiltered(String keyword, String typeFilter, String statusFilter) {
         StringBuilder sql = new StringBuilder("""
@@ -918,4 +903,5 @@ public class RequestDAO {
         }
         return 0;
     }
+
 }
