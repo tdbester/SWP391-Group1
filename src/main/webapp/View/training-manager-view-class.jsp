@@ -121,9 +121,12 @@
                             <c:forEach var="classroom" items="${classrooms}" varStatus="status">
                                 <tr class="fade-in">
                                     <td class="text-center fw-bold">${(currentPage - 1) * 10 + status.index + 1}</td>
-                                    <td>
-                                        <div class="course-title">${classroom.courseTitle}</div>
-                                    </td>
+                                    <div class="course-title">
+                                        <a href="${pageContext.request.contextPath}/TrainingManagerClassroom?id=${classroom.id}"
+                                           style="text-decoration: none; color: inherit;">
+                                                ${classroom.courseTitle}
+                                        </a>
+                                    </div>
                                     <td>
                                         <div class="class-name">${classroom.name}</div>
                                         <small class="student-count">
