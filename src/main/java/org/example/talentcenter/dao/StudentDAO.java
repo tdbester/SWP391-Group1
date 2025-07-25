@@ -60,13 +60,13 @@ public class StudentDAO {
      */
     public boolean transferStudentToClass(int studentAccountId, String targetClassName) {
         String sql = """
-        UPDATE StudentClass 
-        SET ClassroomID = (
-            SELECT ClassroomID FROM Classroom WHERE ClassroomName = ?
-        )
-        WHERE StudentID = (
-            SELECT Id FROM Student WHERE AccountID = ?
-        )
+        UPDATE Student_Class
+                                                      SET ClassRoomId = (
+                                                          SELECT Id FROM Classrooms WHERE Name = ?
+                                                      )
+                                                      WHERE StudentID = (
+                                                          SELECT Id FROM Student WHERE AccountID = ?
+                                                      )
     """;
 
         try (Connection conn = DBConnect.getConnection();

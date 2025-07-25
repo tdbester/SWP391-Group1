@@ -159,6 +159,9 @@ public class RequestDAO {
                                     request.setReason(fullReason);
                                 }
                                 break;
+                            case "Đơn yêu cầu cấp tài khoản học viên":
+                                request.setReason(fullReason);
+                                break;
                             default:
                                 if (parts.length >= 4) {
                                     request.setCourseName(parts[0]); //tên khoá học
