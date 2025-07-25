@@ -91,18 +91,18 @@
                         <label for="requestType">Chọn loại đơn:</label>
                         <select id="requestType" name="requestType">
                             <option value="">Tất cả loại đơn</option>
-                            <option value="Xin nghỉ phép" ${selectedRequestType == 'Xin nghỉ phép' ? 'selected' : ''}>Xin nghỉ phép</option>
-                            <option value="Thay đổi lịch dạy" ${selectedRequestType == 'Thay đổi lịch dạy' ? 'selected' : ''}>Thay đổi lịch dạy</option>
-                            <option value="Khác" ${selectedRequestType == 'Khác' ? 'selected' : ''}>Khác</option>
+                            <option value="Đơn xin nghỉ phép" ${selectedRequestType == 'Đơn xin nghỉ phép' ? 'selected' : ''}>Đơn xin nghỉ phép</option>
+                            <option value="Đơn thay đổi lịch dạy" ${selectedRequestType == 'Đơn thay đổi lịch dạy' ? 'selected' : ''}>Đơn thay đổi lịch dạy</option>
+                            <option value="Đơn khác" ${selectedRequestType == 'Đơn khác' ? 'selected' : ''}>Đơn khác</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label for="status">Trạng thái:</label>
                         <select id="status" name="status">
                             <option value="">Tất cả trạng thái</option>
-                            <option value="Pending" ${selectedStatus == 'Pending' ? 'selected' : ''}>Đang xử lý</option>
-                            <option value="Approved" ${selectedStatus == 'Approved' ? 'selected' : ''}>Đã duyệt</option>
-                            <option value="Rejected" ${selectedStatus == 'Rejected' ? 'selected' : ''}>Bị từ chối</option>
+                            <option value="Chờ xử lý" ${selectedStatus == 'Chờ xử lý' ? 'selected' : ''}>Chờ xử lý</option>
+                            <option value="Đã duyệt" ${selectedStatus == 'Đã duyệt' ? 'selected' : ''}>Đã duyệt</option>
+                            <option value="Từ chối" ${selectedStatus == 'Từ chối' ? 'selected' : ''}>Từ chối</option>
                         </select>
                     </div>
                     <button type="submit" class="btn-filter">
@@ -145,10 +145,10 @@
                                 <tr>
                                     <td>
                                         <c:choose>
-                                            <c:when test="${request.typeName == 'Xin nghỉ phép'}">
+                                            <c:when test="${request.typeName == 'Đơn xin nghỉ phép'}">
                                                 <span class="request-type leave">${request.typeName}</span>
                                             </c:when>
-                                            <c:when test="${request.typeName == 'Thay đổi lịch dạy'}">
+                                            <c:when test="${request.typeName == 'Đơn thay đổi lịch dạy'}">
                                                 <span class="request-type schedule-change">${request.typeName}</span>
                                             </c:when>
                                             <c:otherwise>
@@ -166,13 +166,13 @@
                                     </td>
                                     <td class="process-cell">
                                         <c:choose>
-                                            <c:when test="${request.status == 'Pending'}">
+                                            <c:when test="${request.status == 'Chờ xử lý'}">
                                                 <span class="process-text pending-status">
                                                 <i class="fas fa-clock"></i>
                                                 Hiện đang chờ xử lý...
                                                 </span>
                                             </c:when>
-                                            <c:when test="${request.status == 'Approved'}">
+                                            <c:when test="${request.status == 'Đã duyệt'}">
                                                 <div class="process-text approved-status">
                                                     <c:if test="${not empty request.response}">
                                                         <div class="response-content">
@@ -186,7 +186,7 @@
                                                     </c:if>
                                                 </div>
                                             </c:when>
-                                            <c:when test="${request.status == 'Rejected'}">
+                                            <c:when test="${request.status == 'Từ chối'}">
                                                 <div class="process-text rejected-status">
                                                     <c:if test="${not empty request.response}">
                                                         <div class="response-content">
@@ -212,9 +212,9 @@
                                     <td>
                                         <span class="status ${request.status.toLowerCase()}">
                                             <c:choose>
-                                                <c:when test="${request.status == 'Pending'}">Đang xử lý</c:when>
-                                                <c:when test="${request.status == 'Approved'}">Đã duyệt</c:when>
-                                                <c:when test="${request.status == 'Rejected'}">Bị từ chối</c:when>
+                                                <c:when test="${request.status == 'Chờ xử lý'}">Đang xử lý</c:when>
+                                                <c:when test="${request.status == 'Đã duyệt'}">Đã duyệt</c:when>
+                                                <c:when test="${request.status == 'Từ chối'}">Bị từ chối</c:when>
                                                 <c:otherwise>${request.status}</c:otherwise>
                                             </c:choose>
                                         </span>
@@ -224,7 +224,7 @@
                                             <button class="btn-action view" onclick="viewRequestDetail(${request.id})">
                                                 <i class="fas fa-eye"></i> Xem
                                             </button>
-                                            <c:if test="${request.status == 'Pending'}">
+                                            <c:if test="${request.status == 'Chờ xử lý'}">
                                                 <button class="btn-action delete" onclick="confirmDelete(${request.id})">
                                                     <i class="fas fa-trash"></i> Xóa
                                                 </button>
@@ -305,9 +305,9 @@
                             <strong>Trạng thái:</strong>
                             <span class="status ${requestDetail.status.toLowerCase()}">
                                 <c:choose>
-                                    <c:when test="${requestDetail.status == 'Pending'}">Đang xử lý</c:when>
-                                    <c:when test="${requestDetail.status == 'Approved'}">Đã duyệt</c:when>
-                                    <c:when test="${requestDetail.status == 'Rejected'}">Bị từ chối</c:when>
+                                    <c:when test="${requestDetail.status == 'Chờ xử lý'}">Đang xử lý</c:when>
+                                    <c:when test="${requestDetail.status == 'Đã duyệt'}">Đã duyệt</c:when>
+                                    <c:when test="${requestDetail.status == 'Từ chối'}">Bị từ chối</c:when>
                                     <c:otherwise>${requestDetail.status}</c:otherwise>
                                 </c:choose>
                             </span>

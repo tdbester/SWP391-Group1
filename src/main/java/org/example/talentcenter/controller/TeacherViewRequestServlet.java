@@ -110,14 +110,14 @@ public class TeacherViewRequestServlet extends HttpServlet {
             // Thống kê đơn từ theo trạng thái
             int pendingCount = 0, approvedCount = 0, rejectedCount = 0;
             for (Request req : requests) {
-                switch (req.getStatus().toLowerCase()) {
-                    case "pending":
+                switch (req.getStatus()) {
+                    case "Chờ xử lý":
                         pendingCount++;
                         break;
-                    case "approved":
+                    case "Đã duyệt":
                         approvedCount++;
                         break;
-                    case "rejected":
+                    case "Từ chối":
                         rejectedCount++;
                         break;
                 }
@@ -261,7 +261,7 @@ public class TeacherViewRequestServlet extends HttpServlet {
             }
 
             // Chỉ cho phép xóa đơn từ ở trạng thái "Pending"
-            if (!"Pending".equalsIgnoreCase(requestToDelete.getStatus())) {
+            if (!"Chờ xử lý".equalsIgnoreCase(requestToDelete.getStatus())) {
                 request.setAttribute("error", "Chỉ được xóa đơn từ đang chờ xử lý!");
                 loadAllRequests(request, response, session);
                 return;

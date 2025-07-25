@@ -359,7 +359,7 @@ public class TeacherRequestDAO {
      * Xóa đơn từ (chỉ cho phép xóa đơn từ ở trạng thái Pending)
      */
     public boolean deleteRequest(int requestId) {
-        String sql = "DELETE FROM Request WHERE Id = ? AND Status = 'Pending'";
+        String sql = "DELETE FROM Request WHERE Id = ? AND Status = 'Chờ xử lý'";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

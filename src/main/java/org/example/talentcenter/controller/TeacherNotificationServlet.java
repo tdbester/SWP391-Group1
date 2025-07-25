@@ -82,7 +82,7 @@ public class TeacherNotificationServlet extends HttpServlet {
             List<Request> approvedRequests;
             if (hasFilter(dateFrom, dateTo, searchKeyword)) {
                 approvedRequests = approvedRequestDAO.getApprovedRequestsWithFilterByTeacher(
-                        accountId, null, dateFrom, dateTo, searchKeyword); // Vẫn dùng accountId cho requests
+                        teacherId, null, dateFrom, dateTo, searchKeyword);
             } else {
                 approvedRequests = approvedRequestDAO.getApprovedRequestsWithFilterByTeacher(
                         accountId, null, null, null, null);

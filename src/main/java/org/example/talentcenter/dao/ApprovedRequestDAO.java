@@ -26,7 +26,7 @@ public class ApprovedRequestDAO {
             JOIN RequestType rt ON r.TypeID = rt.TypeID
             JOIN Account a ON r.SenderId = a.Id
             LEFT JOIN Account p ON r.ProcessedBy = p.Id
-            WHERE r.Status = 'Approved' AND r.SenderId = ?
+            WHERE r.Status = N'Đã duyệt' AND r.SenderId = ?
             """);
 
         List<Object> params = new ArrayList<>();
@@ -90,7 +90,7 @@ public class ApprovedRequestDAO {
             FROM Request r
             JOIN RequestType rt ON r.TypeID = rt.TypeID
             JOIN Account a ON r.SenderId = a.Id
-            WHERE r.Status = 'Approved' AND r.SenderId = ?
+            WHERE r.Status = N'Đã duyệt' AND r.SenderId = ?
             """);
 
         List<Object> params = new ArrayList<>();
@@ -153,7 +153,7 @@ public class ApprovedRequestDAO {
             JOIN RequestType rt ON r.TypeID = rt.TypeID
             JOIN Account a ON r.SenderId = a.Id
             LEFT JOIN Account p ON r.ProcessedBy = p.Id
-            WHERE r.Id = ? AND r.Status = 'Approved' AND r.SenderId = ?
+            WHERE r.Id = ? AND r.Status = N'Đã duyệt' AND r.SenderId = ?
             """;
 
         try (Connection conn = DBConnect.getConnection();
@@ -177,8 +177,8 @@ public class ApprovedRequestDAO {
     /**
      * Đếm tổng số request đã approved của teacher cụ thể
      */
-    public int getTotalApprovedRequestsByTeacher(int teacherId) {
-        String sql = "SELECT COUNT(*) FROM Request WHERE Status = 'Approved' AND SenderId = ?";
+    public int getTotalRequestsByTeacher(int teacherId) {
+        String sql = "SELECT COUNT(*) FROM Request WHERE Status = N'Đã duyệt' AND SenderId = ?";
 
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
