@@ -353,6 +353,138 @@ public class NotificationDAO {
     }
 
     /**
+     * Lấy danh sách thông báo của một người gửi cụ thể (theo tên)
+     * Chỉ lấy thông báo do teacher gửi, không bao gồm thông báo hệ thống
+     */
+    public ArrayList<Notification> getNotificationsBySender(String senderName, Integer classRoomId,
+                                                            String searchKeyword, String dateFrom, String dateTo) {
+        ArrayList<Notification> notifications = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+    SELECT n.*, cr.Name as ClassName, c.Title as CourseTitle
+    FROM Notification n
+    LEFT JOIN ClassRooms cr ON n.ClassRoomId = cr.Id
+    LEFT JOIN Course c ON cr.CourseId = c.Id
+    WHERE n.SenderName = ? 
+    AND n.SenderName != 'SYSTEM'
+    AND n.RecipientRole = 'Student'
+    """);
+
+        ArrayList<Object> params = new ArrayList<>();
+        params.add(senderName);
+
+        if (classRoomId != null) {
+            sql.append(" AND n.ClassRoomId = ?");
+            params.add(classRoomId);
+        }
+
+        if (searchKeyword != null && !searchKeyword.trim().isEmpty()) {
+            sql.append(" AND (n.Title LIKE ? OR n.Content LIKE ?)");
+            String searchPattern = "%" + searchKeyword + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+            sql.append(" AND n.CreatedAt >= ?");
+            params.add(dateFrom + " 00:00:00");
+        }
+
+        if (dateTo != null && !dateTo.trim().isEmpty()) {
+            sql.append(" AND n.CreatedAt <= ?");
+            params.add(dateTo + " 23:59:59");
+        }
+
+        sql.append(" ORDER BY n.CreatedAt DESC");
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Notification notification = mapResultSetToNotification(rs);
+                // Set className if available
+                notification.setClassName(rs.getString("ClassName"));
+                notifications.add(notification);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return notifications;
+    }
+
+    /**
+     * Lấy danh sách classroom của một teacher cụ thể
+     */
+    public ArrayList<ClassRooms> getClassRoomsByTeacherId(int teacherId) {
+        ArrayList<ClassRooms> classRooms = new ArrayList<>();
+        String sql = """
+        SELECT cr.Id, cr.Name, c.Title as CourseTitle, cr.CourseId, cr.TeacherId
+        FROM ClassRooms cr
+        JOIN Course c ON cr.CourseId = c.Id
+        WHERE cr.TeacherId = ?
+        ORDER BY cr.Name
+        """;
+
+        try (Connection conn = DBConnect.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, teacherId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                ClassRooms classRoom = new ClassRooms();
+                classRoom.setId(rs.getInt("Id"));
+                classRoom.setName(rs.getString("Name"));
+                classRoom.setCourseTitle(rs.getString("CourseTitle"));
+                classRoom.setCourseId(rs.getInt("CourseId"));
+                classRoom.setTeacherId(rs.getInt("TeacherId"));
+                classRooms.add(classRoom);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return classRooms;
+    }
+
+    /**
+     * Update the existing mapResultSetToNotification method to handle className
+     */
+    private Notification mapResultSetToNotification(ResultSet rs) throws SQLException {
+        Notification notification = new Notification();
+        notification.setId(rs.getInt("Id"));
+        notification.setTitle(rs.getString("Title"));
+        notification.setContent(rs.getString("Content"));
+        notification.setSenderName(rs.getString("SenderName"));
+        notification.setRecipientRole(rs.getString("RecipientRole"));
+
+        int recipientAccountId = rs.getInt("RecipientAccountId");
+        if (!rs.wasNull()) {
+            notification.setRecipientAccountId(recipientAccountId);
+        }
+
+        notification.setNotificationType(rs.getString("NotificationType"));
+        notification.setRelatedEntityId(rs.getObject("RelatedEntityId", Integer.class));
+        notification.setRelatedEntityType(rs.getString("RelatedEntityType"));
+        notification.setCreatedAt(rs.getTimestamp("CreatedAt"));
+        notification.setRead(rs.getBoolean("IsRead"));
+
+        int classRoomId = rs.getInt("ClassRoomId");
+        if (!rs.wasNull()) {
+            notification.setClassRoomId(classRoomId);
+        }
+
+        return notification;
+    }
+
+    /**
      * Đếm số lượng thông báo chưa đọc cho một vai trò cụ thể và tài khoản
      * Bao gồm các thông báo:
      * - Gửi đến vai trò {@code role} mà không chỉ định tài khoản,
@@ -761,30 +893,6 @@ public class NotificationDAO {
     }
 
 
-    /**
-     * Mapping dữ liệu từ ResultSet thành đối tượng Notification.
-     */
-    private Notification mapResultSetToNotification(ResultSet rs) throws SQLException {
-        Notification notification = new Notification();
-        notification.setId(rs.getInt("Id"));
-        notification.setTitle(rs.getString("Title"));
-        notification.setContent(rs.getString("Content"));
-        notification.setSenderName(rs.getString("SenderName"));
-        notification.setRecipientRole(rs.getString("RecipientRole"));
-
-        int recipientAccountId = rs.getInt("RecipientAccountId");
-        if (!rs.wasNull()) {
-            notification.setRecipientAccountId(recipientAccountId);
-        }
-
-        notification.setNotificationType(rs.getString("NotificationType"));
-        notification.setRelatedEntityId(rs.getObject("RelatedEntityId", Integer.class));
-        notification.setRelatedEntityType(rs.getString("RelatedEntityType"));
-        notification.setCreatedAt(rs.getTimestamp("CreatedAt"));
-        notification.setRead(rs.getBoolean("IsRead"));
-
-        return notification;
-    }
 
     /**
      * Đếm tổng số thông báo dành cho Sale.

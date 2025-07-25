@@ -4,47 +4,59 @@ import org.example.talentcenter.config.DBConnect;
 import org.example.talentcenter.model.Account;
 import java.sql.*;
 
+import static org.example.talentcenter.config.DBConnect.getConnection;
+
 public class AccountDAO {
 
-    public Account getAccountById(int accountId) {
-        String sql = "SELECT * FROM Account WHERE Id = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+    public Account getAccountById(int id) {
+        String sql = "SELECT Id, FullName, Email, PhoneNumber, Address, Avatar, RoleId FROM Account WHERE Id = ?";
 
-            pstmt.setInt(1, accountId);
-            ResultSet rs = pstmt.executeQuery();
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return new Account(
-                        rs.getInt("Id"),
-                        rs.getString("FullName"),
-                        rs.getString("Email"),
-                        rs.getString("Password"),
-                        rs.getString("PhoneNumber"),
-                        rs.getString("Address"),
-                        rs.getInt("RoleId")
-                );
+                Account account = new Account();
+                account.setId(rs.getInt("Id"));
+                account.setFullName(rs.getString("FullName"));
+                account.setEmail(rs.getString("Email"));
+                account.setPhoneNumber(rs.getString("PhoneNumber"));
+                account.setAddress(rs.getString("Address"));
+                account.setAvatar(rs.getString("Avatar"));
+                account.setRoleId(rs.getInt("RoleId"));
+                return account;
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return null;
     }
 
 
-    public boolean updateAccountProfile(int accountId, String fullName, String phoneNumber, String email, String address) {
-        String sql = "UPDATE Account SET FullName = ?, PhoneNumber = ?, Email = ?, Address = ? WHERE Id = ?";
-        try (Connection conn = DBConnect.getConnection();
-             PreparedStatement st = conn.prepareStatement(sql)) {
+    public boolean updateAccountProfile(int accountId, String fullName, String phone, String email, String address, String avatarUrl) {
+        String sql = "UPDATE Account SET FullName = ?, PhoneNumber = ?, Email = ?, Address = ?" +
+                (avatarUrl != null ? ", Avatar = ?" : "") + " WHERE Id = ?";
 
-            st.setString(1, fullName);
-            st.setString(2, phoneNumber);
-            st.setString(3, email);
-            st.setString(4, address);
-            st.setInt(5, accountId);
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            int rowsAffected = st.executeUpdate();
-            return rowsAffected > 0;
+            ps.setString(1, fullName);
+            ps.setString(2, phone);
+            ps.setString(3, email);
+            ps.setString(4, address);
+
+            if (avatarUrl != null) {
+                ps.setString(5, avatarUrl);
+                ps.setInt(6, accountId);
+            } else {
+                ps.setInt(5, accountId);
+            }
+
+            return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -55,7 +67,7 @@ public class AccountDAO {
 
     public boolean updatePassword(int accountId, String newPassword) {
         String sql = "UPDATE Account SET Password = ? WHERE Id = ?";
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement st = conn.prepareStatement(sql)) {
 
             st.setString(1, newPassword);
@@ -73,7 +85,7 @@ public class AccountDAO {
 
     public boolean isEmailExists(String email, int currentAccountId) {
         String sql = "SELECT COUNT(*) FROM Account WHERE Email = ? AND Id != ?";
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement st = conn.prepareStatement(sql)) {
 
             st.setString(1, email);
@@ -92,7 +104,7 @@ public class AccountDAO {
 
     public boolean isPhoneExists(String phone, int currentAccountId) {
         String sql = "SELECT COUNT(*) FROM Account WHERE PhoneNumber = ? AND Id != ?";
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement st = conn.prepareStatement(sql)) {
 
             st.setString(1, phone);
@@ -111,7 +123,7 @@ public class AccountDAO {
 
     public Account getAccountByEmail(String email) {
         String sql = "SELECT * FROM Account WHERE Email = ?";
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement st = conn.prepareStatement(sql)) {
 
             st.setString(1, email);
@@ -137,7 +149,7 @@ public class AccountDAO {
 
     public boolean updatePasswordByEmail(String email, String password) {
         String sql = "UPDATE Account SET Password = ? WHERE Email = ?";
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement st = conn.prepareStatement(sql)) {
             st.setString(1, password);
             st.setString(2, email);
@@ -154,7 +166,7 @@ public class AccountDAO {
     public boolean insertAccount(Account account) {
         String sql = "INSERT INTO Account (FullName, Email, Password, PhoneNumber, Address, RoleId) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement st = conn.prepareStatement(sql)) {
 
             st.setString(1, account.getFullName());
@@ -177,7 +189,7 @@ public class AccountDAO {
     public java.util.List<Account> getAllAccounts() {
         java.util.List<Account> accounts = new java.util.ArrayList<>();
         String sql = "SELECT * FROM Account";
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement st = conn.prepareStatement(sql)) {
 
             ResultSet rs = st.executeQuery();
@@ -202,7 +214,7 @@ public class AccountDAO {
     public java.util.List<Account> getAccountsByRole(int roleId) {
         java.util.List<Account> accounts = new java.util.ArrayList<>();
         String sql = "SELECT * FROM Account WHERE RoleId = ?";
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement st = conn.prepareStatement(sql)) {
 
             st.setInt(1, roleId);
@@ -227,7 +239,7 @@ public class AccountDAO {
 
     public boolean deleteAccount(int accountId) {
         String sql = "DELETE FROM Account WHERE Id = ?";
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement st = conn.prepareStatement(sql)) {
 
             st.setInt(1, accountId);
@@ -242,7 +254,7 @@ public class AccountDAO {
 
     public int getTeacherIdByAccountId(int accountId) throws SQLException {
         String sql = "SELECT Id FROM Teacher WHERE AccountId = ?";
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, accountId);
             ResultSet rs = ps.executeQuery();
@@ -273,7 +285,7 @@ public class AccountDAO {
         VALUES (?, ?, GETDATE(),?)
     """;
 
-        try (Connection conn = DBConnect.getConnection()) {
+        try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
 
             try {
@@ -328,7 +340,7 @@ public class AccountDAO {
     public boolean isUsernameExists(String email) {
         String sql = "SELECT COUNT(*) FROM Account WHERE Email = ?";
 
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, email);
@@ -346,7 +358,7 @@ public class AccountDAO {
     }
     public int getAccountIdByEmail(String email) {
         String sql = "SELECT Id FROM Account WHERE Email = ?";
-        try (Connection conn = DBConnect.getConnection();
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();

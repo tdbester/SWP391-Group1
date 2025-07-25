@@ -1,16 +1,24 @@
 package org.example.talentcenter.controller;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import org.example.talentcenter.dao.AccountDAO;
 import org.example.talentcenter.model.Account;
+import org.example.talentcenter.utilities.CloudinaryUtils;
 import java.io.IOException;
 
 @WebServlet("/profile")
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+        maxFileSize = 1024 * 1024 * 10,      // 10MB
+        maxRequestSize = 1024 * 1024 * 50    // 50MB
+)
 public class ProfileServlet extends HttpServlet {
     private AccountDAO accountDAO = new AccountDAO();
 
@@ -29,7 +37,7 @@ public class ProfileServlet extends HttpServlet {
         // Lấy thông tin account từ database
         Account account = accountDAO.getAccountById(accountId);
         if (account != null) {
-            request.setAttribute("account", account);
+            session.setAttribute("account", account);
         }
 
         request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
@@ -55,6 +63,10 @@ public class ProfileServlet extends HttpServlet {
         String phone = request.getParameter("phone");
         String email = request.getParameter("email");
         String address = request.getParameter("address");
+
+        // Xử lý upload ảnh
+        Part avatarPart = request.getPart("avatar");
+        String newAvatarUrl = null;
 
         // Validate dữ liệu
         if (fullName == null || fullName.trim().isEmpty()) {
@@ -88,8 +100,42 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
+        // Xử lý upload ảnh nếu có
+        if (avatarPart != null && avatarPart.getSize() > 0) {
+            try {
+                // Validate file type
+                String contentType = avatarPart.getContentType();
+                if (!contentType.startsWith("image/")) {
+                    request.setAttribute("error", "Chỉ được upload file ảnh!");
+                    request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
+                    return;
+                }
+
+                // Validate file size (5MB)
+                if (avatarPart.getSize() > 5 * 1024 * 1024) {
+                    request.setAttribute("error", "Kích thước file không được vượt quá 5MB!");
+                    request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
+                    return;
+                }
+
+                // Upload ảnh mới lên Cloudinary
+                newAvatarUrl = CloudinaryUtils.uploadImage(avatarPart);
+
+                // Xóa ảnh cũ nếu có
+                Account currentAccount = accountDAO.getAccountById(accountId);
+                if (currentAccount != null && currentAccount.getAvatar() != null) {
+                    CloudinaryUtils.deleteImage(currentAccount.getAvatar());
+                }
+
+            } catch (IOException e) {
+                request.setAttribute("error", "Lỗi upload ảnh: " + e.getMessage());
+                request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
+                return;
+            }
+        }
+
         // Cập nhật thông tin
-        boolean isUpdated = accountDAO.updateAccountProfile(accountId, fullName.trim(), phone, email, address);
+        boolean isUpdated = accountDAO.updateAccountProfile(accountId, fullName.trim(), phone, email, address, newAvatarUrl);
 
         if (isUpdated) {
             request.setAttribute("success", "Cập nhật thông tin thành công!");
@@ -97,11 +143,8 @@ public class ProfileServlet extends HttpServlet {
             // Cập nhật lại thông tin account trong session
             Account updatedAccount = accountDAO.getAccountById(accountId);
             session.setAttribute("account", updatedAccount);
-            request.setAttribute("account", updatedAccount);
-            request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Có lỗi xảy ra khi cập nhật thông tin!");
-            request.getRequestDispatcher("/View/profile.jsp").forward(request, response);
         }
 
         // Forward về trang profile

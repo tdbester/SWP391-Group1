@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -241,9 +242,31 @@
                                     <tbody>
                                     <c:forEach var="notification" items="${notifications}">
                                         <tr>
+                                            <!-- Cột 1: ID thông báo -->
                                             <td>${notification.id}</td>
-                                            <td class="notification-title">${notification.title}</td>
-                                            <td class="notification-content">${notification.content}</td>
+
+                                            <!-- Cột 2: Tiêu đề -->
+                                            <td>
+                                                <div class="notification-title" title="${notification.title}">
+                                                        ${notification.title}
+                                                </div>
+                                            </td>
+
+                                            <!-- Cột 3: Nội dung (rút gọn) -->
+                                            <td>
+                                                <div class="notification-content" title="${notification.content}">
+                                                    <c:choose>
+                                                        <c:when test="${fn:length(notification.content) > 50}">
+                                                            ${fn:substring(notification.content, 0, 50)}...
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            ${notification.content}
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+                                            </td>
+
+                                            <!-- Cột 4: Tên lớp học -->
                                             <td>
                                                 <c:forEach var="classRoom" items="${classRooms}">
                                                     <c:if test="${classRoom.id == notification.classRoomId}">
@@ -251,44 +274,51 @@
                                                     </c:if>
                                                 </c:forEach>
                                             </td>
+
+                                            <!-- Cột 5: Loại thông báo -->
                                             <td>
                                                 <c:choose>
                                                     <c:when test="${notification.notificationType == 'GENERAL'}">
-                                                                <span class="badge badge-general">
-                                                                    <i class="fas fa-info-circle"></i>
-                                                                    Thông báo chung
-                                                                </span>
+                                                        <span class="badge badge-general">
+                                                        <i class="fas fa-info-circle"></i>
+                                                            Thông báo chung
+                                                        </span>
                                                     </c:when>
                                                     <c:when test="${notification.notificationType == 'URGENT'}">
-                                                                <span class="badge badge-urgent">
-                                                                    <i class="fas fa-exclamation-triangle"></i>
-                                                                    Khẩn cấp
-                                                                </span>
+                                                        <span class="badge badge-urgent">
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                            Khẩn cấp
+                                                        </span>
                                                     </c:when>
                                                     <c:when test="${notification.notificationType == 'ASSIGNMENT'}">
-                                                                <span class="badge badge-assignment">
-                                                                    <i class="fas fa-tasks"></i>
-                                                                    Bài tập
-                                                                </span>
+                                                        <span class="badge badge-assignment">
+                                                        <i class="fas fa-tasks"></i>
+                                                            Bài tập
+                                                        </span>
                                                     </c:when>
                                                     <c:when test="${notification.notificationType == 'EXAM'}">
-                                                                <span class="badge badge-exam">
-                                                                    <i class="fas fa-file-alt"></i>
-                                                                    Kiểm tra
-                                                                </span>
+                                                        <span class="badge badge-exam">
+                                                        <i class="fas fa-file-alt"></i>
+                                                            Kiểm tra
+                                                        </span>
                                                     </c:when>
                                                     <c:otherwise>
-                                                                <span class="badge badge-default">
-                                                                        ${notification.notificationType}
-                                                                </span>
+                                                        <span class="badge badge-default">
+                                                        ${notification.notificationType}
+                                                        </span>
                                                     </c:otherwise>
                                                 </c:choose>
                                             </td>
+
+                                            <!-- Cột 6: Ngày gửi -->
                                             <td>
-                                                <fmt:formatDate value="${notification.createdAt}"
-                                                                pattern="dd/MM/yyyy HH:mm"/>
+                                                <fmt:formatDate value="${notification.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
                                             </td>
+
+                                            <!-- Cột 7: Người gửi -->
                                             <td>${notification.senderName}</td>
+
+                                            <!-- Cột 8: Thao tác -->
                                             <td>
                                                 <div class="action-buttons">
                                                     <a href="sendNotification?action=edit&id=${notification.id}"

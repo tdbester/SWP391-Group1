@@ -38,6 +38,12 @@ public class CreateClassRoomServlet extends HttpServlet {
             int teacherId = parseIntParameter(request, "teacherId", "Giáo viên không hợp lệ");
             int slotId = parseIntParameter(request, "slotId", "Slot học không hợp lệ");
             int roomId = parseIntParameter(request, "roomId", "Phòng học không hợp lệ");
+            int maxCapacity = parseIntParameter(request, "maxCapacity", "Sĩ số tối đa không hợp lệ");
+
+            // Validate max capacity range
+            if (maxCapacity < 1 || maxCapacity > 30) {
+                throw new IllegalArgumentException("Sĩ số tối đa phải từ 1 đến 30");
+            }
 
             LocalDate startDate = parseLocalDateParameter(request, "startDate", "Ngày bắt đầu không hợp lệ");
             LocalDate endDate = parseLocalDateParameter(request, "endDate", "Ngày kết thúc không hợp lệ");
@@ -89,7 +95,7 @@ public class CreateClassRoomServlet extends HttpServlet {
                 throw new IllegalArgumentException("Giáo viên đã có lớp học trong slot và ngày đã chọn. Vui lòng chọn giáo viên khác, slot khác hoặc ngày khác.");
             }
 
-            // 3. Check for room conflicts (need to add this method to DAO)
+            // 3. Check for room conflicts
             if (hasRoomConflict(roomId, slotId, daysOfWeek, startDate, endDate)) {
                 throw new IllegalArgumentException("Phòng học đã được sử dụng trong slot và ngày đã chọn. Vui lòng chọn phòng khác.");
             }
@@ -100,6 +106,7 @@ public class CreateClassRoomServlet extends HttpServlet {
             classRoom.setCourseId(courseId);
             classRoom.setTeacherId(teacherId);
             classRoom.setSlotId(slotId);
+            classRoom.setMaxCapacity(maxCapacity); // Set max capacity
 
             int classRoomId = classRoomsDAO.insertClassRoomAndReturnId(classRoom);
             if (classRoomId == -1) {
@@ -169,6 +176,7 @@ public class CreateClassRoomServlet extends HttpServlet {
         request.setAttribute("preservedTeacherId", request.getParameter("teacherId"));
         request.setAttribute("preservedSlotId", request.getParameter("slotId"));
         request.setAttribute("preservedRoomId", request.getParameter("roomId"));
+        request.setAttribute("preservedMaxCapacity", request.getParameter("maxCapacity")); // Add max capacity preservation
         request.setAttribute("preservedStartDate", request.getParameter("startDate"));
         request.setAttribute("preservedEndDate", request.getParameter("endDate"));
         request.setAttribute("preservedDaysOfWeek", request.getParameterValues("daysOfWeek"));

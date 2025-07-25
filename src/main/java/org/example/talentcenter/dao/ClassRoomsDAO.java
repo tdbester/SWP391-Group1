@@ -11,13 +11,14 @@ import java.util.List;
 public class ClassRoomsDAO {
 
     public int insertClassRoomAndReturnId(ClassRooms classRoom) throws SQLException {
-        String sql = "INSERT INTO ClassRooms (Name, CourseId, TeacherId, SlotId) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO ClassRooms (Name, CourseId, TeacherId, SlotId, MaxCapacity) VALUES (?, ?, ?, ?,?)";
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, classRoom.getName());
             stmt.setInt(2, classRoom.getCourseId());
             stmt.setInt(3, classRoom.getTeacherId());
             stmt.setInt(4, classRoom.getSlotId());
+            stmt.setInt(5, classRoom.getMaxCapacity());
             int affectedRows = stmt.executeUpdate();
             if (affectedRows == 0) return -1;
             try (ResultSet rs = stmt.getGeneratedKeys()) {
@@ -33,7 +34,7 @@ public class ClassRoomsDAO {
     public List<ClassRooms> getClassRoomsWithDetails(String courseSearch, String classSearch, int page, int pageSize) {
         List<ClassRooms> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT DISTINCT cr.Id, cr.Name, cr.CourseId, cr.TeacherId, cr.SlotId, ")
+        sql.append("SELECT DISTINCT cr.Id, cr.Name, cr.CourseId, cr.TeacherId, cr.SlotId, cr.MaxCapacity, ")
                 .append("c.Title as CourseTitle, ")
                 .append("a.FullName as TeacherName, ")
                 .append("s.StartTime, s.EndTime, ")
@@ -86,6 +87,7 @@ public class ClassRoomsDAO {
                     classRoom.setTeacherId(rs.getInt("TeacherId"));
                     classRoom.setSlotId(rs.getInt("SlotId"));
                     classRoom.setRoomId(rs.getInt("RoomId"));
+                    classRoom.setMaxCapacity(rs.getInt("MaxCapacity"));
                     classRoom.setCourseTitle(rs.getString("CourseTitle"));
                     classRoom.setRoomCode(rs.getString("RoomCode"));
 
@@ -319,11 +321,12 @@ public class ClassRoomsDAO {
     }
 
     /**
-     * Xóa lớp học theo ID
+     * Xóa lớp học theo ID với cải tiến cho việc xóa schedule patterns
      */
     public boolean deleteClassRoom(int classRoomId) {
         // Kiểm tra xem lớp học có học sinh không
         if (hasStudentsInClass(classRoomId)) {
+            System.out.println("Cannot delete classroom " + classRoomId + " - has enrolled students");
             return false; // Không thể xóa nếu có học sinh
         }
 
@@ -332,41 +335,53 @@ public class ClassRoomsDAO {
             conn = DBConnect.getConnection();
             conn.setAutoCommit(false);
 
-            // Xóa các schedule pattern trước
-            String deletePatternSql = "DELETE FROM ClassSchedulePattern WHERE ClassRoomId = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(deletePatternSql)) {
-                stmt.setInt(1, classRoomId);
-                stmt.executeUpdate();
-            }
+            System.out.println("Starting deletion process for classroom ID: " + classRoomId);
 
-            // Xóa các schedule
-            String deleteScheduleSql = "DELETE FROM Schedule WHERE ClassRoomId = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(deleteScheduleSql)) {
-                stmt.setInt(1, classRoomId);
-                stmt.executeUpdate();
-            }
+            // 1. Xóa các ClassSchedulePattern trước
+            int deletedPatterns = deleteClassSchedulePatterns(conn, classRoomId);
+            System.out.println("Deleted " + deletedPatterns + " schedule patterns for classroom " + classRoomId);
 
-            // Xóa lớp học
+            // 2. Xóa các Schedule records
+            int deletedSchedules = deleteScheduleRecords(conn, classRoomId);
+            System.out.println("Deleted " + deletedSchedules + " schedule records for classroom " + classRoomId);
+
+            // 3. Xóa các attendance records nếu có
+            int deletedAttendances = deleteAttendanceRecords(conn, classRoomId);
+            System.out.println("Deleted " + deletedAttendances + " attendance records for classroom " + classRoomId);
+
+            // 4. Xóa các assessment records nếu có
+            int deletedAssessments = deleteAssessmentRecords(conn, classRoomId);
+            System.out.println("Deleted " + deletedAssessments + " assessment records for classroom " + classRoomId);
+
+            // 5. Cuối cùng xóa lớp học
             String deleteClassSql = "DELETE FROM ClassRooms WHERE Id = ?";
             try (PreparedStatement stmt = conn.prepareStatement(deleteClassSql)) {
                 stmt.setInt(1, classRoomId);
-                int affected = stmt.executeUpdate();
+                int deletedClassrooms = stmt.executeUpdate();
 
-                if (affected > 0) {
+                if (deletedClassrooms > 0) {
                     conn.commit();
+                    System.out.println("Successfully deleted classroom " + classRoomId);
                     return true;
                 } else {
                     conn.rollback();
+                    System.err.println("Failed to delete classroom " + classRoomId + " - no rows affected");
                     return false;
                 }
             }
+
         } catch (SQLException e) {
+            System.err.println("Error deleting classroom " + classRoomId + ": " + e.getMessage());
+            e.printStackTrace();
             try {
-                if (conn != null) conn.rollback();
+                if (conn != null) {
+                    conn.rollback();
+                    System.out.println("Transaction rolled back for classroom " + classRoomId);
+                }
             } catch (SQLException ex) {
+                System.err.println("Error rolling back transaction: " + ex.getMessage());
                 ex.printStackTrace();
             }
-            e.printStackTrace();
             return false;
         } finally {
             try {
@@ -375,8 +390,61 @@ public class ClassRoomsDAO {
                     conn.close();
                 }
             } catch (SQLException e) {
+                System.err.println("Error closing connection: " + e.getMessage());
                 e.printStackTrace();
             }
+        }
+    }
+
+    /**
+     * Xóa các ClassSchedulePattern records
+     */
+    private int deleteClassSchedulePatterns(Connection conn, int classRoomId) throws SQLException {
+        String sql = "DELETE FROM ClassSchedulePattern WHERE ClassRoomId = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classRoomId);
+            return stmt.executeUpdate();
+        }
+    }
+
+    /**
+     * Xóa các Schedule records
+     */
+    private int deleteScheduleRecords(Connection conn, int classRoomId) throws SQLException {
+        String sql = "DELETE FROM Schedule WHERE ClassRoomId = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classRoomId);
+            return stmt.executeUpdate();
+        }
+    }
+
+    /**
+     * Xóa các Attendance records nếu có
+     */
+    private int deleteAttendanceRecords(Connection conn, int classRoomId) throws SQLException {
+        String sql = "DELETE FROM Attendance WHERE ClassRoomId = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classRoomId);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            // Bảng Attendance có thể không tồn tại hoặc không có cột ClassRoomId
+            System.out.println("Note: Could not delete attendance records (table may not exist or have different structure): " + e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Xóa các Assessment records nếu có
+     */
+    private int deleteAssessmentRecords(Connection conn, int classRoomId) throws SQLException {
+        String sql = "DELETE FROM Assessment WHERE ClassRoomId = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, classRoomId);
+            return stmt.executeUpdate();
+        } catch (SQLException e) {
+            // Bảng Assessment có thể không tồn tại hoặc không có cột ClassRoomId
+            System.out.println("Note: Could not delete assessment records (table may not exist or have different structure): " + e.getMessage());
+            return 0;
         }
     }
 
@@ -390,15 +458,17 @@ public class ClassRoomsDAO {
             stmt.setInt(1, classRoomId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1) > 0;
+                    int studentCount = rs.getInt(1);
+                    System.out.println("Classroom " + classRoomId + " has " + studentCount + " students");
+                    return studentCount > 0;
                 }
             }
         } catch (SQLException e) {
+            System.err.println("Error checking students in class: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
     }
-
 
     /**
      * Kiểm tra xem giáo viên có đang dạy lớp khác trong cùng slot và cùng ngày trong tuần không
@@ -468,5 +538,4 @@ public class ClassRoomsDAO {
                                                    LocalDate startDate, LocalDate endDate) {
         return isTeacherAvailableInSlotAndDays(teacherId, slotId, daysOfWeek, startDate, endDate, -1);
     }
-
 }

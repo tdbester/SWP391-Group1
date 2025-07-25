@@ -11,6 +11,7 @@ public class Account {
     private String address;
     private int roleId;
     private LocalDateTime createdAt;
+    private String avatar;
 
     public Account() {
     }
@@ -59,6 +60,12 @@ public class Account {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getAvatar() {
+        return avatar;
+    }
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
 
     @Override
     public String toString() {

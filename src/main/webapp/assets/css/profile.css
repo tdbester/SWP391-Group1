@@ -125,6 +125,25 @@ input {
     background: #9B7BFA;
 }
 
+.password-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.password-field input {
+    flex: 1;
+    padding-right: 40px;
+}
+.password-field .toggle-pass {
+    position: absolute;
+    right: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+
 /* Alert styles */
 .alert {
     padding: 12px 16px;

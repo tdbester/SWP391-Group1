@@ -5,11 +5,13 @@ import org.example.talentcenter.dao.CourseDAO;
 import org.example.talentcenter.dao.TeacherDAO;
 import org.example.talentcenter.dao.SlotDAO;
 import org.example.talentcenter.dao.RoomDAO;
+import org.example.talentcenter.dao.ClassSchedulePatternDAO;
 import org.example.talentcenter.model.ClassRooms;
 import org.example.talentcenter.model.Course;
 import org.example.talentcenter.model.Teacher;
 import org.example.talentcenter.model.Slot;
 import org.example.talentcenter.model.Room;
+import org.example.talentcenter.model.ClassSchedulePattern;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,7 +20,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @WebServlet(name = "ClassRoomServlet", urlPatterns = {
         "/training-manager-view-class",
@@ -32,6 +36,7 @@ public class ClassRoomServlet extends HttpServlet {
     private TeacherDAO teacherDAO;
     private SlotDAO slotDAO;
     private RoomDAO roomDAO;
+    private ClassSchedulePatternDAO classSchedulePatternDAO;
     private static final int PAGE_SIZE = 10;
 
     @Override
@@ -41,6 +46,7 @@ public class ClassRoomServlet extends HttpServlet {
         teacherDAO = new TeacherDAO();
         slotDAO = new SlotDAO();
         roomDAO = new RoomDAO();
+        classSchedulePatternDAO = new ClassSchedulePatternDAO();
     }
 
     @Override
@@ -139,6 +145,16 @@ public class ClassRoomServlet extends HttpServlet {
                 PAGE_SIZE
         );
 
+        // Populate daysOfWeek data for each classroom
+        for (ClassRooms classroom : classrooms) {
+            try {
+                List<ClassSchedulePattern> patterns = classSchedulePatternDAO.getPatternsByClassRoom(classroom.getId());
+                populateClassroomScheduleInfo(classroom, patterns);
+            } catch (SQLException e) {
+                System.err.println("Error loading schedule patterns for classroom " + classroom.getId() + ": " + e.getMessage());
+            }
+        }
+
         int totalClassrooms = classRoomsDAO.getTotalClassRooms(
                 courseSearch.isEmpty() ? null : courseSearch,
                 classSearch.isEmpty() ? null : classSearch
@@ -178,6 +194,72 @@ public class ClassRoomServlet extends HttpServlet {
     }
 
     /**
+     * Populate classroom with schedule pattern information
+     */
+    private void populateClassroomScheduleInfo(ClassRooms classroom, List<ClassSchedulePattern> patterns) {
+        if (patterns.isEmpty()) return;
+
+        // Get days of week
+        Set<Integer> daysSet = new HashSet<>();
+        LocalDate earliestStart = null;
+        LocalDate latestEnd = null;
+
+        for (ClassSchedulePattern pattern : patterns) {
+            daysSet.add(pattern.getDayOfWeek());
+
+            if (earliestStart == null || pattern.getStartDate().isBefore(earliestStart)) {
+                earliestStart = pattern.getStartDate();
+            }
+
+            if (latestEnd == null || pattern.getEndDate().isAfter(latestEnd)) {
+                latestEnd = pattern.getEndDate();
+            }
+        }
+
+        // Convert days of week to display string
+        List<Integer> sortedDays = new ArrayList<>(daysSet);
+        Collections.sort(sortedDays);
+
+        StringBuilder daysDisplay = new StringBuilder();
+        StringBuilder daysString = new StringBuilder();
+
+        for (int i = 0; i < sortedDays.size(); i++) {
+            int day = sortedDays.get(i);
+            if (i > 0) {
+                daysDisplay.append(", ");
+                daysString.append(",");
+            }
+            daysDisplay.append(getDayName(day));
+            daysString.append(day);
+        }
+
+        classroom.setDaysOfWeekDisplay(daysDisplay.toString());
+        classroom.setDaysOfWeekString(daysString.toString());
+
+        // Check if class has started
+        if (earliestStart != null) {
+            boolean classStarted = LocalDate.now().isAfter(earliestStart) || LocalDate.now().isEqual(earliestStart);
+            classroom.setClassStarted(classStarted);
+        }
+    }
+
+    /**
+     * Get day name in Vietnamese
+     */
+    private String getDayName(int dayOfWeek) {
+        switch (dayOfWeek) {
+            case 1: return "T2";
+            case 2: return "T3";
+            case 3: return "T4";
+            case 4: return "T5";
+            case 5: return "T6";
+            case 6: return "T7";
+            case 7: return "CN";
+            default: return "";
+        }
+    }
+
+    /**
      * Xử lý cập nhật lớp học
      */
     private void handleUpdateClassroom(HttpServletRequest request, HttpServletResponse response)
@@ -189,11 +271,15 @@ public class ClassRoomServlet extends HttpServlet {
         String teacherIdParam = request.getParameter("teacherId");
         String slotIdParam = request.getParameter("slotId");
         String roomIdParam = request.getParameter("roomId");
+        String startDateParam = request.getParameter("startDate");
+        String endDateParam = request.getParameter("endDate");
+        String[] daysOfWeekParams = request.getParameterValues("daysOfWeek");
 
         // Validation cơ bản
         if (classroomIdParam == null || name == null || name.trim().isEmpty() ||
                 courseIdParam == null || teacherIdParam == null || slotIdParam == null ||
-                roomIdParam == null ) {
+                roomIdParam == null || startDateParam == null || endDateParam == null ||
+                daysOfWeekParams == null || daysOfWeekParams.length == 0) {
 
             request.getSession().setAttribute("error", "Vui lòng điền đầy đủ thông tin");
             response.sendRedirect(request.getContextPath() + "/training-manager-view-class");
@@ -206,11 +292,70 @@ public class ClassRoomServlet extends HttpServlet {
             int teacherId = Integer.parseInt(teacherIdParam);
             int slotId = Integer.parseInt(slotIdParam);
             int roomId = Integer.parseInt(roomIdParam);
+            LocalDate startDate = LocalDate.parse(startDateParam);
+            LocalDate endDate = LocalDate.parse(endDateParam);
 
+            // Validate dates
+            if (startDate.isAfter(endDate) || startDate.isEqual(endDate)) {
+                request.getSession().setAttribute("error", "Ngày kết thúc phải sau ngày bắt đầu");
+                response.sendRedirect(request.getContextPath() + "/training-manager-view-class");
+                return;
+            }
+
+            // Parse days of week
+            List<Integer> daysOfWeek = new ArrayList<>();
+            for (String day : daysOfWeekParams) {
+                daysOfWeek.add(Integer.parseInt(day));
+            }
+
+            // Get existing classroom to check if it has started
+            List<ClassSchedulePattern> existingPatterns = classSchedulePatternDAO.getPatternsByClassRoom(classroomId);
+            boolean classStarted = false;
+            LocalDate currentEarliestStart = null;
+
+            if (!existingPatterns.isEmpty()) {
+                currentEarliestStart = existingPatterns.stream()
+                        .map(ClassSchedulePattern::getStartDate)
+                        .min(LocalDate::compareTo)
+                        .orElse(null);
+
+                if (currentEarliestStart != null) {
+                    classStarted = LocalDate.now().isAfter(currentEarliestStart) || LocalDate.now().isEqual(currentEarliestStart);
+                }
+            }
+
+            // If class has started, don't allow changing start date or days of week
+            if (classStarted) {
+                if (currentEarliestStart != null && !startDate.equals(currentEarliestStart)) {
+                    request.getSession().setAttribute("error", "Lớp học đã bắt đầu, không thể thay đổi ngày bắt đầu");
+                    response.sendRedirect(request.getContextPath() + "/training-manager-view-class");
+                    return;
+                }
+
+                // Check if days of week are being changed
+                Set<Integer> existingDays = new HashSet<>();
+                for (ClassSchedulePattern pattern : existingPatterns) {
+                    existingDays.add(pattern.getDayOfWeek());
+                }
+                Set<Integer> newDays = new HashSet<>(daysOfWeek);
+
+                if (!existingDays.equals(newDays)) {
+                    request.getSession().setAttribute("error", "Lớp học đã bắt đầu, không thể thay đổi thứ trong tuần");
+                    response.sendRedirect(request.getContextPath() + "/training-manager-view-class");
+                    return;
+                }
+            }
 
             // Kiểm tra tên lớp học đã tồn tại (trừ lớp học hiện tại)
             if (classRoomsDAO.isClassNameExists(name.trim(), classroomId)) {
                 request.getSession().setAttribute("error", "Tên lớp học đã tồn tại");
+                response.sendRedirect(request.getContextPath() + "/training-manager-view-class");
+                return;
+            }
+
+            // Check teacher availability for the updated schedule
+            if (!classRoomsDAO.isTeacherAvailableInSlotAndDays(teacherId, slotId, daysOfWeek, startDate, endDate, classroomId)) {
+                request.getSession().setAttribute("error", "Giáo viên đã có lịch dạy trung với thời gian này");
                 response.sendRedirect(request.getContextPath() + "/training-manager-view-class");
                 return;
             }
@@ -224,8 +369,8 @@ public class ClassRoomServlet extends HttpServlet {
             classroom.setSlotId(slotId);
             classroom.setRoomId(roomId);
 
-            // Thực hiện update
-            boolean success = classRoomsDAO.updateClassRoom(classroom);
+            // Thực hiện update classroom và schedule patterns
+            boolean success = updateClassroomWithSchedule(classroom, daysOfWeek, startDate, endDate);
 
             if (success) {
                 request.getSession().setAttribute("message", "Cập nhật lớp học thành công");
@@ -238,11 +383,49 @@ public class ClassRoomServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             request.getSession().setAttribute("error", "Dữ liệu không hợp lệ");
             System.err.println("Invalid data format: " + e.getMessage());
+        } catch (Exception e) {
+            request.getSession().setAttribute("error", "Có lỗi xảy ra khi cập nhật lớp học: " + e.getMessage());
+            System.err.println("Error updating classroom: " + e.getMessage());
+            e.printStackTrace();
         }
 
         // Preserve search parameters
         String redirectUrl = buildRedirectUrl(request, "/training-manager-view-class");
         response.sendRedirect(redirectUrl);
+    }
+
+    /**
+     * Update classroom with schedule patterns
+     */
+    private boolean updateClassroomWithSchedule(ClassRooms classroom, List<Integer> daysOfWeek,
+                                                LocalDate startDate, LocalDate endDate) throws SQLException {
+        // Update classroom basic info
+        boolean classroomUpdated = classRoomsDAO.updateClassRoom(classroom);
+        if (!classroomUpdated) {
+            return false;
+        }
+
+        // Delete existing schedule patterns
+        String deletePatternSql = "DELETE FROM ClassSchedulePattern WHERE ClassRoomId = ?";
+        try (var conn = org.example.talentcenter.config.DBConnect.getConnection();
+             var stmt = conn.prepareStatement(deletePatternSql)) {
+            stmt.setInt(1, classroom.getId());
+            stmt.executeUpdate();
+        }
+
+        // Insert new schedule patterns
+        for (Integer dayOfWeek : daysOfWeek) {
+            ClassSchedulePattern pattern = new ClassSchedulePattern();
+            pattern.setClassRoomId(classroom.getId());
+            pattern.setStartDate(startDate);
+            pattern.setEndDate(endDate);
+            pattern.setSlotId(classroom.getSlotId());
+            pattern.setDayOfWeek(dayOfWeek);
+
+            classSchedulePatternDAO.insertPattern(pattern);
+        }
+
+        return true;
     }
 
     /**

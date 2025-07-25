@@ -21,6 +21,7 @@ public class ClassRooms {
     private LocalDate startDate;
     private LocalDate endDate;
     private int roomId;
+    private int maxCapacity;
 
     // Date fields for JSP compatibility
     private Date startTimeAsDate;
@@ -28,6 +29,11 @@ public class ClassRooms {
     private Date startDateAsDate;
     private Date endDateAsDate;
     private Date endDateAsUtilDate;
+
+    // New fields for schedule pattern support
+    private String daysOfWeekDisplay; // Display string for days (T2, T3, T4)
+    private String daysOfWeekString;  // Comma-separated string of day numbers (1,2,3)
+    private boolean classStarted;     // Whether the class has started
 
     public ClassRooms() {
     }
@@ -170,22 +176,66 @@ public class ClassRooms {
     public void setEndDateAsDate(Date endDateAsDate) {
         this.endDateAsDate = endDateAsDate;
     }
+
     public Date getEndDateAsUtilDate() {
         return endDateAsUtilDate;
     }
+
     public void setEndDateAsUtilDate(Date endDateAsUtilDate) {
         this.endDateAsUtilDate = endDateAsUtilDate;
     }
+
     public int getRoomId() {
         return roomId;
     }
+
     public void setRoomId(int roomId) {
         this.roomId = roomId;
     }
+
     public String getRoomCode() {
         return roomCode;
     }
+
     public void setRoomCode(String roomCode) {
         this.roomCode = roomCode;
+    }
+
+    public int getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    public void setMaxCapacity(int maxCapacity) {
+        this.maxCapacity = maxCapacity;
+    }
+
+    // New getters and setters for schedule pattern support
+    public String getDaysOfWeekDisplay() {
+        return daysOfWeekDisplay;
+    }
+
+    public void setDaysOfWeekDisplay(String daysOfWeekDisplay) {
+        this.daysOfWeekDisplay = daysOfWeekDisplay;
+    }
+
+    public String getDaysOfWeekString() {
+        return daysOfWeekString;
+    }
+
+    public void setDaysOfWeekString(String daysOfWeekString) {
+        this.daysOfWeekString = daysOfWeekString;
+    }
+
+    public boolean isClassStarted() {
+        return classStarted;
+    }
+
+    public void setClassStarted(boolean classStarted) {
+        this.classStarted = classStarted;
+    }
+
+    // Additional getter for JSP compatibility
+    public boolean getClassStarted() {
+        return classStarted;
     }
 }

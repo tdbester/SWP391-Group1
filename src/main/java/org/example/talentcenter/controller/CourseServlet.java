@@ -448,7 +448,7 @@ public class CourseServlet extends HttpServlet {
         //1. Tạo kết nối web của mình đến cloudinary
         Cloudinary cloudinary = Singleton.getCloudinary();
         if (cloudinary == null) {
-            throw new ServletException("Cloudinary not configured");
+            throw new ServletException("CloudinaryUtils not configured");
         }
 
         //2. Khởi tạo đối tượng file- là file người dùng upload lên

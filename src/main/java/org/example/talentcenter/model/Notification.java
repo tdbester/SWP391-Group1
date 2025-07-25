@@ -15,6 +15,7 @@ public class Notification {
     private boolean isRead;
     private Integer recipientAccountId;
     private Integer classRoomId; // Thêm trường mới cho classroom
+    private String className;
 
     public Notification() {
     }
@@ -113,5 +114,11 @@ public class Notification {
 
     public void setClassRoomId(Integer classRoomId) {
         this.classRoomId = classRoomId;
+    }
+    public String getClassName() {
+        return className;
+    }
+    public void setClassName(String className) {
+        this.className = className;
     }
 }

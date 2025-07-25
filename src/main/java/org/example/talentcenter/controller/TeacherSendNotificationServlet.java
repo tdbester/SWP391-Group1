@@ -1,8 +1,11 @@
 package org.example.talentcenter.controller;
 
 import org.example.talentcenter.dao.NotificationDAO;
+import org.example.talentcenter.dao.TeacherDAO;
+import org.example.talentcenter.dao.AccountDAO;
 import org.example.talentcenter.model.Notification;
 import org.example.talentcenter.model.ClassRooms;
+import org.example.talentcenter.model.Teacher;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,10 +21,14 @@ import java.util.ArrayList;
 @WebServlet("/sendNotification")
 public class TeacherSendNotificationServlet extends HttpServlet {
     private NotificationDAO notificationDAO;
+    private TeacherDAO teacherDAO;
+    private AccountDAO accountDAO;
 
     @Override
     public void init() throws ServletException {
         notificationDAO = new NotificationDAO();
+        teacherDAO = new TeacherDAO();
+        accountDAO = new AccountDAO();
     }
 
     @Override
@@ -64,11 +71,14 @@ public class TeacherSendNotificationServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             HttpSession session = request.getSession();
-            String senderName = (String) session.getAttribute("fullName");
+            Integer accountId = (Integer) session.getAttribute("accountId");
+            String senderName = (String) session.getAttribute("userFullName");
 
             // Kiểm tra session
-            if (senderName == null) {
-                senderName = "Admin"; // Default value
+            if (accountId == null || senderName == null) {
+                request.setAttribute("errorMessage", "Phiên đăng nhập không hợp lệ!");
+                loadNotifications(request, response);
+                return;
             }
 
             String title = request.getParameter("title");
@@ -132,6 +142,16 @@ public class TeacherSendNotificationServlet extends HttpServlet {
     private void handleDelete(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            HttpSession session = request.getSession();
+            Integer accountId = (Integer) session.getAttribute("accountId");
+            String senderName = (String) session.getAttribute("userFullName");
+
+            if (accountId == null || senderName == null) {
+                request.setAttribute("errorMessage", "Phiên đăng nhập không hợp lệ!");
+                loadNotifications(request, response);
+                return;
+            }
+
             String idStr = request.getParameter("id");
             if (idStr == null || idStr.trim().isEmpty()) {
                 request.setAttribute("errorMessage", "ID thông báo không hợp lệ!");
@@ -140,6 +160,15 @@ public class TeacherSendNotificationServlet extends HttpServlet {
             }
 
             int notificationId = Integer.parseInt(idStr);
+
+            // Kiểm tra quyền sở hữu thông báo
+            Notification notification = notificationDAO.getNotificationById(notificationId);
+            if (notification == null || !senderName.equals(notification.getSenderName())) {
+                request.setAttribute("errorMessage", "Bạn không có quyền xóa thông báo này!");
+                loadNotifications(request, response);
+                return;
+            }
+
             boolean success = notificationDAO.deleteNotification(notificationId);
 
             if (success) {
@@ -161,6 +190,16 @@ public class TeacherSendNotificationServlet extends HttpServlet {
     private void handleEdit(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            HttpSession session = request.getSession();
+            Integer accountId = (Integer) session.getAttribute("accountId");
+            String senderName = (String) session.getAttribute("userFullName");
+
+            if (accountId == null || senderName == null) {
+                request.setAttribute("errorMessage", "Phiên đăng nhập không hợp lệ!");
+                loadNotifications(request, response);
+                return;
+            }
+
             String idStr = request.getParameter("id");
             if (idStr == null || idStr.trim().isEmpty()) {
                 request.setAttribute("errorMessage", "ID thông báo không hợp lệ!");
@@ -172,7 +211,12 @@ public class TeacherSendNotificationServlet extends HttpServlet {
             Notification notification = notificationDAO.getNotificationById(notificationId);
 
             if (notification != null) {
-                request.setAttribute("editNotification", notification);
+                // Kiểm tra quyền sở hữu thông báo
+                if (!senderName.equals(notification.getSenderName())) {
+                    request.setAttribute("errorMessage", "Bạn không có quyền chỉnh sửa thông báo này!");
+                } else {
+                    request.setAttribute("editNotification", notification);
+                }
             } else {
                 request.setAttribute("errorMessage", "Không tìm thấy thông báo!");
             }
@@ -190,6 +234,16 @@ public class TeacherSendNotificationServlet extends HttpServlet {
     private void handleUpdateNotification(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            HttpSession session = request.getSession();
+            Integer accountId = (Integer) session.getAttribute("accountId");
+            String senderName = (String) session.getAttribute("userFullName");
+
+            if (accountId == null || senderName == null) {
+                request.setAttribute("errorMessage", "Phiên đăng nhập không hợp lệ!");
+                loadNotifications(request, response);
+                return;
+            }
+
             String idStr = request.getParameter("notificationId");
             if (idStr == null || idStr.trim().isEmpty()) {
                 request.setAttribute("errorMessage", "ID thông báo không hợp lệ!");
@@ -202,6 +256,14 @@ public class TeacherSendNotificationServlet extends HttpServlet {
             String content = request.getParameter("content");
             String notificationType = request.getParameter("notificationType");
             String classRoomIdStr = request.getParameter("classRoomId");
+
+            // Kiểm tra quyền sở hữu thông báo
+            Notification existingNotification = notificationDAO.getNotificationById(notificationId);
+            if (existingNotification == null || !senderName.equals(existingNotification.getSenderName())) {
+                request.setAttribute("errorMessage", "Bạn không có quyền cập nhật thông báo này!");
+                loadNotifications(request, response);
+                return;
+            }
 
             // Validation
             if (title == null || title.trim().isEmpty()) {
@@ -247,6 +309,24 @@ public class TeacherSendNotificationServlet extends HttpServlet {
     private void loadNotifications(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
+            HttpSession session = request.getSession();
+            Integer accountId = (Integer) session.getAttribute("accountId");
+            String senderName = (String) session.getAttribute("userFullName");
+
+            if (accountId == null || senderName == null) {
+                request.setAttribute("errorMessage", "Phiên đăng nhập không hợp lệ!");
+                request.getRequestDispatcher("/View/teacher-send-notification.jsp").forward(request, response);
+                return;
+            }
+
+            // Lấy teacher ID từ account ID
+            int teacherId = accountDAO.getTeacherIdByAccountId(accountId);
+            if (teacherId == -1) {
+                request.setAttribute("errorMessage", "Không tìm thấy thông tin giáo viên!");
+                request.getRequestDispatcher("/View/teacher-send-notification.jsp").forward(request, response);
+                return;
+            }
+
             String searchKeyword = request.getParameter("search");
             String dateFrom = request.getParameter("dateFrom");
             String dateTo = request.getParameter("dateTo");
@@ -261,12 +341,12 @@ public class TeacherSendNotificationServlet extends HttpServlet {
                 }
             }
 
-            // Lấy danh sách thông báo
-            ArrayList<Notification> notifications = notificationDAO.getNotificationsForClassRoom(
-                    classRoomId, searchKeyword, dateFrom, dateTo);
+            // Lấy danh sách thông báo của teacher này
+            ArrayList<Notification> notifications = notificationDAO.getNotificationsBySender(
+                    senderName, classRoomId, searchKeyword, dateFrom, dateTo);
 
-            // Lấy danh sách classroom cho dropdown
-            ArrayList<ClassRooms> classRooms = notificationDAO.getAllClassRooms();
+            // Lấy danh sách classrooms của teacher này
+            ArrayList<ClassRooms> classRooms = notificationDAO.getClassRoomsByTeacherId(teacherId);
 
             // Set attributes
             request.setAttribute("notifications", notifications);

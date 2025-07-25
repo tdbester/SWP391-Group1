@@ -28,7 +28,7 @@ public class CloudinaryConfig implements ServletContextListener {
         SingletonManager manager= new SingletonManager();
         manager.setCloudinary(cloudinary);
         manager.init();
-        System.out.println("Cloudinary instance created and set to Singleton.");
+        System.out.println("CloudinaryUtils instance created and set to Singleton.");
     }
 
     @Override

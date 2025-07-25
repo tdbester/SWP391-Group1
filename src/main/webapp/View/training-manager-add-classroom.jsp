@@ -95,7 +95,7 @@
                         </div>
                     </div>
 
-                    <!-- Form Row 3: Phòng học -->
+                    <!-- Form Row 3: Phòng học và Sĩ số tối đa -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="roomId">Phòng học:</label>
@@ -108,6 +108,14 @@
                                     </option>
                                 </c:forEach>
                             </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="maxCapacity">Sĩ số tối đa:</label>
+                            <input type="number" id="maxCapacity" name="maxCapacity"
+                                   value="${preservedMaxCapacity != null ? preservedMaxCapacity : 30}"
+                                   min="1" max="100" required>
+                            <small class="form-text">Số lượng học sinh tối đa trong lớp (1-30)</small>
                         </div>
                     </div>
 
@@ -205,6 +213,7 @@
         const className = document.getElementById('className').value.trim();
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
+        const maxCapacity = document.getElementById('maxCapacity').value;
         const daysChecked = document.querySelectorAll('input[name="daysOfWeek"]:checked').length;
 
         // Basic validations
@@ -223,6 +232,13 @@
         // Check if start date is in the past
         if (startDate && new Date(startDate) < new Date()) {
             alert('Ngày bắt đầu không thể là ngày trong quá khứ!');
+            e.preventDefault();
+            return;
+        }
+
+        // Validate max capacity
+        if (!maxCapacity || maxCapacity < 1 || maxCapacity > 100) {
+            alert('Sĩ số tối đa phải từ 1 đến 100!');
             e.preventDefault();
             return;
         }
@@ -262,6 +278,16 @@
     document.getElementById('className').addEventListener('blur', function() {
         const className = this.value.trim();
         if (className.length < 3) {
+            this.style.borderColor = '#dc3545';
+        } else {
+            this.style.borderColor = '#28a745';
+        }
+    });
+
+    // Real-time validation for max capacity
+    document.getElementById('maxCapacity').addEventListener('input', function() {
+        const capacity = parseInt(this.value);
+        if (capacity < 1 || capacity > 100 || isNaN(capacity)) {
             this.style.borderColor = '#dc3545';
         } else {
             this.style.borderColor = '#28a745';

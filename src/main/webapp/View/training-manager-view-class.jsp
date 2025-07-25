@@ -158,6 +158,7 @@
                                             </c:if>
                                         </span>
                                     </td>
+
                                     <td class="text-center">
                                         <c:if test="${not empty classroom.startDateAsDate}">
                                             <span class="date-display">
@@ -198,6 +199,8 @@
                                                 data-room-id="${classroom.roomId}"
                                                 data-start-date="<fmt:formatDate value='${classroom.startDateAsDate}' pattern='yyyy-MM-dd'/>"
                                                 data-end-date="<fmt:formatDate value='${classroom.endDateAsDate}' pattern='yyyy-MM-dd'/>"
+                                                data-days-of-week="${classroom.daysOfWeekString}"
+                                                data-class-started="${classroom.classStarted}"
                                                 onclick="showEditModal(this)">
                                             <i class="fas fa-edit"></i> Sửa
                                         </button>
@@ -271,13 +274,13 @@
 
 <!-- Edit Modal -->
 <div id="editModal" class="modal-overlay">
-    <div class="modal-content-custom">
+    <div class="modal-content-custom" style="max-width: 800px;">
         <div class="modal-header-custom">
             <h4><i class="fas fa-edit"></i>Chỉnh sửa lớp học</h4>
             <button type="button" class="close-btn" onclick="hideEditModal()">&times;</button>
         </div>
 
-        <!-- Form cập nhật trong modal - thay thế form cũ -->
+        <!-- Form cập nhật trong modal -->
         <form method="POST" action="${pageContext.request.contextPath}/training-manager-update-classroom">
             <!-- Hidden fields to preserve search parameters -->
             <input type="hidden" name="courseSearch" value="${param.courseSearch}">
@@ -313,9 +316,7 @@
                         </c:forEach>
                     </select>
                 </div>
-            </div>
 
-            <div class="form-row">
                 <div class="form-group half-width">
                     <label for="editSlotId" class="form-label">
                         <i class="fas fa-clock"></i>Slot thời gian
@@ -329,7 +330,9 @@
                         </c:forEach>
                     </select>
                 </div>
+            </div>
 
+            <div class="form-row">
                 <div class="form-group half-width">
                     <label for="editRoomId" class="form-label">
                         <i class="fas fa-door-open"></i>Phòng học
@@ -340,6 +343,74 @@
                             <option value="${room.id}">${room.code}</option>
                         </c:forEach>
                     </select>
+                </div>
+            </div>
+
+            <!-- Thứ trong tuần -->
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label class="form-label">
+                        <i class="fas fa-calendar-week"></i>Thứ trong tuần
+                    </label>
+                    <div class="days-checkbox-group">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="daysOfWeek" value="1" id="editMon">
+                            <label class="form-check-label" for="editMon">Thứ 2</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="daysOfWeek" value="2" id="editTue">
+                            <label class="form-check-label" for="editTue">Thứ 3</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="daysOfWeek" value="3" id="editWed">
+                            <label class="form-check-label" for="editWed">Thứ 4</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="daysOfWeek" value="4" id="editThu">
+                            <label class="form-check-label" for="editThu">Thứ 5</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="daysOfWeek" value="5" id="editFri">
+                            <label class="form-check-label" for="editFri">Thứ 6</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="daysOfWeek" value="6" id="editSat">
+                            <label class="form-check-label" for="editSat">Thứ 7</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="daysOfWeek" value="7" id="editSun">
+                            <label class="form-check-label" for="editSun">Chủ nhật</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ngày bắt đầu và kết thúc -->
+            <div class="form-row">
+                <div class="form-group half-width">
+                    <label for="editStartDate" class="form-label">
+                        <i class="fas fa-calendar-alt"></i>Ngày bắt đầu
+                    </label>
+                    <input type="date"
+                           class="form-control"
+                           id="editStartDate"
+                           name="startDate"
+                           required>
+                    <small class="text-warning" id="startDateWarning" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Lớp học đã bắt đầu, không thể thay đổi ngày bắt đầu
+                    </small>
+                </div>
+
+                <div class="form-group half-width">
+                    <label for="editEndDate" class="form-label">
+                        <i class="fas fa-calendar-alt"></i>Ngày kết thúc
+                    </label>
+                    <input type="date"
+                           class="form-control"
+                           id="editEndDate"
+                           name="endDate"
+                           required>
                 </div>
             </div>
 
@@ -370,6 +441,12 @@
         const teacherId = button.getAttribute('data-teacher-id');
         const slotId = button.getAttribute('data-slot-id');
         const roomId = button.getAttribute('data-room-id');
+        const startDate = button.getAttribute('data-start-date');
+        const endDate = button.getAttribute('data-end-date');
+        const daysOfWeek = button.getAttribute('data-days-of-week');
+        const classStarted = button.getAttribute('data-class-started') === 'true';
+
+        console.log('Days of week from button:', daysOfWeek); // Debug log
 
         // Fill form fields
         document.getElementById('editClassroomId').value = classroomId;
@@ -378,6 +455,70 @@
         document.getElementById('editTeacherId').value = teacherId;
         document.getElementById('editSlotId').value = slotId;
         document.getElementById('editRoomId').value = roomId;
+        document.getElementById('editStartDate').value = startDate;
+        document.getElementById('editEndDate').value = endDate;
+
+        // Set days of week checkboxes
+        // Clear all checkboxes first
+        const dayCheckboxes = document.querySelectorAll('#editModal input[name="daysOfWeek"]');
+        console.log('Found checkboxes:', dayCheckboxes.length); // Debug log
+
+        dayCheckboxes.forEach(cb => {
+            cb.checked = false;
+            cb.disabled = false; // Reset disabled state first
+        });
+
+        // Check the appropriate days
+        if (daysOfWeek && daysOfWeek.trim() !== '') {
+            const days = daysOfWeek.split(',');
+            console.log('Days to check:', days); // Debug log
+
+            days.forEach(day => {
+                const trimmedDay = day.trim();
+                const checkbox = document.querySelector(`#editModal input[name="daysOfWeek"][value="${trimmedDay}"]`);
+                console.log(`Looking for checkbox with value ${trimmedDay}:`, checkbox); // Debug log
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+
+        // Handle class started logic
+        const startDateField = document.getElementById('editStartDate');
+        const startDateWarning = document.getElementById('startDateWarning');
+        const dayCheckboxesContainer = document.querySelector('.days-checkbox-group');
+
+        if (classStarted) {
+            console.log('Class has started - disabling fields'); // Debug log
+            // Disable start date and days of week if class has started
+            startDateField.disabled = true;
+            startDateWarning.style.display = 'block';
+
+            // Disable all day checkboxes
+            dayCheckboxes.forEach(cb => {
+                cb.disabled = true;
+            });
+
+            // Add visual indication that these fields are disabled
+            if (dayCheckboxesContainer) {
+                dayCheckboxesContainer.style.opacity = '0.6';
+                dayCheckboxesContainer.style.pointerEvents = 'none';
+            }
+        } else {
+            console.log('Class has not started - enabling fields'); // Debug log
+            // Enable all fields if class hasn't started
+            startDateField.disabled = false;
+            startDateWarning.style.display = 'none';
+
+            dayCheckboxes.forEach(cb => {
+                cb.disabled = false;
+            });
+
+            if (dayCheckboxesContainer) {
+                dayCheckboxesContainer.style.opacity = '1';
+                dayCheckboxesContainer.style.pointerEvents = 'auto';
+            }
+        }
 
         // Show modal
         document.getElementById('editModal').classList.add('show');
@@ -387,6 +528,24 @@
     function hideEditModal() {
         document.getElementById('editModal').classList.remove('show');
         document.body.style.overflow = 'auto';
+
+        // Reset form state
+        const startDateField = document.getElementById('editStartDate');
+        const startDateWarning = document.getElementById('startDateWarning');
+        const dayCheckboxesContainer = document.querySelector('.days-checkbox-group');
+        const dayCheckboxes = document.querySelectorAll('#editModal input[name="daysOfWeek"]');
+
+        if (startDateField) startDateField.disabled = false;
+        if (startDateWarning) startDateWarning.style.display = 'none';
+
+        dayCheckboxes.forEach(cb => {
+            cb.disabled = false;
+        });
+
+        if (dayCheckboxesContainer) {
+            dayCheckboxesContainer.style.opacity = '1';
+            dayCheckboxesContainer.style.pointerEvents = 'auto';
+        }
     }
 
     // Close modal when clicking outside
@@ -402,7 +561,134 @@
             hideEditModal();
         }
     });
+
+    // Validate form before submit
+    document.querySelector('#editModal form').addEventListener('submit', function(e) {
+        const checkedDays = document.querySelectorAll('#editModal input[name="daysOfWeek"]:checked');
+        if (checkedDays.length === 0) {
+            e.preventDefault();
+            alert('Vui lòng chọn ít nhất một thứ trong tuần!');
+            return false;
+        }
+
+        const startDate = new Date(document.getElementById('editStartDate').value);
+        const endDate = new Date(document.getElementById('editEndDate').value);
+
+        if (startDate >= endDate) {
+            e.preventDefault();
+            alert('Ngày kết thúc phải sau ngày bắt đầu!');
+            return false;
+        }
+    });
+
+    function hideEditModal() {
+        document.getElementById('editModal').classList.remove('show');
+        document.body.style.overflow = 'auto';
+
+        // Reset form state
+        const startDateField = document.getElementById('editStartDate');
+        const startDateWarning = document.getElementById('startDateWarning');
+        const dayCheckboxesContainer = document.querySelector('.days-checkbox-group');
+        const dayCheckboxes = document.querySelectorAll('input[name="daysOfWeek"]');
+
+        startDateField.disabled = false;
+        startDateWarning.style.display = 'none';
+        dayCheckboxes.forEach(cb => {
+            cb.disabled = false;
+        });
+        dayCheckboxesContainer.style.opacity = '1';
+        dayCheckboxesContainer.style.pointerEvents = 'auto';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('editModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideEditModal();
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideEditModal();
+        }
+    });
+
+    // Validate form before submit
+    document.querySelector('#editModal form').addEventListener('submit', function(e) {
+        const checkedDays = document.querySelectorAll('input[name="daysOfWeek"]:checked');
+        if (checkedDays.length === 0) {
+            e.preventDefault();
+            alert('Vui lòng chọn ít nhất một thứ trong tuần!');
+            return false;
+        }
+
+        const startDate = new Date(document.getElementById('editStartDate').value);
+        const endDate = new Date(document.getElementById('editEndDate').value);
+
+        if (startDate >= endDate) {
+            e.preventDefault();
+            alert('Ngày kết thúc phải sau ngày bắt đầu!');
+            return false;
+        }
+    });
 </script>
+
+<style>
+    .days-checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+    }
+
+    .form-check-inline {
+        margin-right: 0;
+    }
+
+    .form-check-input:disabled + .form-check-label {
+        color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .text-warning {
+        font-size: 0.875em;
+        margin-top: 5px;
+    }
+
+    .modal-content-custom {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-group.full-width {
+        flex: 1;
+    }
+
+    .form-group.half-width {
+        flex: 0 0 calc(50% - 10px);
+    }
+
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #495057;
+    }
+
+    .form-label i {
+        margin-right: 8px;
+        color: #007bff;
+    }
+</style>
 
 </body>
 </html>
