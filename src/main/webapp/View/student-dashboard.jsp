@@ -64,24 +64,24 @@
             <div class="sale-quick-nav">
                 <h2><i class="fas fa-bolt"></i> Thao tác nhanh</h2>
                 <div class="sale-nav-buttons">
-                    <a href="${pageContext.request.contextPath}/View/student-schedule.jsp" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/StudentSchedule" class="sale-nav-btn">
                         <i class="fas fa-calendar-alt"></i>
                         Xem lịch học
                     </a>
-                    <a href="${pageContext.request.contextPath}/View/student-attendance-report.jsp"
+                    <a href="${pageContext.request.contextPath}/StudentAttendanceReport"
                        class="sale-nav-btn">
                         <i class="fas fa-clipboard-check"></i>
                         Báo cáo điểm danh
                     </a>
-                    <a href="${pageContext.request.contextPath}/View/student-request.jsp" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/StudentApplication?action=application" class="sale-nav-btn">
                         <i class="fas fa-file-signature"></i>
                         Gửi đơn
                     </a>
-                    <a href="${pageContext.request.contextPath}/View/student-request-list.jsp" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/StudentApplication?action=list" class="sale-nav-btn">
                         <i class="fas fa-folder-open"></i>
                         Xem đơn
                     </a>
-                    <a href="${pageContext.request.contextPath}/View/student-notification-list.jsp"
+                    <a href="${pageContext.request.contextPath}/StudentDashboard?action=notifications"
                        class="sale-nav-btn">
                         <i class="fas fa-bell"></i>
                         Thông báo

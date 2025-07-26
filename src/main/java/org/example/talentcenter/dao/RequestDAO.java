@@ -725,7 +725,7 @@ public class RequestDAO {
      */
     public ArrayList<Request> getAllRequestTypesForManager() {
         ArrayList<Request> requestTypes = new ArrayList<>();
-        String sql = "SELECT TypeID, TypeName FROM RequestType WHERE TypeID NOT IN (3, 6)"; // Exclude absence and account creation
+        String sql = "SELECT TypeID, TypeName FROM RequestType WHERE TypeID NOT IN (3, 6, 2)"; // Exclude absence and account creation
         try (Connection conn = DBConnect.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {

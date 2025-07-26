@@ -26,7 +26,7 @@
 <div class="sidebar">
     <nav>
         <div class="nav-section">
-            <a href="${pageContext.request.contextPath}/View/student-dashboard.jsp"
+            <a href="${pageContext.request.contextPath}/StudentDashboard"
                class="nav-item ${pageContext.request.requestURI.contains('student-dashboard.jsp') ? 'active' : ''}"
                role="link"
                aria-current="${pageContext.request.requestURI.contains('student-dashboard.jsp') ? 'page' : 'false'}">

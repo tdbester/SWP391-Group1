@@ -58,7 +58,7 @@ public class AdminDAO {
         String sql = """
             SELECT TOP (?) Id, Title, Content, CreatedAt, IsRead, NotificationType, RelatedEntityId
             FROM Notification 
-            WHERE TargetRole = 'Admin' OR TargetRole IS NULL
+            WHERE RecipientRole = 'Admin' OR RecipientRole IS NULL
             ORDER BY CreatedAt DESC
             """;
             
@@ -95,7 +95,7 @@ public class AdminDAO {
     public int getUnreadAdminNotificationCount() {
         String sql = """
             SELECT COUNT(*) FROM Notification 
-            WHERE (TargetRole = 'Admin' OR TargetRole IS NULL) AND IsRead = 0
+            WHERE (RecipientRole = 'Admin' OR RecipientRole IS NULL) AND IsRead = 0
             """;
             
         try (Connection conn = DBConnect.getConnection();

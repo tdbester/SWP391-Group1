@@ -190,10 +190,6 @@
                                                 <button class="dropdown-item" name="action" value="delete">Xóa</button>
                                             </form>
                                         </li>
-                                        <li>
-                                            <a class="dropdown-item" href="Consultation?action=viewDetail&id=${c.id}">Xem
-                                                chi tiết</a>
-                                        </li>
                                     </ul>
                                 </div>
                             </td>

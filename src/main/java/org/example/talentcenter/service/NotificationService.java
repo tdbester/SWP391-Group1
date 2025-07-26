@@ -134,7 +134,7 @@ public class NotificationService {
         notification.setContent(String.format("Sale %s đã gửi yêu cầu tạo tài khoản cho học viên %s (%s)",
                 saleName, studentName, studentEmail));
         notification.setSenderName(saleName);
-        notification.setRecipientRole("TrainingManager");
+        notification.setRecipientRole("Admin");
         notification.setNotificationType("ACCOUNT_CREATION_REQUEST");
         notification.setRelatedEntityId(requestId);
         notification.setRelatedEntityType("Request");
@@ -142,7 +142,7 @@ public class NotificationService {
         notification.setRead(false);
 
         notificationDAO.createNotification(notification);
-        System.out.println("Notification sent to Training Manager for account creation request: " + requestId);
+        System.out.println("Notification sent to Admin for account creation request: " + requestId);
     }
 
     /**

@@ -93,12 +93,15 @@
               <c:forEach var="notification" items="${latestNotifications}">
                 <li style="display: flex; padding: 15px; background: white;
                         margin-bottom: 10px; border-radius: 6px; border: 1px solid #eee;
-                        ">
+                <c:if test='${!notification.read}'>
+                        border-left: 4px solid #007bff; background: #f0f8ff;
+                        </c:if>">
                   <div style="margin-right: 15px; font-size: 24px;">
                     <c:choose>
                       <c:when test="${notification.notificationType == 'SYSTEM_ALERT'}">⚠️</c:when>
                       <c:when test="${notification.notificationType == 'USER_MANAGEMENT'}">👥</c:when>
                       <c:when test="${notification.notificationType == 'TEACHER_SALARY'}">💰</c:when>
+                      <c:when test="${notification.notificationType == 'ACCOUNT_CREATION_REQUEST'}">👤</c:when>
                       <c:otherwise>📋</c:otherwise>
                     </c:choose>
                   </div>
@@ -113,6 +116,14 @@
                       <i class="fas fa-clock"></i>
                       <fmt:formatDate value="${notification.createdAt}" pattern="dd/MM/yyyy HH:mm"/>
                     </div>
+                  </div>
+                  <div style="display: flex; align-items: center;">
+                      <a href="${pageContext.request.contextPath}/CreateAccount"
+                         style="background: #007bff; color: white; padding: 8px 15px;
+                                text-decoration: none; border-radius: 4px;
+                                font-size: 12px; font-weight: bold;">
+                        <i class="fas fa-cog"></i> Xử lý
+                      </a>
                   </div>
                 </li>
               </c:forEach>

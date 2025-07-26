@@ -43,10 +43,10 @@
             <div class="sale-quick-nav">
                 <h2>Quick Actions</h2>
                 <div class="sale-nav-buttons">
-                    <a href="${pageContext.request.contextPath}/ProcessRequest?action=list" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/courses" class="sale-nav-btn">
                         <i class="fas fa-book"></i>Quản lý khoá học
                     </a>
-                    <a href="${pageContext.request.contextPath}/ProcessRequest?action=list" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/training-manager-view-class" class="sale-nav-btn">
                         <i class="fas fa-tasks"></i>Quản lý lớp học
                     </a>
                     <a href="${pageContext.request.contextPath}/ProcessRequest?action=list" class="sale-nav-btn">
@@ -109,25 +109,13 @@
                                         </div>
                                     </div>
                                     <div style="display: flex; align-items: center;">
-                                        <c:if test="${not empty notification.relatedEntityId}">
-                                            <c:choose>
-                                                <c:when test="${notification.notificationType == 'STUDENT_REQUEST'}">
-                                                    <a href="RequestManagement?action=view&id=${notification.relatedEntityId}"
+                                        <c:if test="${not empty notification.relatedEntityId and notification.relatedEntityId > 0}">
+                                                    <a href="${pageContext.request.contextPath}/ProcessRequest?action=list&id=${notification.relatedEntityId}"
                                                        style="background: #28a745; color: white; padding: 8px 15px;
                               text-decoration: none; border-radius: 4px;
                               font-size: 12px; font-weight: bold;">
                                                         <i class="fas fa-eye"></i> Xem đơn
                                                     </a>
-                                                </c:when>
-                                                <c:when test="${notification.notificationType == 'ACCOUNT_CREATION_REQUEST'}">
-                                                    <a href="AccountManagement?action=pending&id=${notification.relatedEntityId}"
-                                                       style="background: #007bff; color: white; padding: 8px 15px;
-                              text-decoration: none; border-radius: 4px;
-                              font-size: 12px; font-weight: bold;">
-                                                        <i class="fas fa-user-check"></i> Xử lý
-                                                    </a>
-                                                </c:when>
-                                            </c:choose>
                                         </c:if>
                                     </div>
                                 </li>
@@ -166,7 +154,7 @@
                             <h3 style="margin: 0; font-size: 14px; color: #666;">Đơn đã xử lý tuần này</h3>
                         </div>
                         <div style="font-size: 28px; font-weight: bold; color: #333; margin: 10px 0;">${processedRequestsThisWeek}</div>
-                        <a href="RequestManagement?action=processed"
+                        <a href="${pageContext.request.contextPath}/ProcessRequest?action=list"
                            style="color: #28a745; text-decoration: none; font-size: 12px;">
                             <i class="fas fa-eye"></i> Xem chi tiết
                         </a>
@@ -181,7 +169,7 @@
                             <h3 style="margin: 0; font-size: 14px; color: #666;">Đơn chờ xử lý</h3>
                         </div>
                         <div style="font-size: 28px; font-weight: bold; color: #333; margin: 10px 0;">${pendingRequests}</div>
-                        <a href="RequestManagement?action=pending"
+                        <a href="${pageContext.request.contextPath}/ProcessRequest?action=list"
                            style="color: #ffc107; text-decoration: none; font-size: 12px;">
                             <i class="fas fa-tasks"></i> Xử lý ngay
                         </a>

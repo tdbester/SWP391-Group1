@@ -62,19 +62,19 @@
             <div class="sale-quick-nav">
                 <h2>Điều hướng nhanh</h2>
                 <div class="sale-nav-buttons">
-                    <a href="consultation-list.jsp" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/Consultation?action=list" class="sale-nav-btn">
                         <i class="fas fa-comments"></i> Xem danh sách tư vấn
                     </a>
-                    <a href="blog.jsp" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/blogs" class="sale-nav-btn">
                         <i class="fas fa-blog"></i> Quản lý blog
                     </a>
-                    <a href="student-account-request.jsp" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/StudentAccountRequest" class="sale-nav-btn">
                         <i class="fas fa-user-check"></i> Yêu cầu cấp tài khoản học viên
                     </a>
-                    <a href="sale-course-list.jsp" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/SaleDashboard?action=courseList" class="sale-nav-btn">
                         <i class="fas fa-graduation-cap"></i> Danh sách khoá học
                     </a>
-                    <a href="sale-notification-list.jsp" class="sale-nav-btn">
+                    <a href="${pageContext.request.contextPath}/SaleDashboard?action=notifications" class="sale-nav-btn">
                         <i class="fas fa-bell"></i> Thông báo
                     </a>
                 </div>
